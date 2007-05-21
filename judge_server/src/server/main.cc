@@ -1,3 +1,23 @@
+/*
+ * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ *
+ * This file is part of ZOJ Judge Server.
+ *
+ * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ZOJ Judge Server; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,88 +43,93 @@
 #include "logging.h"
 #include "params.h"
 #include "run.h"
-#include "save_problem.h"
 #include "trace.h"
 #include "util.h"
 
+// The file descriptor of the server socket
 static int fdServerSocket = 0;
 
+// PIDs of all child processes
 static pid_t* pids;
 
+// Returns true if the specified file type is supported by the server
 bool isSupportedSourceFileType(const std::string& sourceFileType) {
     return (int) LANG.find("," + sourceFileType + ",") >= 0;
 }
 
-#define WS " \t\r\n"
+#define INPUT_FAIL(fd, messages) if(0);else{\
+    LOG(ERROR)<<messages;\
+    sendReply(fd, INTERNAL_ERROR);\
+    std::ostringstream message;\
+    message<<messages;\
+    std::string s = message.str();\
+    writen(fd, s.c_str(), s.size());\
+    return -1;}
 
+// Validates the command and invokes appropriate functions. Returns 0 if the
+// command is executed successfully, -1 otherwise.
 int dispatch(int fdSocket, const char* command_line) {
-    char buffer[MAX_BUFFER_SIZE];
-    strncpy(buffer, command_line, sizeof(buffer) - 1);
-    buffer[sizeof(buffer) - 1] = 0;
-    char *p = buffer;
-    const char* command = strsep(&p, WS);
-    if (strcmp(command, "saveprob") == 0) {
-        const char* problem_name = strsep(&p, WS);
-        const char* version = strsep(&p, WS);
-        if (problem_name == NULL || version == NULL) {
-            INPUT_FAIL(fdSocket, "Insufficient number of arguments: "<<command_line);
+    std::istringstream is(command_line);
+    std::string command;
+    is>>command;
+    if (command == "save") {
+        std::string problem_name;
+        std::string version;
+        is>>problem_name>>version;
+        if (is.fail()) {
+            INPUT_FAIL(fdSocket, "Invalid command: "<<command_line);
         }
-        const std::string path =
-            JUDGE_ROOT + "/prob/" + problem_name + "/" + version;
-        if (execSaveprobCommand(fdSocket, problem_name, version) == -1) {
-            system(("rm -rf " + path + " " + path + ".link").c_str());
+        const std::string zipFile =
+            JUDGE_ROOT + "/prob/" + problem_name + "_" + version + ".zip";
+        if (saveFile(fdSocket, zipFile) == -1) {
+            return -1;
+        }
+        std::string command = JUDGE_ROOT + "/script/save_problem.sh '" +
+                              problem_name + "' '" + version + "'";
+        char errorMessage[128];
+        int errorMessageLength = sizeof(errorMessage) - 1;
+        if (runShellCommand(command.c_str(),
+                            errorMessage,
+                            &errorMessageLength)) {
+            errorMessage[errorMessageLength] = 0;
+            INPUT_FAIL(fdSocket, errorMessage);
             return -1;
         }
         return 0;
-    } else if (strcmp(command, "judge") == 0) {
-        const char* sourceFileType = strsep(&p, WS);
-        const char* problem_name = strsep(&p, WS);
-        const char* testcase = strsep(&p, WS);
-        const char* version = strsep(&p, WS);
-        const char* time_limit = strsep(&p, WS);
-        const char* memory_limit = strsep(&p, WS);
-        const char* output_limit = strsep(&p, WS);
-        if (sourceFileType == NULL ||
-            problem_name == NULL ||
-            testcase == NULL ||
-            version == NULL ||
-            time_limit == NULL ||
-            memory_limit == NULL ||
-            output_limit == NULL) {
-            INPUT_FAIL(fdSocket, "Insufficient number of arguments: "<<command_line);
+    } else if (command == "judge") {
+        std::string sourceFileType;
+        std::string problem_name;
+        std::string testcase;
+        std::string version;
+        int time_limit;
+        int memory_limit;
+        int output_limit;
+        is>>sourceFileType>>problem_name>>testcase>>version
+            >>time_limit>>memory_limit>>output_limit;
+        if (is.fail()) {
+            INPUT_FAIL(fdSocket, "Invalid command: "<<command_line);
         }
         if (!isSupportedSourceFileType(sourceFileType)) {
-            INPUT_FAIL(fdSocket, "Unsupported source file type "<<sourceFileType);
+            INPUT_FAIL(fdSocket,
+                       "Unsupported source file type "<<sourceFileType);
         }
-        int tl, ml, ol;
-        if (sscanf(time_limit, "%d", &tl) < 1 || tl < 0) {
-            INPUT_FAIL(fdSocket, "Invalid time limit: "<<time_limit);
+        if (time_limit < 0 || time_limit > MAX_TIME_LIMIT) {
+            INPUT_FAIL(fdSocket, "Invalid time limit "<<time_limit);
         }
-        if (tl > MAX_TIME_LIMIT) {
-            INPUT_FAIL(fdSocket, "Time limit too large: "<<time_limit);
+        if (memory_limit < 0 || memory_limit > MAX_TIME_LIMIT) {
+            INPUT_FAIL(fdSocket, "Invalid memory limit "<<memory_limit);
         }
-        if (sscanf(memory_limit, "%d", &ml) < 1 || ml <= 0) {
-            INPUT_FAIL(fdSocket, "Invalid memory limit: "<<memory_limit);
+        if (output_limit < 0 || output_limit > MAX_TIME_LIMIT) {
+            INPUT_FAIL(fdSocket, "Invalid output limit "<<output_limit);
         }
-        if (ml > MAX_MEMORY_LIMIT) {
-            INPUT_FAIL(fdSocket, "Memory limit too large: "<<memory_limit);
-        }
-        if (sscanf(output_limit, "%d", &ol) < 1 || ol <= 0) {
-            INPUT_FAIL(fdSocket, "Invalid output limit: "<<output_limit);
-        }
-        if (ol > MAX_OUTPUT_LIMIT) {
-            INPUT_FAIL(fdSocket, "Output limit too large: "<<output_limit);
-        }
-
         int ret = execJudgeCommand(fdSocket,
                                    sourceFileType,
                                    problem_name,
                                    testcase,
                                    version,
-                                   tl,
-                                   ml,
-                                   ol);
-        
+                                   time_limit,
+                                   memory_limit,
+                                   output_limit);
         // clear all temporary files.
         system("rm -f *");
         return ret;
@@ -114,11 +139,14 @@ int dispatch(int fdSocket, const char* command_line) {
     }
 }
 
+// Writes the current PID to judge.pid, creates it if not exists.
+// Return 0 if successful, 1 if the file is already locked by another process,
+// or -1 if any error occurs.
 int alreadyRunning() {
     int fd = open("judge.pid", O_RDWR | O_CREAT, 0640);
     if (fd < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to open judge.pid";
-        exit(1);
+        return -1;
     }
     if (lockFile(fd, F_SETLK) == -1) {
         if (errno == EACCES || errno == EAGAIN) {
@@ -126,21 +154,32 @@ int alreadyRunning() {
             return 1;
         } else {
             LOG(SYSCALL_ERROR)<<"Fail to lock judge.pid";
-            exit(1);
+            return -1;
         }
     }
     ftruncate(fd, 0);
     char buffer[20];
     sprintf(buffer, "%ld", (long)getpid());
-    write(fd, buffer, strlen(buffer) + 1);
+    write(fd, buffer, strlen(buffer));
     return 0;
 }
 
+static int terminated = 0;
+
+static void sigtermHandler(int signum) {
+    terminated = 1;
+}
+
+// The main function of the child process.
 void childMain() {
+    // prevents SIGPIPE to terminate the process.
     installSignalHandler(SIGPIPE, SIG_IGN);
-    installSignalHandler(SIGTERM, SIG_DFL);
+
+    // installs handlers for tracing.
     installHandlers();
-    while (1) {
+
+    // Loops until SIGTERM is received.
+    while (!terminated) {
         sockaddr_in address;
         socklen_t addressLength = sizeof(sockaddr_in);
         int fdClientSocket = accept(
@@ -166,6 +205,7 @@ void childMain() {
     }
 }
 
+// Creates a judge process.
 pid_t createChild() {
     pid_t pid = fork();
     if (pid < 0) {
@@ -184,28 +224,9 @@ pid_t createChild() {
             LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<buffer;
             exit(1);
         }
-        childMain(); // never returns
+        childMain();
         exit(0);
     }
-}
-
-static void sigchldHandler(int signum) {
-    int status;
-    pid_t pid = wait(&status);
-    if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Error occurs! Signal number "<<WTERMSIG(status);
-    }
-    char buffer[MAX_BUFFER_SIZE];
-    sprintf(buffer, "rm -rf working/%d", pid);
-    system(buffer);
-}
-
-static void sigtermHandler(int signum) {
-    LOG(INFO)<<"Terminate";
-    for (int i = 0; i < MAX_JOBS; i++) {
-        kill(pids[i], KMMON_SIG);
-    }
-    exit(0);
 }
 
 int main(int argc, char* argv[]) {
@@ -216,26 +237,30 @@ int main(int argc, char* argv[]) {
     if (alreadyRunning()) {
         return 1;
     }
-    if (initAllowedFilesMap(LANG) == -1) {
-        return 1;
-    }
     sigset_t mask;
     sigemptyset(&mask);
-    sigaddset(&mask, SIGTERM);
-    sigaddset(&mask, SIGCHLD);
-    installSignalHandler(SIGCHLD, sigchldHandler, 0, mask);
     installSignalHandler(SIGTERM, sigtermHandler, 0, mask);
     fdServerSocket = createServerSocket(SERVER_PORT);
     if (fdServerSocket == -1) {
         return 1;
     }
-    //childMain();
     pids = (pid_t*) malloc(sizeof(pid_t) * MAX_JOBS);
     memset(pids, 0, sizeof(pid_t) * MAX_JOBS);
     for (int i = 0; i < MAX_JOBS; i++) {
         pids[i] = createChild();
     }
-    while (1) {
+    while (!terminated) {
         pause();
     }
+    for (int i = 0; i < MAX_JOBS; i++) {
+        kill(pids[i], SIGTERM);
+    }
+    for (;;) {
+        wait(NULL);
+        if (errno == ECHILD) {
+            break;
+        }
+    }
+    system("rm -rf working/*");
+    return 0;
 }

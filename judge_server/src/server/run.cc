@@ -1,3 +1,23 @@
+/*
+ * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ *
+ * This file is part of ZOJ Judge Server.
+ *
+ * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ZOJ Judge Server; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "run.h"
 
 #include <map>
@@ -14,51 +34,20 @@
 #include "trace.h"
 #include "util.h"
 
-static std::map<std::string, std::vector<std::string> > allowedFilesMap;
-
-int initAllowedFilesMap(const std::string& supportedSourceFileTypes) {
-    int i = 0;
-    for (;;) {
-        int j = supportedSourceFileTypes.find(',', i + 1);
-        if (j < 0) {
-            return 0;
-        }
-        std::string sourceFileType = supportedSourceFileTypes.substr(i, j - i);
-        std::vector<std::string>& allowedFiles = allowedFilesMap[sourceFileType];
-        FILE* fp = popen(("script/allowedfiles.sh " + sourceFileType).c_str(),
-                         "r");
-        if (fp == NULL) {
-            LOG(SYSCALL_ERROR)<<"Fail to run allowedfiles.sh";
-            return -1;
-        }
-        char buffer[PATH_MAX + 1];
-        while (fgets(buffer, sizeof(buffer), fp)) {
-            int length = strlen(buffer);
-            while (length && isspace(buffer[length - 1])) {
-                length--;
-            }
-            buffer[length] = 0;
-            allowedFiles.push_back(buffer);
-        }
-        pclose(fp);
-        i = j + 1;
-    }
-}
-
-int trace(int fdSocket,
-          pid_t pid,
-          int timeLimit,
-          int memoryLimit,
-          const ProcessMonitor& monitor) {
+int monitor(int fdSocket,
+            pid_t pid,
+            int timeLimit,
+            int memoryLimit,
+            const TraceCallback& callback) {
     int result = -1;
     double timeConsumption = 0;
     int memoryConsumption = 0;
     do {
         double ts;
         int ms;
-        if (monitor.getResult() == JUDGING) {
-            ts = monitor.getTimeConsumption();
-            ms = monitor.getMemoryConsumption();
+        if (callback.getResult() == JUDGING) {
+            ts = callback.getTimeConsumption();
+            ms = callback.getMemoryConsumption();
         } else {
             ts = readTimeConsumption(pid);
             ms = readMemoryConsumption(pid);
@@ -82,15 +71,15 @@ int trace(int fdSocket,
             memoryConsumption = memoryLimit + 1;
         }
         if (result < 0 &&
-            monitor.getResult() &&
-            monitor.getResult() != RUNNING) {
-            result = monitor.getResult();
+            callback.getResult() &&
+            callback.getResult() != RUNNING) {
+            result = callback.getResult();
         }
         char buffer[128];
         snprintf(buffer, sizeof(buffer), "%.3lf %d\n",
                  timeConsumption, memoryConsumption);
         if (writen(fdSocket, buffer, strlen(buffer)) < 0) {
-            if (!monitor.hasExited()) {
+            if (!callback.hasExited()) {
                 kill(pid, SIGKILL);
             }
             result = SERVER_ERROR;
@@ -99,7 +88,7 @@ int trace(int fdSocket,
         request.tv_sec = 1;
         request.tv_nsec = 0;
         while (result < 0 &&
-               !monitor.hasExited() &&
+               !callback.hasExited() &&
                nanosleep(&request, &remain) < 0) {
             if (errno != EINTR) {
                 LOG(SYSCALL_ERROR);
@@ -115,51 +104,13 @@ int trace(int fdSocket,
 
 static pid_t pid;
 
-class ExecutiveFileMonitor: public ProcessMonitor {
-    public:
-        ExecutiveFileMonitor(const std::vector<std::string>& allowedFiles)
-            : allowedFiles(allowedFiles) {
-            pid = 0;
-        }
-
-        virtual int onOpen(const std::string& pathname, int flags) {
-            if (!isFlagsReadOnly(flags)) {
-                LOG(ERROR)<<"Not allowed to open file "<<pathname<<" for writing";
-                return 0;
-            }
-            for (int i = 0; i < (int)this->allowedFiles.size(); i++) {
-                if (this->allowedFiles[i] == pathname) {
-                    LOG(ERROR)<<"Not allowed to open file "<<pathname;
-                    return 1;
-                }
-            }
-            return 0;
-        }
-
-        virtual void onExit(pid_t pid) {
-            this->timeConsumption = readTimeConsumption(pid);
-            this->memoryConsumption = readMemoryConsumption(pid);
-        }
-
-        virtual void terminate() {
-            if (pid > 0) {
-                kill(pid, SIGKILL);
-            }
-            ProcessMonitor::terminate();
-        }
-
-    private:
-        const std::vector<std::string>& allowedFiles;
-};
-
 int runExe(int fdSocket,
             const std::string& exeFilename,
             const std::string& stdinFilename,
             const std::string& stdoutFilename,
             int timeLimit,
             int memoryLimit,
-            int outputLimit,
-            const std::vector<std::string>& allowedFiles) {
+            int outputLimit) {
     const char* commands[] = {exeFilename.c_str(), exeFilename.c_str(), NULL};
     StartupInfo info;
     info.stdinFilename = stdinFilename.c_str();
@@ -176,8 +127,8 @@ int runExe(int fdSocket,
     if (pid == -1) {
         return SERVER_ERROR;
     }
-    ExecutiveFileMonitor monitor(allowedFiles);
-    int result = trace(fdSocket, pid, timeLimit, memoryLimit, monitor);
+    ExecutiveCallback callback;
+    int result = monitor(fdSocket, pid, timeLimit, memoryLimit, callback);
     if (writen(fdSocket, "-1 -1\n", 6) < 0) {
         return -1;
     }
@@ -207,8 +158,7 @@ int doRun(int fdSocket,
                         stdoutFilename,
                         timeLimit,
                         memoryLimit,
-                        outputLimit,
-                        allowedFilesMap[sourceFileType]);
+                        outputLimit);
     } else {
         return -1;
     }

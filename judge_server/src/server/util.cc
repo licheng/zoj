@@ -1,3 +1,23 @@
+/*
+ * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ *
+ * This file is part of ZOJ Judge Server.
+ *
+ * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ZOJ Judge Server; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <string>
 
 #include <fcntl.h>
@@ -9,9 +29,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "logging.h"
-#include "util.h"
 #include "kmmon-lib.h"
+#include "logging.h"
+#include "trace.h"
+#include "util.h"
 
 int setLimit(int resource, unsigned int limit) {
     struct rlimit t;
@@ -180,6 +201,40 @@ int createProcess(const char* commands[], const StartupInfo& processInfo) {
 int createShellProcess(const char* command, const StartupInfo& processInfo) {
     const char* commands[] = {"/bin/sh", "sh", "-c", command, NULL};
     return createProcess(commands, processInfo);
+}
+
+int runShellCommand(const char* command,
+                    char errorMessage[],
+                    int* maxErrorMessageLength,
+                    int timeLimit) {
+    int fdPipe[2];
+    if (pipe(fdPipe) < 0) {
+        LOG(SYSCALL_ERROR);
+        return -1;
+    }
+    StartupInfo info;
+    info.fdStderr = fdPipe[1];
+    info.timeLimit = timeLimit;
+    TraceCallback callback;
+    pid_t pid = createShellProcess(command, info);
+    callback.setPid(pid);
+    close(fdPipe[1]);
+    if (pid < 0) {
+        close(fdPipe[0]);
+        return -1;
+    }
+    *maxErrorMessageLength = readn(fdPipe[0], errorMessage, *maxErrorMessageLength);
+    close(fdPipe[0]);
+    if (*maxErrorMessageLength < 0) {
+        return -1;
+    }
+    int status;
+    waitpid(pid, &status, 0);
+    if (WIFSIGNALED(status)) {
+        LOG(ERROR)<<"Command '"<<command<<"' terminated by signal "<<WTERMSIG(status);
+        return -1;
+    }
+    return WEXITSTATUS(status);
 }
 
 ssize_t readn(int fd, void* buffer, size_t count) {

@@ -1,3 +1,23 @@
+/*
+ * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ *
+ * This file is part of ZOJ Judge Server.
+ *
+ * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ZOJ Judge Server; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "trace.h"
 
 #include <string>
@@ -12,9 +32,9 @@
 #include "logging.h"
 #include "util.h"
 
-ProcessMonitor* ProcessMonitor::monitor;
+TraceCallback* TraceCallback::instance;
 
-int ProcessMonitor::onExecve() {
+int TraceCallback::onExecve() {
     if (this->result < 0) {
         this->result = RUNNING;
         return 1;
@@ -23,17 +43,17 @@ int ProcessMonitor::onExecve() {
     }
 }
 
-void ProcessMonitor::onMemoryLimitExceeded() {
+void TraceCallback::onMemoryLimitExceeded() {
     this->result = MEMORY_LIMIT_EXCEEDED;
 }
 
-void ProcessMonitor::onExit(pid_t pid) {
+void TraceCallback::onExit(pid_t pid) {
     this->timeConsumption = readTimeConsumption(pid);
     this->memoryConsumption = readMemoryConsumption(pid);
     this->result = 0;
 }
 
-void ProcessMonitor::onSIGCHLD(pid_t pid) {
+void TraceCallback::onSIGCHLD(pid_t pid) {
     int status;
     while (waitpid(pid, &status, 0) < 0) {
         if (errno != EINTR) {
@@ -71,11 +91,15 @@ void ProcessMonitor::onSIGCHLD(pid_t pid) {
     }
 }
 
-void ProcessMonitor::onError() {
+void TraceCallback::onError() {
     this->result = SERVER_ERROR;
 }
 
-void ProcessMonitor::terminate() {
+void TraceCallback::terminate() {
+    if (this->pid > 0) {
+        kill(this->pid, SIGTERM);
+        waitpid(pid, 0, 0);
+    }
     system(("rm -rf working/" + toString(getpid())).c_str());
     kill(getpid(), SIGKILL);
 }
@@ -104,63 +128,48 @@ int readStringFromTracedProcess(pid_t pid,
 }
 
 static void sigchldHandler(int sig, siginfo_t* siginfo, void* context) {
-    if (ProcessMonitor::getMonitor()) {
-        ProcessMonitor::getMonitor()->onSIGCHLD(siginfo->si_pid);
+    if (TraceCallback::getInstance()) {
+        TraceCallback::getInstance()->onSIGCHLD(siginfo->si_pid);
     }
 }
 
 static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
-    if (!ProcessMonitor::getMonitor()) {
+    if (!TraceCallback::getInstance()) {
         return;
     }
     static pid_t ppid = getppid();
     pid_t pid = siginfo->si_pid;
     if (pid == ppid) {
-        ProcessMonitor::getMonitor()->terminate();
+        TraceCallback::getInstance()->terminate();
         return;
     }
     int syscall = siginfo->si_value.sival_int;
     if (syscall == SYS_exit || syscall == SYS_exit_group) {
-        ProcessMonitor::getMonitor()->onExit(pid);
+        TraceCallback::getInstance()->onExit(pid);
         kmmon_continue(pid);
     } else if (syscall == SYS_brk) {
-        ProcessMonitor::getMonitor()->onMemoryLimitExceeded();
+        TraceCallback::getInstance()->onMemoryLimitExceeded();
         kmmon_kill(pid);
     } else if (syscall == SYS_clone ||
                syscall == SYS_fork ||
                syscall == SYS_vfork) {
-        ProcessMonitor::getMonitor()->onClone();
-    } else if (syscall == SYS_open) {
-        char buffer[PATH_MAX + 1];
-        int address, flags;
-        if (kmmon_getreg(pid, EBX, &address) < 0 ||
-            kmmon_getreg(pid, ECX, &flags) < 0) {
-            ProcessMonitor::getMonitor()->onError();
-            kmmon_kill(pid);
-            return;
-        }
-        if (readStringFromTracedProcess(pid,
-                                        address,
-                                        buffer,
-                                        sizeof(buffer)) < 0) {
-            ProcessMonitor::getMonitor()->onError();
-            kmmon_kill(pid);
-        } else if (ProcessMonitor::getMonitor()->onOpen(buffer, flags)) {
-            kmmon_continue(pid);
-        } else {
-            kmmon_kill(pid);
-        }
+        TraceCallback::getInstance()->onClone();
     } else if (syscall == SYS_execve) {
-        if (ProcessMonitor::getMonitor()->onExecve()) {
+        if (TraceCallback::getInstance()->onExecve()) {
             kmmon_continue(pid);
         } else {
             kmmon_kill(pid);
         }
     } else {
         LOG(ERROR)<<"Unexpected syscall "<<syscall;
-        ProcessMonitor::getMonitor()->onError();
+        TraceCallback::getInstance()->onError();
        kmmon_kill(pid);
     }
+}
+
+void ExecutiveCallback::onExit(pid_t pid) {
+    this->timeConsumption = readTimeConsumption(pid);
+    this->memoryConsumption = readMemoryConsumption(pid);
 }
 
 void installHandlers() {

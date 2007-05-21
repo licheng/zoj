@@ -1,3 +1,23 @@
+/*
+ * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ *
+ * This file is part of ZOJ Judge Server.
+ *
+ * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ZOJ Judge Server; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef __UTIL_H
 #define __UTIL_H
 
@@ -50,16 +70,16 @@ struct StartupInfo {
     // the parent's standard error will be inherited.
     int fdStderr;
     
-    // If not null, the file will be redirected to the standard input of the
-    // child process regardless of the value of fdStdin.
+    // If not null, the file will used as the standard input of the child
+    // process regardless of the value of fdStdin.
     const char* stdinFilename;
 
-    // If not null, the file will be redirected to the standard output of the
-    // child process regardless of the value of fdStdout.
+    // If not null, the standard output of the child process will be saved
+    // to this file regardless of the value of fdStdout.
     const char* stdoutFilename;
 
-    // If not null, the file will be redirected to the standard error of the
-    // child process regardless of the value of fdStderr.
+    // If not null, the standard error of the child process regardless of the
+    // value of fdStderr.
     const char* stderrFilename;
 
     // The UID of the child process. If zero, the parent's UID will be
@@ -106,6 +126,9 @@ int createProcess(const char* commands[], const StartupInfo& processInfo);
 // is a wrapper of the createProcess function above, just like
 // createProcess({"/bin/sh", "-c", command}, processInfo)
 int createShellProcess(const char* command, const StartupInfo& processInfo);
+
+// Executes a shell command in a child process and waits until it finishes. Returns its exit code. The standard error output of the shell command is stored in errorMessge, at most maxErrorMessageLength bytes. timeLimit, if not zero,  is the time limit of the shell command execution.
+int runShellCommand(const char* command, char errorMessage[], int* maxErrorMessageLength, int timeLimit = 0);
 
 // Reads from the specified file descriptor into buffer. count is the maximum
 // number of bytes to read.
@@ -166,18 +189,5 @@ int lockFile(int fd, int cmd);
 #define MAX_MEMORY_LIMIT (1280 * 1024)
 #define MAX_OUTPUT_LIMIT (16 * 1024)
 #define MAX_BUFFER_SIZE 256
-
-#define SERVER_FAIL(fd) \
-    sendReply(fd, SERVER_ERROR);\
-    return -1;
-
-#define INPUT_FAIL(fd, messages) if(0);else{\
-    LOG(ERROR)<<messages;\
-    sendReply(fd, INTERNAL_ERROR);\
-    std::ostringstream message;\
-    message<<messages;\
-    std::string s = message.str();\
-    writen(fd, s.c_str(), s.size());\
-    return -1;}
 
 #endif

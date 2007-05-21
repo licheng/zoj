@@ -20,6 +20,7 @@
 #include "run.h"
 #include "util.h"
 
+// Executes the "judge" command.
 int execJudgeCommand(int fdSocket,
                      const std::string& sourceFileType,
                      const std::string& problemName,
@@ -74,8 +75,7 @@ int execJudgeCommand(int fdSocket,
         if (access(inputFilename.c_str(), F_OK) != 0) {
 			if (i == 0) {
                 sendReply(fdSocket, INTERNAL_ERROR);
-                char buffer[32];
-                sprintf("No such test case %s", testcase.c_str());
+                sprintf(buffer, "No such test case %s", testcase.c_str());
                 writen(fdSocket, buffer, sizeof(buffer));
 				return -1;
 			}
@@ -93,11 +93,11 @@ int execJudgeCommand(int fdSocket,
             return -1;
         }
         if (result == 0) {
-            doCheck(fdSocket,
-                    inputFilename,
-                    outputFilename,
-                    programOutputFilename,
-                    specialJudgeFilename);
+            result = doCheck(fdSocket,
+                             inputFilename,
+                             outputFilename,
+                             programOutputFilename,
+                             specialJudgeFilename);
         }
         if (testcase != "*" && testcase != "?" ||
             result != ACCEPTED && testcase == "?") {
