@@ -31,8 +31,7 @@ class TraceCallback {
         TraceCallback():
             result(-1),
             timeConsumption(0),
-            memoryConsumption(0),
-            pid(0) {
+            memoryConsumption(0) {
             TraceCallback::instance = this;
         }
 
@@ -53,12 +52,6 @@ class TraceCallback {
         virtual void onSIGCHLD(pid_t pid);
 
         virtual void onError();
-
-        virtual void terminate();
-
-        void setPid(pid_t pid) {
-            this->pid = pid;
-        }
 
         int getResult() const {
             return this->result;
@@ -88,7 +81,6 @@ class TraceCallback {
         int result;
         double timeConsumption;
         int memoryConsumption;
-        pid_t pid;
 
     private:
         static TraceCallback* instance;

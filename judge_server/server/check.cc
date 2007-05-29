@@ -192,7 +192,6 @@ int runSpecialJudgeExe(const std::string& specialJudgeFilename,
     info.workingDirectory = workingDirectory.c_str();
     ExecutiveCallback callback;
     pid_t pid = createProcess(commands, info);
-    callback.setPid(pid);
     if (pid == -1) {
         return SERVER_ERROR;
     }

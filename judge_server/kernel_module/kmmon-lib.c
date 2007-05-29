@@ -18,21 +18,30 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __COMPILE_H
-#define __COMPILE_H
+#include <sys/syscall.h>
+#include "kmmon.h"
+#include "kmmon-lib.h"
 
-#include <string>
+static inline int kmmon(int request, unsigned long pid, unsigned long addr, unsigned long data) {
+    return syscall(__NR_kmmon, request, pid, addr, data);
+}
 
-// Compiles the specified source file and stores the error message into buffer
-// if compilation fails. If the length of the error message is greater than
-// bufferSize bytes, it is truncated. bufferSize will be updated to reflect the
-// actual length of the error message.
-// Returns 0 if compilation succeeded, or -1 on error.
-int compile(const std::string& sourceFilename, char buffer[], int* bufferSize);
+int kmmon_traceme(void) {
+    return kmmon(KMMON_TRACEME, 0, 0, 0);
+}
 
-// Compiles the specified source file. See the Communication Protocol for the
-// description of possible meessages written to fd.
-// Returns 0 if compilation succeeded, or -1 on error.
-int doCompile(int fd, const std::string& sourceFilename);
+int kmmon_continue(pid_t pid) {
+    return kmmon(KMMON_CONTINUE, pid, 0, 0);
+}
 
-#endif
+int kmmon_kill(pid_t pid) {
+    return kmmon(KMMON_KILL, pid, 0, 0);
+}
+
+int kmmon_getreg(pid_t pid, int regno, int* value) {
+    return kmmon(KMMON_GETREG, pid, regno, (unsigned long)value);
+}
+
+int kmmon_readmem(pid_t pid, unsigned long addr, int* value) {
+    return kmmon(KMMON_READMEM, pid, addr, (unsigned long)value);
+}

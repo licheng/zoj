@@ -46,14 +46,14 @@ inline void printUsage() {
 int parseArguments(int argc, char* argv[]) {
     static struct option options[] = {
         {"port", 1, 0, 'p'},
-        {"uid", 0, 0, 'u'},
-        {"gid", 0, 0, 'g'},
+        {"uid", 1, 0, 'u'},
+        {"gid", 1, 0, 'g'},
         {"lang", 1, 0, 'l'},
         {"maxjobs", 1, 0, 'm'},
         {0, 0, 0, 0}
     };
     for (;;) {
-        switch (getopt_long (argc, argv, "", options, NULL)) {
+        switch (getopt_long(argc, argv, "", options, NULL)) {
             case 'p':
                 if (sscanf(optarg, "%d", &SERVER_PORT) < 1) {
                     fprintf(stderr, "Invalid port %s\n", optarg);
@@ -74,7 +74,7 @@ int parseArguments(int argc, char* argv[]) {
                 break;
             case 'l':
                 LANG = optarg;
-                LANG += ',';
+                LANG = ',' + LANG + ',';
                 break;
             case 'm':
                 if (sscanf(optarg, "%d", &MAX_JOBS) < 1) {

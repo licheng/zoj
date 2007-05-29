@@ -95,36 +95,9 @@ void TraceCallback::onError() {
     this->result = SERVER_ERROR;
 }
 
-void TraceCallback::terminate() {
-    if (this->pid > 0) {
-        kill(this->pid, SIGTERM);
-        waitpid(pid, 0, 0);
-    }
-    system(("rm -rf working/" + toString(getpid())).c_str());
-    kill(getpid(), SIGKILL);
-}
-
-int readStringFromTracedProcess(pid_t pid,
-                                int address,
-                                char* buffer,
-                                int maxLength) {
-    for (int i = 0; i < maxLength; i += 4) {
-        int data;
-        if (kmmon_readmem(pid, address + i, &data) < 0) {
-            return -1;
-        }
-        char* p = (char*) &data;
-        for (int j = 0; j < 4; j++, p++) {
-            if (*p && i + j < maxLength) {
-                buffer[i + j] = *p;
-            } else {
-                buffer[i + j] = 0;
-                return 0;
-            }
-        }
-    }
-    buffer[maxLength] = 0;
-    return 0;
+void ExecutiveCallback::onExit(pid_t pid) {
+    this->timeConsumption = readTimeConsumption(pid);
+    this->memoryConsumption = readMemoryConsumption(pid);
 }
 
 static void sigchldHandler(int sig, siginfo_t* siginfo, void* context) {
@@ -137,12 +110,7 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
     if (!TraceCallback::getInstance()) {
         return;
     }
-    static pid_t ppid = getppid();
     pid_t pid = siginfo->si_pid;
-    if (pid == ppid) {
-        TraceCallback::getInstance()->terminate();
-        return;
-    }
     int syscall = siginfo->si_value.sival_int;
     if (syscall == SYS_exit || syscall == SYS_exit_group) {
         TraceCallback::getInstance()->onExit(pid);
@@ -165,11 +133,6 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
         TraceCallback::getInstance()->onError();
        kmmon_kill(pid);
     }
-}
-
-void ExecutiveCallback::onExit(pid_t pid) {
-    this->timeConsumption = readTimeConsumption(pid);
-    this->memoryConsumption = readMemoryConsumption(pid);
 }
 
 void installHandlers() {

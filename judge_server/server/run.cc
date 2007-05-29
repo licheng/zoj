@@ -20,9 +20,7 @@
 
 #include "run.h"
 
-#include <map>
 #include <string>
-#include <vector>
 
 #include <errno.h>
 #include <sys/types.h>
@@ -102,8 +100,6 @@ int monitor(int fdSocket,
     return result;
 }
 
-static pid_t pid;
-
 int runExe(int fdSocket,
             const std::string& exeFilename,
             const std::string& stdinFilename,
@@ -123,7 +119,7 @@ int runExe(int fdSocket,
     info.procLimit = 1;
     info.fileLimit = 5;
     info.trace = 1;
-    pid = createProcess(commands, info);
+    pid_t pid = createProcess(commands, info);
     if (pid == -1) {
         return SERVER_ERROR;
     }

@@ -217,7 +217,6 @@ int runShellCommand(const char* command,
     info.timeLimit = timeLimit;
     TraceCallback callback;
     pid_t pid = createShellProcess(command, info);
-    callback.setPid(pid);
     close(fdPipe[1]);
     if (pid < 0) {
         close(fdPipe[0]);
