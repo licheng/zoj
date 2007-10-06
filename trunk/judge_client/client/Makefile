@@ -11,10 +11,10 @@ UNITTEST_RUNS:=$(patsubst %.cc,%.run,$(UNITTEST_SOURCES))
 
 .PHONY: all clean rebuild $(UNITTEST_RUNS) test
 
-all: judge_server
+all: judge_client
 
 clean:
-	@rm -f $(ALL_OBJS) $(ALL_DEPS) judge_server $(UNITTESTS)
+	@rm -f $(ALL_OBJS) $(ALL_DEPS) judge_client $(UNITTESTS)
 
 rebuild: clean all
 
@@ -29,7 +29,7 @@ endif
 
 -include $(ALL_DEPS)
 
-judge_server: $(OBJS) -lkmmon
+judge_client: $(OBJS) -lkmmon
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(UNITTESTS): %_unittest : %.o %_unittest.o -lcppunit -lkmmon

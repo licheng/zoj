@@ -1,8 +1,10 @@
 obj-m += kmmon.o
 
-all : kmmon.ko libkmmon.a
+default: all
 
-clean :
+all: kmmon.ko libkmmon.a
+
+clean:
 	@rm -f *.o *.a *.ko Module.symvers
 
 kmmon.ko: kmmon.c kmmon.h syscall.h
