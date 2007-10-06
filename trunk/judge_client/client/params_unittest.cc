@@ -65,7 +65,7 @@ TEST(parseArgumentsLANG) {
     optind = 0;
     char* argv[] = {"", "--lang=a,b,c"};
     CPPUNIT_ASSERT_EQUAL(0, parseArguments(2, argv));
-    CPPUNIT_ASSERT_EQUAL(std::string(",a,b,c,"), LANG);
+    CPPUNIT_ASSERT_EQUAL(string(",a,b,c,"), LANG);
 }
 
 TEST(parseArgumentsMaxJobs) {
@@ -102,6 +102,6 @@ TEST(parseArgumentsMixed) {
     CPPUNIT_ASSERT_EQUAL(1, SERVER_PORT);
     CPPUNIT_ASSERT_EQUAL(2, JOB_UID);
     CPPUNIT_ASSERT_EQUAL(3, JOB_GID);
-    CPPUNIT_ASSERT_EQUAL(std::string(",4,"), LANG);
+    CPPUNIT_ASSERT_EQUAL(string(",4,"), LANG);
     CPPUNIT_ASSERT_EQUAL(5, MAX_JOBS);
 }

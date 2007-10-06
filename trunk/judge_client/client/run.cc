@@ -101,9 +101,9 @@ int monitor(int fdSocket,
 }
 
 int runExe(int fdSocket,
-            const std::string& exeFilename,
-            const std::string& stdinFilename,
-            const std::string& stdoutFilename,
+            const string& exeFilename,
+            const string& stdinFilename,
+            const string& stdoutFilename,
             int timeLimit,
             int memoryLimit,
             int outputLimit) {
@@ -131,17 +131,17 @@ int runExe(int fdSocket,
     return result;
 }
 
-inline int isNativeExe(const std::string& sourceFileType) {
+inline int isNativeExe(const string& sourceFileType) {
     return sourceFileType == "cc" ||
            sourceFileType == "c" ||
            sourceFileType == "pas";
 }
 
 int doRun(int fdSocket,
-          const std::string& programName,
-          const std::string& sourceFileType,
-          const std::string& stdinFilename,
-          const std::string& stdoutFilename,
+          const string& programName,
+          const string& sourceFileType,
+          const string& stdinFilename,
+          const string& stdoutFilename,
           int timeLimit,
           int memoryLimit,
           int outputLimit) {

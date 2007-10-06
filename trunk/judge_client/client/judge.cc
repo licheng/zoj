@@ -22,16 +22,16 @@
 
 // Executes the "judge" command.
 int execJudgeCommand(int fdSocket,
-                     const std::string& sourceFileType,
-                     const std::string& problemName,
-                     const std::string& testcase,
-                     const std::string& version,
+                     const string& sourceFileType,
+                     const string& problemName,
+                     const string& testcase,
+                     const string& version,
                      int timeLimit,
                      int memoryLimit,
                      int outputLimit) {
-    std::string programName = "P" + problemName;
+    string programName = "P" + problemName;
     char buffer[PATH_MAX + 1];
-    std::string probDir = JUDGE_ROOT + "/prob/";
+    string probDir = JUDGE_ROOT + "/prob/";
     int count = readlink((probDir + problemName + "/current").c_str(),
                          buffer,
                          sizeof(buffer));
@@ -57,10 +57,10 @@ int execJudgeCommand(int fdSocket,
         return -1;
     }
 
-    std::string sourceFilename = programName + "." + sourceFileType;
-    std::string exeFilename = programName;
-    std::string problemPath = probDir + problemName + "/" + version;
-    std::string specialJudgeFilename = problemPath + "/judge";
+    string sourceFilename = programName + "." + sourceFileType;
+    string exeFilename = programName;
+    string problemPath = probDir + problemName + "/" + version;
+    string specialJudgeFilename = problemPath + "/judge";
     if (doCompile(fdSocket, sourceFilename) == -1) {
         return -1;
     }
@@ -69,9 +69,9 @@ int execJudgeCommand(int fdSocket,
             sscanf(testcase.c_str(), "%d", &i);
         }
         sprintf(buffer, "%d", i);
-        std::string inputFilename = problemPath + "/input." + buffer;
-        std::string outputFilename = problemPath + "/output." + buffer;
-        std::string programOutputFilename = programName + ".out." + buffer;
+        string inputFilename = problemPath + "/input." + buffer;
+        string outputFilename = problemPath + "/output." + buffer;
+        string programOutputFilename = programName + ".out." + buffer;
         if (access(inputFilename.c_str(), F_OK) != 0) {
 			if (i == 0) {
                 sendReply(fdSocket, INTERNAL_ERROR);

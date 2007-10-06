@@ -23,14 +23,16 @@
 
 #include <string>
 
+using namespace std;
+
 // Runs the specified program. See the Communication Protocol for the
 // description of possible meessages written to fdSocket.
 // Returns 0 if compilation succeeded, or -1 on error.
 int doRun(int fdSocket,
-          const std::string& programName,
-          const std::string& sourceFileType,
-          const std::string& stdinFilename,
-          const std::string& stdoutFilename,
+          const string& programName,
+          const string& sourceFileType,
+          const string& stdinFilename,
+          const string& stdoutFilename,
           int timeLiimt,
           int memoryLimit,
           int outputLimit);

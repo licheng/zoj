@@ -33,7 +33,7 @@
 
 class TextFile {
     public:
-        TextFile(const std::string& filename):
+        TextFile(const string& filename):
             fd(0),
             // necessary, otherwise readn will think EOF is reached.
             bufferSize(sizeof(this->buffer)),
@@ -104,7 +104,7 @@ class TextFile {
         char* p; // A pointer pointing to the next available character in the
                  // buffer
         int failed; // A flag indicating whether the file is opened successfully
-        const std::string& filename; // the name of file reading from
+        const string& filename; // the name of file reading from
 };
 
 // This function compares two text files and returns
@@ -119,8 +119,8 @@ class TextFile {
 //    characters.
 // 3. WRONG_ANSWER
 //    Neither ACCEPTED nor PRESENTATION_ERROR
-int compareTextFiles(const std::string& outputFilename,
-                     const std::string& programOutputFilename) {
+int compareTextFiles(const string& outputFilename,
+                     const string& programOutputFilename) {
     int ret = ACCEPTED;
     TextFile f1(outputFilename), f2(programOutputFilename);
     if (f1.fail() || f2.fail()) {
@@ -166,12 +166,12 @@ int compareTextFiles(const std::string& outputFilename,
     return ret;
 }
 
-int runSpecialJudgeExe(const std::string& specialJudgeFilename,
-                       const std::string& inputFilename,
-                       const std::string& programOutputFilename) {
-    std::string workingDirectory = 
+int runSpecialJudgeExe(const string& specialJudgeFilename,
+                       const string& inputFilename,
+                       const string& programOutputFilename) {
+    string workingDirectory = 
         specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
-    std::string relativeProgramOutputFilename =
+    string relativeProgramOutputFilename =
         JUDGE_ROOT + "/working/" + toString(getpid()) + "/" +
         programOutputFilename;
     const char* commands[] = {
@@ -216,10 +216,10 @@ int runSpecialJudgeExe(const std::string& specialJudgeFilename,
 }
 
 int doCheck(int fdSocket,
-            const std::string& inputFilename,
-            const std::string& outputFilename,
-            const std::string& programOutputFilename,
-            const std::string& specialJudgeFilename) {
+            const string& inputFilename,
+            const string& outputFilename,
+            const string& programOutputFilename,
+            const string& specialJudgeFilename) {
     sendReply(fdSocket, JUDGING);
     int result;
     if (access(specialJudgeFilename.c_str(), F_OK) == 0) {

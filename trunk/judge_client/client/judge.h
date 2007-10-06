@@ -23,11 +23,13 @@
 
 #include <string>
 
+using namespace std;
+
 int execJudgeCommand(int fdSocket,
-                     const std::string& sourceFileType,
-                     const std::string& problemName,
-                     const std::string& testcase,
-                     const std::string& version,
+                     const string& sourceFileType,
+                     const string& problemName,
+                     const string& testcase,
+                     const string& version,
                      int timeLimit,
                      int memoryLimit,
                      int outputLimit);

@@ -23,9 +23,11 @@
 
 #include <string>
 
+using namespace std;
+
 // Compiles the specified source file. See the Communication Protocol for the
 // description of possible meessages written to fd.
 // Returns 0 if compilation succeeded, or -1 on error.
-int doCompile(int fd, const std::string& sourceFilename);
+int doCompile(int fd, const string& sourceFilename);
 
 #endif

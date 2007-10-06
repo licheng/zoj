@@ -26,9 +26,9 @@
 #include "trace.h"
 #include "util.h"
 
-int doCompile(int fdSocket, const std::string& sourceFilename) {
+int doCompile(int fdSocket, const string& sourceFilename) {
     sendReply(fdSocket, COMPILING);
-    std::string command =
+    string command =
         JUDGE_ROOT + "/script/compile.sh '" + sourceFilename + "'";
     class Callback: public TraceCallback {
         public:

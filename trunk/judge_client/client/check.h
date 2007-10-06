@@ -23,10 +23,12 @@
 
 #include <string>
 
+using namespace std;
+
 int doCheck(int fdSocket,
-            const std::string& inputFilename,
-            const std::string& outputFilename,
-            const std::string& programOutputFilename,
-            const std::string& specialJudgeFilename);
+            const string& inputFilename,
+            const string& outputFilename,
+            const string& programOutputFilename,
+            const string& specialJudgeFilename);
 
 #endif

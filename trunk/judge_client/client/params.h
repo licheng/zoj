@@ -22,18 +22,19 @@
 #define __CONFIGURATION_H
 
 #include <string>
+#include <vector>
 
-extern std::string JUDGE_ROOT;
+using namespace std;
+
+extern string JUDGE_ROOT;
 
 extern int JOB_UID;
 
 extern int JOB_GID;
 
-extern int SERVER_PORT;
+extern pair<string, int> QUEUE_ADDRESS;
 
-extern std::string LANG;
-
-extern int MAX_JOBS;
+extern vector<string> LANG;
 
 int parseArguments(int argc, char* argv[]);
 

@@ -28,6 +28,7 @@
 #include <sys/times.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "kmmon-lib.h"
 #include "logging.h"
@@ -292,7 +293,7 @@ int copyFile(int fdSource, int fdDestination) {
     }
 }
 
-int saveFile(int fdSource, const std::string& outputFilename) {
+int saveFile(int fdSource, const string& outputFilename) {
     int fdDestination = open(outputFilename.c_str(),
                              O_RDWR | O_CREAT | O_TRUNC);
     if (fdDestination == -1) {
@@ -341,66 +342,28 @@ sighandler_t installSignalHandler(
     return oact.sa_handler;
 }
 
-void daemonize() {
-    umask(0);
-    int pid = fork();
-    if (pid < 0) {
-        LOG(SYSCALL_ERROR);
-        exit(1);
-    } else if (pid > 0) {
-        exit(0);
+void SplitString(const string& str, char separator, vector<string>* output) {
+    int k = 0;
+    for (int i = 0; i < str.size(); ++i) {
+        if (str[i] == separator) {
+            if (i > k) {
+                output->push_back(str.substr(k, i - k));
+            }
+            k = i + 1;
+        }
     }
-
-    // start a new session
-    setsid();
-
-    // ignore SIGHUP
-    if (installSignalHandler(SIGHUP, SIG_IGN) == SIG_ERR) {
-        LOG(SYSCALL_ERROR)<<"Fail to ignore SIGHUP";
-        exit(1);
-    }
-    
-    // attach file descriptor 0, 1, 2 to /dev/null
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, 0);
-    dup2(fd, 1);
-    dup2(fd, 2);
-
-    // close all other file descriptors
-    for (int i = 3; i < 100; i++) {
-        close(i);
+    if (k < str.size()) {
+        output->push_back(str.substr(k, str.size() - k));
     }
 }
 
-int createServerSocket(int port) {
-    int sockServer = socket(PF_INET, SOCK_STREAM, 6);
-    if (sockServer == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to create socket";
-        return -1;
-    }
-    int optionValue = 1;
-    if (setsockopt(sockServer, 
-                   SOL_SOCKET,
-                   SO_REUSEADDR,
-                   &optionValue,
-                   sizeof(optionValue)) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to set socket option";
-        return -1;
-    }
-    sockaddr_in address;
-    memset(&address, 0, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    address.sin_port = htons(port);
-    if (bind(sockServer, (struct sockaddr*)&address, sizeof(address)) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to bind";
-        return -1;
-    }
-    if (listen(sockServer, 32) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to listen";
-        return -1;
-    }
-    return sockServer;
+string StringPrintf(const char* format, ...) {
+    va_list args;
+    char buffer[1024];
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    return buffer;
 }
 
 int lockFile(int fd, int cmd) {

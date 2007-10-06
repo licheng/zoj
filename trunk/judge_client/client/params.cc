@@ -23,42 +23,44 @@
 #include <stdio.h>
 #include <getopt.h>
 
-std::string JUDGE_ROOT;
+#include "util.h"
+
+string JUDGE_ROOT;
 
 int JOB_UID;
 
 int JOB_GID;
 
-int SERVER_PORT = 8725;
+pair<string, int> QUEUE_ADDRESS;
 
-std::string LANG;
+vector<string> LANG;
 
-int MAX_JOBS;
-
-inline void printUsage() {
-    printf("Usage: judge [--port=<port>] "
+void printUsage() {
+    printf("Usage: judge [--queue=<queue address>] "
                         "[--uid=<uid>] "
                         "[--gid=<gid>] "
-                        "[--lang=<comma separated supported languages>] "
-                        "[--maxjobs=<max jobs>]");
+                        "[--lang=<comma separated supported languages>] ");
 }
 
 int parseArguments(int argc, char* argv[]) {
     static struct option options[] = {
-        {"port", 1, 0, 'p'},
+        {"queue", 1, 0, 'q'},
         {"uid", 1, 0, 'u'},
         {"gid", 1, 0, 'g'},
         {"lang", 1, 0, 'l'},
-        {"maxjobs", 1, 0, 'm'},
         {0, 0, 0, 0}
     };
+    const char* p;
     for (;;) {
         switch (getopt_long(argc, argv, "", options, NULL)) {
-            case 'p':
-                if (sscanf(optarg, "%d", &SERVER_PORT) < 1) {
-                    fprintf(stderr, "Invalid port %s\n", optarg);
+            case 'q':
+                p = strstr(optarg, ":");
+                if (!p) {
+                    fprintf(stderr, "Invalid queue address %s\n", optarg);
                     return -1;
                 }
+                QUEUE_ADDRESS.first = string(optarg, p - optarg);
+                QUEUE_ADDRESS.second = atoi(p + 1);
                 break;
             case 'u':
                 if (sscanf(optarg, "%d", &JOB_UID) < 1) {
@@ -73,14 +75,7 @@ int parseArguments(int argc, char* argv[]) {
                 }
                 break;
             case 'l':
-                LANG = optarg;
-                LANG = ',' + LANG + ',';
-                break;
-            case 'm':
-                if (sscanf(optarg, "%d", &MAX_JOBS) < 1) {
-                    fprintf(stderr, "Invalid maxjobs %s\n", optarg);
-                    return -1;
-                }
+                SplitString(optarg, ',', &LANG);
                 break;
             case -1:
                 return 0;

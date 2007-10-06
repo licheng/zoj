@@ -26,6 +26,8 @@
 #include <errno.h>
 #include <syslog.h>
 
+using namespace std;
+
 #define DEBUG LOG_DEBUG
 #define ERROR LOG_ERR
 #define WARNING LOG_WARNING
@@ -52,7 +54,7 @@ class Log {
 			syslog(level, "%s:%d: %s", filename, lineNumber, messageStream.str().c_str());
 		}
 
-		std::ostream& stream() {
+		ostream& stream() {
 			return this->messageStream;
 		}
 		
@@ -63,7 +65,7 @@ class Log {
 		const char* filename;
 		int lineNumber;
 		int level;
-		std::ostringstream messageStream;
+		ostringstream messageStream;
 };
 
 #endif

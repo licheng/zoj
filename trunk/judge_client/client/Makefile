@@ -1,5 +1,5 @@
 CC=$(CXX)
-CXXFLAGS=-I ../kernel_module -L ../kernel_module -Wall -Werror -ansi -O3 -MD
+CXXFLAGS=-I ../kernel_module -L ../kernel_module -Wall -Werror -Wno-sign-compare -ansi -O3 -MD
 VPATH=../kernel_module
 ALL_SOURCES:=$(wildcard *.cc)
 UNITTEST_SOURCES:=$(wildcard *_unittest.cc)

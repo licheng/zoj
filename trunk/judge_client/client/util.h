@@ -23,6 +23,7 @@
 
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <fcntl.h>
 #include <signal.h>
@@ -30,6 +31,8 @@
 
 #include "judge_result.h"
 #include "logging.h"
+
+using namespace std;
 
 // A wrapper function for setrlimit. Set the soft limit to limit and the hard
 // limit to limit + 1.
@@ -147,7 +150,7 @@ int copyFile(int fdSource, int fdDestination);
 // Reads the whole content from the source file descriptor and writes the file
 // specified by outputFilename. Creates the file if not exists.
 // Return 0 if sucdess, or -1 if any error occurs.
-int saveFile(int fdSource, const std::string& outputFilename);
+int saveFile(int fdSource, const string& outputFilename);
 
 // Writes reply in decimal followed by a '\n' to the specified socket.
 // Return 0 if sucdess, or -1 if any error occurs.
@@ -161,11 +164,15 @@ sighandler_t installSignalHandler(
         int signum, sighandler_t handler, int flags, sigset_t mask);
 
 template <class T>
-static inline std::string toString(T obj) {
-    std::ostringstream os;
+inline string toString(T obj) {
+    ostringstream os;
     os<<obj;
     return os.str();
 }
+
+void SplitString(const string& str, char separator, vector<string>* output);
+
+string StringPrintf(const char *format, ...);
 
 static inline int isFlagsReadOnly(int flags) {
     return !((flags & O_WRONLY) == O_WRONLY ||
@@ -173,13 +180,6 @@ static inline int isFlagsReadOnly(int flags) {
              (flags & O_CREAT) == O_CREAT ||
              (flags & O_APPEND) == O_APPEND);
 }
-
-//Make the current process a daemon process
-void daemonize(void);
-
-// Creates a server socket which listens on the specified port.
-// Returns the socket file descriptor, or -1 if any error occurs.
-int createServerSocket(int port);
 
 // Locks the specified file. cmd can be F_GETLK, F_SETLK or F_SETLKW.
 // Returns 0 on success, -1 otherwise.
