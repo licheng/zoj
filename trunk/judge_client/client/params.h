@@ -18,24 +18,30 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __CONFIGURATION_H
-#define __CONFIGURATION_H
+#ifndef __PARAMS_H
+#define __PARAMS_H
 
 #include <string>
 #include <vector>
 
 using namespace std;
 
+// The root directory which contains problems, scripts and working directory of
+// the client
 extern string JUDGE_ROOT;
 
+// The uid for executing the program to be judged
 extern int JOB_UID;
 
+// The gid for executing the program to be judged
 extern int JOB_GID;
 
 extern pair<string, int> QUEUE_ADDRESS;
 
+// All languages supported by this client
 extern vector<string> LANG;
 
+// Extracts parameter values from the passed-in arguments.
 int parseArguments(int argc, char* argv[]);
 
 #endif

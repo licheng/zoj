@@ -130,10 +130,10 @@ void process(int fdSocket) {
     if (time_limit < 0 || time_limit > MAX_TIME_LIMIT) {
         INPUT_FAIL(fdSocket, "Invalid time limit "<<time_limit);
     }
-    if (memory_limit < 0 || memory_limit > MAX_TIME_LIMIT) {
+    if (memory_limit < 0 || memory_limit > MAX_MEMORY_LIMIT) {
         INPUT_FAIL(fdSocket, "Invalid memory limit "<<memory_limit);
     }
-    if (output_limit < 0 || output_limit > MAX_TIME_LIMIT) {
+    if (output_limit < 0 || output_limit > MAX_OUTPUT_LIMIT) {
         INPUT_FAIL(fdSocket, "Invalid output limit "<<output_limit);
     }
     execJudgeCommand(fdSocket, sourceFileType, problem_name, testcase,
