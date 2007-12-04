@@ -57,6 +57,9 @@ chmod 750 prob/0/current/*
 # Prepare /working
 CreateDir working 750
 
+# Prepare /log
+CreateDir log 750
+
 cmd="bin/judge --lang=$supported_source_file_types $*"
 echo $cmd
 #eval $cmd

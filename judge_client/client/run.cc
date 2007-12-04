@@ -32,6 +32,12 @@
 #include "trace.h"
 #include "util.h"
 
+// The uid for executing the program to be judged
+DECLARE_ARG(int, uid);
+
+// The uid for executing the program to be judged
+DECLARE_ARG(int, gid);
+
 int monitor(int fdSocket,
             pid_t pid,
             int timeLimit,
@@ -111,8 +117,8 @@ int runExe(int fdSocket,
     StartupInfo info;
     info.stdinFilename = stdinFilename.c_str();
     info.stdoutFilename = stdoutFilename.c_str();
-    info.uid = JOB_UID;
-    info.gid = JOB_GID;
+    info.uid = ARG_uid;
+    info.gid = ARG_gid;
     info.timeLimit = timeLimit;
     info.memoryLimit = memoryLimit;
     info.outputLimit = outputLimit;

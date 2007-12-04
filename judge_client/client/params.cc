@@ -20,67 +20,113 @@
 
 #include "params.h"
 
-#include <stdio.h>
+#include <iostream>
 #include <getopt.h>
 
 #include "util.h"
 
-string JUDGE_ROOT;
+static vector<ArgumentInfo*> infoList;
 
-int JOB_UID;
+ArgumentInfo::ArgumentInfo(string type,
+                           string name,
+                           string defaultValue,
+                           string description,
+                           bool optional,
+                           void* reference)
+    : type_(type),
+      name_(name),
+      defaultValue_(defaultValue),
+      description_(description),
+      optional_(optional),
+      reference_(reference) {
+    infoList.push_back(this);
+}
 
-int JOB_GID;
+void ArgumentInfo::Print() {
+    cout<<"        -"<<name_<<": "<<description_<<endl
+        <<"            type: "<<type_
+        <<"            optional: "<<(optional_ ? "true" : "false");
+    if (optional_) {
+        cout<<endl<<"            default value: "<<defaultValue_;
+    }
+    cout<<endl;
+}
 
-pair<string, int> QUEUE_ADDRESS;
-
-vector<string> LANG;
+bool ArgumentInfo::Assign(const string& value) {
+    char* p;
+    if (type_ == "int") {
+        if (value.empty()) {
+            return false;
+        }
+        *(int*)reference_ = strtol(value.c_str(), &p, 10);
+        if (p != value.c_str() + value.size()) {
+            return false;
+        }
+    } else if (type_ == "string") {
+        *(string*)reference_ = value;
+    } else if (type_ == "bool") {
+        string s;
+        for (int i = 0; i < value.size(); ++i) {
+            s += tolower(value[i]);
+        }
+        if (s == "true") {
+            *(bool*)reference_ = true;
+        } else if (s == "false") {
+            *(bool*)reference_ = false;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
 
 void printUsage() {
-    printf("Usage: judge [--queue=<queue address>] "
-                        "[--uid=<uid>] "
-                        "[--gid=<gid>] "
-                        "[--lang=<comma separated supported languages>] ");
+    cout<<"Usage: judge [arguments] "<<endl;
+    for (int i = 0; i < infoList.size(); ++i) {
+        infoList[i]->Print();
+    }
 }
 
 int parseArguments(int argc, char* argv[]) {
-    static struct option options[] = {
-        {"queue", 1, 0, 'q'},
-        {"uid", 1, 0, 'u'},
-        {"gid", 1, 0, 'g'},
-        {"lang", 1, 0, 'l'},
-        {0, 0, 0, 0}
-    };
-    const char* p;
-    for (;;) {
-        switch (getopt_long(argc, argv, "", options, NULL)) {
-            case 'q':
-                p = strstr(optarg, ":");
-                if (!p) {
-                    fprintf(stderr, "Invalid queue address %s\n", optarg);
-                    return -1;
+    vector<bool> assigned(infoList.size(), false);
+    for (int i = 1; i < argc; ++i) {
+        if (argv[i][0] == '-' && argv[i][1] == '-') {
+            char* p = argv[i] + 2;
+            while (*p && *p != '=') {
+                ++p;
+            }
+            string name(argv[i] + 2, p - argv[i] - 2);
+            bool found = false;
+            for (int j = 0; j < infoList.size(); ++j) {
+                if (infoList[j]->name() == name) {
+                    if (*p) {
+                        if (!infoList[j]->Assign(p + 1)) {
+                            cerr<<"Invalid value for argument "<<name<<endl;
+                            return -1;
+                        }
+                    } else {
+                        if (infoList[j]->type() != "bool") {
+                            cerr<<"Missing value for argument "<<name<<endl;
+                            return -1;
+                        }
+                        infoList[j]->Assign("true");
+                    }
+                    found = true;
+                    assigned[j] = true;
+                    break;
                 }
-                QUEUE_ADDRESS.first = string(optarg, p - optarg);
-                QUEUE_ADDRESS.second = atoi(p + 1);
-                break;
-            case 'u':
-                if (sscanf(optarg, "%d", &JOB_UID) < 1) {
-                    fprintf(stderr, "Invalid uid %s\n", optarg);
-                    return -1;
-                }
-                break;
-            case 'g':
-                if (sscanf(optarg, "%d", &JOB_GID) < 1) {
-                    fprintf(stderr, "Invalid gid %s\n", optarg);
-                    return -1;
-                }
-                break;
-            case 'l':
-                SplitString(optarg, ',', &LANG);
-                break;
-            case -1:
-                return 0;
-            default:
+            }
+            if (!found) {
+                cerr<<"Invalid argument "<<name<<endl;
                 return -1;
+            }
         }
     }
+    for (int i = 0; i < infoList.size(); ++i) {
+        if (!assigned[i] && !infoList[i]->optional()) {
+            cerr<<"Missing argument "<<infoList[i]->name()<<endl;
+            return -1;
+        }
+    }
+    return 0;
 }

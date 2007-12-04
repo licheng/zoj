@@ -48,9 +48,22 @@
 #include "trace.h"
 #include "util.h"
 
+// The ip address of the queue service to which this client connects
+DEFINE_ARG(string, queue_address, "");
+
+// The port of the queue service to which this client connects
+DEFINE_ARG(int, queue_port, "");
+
+// All languages supported by this client
+DEFINE_ARG(string, lang, "");
+
 // Returns true if the specified file type is supported by the server
 bool isSupportedSourceFileType(const string& sourceFileType) {
-    return find(LANG.begin(), LANG.end(), sourceFileType) != LANG.end();
+    vector<string> supportedLanguages;
+    SplitString(ARG_lang, ',', &supportedLanguages);
+    return find(supportedLanguages.begin(),
+                supportedLanguages.end(),
+                sourceFileType) != supportedLanguages.end();
 }
 
 #define INPUT_FAIL(fd, messages) if(0);else{\
@@ -61,43 +74,6 @@ bool isSupportedSourceFileType(const string& sourceFileType) {
     string s = message.str();\
     writen(fd, s.c_str(), s.size());\
     return;}
-
-// Validates the command and invokes appropriate functions. Returns 0 if the
-// command is executed successfully, -1 otherwise.
-/*int dispatch(int fdSocket, const char* command_line) {
-    istringstream is(command_line);
-    string command;
-    is>>command;
-    if (command == "save") {
-        string problem_name;
-        string version;
-        is>>problem_name>>version;
-        if (is.fail()) {
-            INPUT_FAIL(fdSocket, "Invalid command: "<<command_line);
-        }
-        const string zipFile =
-            JUDGE_ROOT + "/prob/" + problem_name + "_" + version + ".zip";
-        if (saveFile(fdSocket, zipFile) == -1) {
-            return -1;
-        }
-        string command = JUDGE_ROOT + "/script/save_problem.sh '" +
-                              problem_name + "' '" + version + "'";
-        char errorMessage[128];
-        int errorMessageLength = sizeof(errorMessage) - 1;
-        if (runShellCommand(command.c_str(),
-                            errorMessage,
-                            &errorMessageLength)) {
-            errorMessage[errorMessageLength] = 0;
-            INPUT_FAIL(fdSocket, errorMessage);
-            return -1;
-        }
-        return 0;
-    } else if (command == "judge") {
-    } else {
-        INPUT_FAIL(fdSocket, "Unrecognized command: "<<command);
-        return -1;
-    }
-}*/
 
 // Deal with a single judge request
 void process(int fdSocket) {
@@ -164,7 +140,7 @@ int main(int argc, char* argv[]) {
 
     char working_root[MAX_BUFFER_SIZE];
     sprintf(working_root, "working/%d", getpid());
-    if (mkdir(working_root, 0777) < 0) {
+    if (mkdir(working_root, 0777) < 0 && errno != EEXIST) {
         LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_root;
         return 1;
     }
@@ -176,14 +152,14 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in servaddr;
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(QUEUE_ADDRESS.second);
-    if (inet_pton(AF_INET, QUEUE_ADDRESS.first.c_str(), &servaddr.sin_addr) <= 0) {
-        LOG(SYSCALL_ERROR)<<"Invalid address "<<QUEUE_ADDRESS.first;
+    servaddr.sin_port = htons(ARG_queue_port);
+    if (inet_pton(AF_INET, ARG_queue_address.c_str(), &servaddr.sin_addr) <= 0) {
+        LOG(SYSCALL_ERROR)<<"Invalid address "<<ARG_queue_address;
         return 1;
     }
     if (connect(fdSocket, (const sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to connect to "
-                          <<QUEUE_ADDRESS.first<<":"<<QUEUE_ADDRESS.second;
+                          <<ARG_queue_address<<":"<<ARG_queue_port;
     }
 
     // Loops until SIGTERM is received.

@@ -26,10 +26,14 @@
 #include "trace.h"
 #include "util.h"
 
+// The root directory which contains problems, scripts and working directory of
+// the client
+DECLARE_ARG(string, root);
+
 int doCompile(int fdSocket, const string& sourceFilename) {
     sendReply(fdSocket, COMPILING);
     string command =
-        JUDGE_ROOT + "/script/compile.sh '" + sourceFilename + "'";
+        ARG_root + "/script/compile.sh '" + sourceFilename + "'";
     class Callback: public TraceCallback {
         public:
             // Nothing special should be done when the compiling process

@@ -28,44 +28,26 @@
 
 using namespace std;
 
-#define DEBUG LOG_DEBUG
-#define ERROR LOG_ERR
-#define WARNING LOG_WARNING
-#define INFO LOG_INFO
-#define FATAL LOG_FATAL
+#define DEBUG 0
+#define ERROR 1
+#define WARNING 2
+#define INFO 3
+#define FATAL 4
 #define SYSCALL_ERROR -1
 #define LOG(level) Log(__FILE__, __LINE__, level).stream()
 
 class Log {
-	public:
-		Log(const char* filename, int lineNumber, int level)
-            : filename(filename),
-              lineNumber(lineNumber),
-              level(level),
-              messageStream() {
-			if (level == SYSCALL_ERROR) {
-				messageStream<<strerror(errno)<<". ";
-				this->level = LOG_ERR;
-			}
-		}
-		
-		~Log() {
-			openlog("ZOJ judge", 0, LOG_USER);
-			syslog(level, "%s:%d: %s", filename, lineNumber, messageStream.str().c_str());
-		}
+    public:
+        Log(const char* filename, int lineNumber, int level);
+        ~Log();
 
-		ostream& stream() {
-			return this->messageStream;
-		}
-		
-	private:
-        Log(const Log&);
-        void operator=(const Log&);
+        ostream& stream() { return this->messageStream; }
 
-		const char* filename;
-		int lineNumber;
-		int level;
-		ostringstream messageStream;
+    private:
+        const char* filename;
+        int lineNumber;
+        int level;
+        ostringstream messageStream;
 };
 
 #endif

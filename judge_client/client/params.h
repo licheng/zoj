@@ -18,28 +18,54 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __PARAMS_H
-#define __PARAMS_H
+#ifndef __ARGS_H
+#define __ARGS_H
 
 #include <string>
 #include <vector>
 
 using namespace std;
 
-// The root directory which contains problems, scripts and working directory of
-// the client
-extern string JUDGE_ROOT;
+class ArgumentInfo {
+  public:
+    ArgumentInfo(string type,
+                 string name,
+                 string defaultValue,
+                 string description,
+                 bool optional,
+                 void* reference);
+    void Print();
+    bool Assign(const string& value);
 
-// The uid for executing the program to be judged
-extern int JOB_UID;
+    const string& type() { return type_; }
+    const string& name() { return name_; }
+    bool optional() { return optional_; }
 
-// The gid for executing the program to be judged
-extern int JOB_GID;
+  private:
+    string type_;
+    string name_;
+    string defaultValue_;
+    string description_;
+    bool optional_;
+    void* reference_;
+};
 
-extern pair<string, int> QUEUE_ADDRESS;
+#define DEFINE_int ;
+#define DEFINE_bool ;
+#define DEFINE_string ;
 
-// All languages supported by this client
-extern vector<string> LANG;
+#define DEFINE_ARG(type, name, description) \
+    DEFINE_##type; \
+    type ARG_##name; \
+    ArgumentInfo _info_##name(#type, #name, "", description, false, &ARG_##name)
+
+#define DEFINE_OPTIONAL_ARG(type, name, defaultValue, description) \
+    DEFINE_##type; \
+    type ARG_##name = defaultValue; \
+    ArgumentInfo _info_##name(#type, #name, #defaultValue, description, true, &ARG_##name)
+
+#define DECLARE_ARG(type, name) \
+    extern type ARG_##name
 
 // Extracts parameter values from the passed-in arguments.
 int parseArguments(int argc, char* argv[]);

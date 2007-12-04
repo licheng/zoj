@@ -375,3 +375,12 @@ int lockFile(int fd, int cmd) {
     return fcntl(fd, cmd, &lock);
 }
 
+string getLocalTimeAsString(const char* format) {
+    time_t t = time(NULL);
+    struct tm tm;
+    localtime_r(&t, &tm);
+    char buf[1024];
+    strftime(buf, sizeof(buf), format, &tm);
+    return buf;
+}
+

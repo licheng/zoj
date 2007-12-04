@@ -31,6 +31,13 @@
 #include "trace.h"
 #include "util.h"
 
+// The root directory which contains problems, scripts and working directory of
+// the client
+DECLARE_ARG(string, root);
+
+// The uid for executing the program to be judged
+DECLARE_ARG(int, uid);
+
 class TextFile {
     public:
         TextFile(const string& filename):
@@ -172,7 +179,7 @@ int runSpecialJudgeExe(const string& specialJudgeFilename,
     string workingDirectory = 
         specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
     string relativeProgramOutputFilename =
-        JUDGE_ROOT + "/working/" + toString(getpid()) + "/" +
+        ARG_root + "/working/" + toString(getpid()) + "/" +
         programOutputFilename;
     const char* commands[] = {
         "judge",
@@ -182,7 +189,7 @@ int runSpecialJudgeExe(const string& specialJudgeFilename,
         NULL};
     StartupInfo info;
     info.stdinFilename = programOutputFilename.c_str();
-    info.uid = JOB_UID;
+    info.uid = ARG_uid;
     info.timeLimit = 10;
     info.memoryLimit = 256 * 1024;
     info.outputLimit = 16;

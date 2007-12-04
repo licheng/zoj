@@ -20,6 +20,16 @@
 #include "run.h"
 #include "util.h"
 
+// The root directory which contains problems, scripts and working directory of
+// the client
+DEFINE_ARG(string, root, "");
+
+// The uid for executing the program to be judged
+DEFINE_ARG(int, uid, "");
+
+// The gid for executing the program to be judged
+DEFINE_ARG(int, gid, "");
+
 // Executes the "judge" command.
 int execJudgeCommand(int fdSocket,
                      const string& sourceFileType,
@@ -31,7 +41,7 @@ int execJudgeCommand(int fdSocket,
                      int outputLimit) {
     string programName = "P" + problemName;
     char buffer[PATH_MAX + 1];
-    string probDir = JUDGE_ROOT + "/prob/";
+    string probDir = ARG_root + "/prob/";
     int count = readlink((probDir + problemName + "/current").c_str(),
                          buffer,
                          sizeof(buffer));

@@ -185,6 +185,10 @@ static inline int isFlagsReadOnly(int flags) {
 // Returns 0 on success, -1 otherwise.
 int lockFile(int fd, int cmd);
 
+// Returns the string representation of the current local time in the specified
+// format. The format string the same as the one used in strftime().
+string getLocalTimeAsString(const char* format);
+
 #define MAX_TIME_LIMIT 300
 #define MAX_MEMORY_LIMIT (1280 * 1024)
 #define MAX_OUTPUT_LIMIT (16 * 1024)
