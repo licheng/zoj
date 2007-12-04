@@ -20,7 +20,7 @@
 
 #include "unittest.h"
 
-#include "params.h"
+#include "args.h"
 
 DEFINE_ARG(int, int, "");
 DEFINE_OPTIONAL_ARG(int, opt_int, 1001, "");

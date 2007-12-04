@@ -43,7 +43,7 @@
 #include "judge_result.h"
 #include "kmmon-lib.h"
 #include "logging.h"
-#include "params.h"
+#include "args.h"
 #include "run.h"
 #include "trace.h"
 #include "util.h"
