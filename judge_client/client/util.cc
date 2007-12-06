@@ -1,21 +1,20 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
  *
- * This file is part of ZOJ Judge Server.
+ * This file is part of ZOJ.
  *
- * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * ZOJ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
- * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * ZOJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ZOJ Judge Server; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <string>
@@ -204,39 +203,6 @@ int createShellProcess(const char* command, const StartupInfo& processInfo) {
     return createProcess(commands, processInfo);
 }
 
-int runShellCommand(const char* command,
-                    char errorMessage[],
-                    int* maxErrorMessageLength,
-                    int timeLimit) {
-    int fdPipe[2];
-    if (pipe(fdPipe) < 0) {
-        LOG(SYSCALL_ERROR);
-        return -1;
-    }
-    StartupInfo info;
-    info.fdStderr = fdPipe[1];
-    info.timeLimit = timeLimit;
-    TraceCallback callback;
-    pid_t pid = createShellProcess(command, info);
-    close(fdPipe[1]);
-    if (pid < 0) {
-        close(fdPipe[0]);
-        return -1;
-    }
-    *maxErrorMessageLength = readn(fdPipe[0], errorMessage, *maxErrorMessageLength);
-    close(fdPipe[0]);
-    if (*maxErrorMessageLength < 0) {
-        return -1;
-    }
-    int status;
-    waitpid(pid, &status, 0);
-    if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Command '"<<command<<"' terminated by signal "<<WTERMSIG(status);
-        return -1;
-    }
-    return WEXITSTATUS(status);
-}
-
 ssize_t readn(int fd, void* buffer, size_t count) {
 	char* p = (char*)buffer;
 	while (count > 0) {
@@ -275,40 +241,6 @@ int writen(int fd, const void* buffer, size_t count) {
 		count -= num;
 	}
 	return 0;
-}
-
-int copyFile(int fdSource, int fdDestination) {
-    char buffer[1024];
-    for (;;) {
-        int count = readn(fdSource, buffer, sizeof(buffer));
-        if (count == -1) {
-            return -1;
-        }
-        if (writen(fdDestination, buffer, count) == -1) {
-            return -1;
-        }
-        if (count < (int) sizeof(buffer)) {
-            return 0;
-        }
-    }
-}
-
-int saveFile(int fdSource, const string& outputFilename) {
-    int fdDestination = open(outputFilename.c_str(),
-                             O_RDWR | O_CREAT | O_TRUNC);
-    if (fdDestination == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to open file "<<outputFilename;
-        return -1;
-    }
-    int ret = copyFile(fdSource, fdDestination);
-    close(fdDestination);
-    return ret;
-}
-
-int sendReply(int fdSocket, int reply) {
-	char buffer[16];
-	sprintf(buffer, "%d\n", reply);
-	return writen(fdSocket, buffer, strlen(buffer));
 }
 
 sighandler_t installSignalHandler(int signal, sighandler_t handler) {

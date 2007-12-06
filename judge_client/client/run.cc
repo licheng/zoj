@@ -1,27 +1,27 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
  *
- * This file is part of ZOJ Judge Server.
+ * This file is part of ZOJ.
  *
- * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * ZOJ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
- * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * ZOJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ZOJ Judge Server; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "run.h"
 
 #include <string>
 
+#include <arpa/inet.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -33,10 +33,25 @@
 #include "util.h"
 
 // The uid for executing the program to be judged
-DECLARE_ARG(int, uid);
+DEFINE_ARG(int, uid, "");
 
 // The uid for executing the program to be judged
-DECLARE_ARG(int, gid);
+DEFINE_ARG(int, gid, "");
+
+int sendRunningMessage(int fdSocket,
+                       double timeConsumption,
+                       int memoryConsumption) {
+    char message[9];
+    message[0] = RUNNING;
+    *(unsigned int*)(message + 1) =
+        htonl((unsigned int)(timeConsumption * 1000));
+    *(unsigned int*)(message + 5) = htonl(memoryConsumption);
+    if (writen(fdSocket, message, sizeof(message)) == -1) {
+        LOG(ERROR)<<"Fail to send running message";
+        return -1;
+    }
+    return 0;
+}
 
 int monitor(int fdSocket,
             pid_t pid,
@@ -79,14 +94,13 @@ int monitor(int fdSocket,
             callback.getResult() != RUNNING) {
             result = callback.getResult();
         }
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "%.3lf %d\n",
-                 timeConsumption, memoryConsumption);
-        if (writen(fdSocket, buffer, strlen(buffer)) < 0) {
+        if (sendRunningMessage(fdSocket,
+                               timeConsumption,
+                               memoryConsumption) == -1) {
             if (!callback.hasExited()) {
                 kill(pid, SIGKILL);
             }
-            result = SERVER_ERROR;
+            result = INTERNAL_ERROR;
         }
         struct timespec request, remain;
         request.tv_sec = 1;
@@ -97,7 +111,7 @@ int monitor(int fdSocket,
             if (errno != EINTR) {
                 LOG(SYSCALL_ERROR);
                 kill(pid, SIGKILL);
-                result = SERVER_ERROR;
+                result = INTERNAL_ERROR;
                 break;
             }
             request = remain;
@@ -127,14 +141,10 @@ int runExe(int fdSocket,
     info.trace = 1;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
-        return SERVER_ERROR;
+        return INTERNAL_ERROR;
     }
     ExecutiveCallback callback;
-    int result = monitor(fdSocket, pid, timeLimit, memoryLimit, callback);
-    if (writen(fdSocket, "-1 -1\n", 6) < 0) {
-        return -1;
-    }
-    return result;
+    return monitor(fdSocket, pid, timeLimit, memoryLimit, callback);
 }
 
 inline int isNativeExe(const string& sourceFileType) {
@@ -144,20 +154,17 @@ inline int isNativeExe(const string& sourceFileType) {
 }
 
 int doRun(int fdSocket,
-          const string& programName,
           const string& sourceFileType,
           const string& stdinFilename,
-          const string& stdoutFilename,
           int timeLimit,
           int memoryLimit,
           int outputLimit) {
-    sendReply(fdSocket, RUNNING);
     int result;
     if (isNativeExe(sourceFileType)) {
         result = runExe(fdSocket,
-                        programName,
+                        "exe",
                         stdinFilename,
-                        stdoutFilename,
+                        "out",
                         timeLimit,
                         memoryLimit,
                         outputLimit);

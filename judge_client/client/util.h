@@ -1,21 +1,20 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
  *
- * This file is part of ZOJ Judge Server.
+ * This file is part of ZOJ.
  *
- * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * ZOJ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
- * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * ZOJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ZOJ Judge Server; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __UTIL_H
@@ -93,21 +92,24 @@ struct StartupInfo {
     // inheried.
     int gid;
 
-    // The CPU time limit of the child process, in seconds.
+    // The CPU time limit of the child process, in seconds. If zero, no time
+    // limit is applied.
     int timeLimit;
 
-    // The maximum size of the child process's data segment, in kilobytes.
+    // The maximum size of the child process's data segment, in kilobytes. If
+    // zero, no memory limit is applied.
     int memoryLimit;
 
     // The maximum size of files that the child process may create, in
-    // kilobytes.
+    // kilobytes. If zero, no output limit is applied.
     int outputLimit;
 
-    // The maximum number of processes that can be created.
+    // The maximum number of processes that can be created. If zero, no process
+    // limit is applied.
     int procLimit;
 
     // The maximum file descriptor number that can be opened by the child
-    // process.
+    // process. If zero, no file limit is applied.
     int fileLimit;
 
     // True if the child process will be traced
@@ -130,9 +132,6 @@ int createProcess(const char* commands[], const StartupInfo& processInfo);
 // createProcess({"/bin/sh", "-c", command}, processInfo)
 int createShellProcess(const char* command, const StartupInfo& processInfo);
 
-// Executes a shell command in a child process and waits until it finishes. Returns its exit code. The standard error output of the shell command is stored in errorMessge, at most maxErrorMessageLength bytes. timeLimit, if not zero,  is the time limit of the shell command execution.
-int runShellCommand(const char* command, char errorMessage[], int* maxErrorMessageLength, int timeLimit = 0);
-
 // Reads from the specified file descriptor into buffer. count is the maximum
 // number of bytes to read.
 // Returns the number of bytes actually read, or -1 if any error occurs.
@@ -143,18 +142,11 @@ ssize_t readn(int fd, void* buffer, size_t count);
 // Returns 0 if success, or -1 if any error occurs.
 int writen(int fd, const void* buffer, size_t count);
 
-// Copies the whole content in the source to the destination.
-// Returns 0 if success, or -1 if any error occurs.
-int copyFile(int fdSource, int fdDestination);
-
-// Reads the whole content from the source file descriptor and writes the file
-// specified by outputFilename. Creates the file if not exists.
-// Return 0 if sucdess, or -1 if any error occurs.
-int saveFile(int fdSource, const string& outputFilename);
-
-// Writes reply in decimal followed by a '\n' to the specified socket.
-// Return 0 if sucdess, or -1 if any error occurs.
-int sendReply(int fdSocket, int reply);
+// Sends 1 byte code back to the queue services. Return 0 if success, or -1 if
+// any error occurs.
+static inline int sendReply(int fdSocket, char reply) {
+    return writen(fdSocket, &reply, 1);
+}
 
 sighandler_t installSignalHandler(int signal, sighandler_t handler);
 
@@ -189,9 +181,9 @@ int lockFile(int fd, int cmd);
 // format. The format string the same as the one used in strftime().
 string getLocalTimeAsString(const char* format);
 
-#define MAX_TIME_LIMIT 300
-#define MAX_MEMORY_LIMIT (1280 * 1024)
-#define MAX_OUTPUT_LIMIT (16 * 1024)
-#define MAX_BUFFER_SIZE 256
+// Returns true if the address represents the localhost
+static inline bool isLocalHost(const string& address) {
+    return address == "127.0.0.1" || address == "localhost";
+}
 
 #endif

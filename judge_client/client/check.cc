@@ -1,21 +1,20 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
  *
- * This file is part of ZOJ Judge Server.
+ * This file is part of ZOJ.
  *
- * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * ZOJ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
- * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * ZOJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ZOJ Judge Server; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "check.h"
@@ -131,7 +130,7 @@ int compareTextFiles(const string& outputFilename,
     int ret = ACCEPTED;
     TextFile f1(outputFilename), f2(programOutputFilename);
     if (f1.fail() || f2.fail()) {
-        return SERVER_ERROR;
+        return INTERNAL_ERROR;
     }
     int c1 = f1.skipWhiteSpaces(), c2 = f2.skipWhiteSpaces();
     while (c1 > 0 && c2 > 0) { // neither EOF is reached
@@ -147,7 +146,7 @@ int compareTextFiles(const string& outputFilename,
         }
     }
     if (c1 < 0 || c2 < 0) {
-        return SERVER_ERROR;
+        return INTERNAL_ERROR;
     }
     if (c1 > 0 || c2 > 0) {
         if (c1 > 0) {
@@ -166,7 +165,7 @@ int compareTextFiles(const string& outputFilename,
             }
         }
         if (c1 < 0 || c2 < 0) {
-            return SERVER_ERROR;
+            return INTERNAL_ERROR;
         }
         return PRESENTATION_ERROR;
     }
@@ -200,17 +199,17 @@ int runSpecialJudgeExe(const string& specialJudgeFilename,
     ExecutiveCallback callback;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
-        return SERVER_ERROR;
+        return INTERNAL_ERROR;
     }
     int status;
     if (waitpid(pid, &status, 0) < 0) {
         pid = 0;
         LOG(SYSCALL_ERROR);
-        return SERVER_ERROR;
+        return INTERNAL_ERROR;
     }
     if (WIFSIGNALED(status)) {
         LOG(ERROR)<<"Judge terminated by signal "<<WTERMSIG(status);
-        return SERVER_ERROR;
+        return INTERNAL_ERROR;
     }
     switch (WEXITSTATUS(status)) {
         case 0:
