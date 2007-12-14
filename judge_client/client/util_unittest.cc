@@ -19,30 +19,60 @@
 
 #include "unittest.h"
 
+#include <sys/resource.h>
 #include <unistd.h>
 
 #include "util.h"
 
+#include "args.h"
+
+DEFINE_OPTIONAL_ARG(string, root, "/tmp", "");
+
+class TestSetLimit : public TestFixture {
+  protected:
+    virtual void setUp() {
+        getrlimit(RLIMIT_FSIZE, &original_);;
+    }
+
+    virtual void tearDown() {
+        setrlimit(RLIMIT_FSIZE, &original_);
+    }
+
+    struct rlimit original_;
+};
+
+TEST_F(TestSetLimit, Normal) {
+    setLimit(RLIMIT_FSIZE, 1024 * 1024);
+    struct rlimit t;
+    getrlimit(RLIMIT_FSIZE, &t);
+    ASSERT_EQUAL(1024 * 1024, (int)t.rlim_cur);
+    ASSERT_EQUAL(1024 * 1024 + 1, (int)t.rlim_max);
+}
+
+TEST_F(TestSetLimit, Invalid) {
+    ASSERT_EQUAL(-1, setLimit(RLIMIT_FSIZE, -1));
+}
+
 TEST(readTimeConsumptionInvalidPID) {
-    CPPUNIT_ASSERT_EQUAL(-1.0, readTimeConsumption(-1));
+    ASSERT_EQUAL(-1.0, readTimeConsumption(-1));
 }
 
 TEST(readTimeConsumptionNormal) {
     double ts = readTimeConsumption(getpid());
     // should be negative
-    CPPUNIT_ASSERT(ts >= 0);
+    ASSERT(ts >= 0);
     // can not be too large
-    CPPUNIT_ASSERT(ts < 100000);
+    ASSERT(ts < 100000);
 }
 
 TEST(readMemoryConsumptionInvalidPID) {
-    CPPUNIT_ASSERT_EQUAL(-1, readMemoryConsumption(-1));
+    ASSERT_EQUAL(-1, readMemoryConsumption(-1));
 }
 
 TEST(readMemoryConsumptionNormal) {
     int ms = readMemoryConsumption(getpid());
     // should be positive
-    CPPUNIT_ASSERT(ms > 0);
+    ASSERT(ms > 0);
     // can not be too large
-    CPPUNIT_ASSERT(ms < 32 * 1024 * 1024);
+    ASSERT(ms < 32 * 1024 * 1024);
 }

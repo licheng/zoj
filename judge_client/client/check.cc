@@ -39,50 +39,42 @@ DECLARE_ARG(int, uid);
 
 class TextFile {
     public:
-        TextFile(const string& filename):
-            fd(0),
-            // necessary, otherwise readn will think EOF is reached.
-            bufferSize(sizeof(this->buffer)),
-            p(buffer),
-            failed(0),
-            filename(filename) {
-            this->p = this->buffer;
-            this->fd = open(filename.c_str(), O_RDONLY);
-            this->failed = this->fd < 0;
-            if (this->failed) {
+        TextFile(const string& filename) : filename_(filename) {
+            fd_ = open(filename.c_str(), O_RDONLY);
+            if (fd_ < 0) {
                 LOG(SYSCALL_ERROR)<<"Fail to open "<<filename;
             }
+            bufferSize_ = sizeof(buffer_);
+            ptr_ = buffer_ + bufferSize_;
         }
 
         ~TextFile() {
-            if (this->fd >= 0) {
-                close(this->fd);
+            if (fd_ >= 0) {
+                close(fd_);
             }
         }
 
         // Returns the next character in the file. Returns 0 if EOF is reached,
         // -1 if any error occurs.
         int read() {
-            if (this->p - this->buffer >= this->bufferSize) {
-                if (this->bufferSize < (int)sizeof(this->buffer)) {
+            if (ptr_ - buffer_ >= bufferSize_) {
+                if (bufferSize_ < sizeof(buffer_)) {
                     // The previous readn returns less characters than requested,
                     // which means EOF is reached. It is not necessary to invoke
                     // it again.
                     return 0;
                 }
-                this->bufferSize = readn(this->fd,
-                                          this->buffer,
-                                          sizeof(this->buffer) - 1);
-                if (this->bufferSize < 0) {
-                    LOG(SYSCALL_ERROR)<<"Fail to read from "<<this->filename;
+                bufferSize_ = readn(fd_, buffer_, sizeof(buffer_));
+                if ((int)bufferSize_ < 0) {
+                    LOG(SYSCALL_ERROR)<<"Fail to read from "<<filename_;
                     return -1;
                 }
-                if (this->bufferSize == 0) {
+                if (bufferSize_ == 0) {
                     return 0;
                 }
-                this->p = this->buffer;
+                ptr_ = buffer_;
             }
-            return *this->p++;
+            return *ptr_++;
         }
 
         // Returns the next non-white-space character. Returns 0 if EOF is
@@ -90,27 +82,31 @@ class TextFile {
         int skipWhiteSpaces() {
             int ret;
             do {
-                ret = this->read();
+                ret = read();
             } while (ret > 0 && isspace(ret));
             return ret;
         }
 
         // Returns true if fail to open the file
         int fail() {
-            return this->failed;
+            return fd_ < 0;
         }
 
     private:
-        TextFile(const TextFile&);
-        void operator=(const TextFile&);
+        // the file descriptor
+        int fd_; 
 
-        int fd; // the file descriptor
-        char buffer[1024]; // A internal buffer used to store unread characters
-        int bufferSize; // The number of available characters in the buffer
-        char* p; // A pointer pointing to the next available character in the
-                 // buffer
-        int failed; // A flag indicating whether the file is opened successfully
-        const string& filename; // the name of file reading from
+        // A internal buffer used to store unread characters
+        char buffer_[1024];
+        
+        // The number of available characters in the buffer
+        size_t bufferSize_;
+
+        // A pointer pointing to the next available character in the buffer
+        char* ptr_;
+
+        // the filename associated with this instance
+        const string filename_;
 };
 
 // This function compares two text files and returns
@@ -132,42 +128,44 @@ int compareTextFiles(const string& outputFilename,
     if (f1.fail() || f2.fail()) {
         return INTERNAL_ERROR;
     }
-    int c1 = f1.skipWhiteSpaces(), c2 = f2.skipWhiteSpaces();
+    int c1 = f1.read();
+    int c2 = f2.read();
     while (c1 > 0 && c2 > 0) { // neither EOF is reached
         if (c1 == c2) {
             c1 = f1.read();
             c2 = f2.read();
-        } else if (!isspace(c1) || !isspace(c2)) {
+        } else if (!isspace(c1) && !isspace(c2)) {
             return WRONG_ANSWER;
         } else {
-            c1 = f1.skipWhiteSpaces();
-            c2 = f2.skipWhiteSpaces();
+            if (isspace(c1)) {
+                c1 = f1.skipWhiteSpaces();
+            }
+            if (isspace(c2)) {
+                c2 = f2.skipWhiteSpaces();
+            }
+            while (c1 > 0 && c2 > 0) {
+                if (c1 != c2) {
+                    return WRONG_ANSWER;
+                }
+                c1 = f1.skipWhiteSpaces();
+                c2 = f2.skipWhiteSpaces();
+            }
             ret = PRESENTATION_ERROR;
         }
+    }
+    if (isspace(c1)) {
+        c1 = f1.skipWhiteSpaces();
+        ret = PRESENTATION_ERROR;
+    }
+    if (isspace(c2)) {
+        c2 = f2.skipWhiteSpaces();
+        ret = PRESENTATION_ERROR;
     }
     if (c1 < 0 || c2 < 0) {
         return INTERNAL_ERROR;
     }
     if (c1 > 0 || c2 > 0) {
-        if (c1 > 0) {
-            if (isspace(c1)) {
-                c1 = f1.skipWhiteSpaces();
-            }
-            if (c1 > 0) {
-                return WRONG_ANSWER;
-            }
-        } else {
-            if (isspace(c2)) {
-                c2 = f2.skipWhiteSpaces();
-            }
-            if (c2 > 0) {
-                return WRONG_ANSWER;
-            }
-        }
-        if (c1 < 0 || c2 < 0) {
-            return INTERNAL_ERROR;
-        }
-        return PRESENTATION_ERROR;
+        return WRONG_ANSWER;
     }
     return ret;
 }
@@ -175,6 +173,7 @@ int compareTextFiles(const string& outputFilename,
 int runSpecialJudgeExe(const string& specialJudgeFilename,
                        const string& inputFilename,
                        const string& programOutputFilename) {
+    LOG(INFO)<<"Running special judge";
     string workingDirectory = 
         specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
     string relativeProgramOutputFilename =
@@ -199,16 +198,18 @@ int runSpecialJudgeExe(const string& specialJudgeFilename,
     ExecutiveCallback callback;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
+        LOG(ERROR)<<"Fail to execute special judge";
         return INTERNAL_ERROR;
     }
     int status;
-    if (waitpid(pid, &status, 0) < 0) {
-        pid = 0;
-        LOG(SYSCALL_ERROR);
-        return INTERNAL_ERROR;
+    while (waitpid(pid, &status, 0) < 0) {
+        if (errno != EINTR) {
+            LOG(SYSCALL_ERROR);
+            return INTERNAL_ERROR;
+        }
     }
     if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Judge terminated by signal "<<WTERMSIG(status);
+        LOG(ERROR)<<"Special judge terminated by signal "<<WTERMSIG(status);
         return INTERNAL_ERROR;
     }
     switch (WEXITSTATUS(status)) {
@@ -226,6 +227,7 @@ int doCheck(int fdSocket,
             const string& outputFilename,
             const string& programOutputFilename,
             const string& specialJudgeFilename) {
+    LOG(INFO)<<"Judging";
     sendReply(fdSocket, JUDGING);
     int result;
     if (access(specialJudgeFilename.c_str(), F_OK) == 0) {
@@ -237,6 +239,17 @@ int doCheck(int fdSocket,
                                   programOutputFilename);
     }
     sendReply(fdSocket, result);
+    switch(result) {
+        case ACCEPTED:
+            LOG(INFO)<<"Accepted";
+            break;
+        case WRONG_ANSWER:
+            LOG(INFO)<<"Wrong Answer";
+            break;
+        case PRESENTATION_ERROR:
+            LOG(INFO)<<"Presentation Error";
+            break;
+    }
     return 0;
 }
 

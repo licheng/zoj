@@ -27,12 +27,12 @@
 
 using namespace std;
 
-#define DEBUG 0
-#define ERROR 1
+#define DEBUG 1
 #define WARNING 2
-#define INFO 3
+#define ERROR 3
 #define FATAL 4
-#define SYSCALL_ERROR -1
+#define INFO 5
+#define SYSCALL_ERROR 0
 #define LOG(level) Log(__FILE__, __LINE__, level).stream()
 
 class Log {
@@ -40,13 +40,10 @@ class Log {
         Log(const char* filename, int lineNumber, int level);
         ~Log();
 
-        ostream& stream() { return this->messageStream; }
+        ostream& stream() { return messageStream_; }
 
     private:
-        const char* filename;
-        int lineNumber;
-        int level;
-        ostringstream messageStream;
+        ostringstream messageStream_;
 };
 
 #endif

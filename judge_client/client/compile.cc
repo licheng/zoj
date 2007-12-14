@@ -24,6 +24,7 @@
 #include <sys/wait.h>
 
 #include "args.h"
+#include "logging.h"
 #include "trace.h"
 #include "util.h"
 
@@ -36,6 +37,7 @@ int doCompile(int fdSocket, const string& sourceFilename) {
     sendReply(fdSocket, COMPILING);
     string command =
         ARG_root + "/script/compile.sh '" + sourceFilename + "'";
+    LOG(INFO)<<"Command: "<<command;
     int fdPipe[2];
     if (pipe(fdPipe) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to create pipe";
@@ -54,6 +56,7 @@ int doCompile(int fdSocket, const string& sourceFilename) {
     pid_t pid = createShellProcess(command.c_str(), info);
     close(fdPipe[1]);
     if (pid < 0) {
+        LOG(INFO)<<"Compilation failed";
         close(fdPipe[0]);
         sendReply(fdSocket, INTERNAL_ERROR);
         return -1;
@@ -67,23 +70,27 @@ int doCompile(int fdSocket, const string& sourceFilename) {
         return -1;
     }
     int status;
-    waitpid(pid, &status, 0);
+    while (waitpid(pid, &status, 0) < 0) {
+        if (errno != EINTR) {
+            LOG(SYSCALL_ERROR);
+            return INTERNAL_ERROR;
+        }
+    }
     if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Command "<<command<<" terminated by signal "<<WTERMSIG(status);
+        LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
         sendReply(fdSocket, INTERNAL_ERROR);
         return -1;
     }
     status = WEXITSTATUS(status);
     if (status) {
-        if (status == -1) {
-            LOG(ERROR)<<"Command "<<command<<" failed";
+        if (status >= 126) {
+            LOG(INFO)<<"Compilation failed";
             sendReply(fdSocket, INTERNAL_ERROR);
-            return -1;
         } else {
             LOG(INFO)<<"Compilation error";
             sendReply(fdSocket, COMPILATION_ERROR);
-            return -1;
         }
+        return -1;
     }
     return 0;
 }

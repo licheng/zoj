@@ -27,8 +27,10 @@ using namespace std;
 // Runs the specified program.
 // Returns 0 if execution succeeded, or -1 on error.
 int doRun(int fdSocket,
+          const string& programName,
           const string& sourceFileType,
-          const string& stdinFilename,
+          const string& inputFilename,
+          const string& programOutputFilename,
           int timeLimit,
           int memoryLimit,
           int outputLimit);

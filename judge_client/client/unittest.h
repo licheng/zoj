@@ -26,6 +26,9 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/ui/text/TestRunner.h>
 
+class TestFixture : public CppUnit::TestFixture {
+};
+
 #define TEST(name) \
     class __ ## name ## Test: public CPPUNIT_NS::TestCase {\
         CPPUNIT_TEST_SUITE(__ ## name ## Test);\
@@ -50,6 +53,9 @@
     CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(__ ## name ## _ ## method,\
                                           "alltest");\
     void __ ## name ## _ ## method::test()
+
+#define ASSERT_EQUAL CPPUNIT_ASSERT_EQUAL
+#define ASSERT CPPUNIT_ASSERT
 
 int main() {
     CPPUNIT_NS::TextUi::TestRunner runner;

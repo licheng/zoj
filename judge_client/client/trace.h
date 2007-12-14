@@ -28,14 +28,14 @@
 class TraceCallback {
     public:
         TraceCallback():
-            result(-1),
-            timeConsumption(0),
-            memoryConsumption(0) {
-            TraceCallback::instance = this;
+            result_(-1),
+            timeConsumption_(0),
+            memoryConsumption_(0) {
+            TraceCallback::instance_ = this;
         }
 
         virtual ~TraceCallback() {
-            TraceCallback::instance = NULL;
+            TraceCallback::instance_ = NULL;
         }
 
         virtual int onClone() {
@@ -53,36 +53,36 @@ class TraceCallback {
         virtual void onError();
 
         int getResult() const {
-            return this->result;
+            return result_;
         }
 
         void setResult(int result) {
-            this->result = result;
+            result_ = result;
         }
 
         double getTimeConsumption() const {
-            return this->timeConsumption;
+            return timeConsumption_;
         }
 
         int getMemoryConsumption() const {
-            return this->memoryConsumption;
+            return memoryConsumption_;
         }
 
         int hasExited() const {
-            return result >= 0 && result != RUNNING;
+            return result_ >= 0 && result_ != RUNNING;
         }
 
         static TraceCallback* getInstance() {
-            return TraceCallback::instance;
+            return TraceCallback::instance_;
         }
 
     protected:
-        int result;
-        double timeConsumption;
-        int memoryConsumption;
+        int result_;
+        double timeConsumption_;
+        int memoryConsumption_;
 
     private:
-        static TraceCallback* instance;
+        static TraceCallback* instance_;
 };
 
 class ExecutiveCallback: public TraceCallback {

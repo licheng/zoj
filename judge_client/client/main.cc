@@ -170,6 +170,30 @@ int saveFile(int fdSocket, const string& outputFilename, size_t size) {
     return 0;
 }
 
+int readSourceFilename(int fdSocket, string* sourceFilename) {
+    unsigned short size;
+    if (readn(fdSocket, &size, 2) < 2) {
+        LOG(ERROR)<<"Fail to read the length of the source file path";
+        sendReply(fdSocket, INVALID_DATA_SIZE);
+        return -1;
+    }
+    size = ntohs(size);
+    char path[PATH_MAX + 1];
+    if (readn(fdSocket, path, size) < size) {
+        LOG(ERROR)<<"Fail to read the source file path";
+        sendReply(fdSocket, INVALID_DATA);
+        return -1;
+    }
+    path[size] = 0;
+    if (access(path, F_OK) == -1) {
+        LOG(ERROR)<<"Fail to access the source file at "<<path;
+        sendReply(fdSocket, INVALID_DATA);
+        return -1;
+    }
+    *sourceFilename = path;
+    return 0;
+}
+
 int saveSourceFile(int fdSocket, const string& sourceFileName) {
     unsigned short size;
     if (readn(fdSocket, &size, 2) < 2) {
@@ -267,9 +291,17 @@ void process(int fdSocket) {
                             problemId,
                             sourceFileType.c_str(),
                             version);
-    LOG(INFO)<<"Saving source file";
-    if (saveSourceFile(fdSocket, "src") == -1) {
-        return;
+    string sourceFilename = "prob." + sourceFileType;
+    if (isLocalHost(ARG_queue_address)) {
+        LOG(INFO)<<"Reading source file path";
+        if (readSourceFilename(fdSocket, &sourceFilename) == -1) {
+            return;
+        }
+    } else {
+        LOG(INFO)<<"Saving source file";
+        if (saveSourceFile(fdSocket, sourceFilename) == -1) {
+            return;
+        }
     }
 
     string problemDir = StringPrintf("../../prob/%u/%u", problemId, version);
@@ -315,10 +347,12 @@ void process(int fdSocket) {
             LOG(ERROR)<<"Invalid test case "<<testcase;
             sendReply(fdSocket, INVALID_TESTCASE);
         } else {
-            doCompile(fdSocket, "src") == 0 &&
+            doCompile(fdSocket, sourceFilename) == 0 &&
             doRun(fdSocket,
+                  "prob",
                   sourceFileType,
                   inputFilename,
+                  "out",
                   timeLimit,
                   memoryLimit,
                   outputLimit) == 0 &&

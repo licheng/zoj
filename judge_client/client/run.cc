@@ -122,15 +122,16 @@ int monitor(int fdSocket,
 
 int runExe(int fdSocket,
             const string& exeFilename,
-            const string& stdinFilename,
-            const string& stdoutFilename,
+            const string& inputFilename,
+            const string& programOutputFilename,
             int timeLimit,
             int memoryLimit,
             int outputLimit) {
+    LOG(INFO)<<"Running";
     const char* commands[] = {exeFilename.c_str(), exeFilename.c_str(), NULL};
     StartupInfo info;
-    info.stdinFilename = stdinFilename.c_str();
-    info.stdoutFilename = stdoutFilename.c_str();
+    info.stdinFilename = inputFilename.c_str();
+    info.stdoutFilename = programOutputFilename.c_str();
     info.uid = ARG_uid;
     info.gid = ARG_gid;
     info.timeLimit = timeLimit;
@@ -141,6 +142,7 @@ int runExe(int fdSocket,
     info.trace = 1;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
+        LOG(ERROR)<<"Fail to execute the program";
         return INTERNAL_ERROR;
     }
     ExecutiveCallback callback;
@@ -154,17 +156,19 @@ inline int isNativeExe(const string& sourceFileType) {
 }
 
 int doRun(int fdSocket,
+          const string& programName,
           const string& sourceFileType,
-          const string& stdinFilename,
+          const string& inputFilename,
+          const string& programOutputFilename,
           int timeLimit,
           int memoryLimit,
           int outputLimit) {
     int result;
     if (isNativeExe(sourceFileType)) {
         result = runExe(fdSocket,
-                        "exe",
-                        stdinFilename,
-                        "out",
+                        programName,
+                        inputFilename,
+                        programOutputFilename,
                         timeLimit,
                         memoryLimit,
                         outputLimit);

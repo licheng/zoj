@@ -31,11 +31,11 @@
 #include "logging.h"
 #include "util.h"
 
-TraceCallback* TraceCallback::instance;
+TraceCallback* TraceCallback::instance_;
 
 int TraceCallback::onExecve() {
-    if (this->result < 0) {
-        this->result = RUNNING;
+    if (result_ < 0) {
+        result_ = RUNNING;
         return 1;
     } else {
         return 0;
@@ -43,60 +43,66 @@ int TraceCallback::onExecve() {
 }
 
 void TraceCallback::onMemoryLimitExceeded() {
-    this->result = MEMORY_LIMIT_EXCEEDED;
+    result_ = MEMORY_LIMIT_EXCEEDED;
 }
 
 void TraceCallback::onExit(pid_t pid) {
-    this->timeConsumption = readTimeConsumption(pid);
-    this->memoryConsumption = readMemoryConsumption(pid);
-    this->result = 0;
+    timeConsumption_ = readTimeConsumption(pid);
+    memoryConsumption_ = readMemoryConsumption(pid);
+    result_ = 0;
 }
 
 void TraceCallback::onSIGCHLD(pid_t pid) {
     int status;
     while (waitpid(pid, &status, 0) < 0) {
         if (errno != EINTR) {
-            this->result = INTERNAL_ERROR;
+            LOG(SYSCALL_ERROR);
+            result_ = INTERNAL_ERROR;
             return;
         }
     }
-    switch (this->result) {
+    switch (result_) {
         case -1:
             // Before the first execve is invoked.
-            this->result = INTERNAL_ERROR;
+            result_ = INTERNAL_ERROR;
             break;
         case RUNNING:
             switch (WTERMSIG(status)) {
                 case SIGXCPU:
-                    this->result = TIME_LIMIT_EXCEEDED;
+                    LOG(INFO)<<"Time limit exceeded";
+                    result_ = TIME_LIMIT_EXCEEDED;
                     break;
                 case SIGSEGV:
-                    this->result = SEGMENTATION_FAULT;
+                    LOG(INFO)<<"Segmentation fault";
+                    result_ = SEGMENTATION_FAULT;
                     break;
                 case SIGXFSZ:
-                    this->result = OUTPUT_LIMIT_EXCEEDED;
+                    LOG(INFO)<<"Output limit exceeded";
+                    result_ = OUTPUT_LIMIT_EXCEEDED;
                     break;
                 case SIGFPE:
-                    this->result = FLOATING_POINT_ERROR;
+                    LOG(INFO)<<"Floating point error";
+                    result_ = FLOATING_POINT_ERROR;
                     break;
                 case SIGKILL:
-                    this->result = RUNTIME_ERROR;
+                    LOG(INFO)<<"Runtime error";
+                    result_ = RUNTIME_ERROR;
                     break;
                 default:
                     LOG(ERROR)<<"Unexpected signal "<<WTERMSIG(status);
-                    this->result = INTERNAL_ERROR;
+                    result_ = INTERNAL_ERROR;
             }
             break;
     }
 }
 
 void TraceCallback::onError() {
-    this->result = INTERNAL_ERROR;
+    result_ = INTERNAL_ERROR;
 }
 
 void ExecutiveCallback::onExit(pid_t pid) {
-    this->timeConsumption = readTimeConsumption(pid);
-    this->memoryConsumption = readMemoryConsumption(pid);
+    timeConsumption_ = readTimeConsumption(pid);
+    memoryConsumption_ = readMemoryConsumption(pid);
 }
 
 static void sigchldHandler(int sig, siginfo_t* siginfo, void* context) {
@@ -130,7 +136,7 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
     } else {
         LOG(ERROR)<<"Unexpected syscall "<<syscall;
         TraceCallback::getInstance()->onError();
-       kmmon_kill(pid);
+        kmmon_kill(pid);
     }
 }
 

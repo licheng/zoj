@@ -29,7 +29,6 @@
 #include <unistd.h>
 
 #include "judge_result.h"
-#include "logging.h"
 
 using namespace std;
 

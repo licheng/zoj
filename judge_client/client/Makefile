@@ -33,7 +33,7 @@ judge_client: $(OBJS) -lkmmon
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(UNITTESTS): %_unittest : %.o %_unittest.o -lcppunit -lkmmon
-compile_unittest: params.o util.o trace.o
+util_unittest: args.o util.o trace.o logging.o
 
 $(UNITTEST_RUNS): %.run : %
 	@echo -n "Running $<: "

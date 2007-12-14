@@ -38,7 +38,11 @@ int setLimit(int resource, unsigned int limit) {
     struct rlimit t;
     t.rlim_max = limit + 1;
     t.rlim_cur = limit;
-    return setrlimit(resource, &t);
+    if (setrlimit(resource, &t) == -1) {
+        LOG(SYSCALL_ERROR);
+        return -1;
+    }
+    return 0;
 }
 
 double readTimeConsumption(int pid) {
