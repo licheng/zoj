@@ -1,0 +1,772 @@
+html, body {
+    font-family: Arial, Helvetica, Verdana, sans-serif;
+    line-height: 1.4;
+    font-size: 12px;
+    background-color: #FFFFFF;
+    padding: 0px;
+    margin: 0px;
+}
+
+table {
+    font-size: 12px;
+}
+div {
+    font-size: 12px;
+}
+span {
+    font-size: 12px;
+}
+.username	{ COLOR: #db6d00; FONT-WEIGHT: BOLD }
+
+A:link		{ COLOR: blue; TEXT-DECORATION: none }
+A:visited	{ COLOR: blue; TEXT-DECORATION: none }
+A:active	{ COLOR: blue; TEXT-DECORATION: none }
+A:hover		{ COLOR: red; TEXT-DECORATION: none }
+
+.button	{ width: 70px }
+
+
+
+#page
+{
+	width: 100%;
+	margin: 0;
+	
+}
+
+#container
+{
+	clear: both;
+	float: left;
+	width: 100%;
+	text-align: left;
+	padding: 0;
+	margin: 0;
+}
+
+#header
+{
+	float: left;
+	width: 100%;
+	padding: 0;
+	border-width: 0;
+	background-color: #6EB9F3;
+	text-align: center;
+}
+
+#loginbar
+{
+	float: left;
+	width: 100%;
+	height: 32px;
+	vertical-align: middle;
+	padding: 0;
+	border-width: 0;
+	background-image: url(../image/link_bg2.gif);
+	background-repeat: repeat-x;
+	border-top: 3 solid #FFFFFF;
+}
+
+#loginbar .welcome_msg
+{
+	float: left;
+	padding: 6 10;
+	border-width: 0;
+	font-size: 15px;
+	color: #FFFFFF;
+}
+
+
+
+#loginbar .login_info
+{
+	float: right;
+	padding: 6 10;
+	border-width: 0;
+	font-size: 12px;
+	color: #FFFFFF;
+}
+
+
+#loginbar a
+{
+	color: #ffffff;
+}
+#loginbar a:hover
+{
+	color: #ff9900;
+}
+
+#minibar
+{
+	float: left;
+	width: 100%;
+
+}
+
+#menus
+{
+	height: 34px;
+	border-width: 0;
+	font-size: 15px;
+	color: #333333;
+	background-image: url(../image/link_bg1.gif);
+	background-repeat: repeat-x;
+	border-top: 4 solid #FFFFFF;
+	padding: 5 10;
+
+}
+
+
+#minibar a:link, #minibar a:visited, #minibar a:active
+{
+	color: #333333;
+}
+#minibar a:hover
+{
+	color: #ff9900;
+}
+#minibar a:link.selected, #minibar a:visited.selected, #minibar a:active.selected
+{
+	color: #db6d00;
+}
+#minibar a:hover.selected
+{
+	color: #ff9900;
+}
+
+#main
+{
+	float: left;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	border-top: 8 solid #FFFFFF;
+	
+}
+
+
+#leftnav
+{
+	width: 169px;
+    height: 100%;
+
+}
+
+.nav_header
+{
+    padding: 0px 10px;
+    height: 29px;
+	width: 100%;
+	background-image: url(../image/buttonbg1.gif);
+}
+.nav_header img
+{
+    float: right;
+    border: 0;
+
+}
+
+.selected_item
+{
+    padding: 0px 10px;
+    height: 29px;
+	width: 100%;
+	background-color: #eca044;
+}
+
+.item
+{
+    padding: 0px 10px;
+    height: 29px;
+	width: 100%;
+	background-color: #738EDE;
+}
+
+.icpc_logo
+{
+    background-color: #738EDE;
+    text-align: center;
+    padding: 10px;
+	width: 100%;
+	vertical-align: bottom;
+}
+
+#leftnav a
+{
+	color: #ffffff;
+}
+#leftnav a:hover
+{
+	color: #ff9900;
+}
+
+#leftnav .selected_item a
+{
+	color: #333333;
+}
+#leftnav .selected_item a:hover
+{
+	color: #333333;
+}
+
+#content
+{
+	float: left;
+	width: 100%;		
+}
+
+#content_title
+{
+    background-color: eeeeee;
+    font-size: 16px;
+    font-weight: bold;
+    float: left;
+	clear: left;
+	width: 100%;
+	padding: 4 0;
+    text-indent: 5px;
+}
+
+#export
+{
+    float: right;
+	clear: none;
+	font-weight: normal;
+	padding: 0px 10px;
+}
+
+#content_body
+{
+	float: left;
+	clear: left;
+	margin: 0;
+	width: 100%;
+    height: 100%;
+    
+    
+}
+
+
+
+
+#footer
+{
+	float: left;
+	width: 100%;
+	padding: 0;
+	border-width: 0;
+	text-align: center;
+}
+
+
+#pageNumber
+{
+  width: 40;
+}
+
+#totalPages
+{
+  color: ED7805;
+}
+
+.pageFooter
+{
+    float: none;
+    clear: both;
+	width: 500;
+	border-width: 0;
+	padding: 5;
+}
+
+#pageInput
+{
+
+  width: 50%;
+  float: left;
+
+}
+#pageNave
+{
+    width: 50%;
+    text-align: center;
+}
+
+.internalError
+{
+    height: 30px;
+    padding: 10;
+    font-size: 20;
+    color: red;
+}
+
+.error
+{
+    font-size: 11;
+    color: red;
+}
+
+
+.profileTable input, .profileTable select
+{
+    width: 150px;
+}
+
+
+.profileFields
+{
+    list-style: none;
+    
+}
+
+.profileFields li
+{
+    padding: 1 5;
+    clear: left;
+    float: none;
+}
+
+.profileFieldName
+{
+    clear: left;
+    float: left;
+    width: 150px;
+    text-align: right;
+    padding: 0 5;
+}
+
+.profileField
+{
+    height: 23px;
+    padding: 0 5;
+}
+
+.profileButtons
+{
+    padding: 10 100;
+    width: 600px;
+    text-align: center;
+}
+
+.profileButton
+{
+    float: left;
+    padding: 0 20 0 20;
+    text-align: center;
+}
+
+
+.profileField input, .profileField select
+{
+    width: 150px;
+}
+
+
+
+.contestFields
+{
+    list-style: none;
+}
+
+.contestFields li
+{
+    padding: 3
+}
+
+.contestFieldName
+{
+    clear: left;
+    float: left;
+    width: 150px;
+    text-align: right;
+    padding: 3
+}
+
+.contestFieldHeader
+{
+    font-size: 12;
+    font-weight: bold;
+    clear: left;
+    float: left;
+    width: 150px;
+    text-align: right;
+    padding: 3
+}
+
+.contestField
+{
+
+}
+
+.contestButtons
+{
+    padding: 10 100;
+    width: 500px;
+    text-align: center;
+}
+
+.contestButton
+{
+    float: left;
+    padding: 0 20 0 20;
+    text-align: center;
+}
+
+
+.contestField input, .contestField select
+{
+    width: 150px;
+}
+
+
+.list
+{
+    width: 100%;
+    border: 1px;
+    border-collapse: separate;
+}
+
+.rowHeader
+{
+    height: 25px;
+    background-color: #CCCCFF;
+    width: 100%;
+}
+
+
+
+.rowOdd
+{
+    height: 25px;
+    background-color: #FFFFFF;
+}
+
+.rowEven
+{
+    height: 25px;
+    background-color: #E9EFF8;
+}
+
+.roleName
+{
+    padding: 0 8 0 8;
+    font-size: 14;    
+}
+.roleDescription
+{
+    padding: 0 8 0 8;    
+}
+
+.roleAdmin
+{
+    padding: 0 8 0 8;    
+}
+
+.roleNameHeader
+{
+    padding: 0 8 0 8;
+    font-size: 14;
+    width: 150px;
+}
+
+.roleDescriptionHeader
+{
+    padding: 0 8 0 8;
+    
+}
+
+.roleAdminHeader
+{
+    padding: 0 8 0 8;
+    width: 100px;
+}
+
+.contestName
+{
+    padding: 0 8 0 8;
+    font-size: 14;
+}
+
+.contestStatus
+{
+    padding: 0 8 0 8;
+    width: 220px;
+}
+
+.contestNameHeader
+{
+    padding: 0 8 0 8;
+}
+
+.contestStatusHeader
+{
+    padding: 0 8 0 8;
+    width: 220px;
+}
+
+.contestInfo
+{
+  width: 160;
+  height: 30;
+  font-weight: bold;
+  padding: 0 0 0 30;
+}
+
+.contestInfoTable
+{
+  font-size: 16px;
+  width: 98%;
+  border: 10;
+  padding: 30 30 30 30;
+}
+
+
+
+.user_name
+{
+    float: left;
+    font-weight: bold;
+	color: #DB6D00;
+}
+
+.runId
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runSubmitTime
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runJudgeStatus
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runProblemId
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runLanguage
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runTime
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runMemory
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runUserName
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.runAdmin
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+
+.problemColor
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 30px;
+}
+.problemSolved
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 40px;
+}
+.problemId
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+.problemTitle
+{
+    padding: 0 8 0 8;
+    text-align: left;
+}
+.problemStatus
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 100px;
+}
+.problemAdmin
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+.statisticsProblem
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.statisticsAC
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.statisticsAC
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsWA
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsPE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.statisticsTLE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsRTE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsFPE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsSF
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsOLE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+.statisticsMLE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.statisticsCE
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.statisticsSubmit
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.statisticsSummaryRow
+{
+    height: 25px;
+    background-color: #E0E0F0;
+}
+
+
+.ranklistRank
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+.ranklistUser
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 100px;
+}
+
+
+.ranklistSolved
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+.ranklistProblem
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
+
+.ranklistPenalty
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+.bigProblemTitle
+{
+    font-size: 24px;
+    color: blue;
+    text-align: center
+}
+
+
+
+
+.message
+{
+    padding: 10px 0px;
+    font-size: 16px;
+    font-weight: bold;
+    color: red
+}
+
+.back
+{
+    padding: 10px 0px;
+}
+
+
+.dateLink a:link, .dateLink a:visited, .dateLink a:active
+{
+	color: blue;
+}
+.dateLink a:hover
+{
+	color: #ff9900;
+}
+
+.judgeReplyAC
+{
+    color: red;
+}
+.judgeReplyOther
+{
+    color: green;
+}
+
+.userSearchSelectBox
+{ 
+width:120px; 
+} 

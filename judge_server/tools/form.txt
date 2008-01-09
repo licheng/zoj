@@ -1,0 +1,13 @@
+Trade
+isLong
+StockSymbol
+lotId
+OpenTransactionDate
+OpenTransactionExecutionPrice
+OpenTransactionAmount
+CloseTransactionDate
+CloseTransactionExecution Price
+CloseTransactionAmount
+ExecutionQuantity
+NetProfit
+NetProfitPerShareTraded

@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+
+<project name="Online Review" default="compile" basedir=".">
+
+    <!-- alter values to match your deployment -->
+    <property name="tomcat_path" value="d:\jboss\server\default\deploy" />
+
+    <property name="package" value="cn.edu.zju.acm.onlinejudge" />
+    <property name="packagedir" value="cn/edu/zju/acm/onlinejudge" />
+    <property name="contest_path" value="onlinejudge" />
+
+    <property name="srcdir" value="src" />
+    <property name="libdir" value="lib" />
+    <property name="docsdir" value="docs" />
+    <property name="configdir" value="conf" />
+    <property name="configdirremote" value="conf_remote" />
+    <property name="testlogdir" value="log" />
+    <property name="testfiles" value="test_files" />
+    <property name="webdir" value="web" />
+    <property name="deploydir" value="deploy" />
+    <property name="javadocsdir" value="${docsdir}/javadocs" />
+    <property name="checkstyledir" value="${docsdir}/checks" />
+
+    <property name="javamain" value="${srcdir}/main" />
+    <property name="javatests" value="${srcdir}/tests" />
+
+    <property name="builddir" value="build" />
+    <property name="build_classdir" value="${builddir}/classes" />
+    <property name="build_testclassdir" value="${builddir}/testClasses" />
+    <property name="build_distdir" value="${builddir}/dist" />
+
+    <property name="warfile" value="${deploydir}/${contest_path}.war" />
+    <property name="remotewarfile" value="${deploydir}/${contest_path}_remote.war" />
+
+    <property name="message_resources.name" value="MessageResources.properties" />
+    <property name="struts_config.name" value="struts-config.xml" />
+    <property name="tiles_config.name" value="tiles-config.xml" />
+    <property name="data_source.properties.name" value="data_source.properties" />
+    <property name="log4j.properties.name" value="log4j.properties" />
+
+
+
+    <!-- checkstyle -->
+    <property name="checkstyle.jar" value="${checkstyledir}/checkstyle-all-3.4.jar" />
+    <property name="checkstyle.xml" value="${checkstyledir}/zojdev.xml" />
+
+    <!-- for compilation -->
+    <property name="struts.jar.name" value="struts.jar" />
+    <property name="struts.jar" value="${libdir}/${struts.jar.name}" />
+
+    <!-- for testing only -->
+    <property name="junit.jar.name" value="junit.jar" />
+    <property name="junit.jar" value="${libdir}/${junit.jar.name}" />
+
+    <!-- for deployment only -->
+    <property name="mysql_connector.jar.name" value="mysql-connector-java-3.1.10-bin.jar" />
+    <property name="mysql_connector.jar" value="${libdir}/${mysql_connector.jar.name}" />
+    <property name="antlr.jar.name" value="antlr.jar" />
+    <property name="antlr.jar" value="${libdir}/${antlr.jar.name}" />
+    <property name="commons_beanutils.jar.name" value="commons-beanutils.jar" />
+    <property name="commons_beanutils.jar" value="${libdir}/${commons_beanutils.jar.name}" />
+    <property name="commons_digester.jar.name" value="commons-digester.jar" />
+    <property name="commons_digester.jar" value="${libdir}/${commons_digester.jar.name}" />
+    <property name="commons_io.jar.name" value="commons-io.jar" />
+    <property name="commons_io.jar" value="${libdir}/${commons_io.jar.name}" />
+    <property name="commons_fileupload.jar.name" value="commons-fileupload.jar" />
+    <property name="commons_fileupload.jar" value="${libdir}/${commons_fileupload.jar.name}" />
+    <property name="commons_logging.jar.name" value="commons-logging.jar" />
+    <property name="commons_logging.jar" value="${libdir}/${commons_logging.jar.name}" />
+    <property name="commons_validator.jar.name" value="commons-validator.jar" />
+    <property name="commons_validator.jar" value="${libdir}/${commons_validator.jar.name}" />
+    <property name="jakata_oro.jar.name" value="jakarta-oro.jar" />
+    <property name="jakata_oro.jar" value="${libdir}/${jakata_oro.jar.name}" />
+    <property name="servlet-api.jar.name" value="servlet-api.jar" />
+    <property name="servlet-api.jar" value="${libdir}/${servlet-api.jar.name}" />
+    <property name="commons-dbcp-1.2.jar.name" value="commons-dbcp-1.2.jar" />
+    <property name="commons-dbcp-1.2.jar" value="${libdir}/${commons-dbcp-1.2.jar.name}" />
+    <property name="commons-pool-1.2.jar.name" value="commons-pool-1.2.jar" />
+    <property name="commons-pool-1.2.jar" value="${libdir}/${commons-pool-1.2.jar.name}" />
+    <property name="commons-collections.jar.name" value="commons-collections.jar" />
+    <property name="commons-collections.jar" value="${libdir}/${commons-collections.jar.name}" />
+    <property name="log4j-1.2.11.jar.name" value="log4j-1.2.11.jar" />
+    <property name="log4j-1.2.11.jar" value="${libdir}/${log4j-1.2.11.jar.name}" />
+    <property name="poi.jar.name" value="poi-2.5.1.jar" />
+    <property name="poi.jar" value="${libdir}/${poi.jar.name}" />
+
+
+
+    <path id="buildlibs">
+        <pathelement location="${struts.jar}" />
+        <pathelement location="${servlet-api.jar}" />
+        <pathelement location="${commons-dbcp-1.2.jar}" />
+        <pathelement location="${log4j-1.2.11.jar}" />
+        <pathelement location="${poi.jar}" />
+        <pathelement location="${commons_io.jar}" />
+    </path>
+
+    <target name="clean">
+        <delete dir="${builddir}" />
+        <delete dir="${testlogdir}" />
+        <delete dir="${deploydir}" />
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${build_classdir}" />
+        <javac srcdir="${javamain}" destdir="${build_classdir}" includes="${packagedir}/**" debug="true" verbose="no">
+            <classpath refid="buildlibs" />
+        </javac>
+    </target>
+
+    <taskdef resource="checkstyletask.properties" classpath="${checkstyle.jar}" />
+    <target name="checkstyle" depends="compile">
+        <mkdir dir="${testlogdir}" />
+        <checkstyle config="${checkstyle.xml}" classpath="${build_classdir}">
+            <fileset dir="${javamain}" includes="**/*.java" />
+            <formatter type="plain" toFile="${testlogdir}/checkstyle.txt" />
+        </checkstyle>
+    </target>
+
+    <target name="javadoc" depends="compile">
+        <mkdir dir="${javadocsdir}" />
+        <javadoc packagenames="${package}.*"
+            sourcepath="${javamain}"
+            classpath="${build_classdir}"
+            classpathref="buildlibs"
+            destdir="${javadocsdir}"
+            windowtitle="ZJU Online Judge"
+            verbose="no" />
+    </target>
+
+    <target name="makewar" depends="compile">
+        <mkdir dir="${deploydir}" />
+        <war warfile="${warfile}"
+            webxml="${configdir}/web.xml">
+            <fileset dir="${webdir}" />
+
+            <classes dir="${build_classdir}" includes="**" />
+
+            <classes dir="${configdir}" includes="${message_resources.name}" />
+            
+            <classes dir="${configdir}" includes="${data_source.properties.name}" />
+            <classes dir="${configdir}" includes="oj.conf" />
+            <classes dir="${configdir}" includes="${log4j.properties.name}" />
+
+            <!--
+            <classes dir="${configdir}" includes="log4j.properties" />
+            -->
+
+            <webinf dir="${configdir}" includes="*.xml" />
+            <webinf dir="${configdir}" includes="*.tld" />
+
+            <lib dir="${libdir}" includes="${struts.jar.name}" />
+            <lib dir="${libdir}" includes="${antlr.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_beanutils.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_digester.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_io.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_fileupload.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_logging.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_validator.jar.name}" />            
+            <lib dir="${libdir}" includes="${commons-dbcp-1.2.jar.name}" />
+            <lib dir="${libdir}" includes="${commons-pool-1.2.jar.name}" />
+            <lib dir="${libdir}" includes="${commons-collections.jar.name}" />
+            <lib dir="${libdir}" includes="${poi.jar.name}" />
+            <lib dir="${libdir}" includes="${log4j-1.2.11.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_validator.jar.name}" />
+            <lib dir="${libdir}" includes="${mysql_connector.jar.name}" />
+            <lib dir="${libdir}" includes="${jakata_oro.jar.name}" />
+
+
+        </war>
+    </target>
+
+    <target name="makewar_remote" depends="compile">
+        <mkdir dir="${deploydir}" />
+        <war warfile="${remotewarfile}"
+            webxml="${configdir}/web.xml">
+            <fileset dir="${webdir}" />
+
+            <classes dir="${build_classdir}" includes="**" />
+
+            <classes dir="${configdir}" includes="${message_resources.name}" />
+            <classes dir="${configdirremote}" includes="${data_source.properties.name}" />
+            <classes dir="${configdirremote}" includes="${log4j.properties.name}" />
+            <classes dir="${configdirremote}" includes="oj.conf" />
+            <!--
+            <classes dir="${configdir}" includes="log4j.properties" />
+            -->
+
+            <webinf dir="${configdirremote}" includes="${struts_config.name}" />
+            <webinf dir="${configdir}" includes="${tiles_config.name}" />
+            <webinf dir="${configdir}" includes="*.tld" />
+
+
+
+            <lib dir="${libdir}" includes="${struts.jar.name}" />
+            <lib dir="${libdir}" includes="${antlr.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_beanutils.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_digester.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_io.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_fileupload.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_logging.jar.name}" />
+            <lib dir="${libdir}" includes="${commons_validator.jar.name}" />            
+            <lib dir="${libdir}" includes="${commons-dbcp-1.2.jar.name}" />
+            <lib dir="${libdir}" includes="${commons-pool-1.2.jar.name}" />
+            <lib dir="${libdir}" includes="${commons-collections.jar.name}" />
+            <lib dir="${libdir}" includes="${poi.jar.name}" />
+
+<!--
+            <lib dir="${libdir}" includes="${log4j-1.2.9.jar.name}" />
+-->
+
+            <lib dir="${libdir}" includes="${commons_validator.jar.name}" />
+            <lib dir="${libdir}" includes="${mysql_connector.jar.name}" />
+            <lib dir="${libdir}" includes="${jakata_oro.jar.name}" />
+
+
+        </war>
+    </target>
+
+    <target name="deploywar" depends="makewar">
+        <copy file="${warfile}" todir="${tomcat_path}" />
+    </target>
+
+    <target name="deployremote" depends="makewar_remote">
+  <scp file="remotewarfile"
+       todir="root@10.10.2.253:/opt/jboss/server/default/deploy/"
+
+       passphrase="ver2.0fromob"
+  />
+
+
+    </target>
+
+
+    <target name="pack" depends="clean">
+        <jar jarfile="zojdev.jar"
+             basedir="."
+             includes="**" />
+    </target>
+
+</project>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE form-validation PUBLIC "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.0//EN" "http://jakarta.apache.org/commons/dtds/validator_1_0.dtd">
+
+<form-validation>
+  <formset>
+  
+    <form name="LoginForm">
+      <field property="handle" depends="required">
+        <msg name="required" key="LoginForm.handle.required"/>
+      </field>
+      <field property="password" depends="required">
+        <msg name="required" key="LoginForm.password.required"/>
+      </field>
+    </form>  
+  </formset>
+</form-validation>

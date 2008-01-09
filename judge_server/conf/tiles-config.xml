@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+          "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+          "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+<tiles-definitions>
+    <definition name="default"
+                path="/layouts/default.jsp">
+        <put name="header"
+             value="/layouts/header.jsp">
+        </put>
+        <put name="loginbar"
+             value="/layouts/loginbar.jsp">
+        </put>
+        <put name="minibar"
+             value="/layouts/minibar.jsp">
+        </put>
+        <put name="footer"
+             value="/layouts/footer.jsp">
+        </put>
+        <put name="title"
+             value="Welcome to"
+             direct="true">
+        </put>
+    </definition>
+    <definition name="home.default"
+                extends="default">
+        <put name="leftnav"
+             value="/layouts/homenav.jsp">
+        </put>
+        <put name="title"
+             value="Home -"
+             direct="true">
+        </put>
+    </definition>
+    <definition name="contest.default"
+                extends="default">
+        <put name="leftnav"
+             value="/layouts/contestnav.jsp">
+        </put>
+        <put name="title"
+             value="Contests -"
+             direct="true">
+        </put>
+    </definition>
+    <definition name="problem.default"
+                extends="default">
+        <put name="leftnav"
+             value="/layouts/problemnav.jsp">
+        </put>
+        <put name="title"
+             value="Problems -"
+             direct="true">
+        </put>
+    </definition>
+    <definition name="forum.default"
+                extends="default">
+        <put name="leftnav"
+             value="/layouts/forumnav.jsp">
+        </put>
+        <put name="title"
+             value="Forums -"
+             direct="true">
+        </put>
+    </definition>
+    <definition name="admin.default"
+                extends="default">
+        <put name="leftnav"
+             value="/layouts/adminnav.jsp">
+        </put>
+        <put name="title"
+             value="Admin -"
+             direct="true">
+        </put>
+    </definition>
+</tiles-definitions>
