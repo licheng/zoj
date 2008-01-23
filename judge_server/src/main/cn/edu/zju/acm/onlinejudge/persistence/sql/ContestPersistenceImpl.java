@@ -43,7 +43,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	
 	
 	/**
-	 * The statment to get the contest limit id.
+	 * The statement to get the contest limit id.
 	 */
 	private static final String GET_CONTEST_LIMIT_ID = 
 		MessageFormat.format("SELECT {0} FROM {1} WHERE {2}=?", 
@@ -54,7 +54,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	
 	   
 	/**
-	 * The statment to update problem limit id.
+	 * The statement to update problem limit id.
 	 */
 	private static final String UPDATE_PROBLEM_LIMIT = 
 		MessageFormat.format("UPDATE {0} SET {1}=? WHERE WHERE {2}=? AND {3}=?", 
@@ -65,7 +65,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	
 	
     /**
-     * The statment to get the default limit.
+     * The statement to get the default limit.
      */
     private static final String SELECT_DEFAULT_LIMIT = 
         MessageFormat.format("SELECT {0}, {1}, {2}, {3}, {4} FROM {5} WHERE {0}=" + DEFAULT_LIMIT_ID , 
@@ -78,7 +78,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
                
     
 	/**
-	 * The statment to create a Contest.
+	 * The statement to create a Contest.
 	 */
 	private static final String INSERT_CONTEST = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13})"
@@ -99,7 +99,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
                                            DatabaseConstants.CONTEST_CHECK_IP});
 	
 	/**
-	 * The statment to update a Contest.
+	 * The statement to update a Contest.
 	 */
 	private static final String UPDATE_CONTEST = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, "
@@ -118,7 +118,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 				  						   DatabaseConstants.CONTEST_CONTEST_ID}); 
 	
 	/**
-	 * The statment to delete a contest.
+	 * The statement to delete a contest.
 	 */
 	private static final String DELETE_CONTEST = 
 		MessageFormat.format("UPDATE {0} SET {1}=0, {2}=?, {3}=? WHERE {4}=?", 
@@ -154,7 +154,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	
 
 	/**
-	 * The statment to create a Limit.
+	 * The statement to create a Limit.
 	 */
 	private static final String INSERT_LIMIT = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}) VALUES(?, ?, ?, ?)", 
@@ -165,7 +165,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 				  						   DatabaseConstants.LIMITS_SUBMISSION_LIMIT});
 	
 	/**
-	 * The statment to update a Limit.
+	 * The statement to update a Limit.
 	 */
 	private static final String UPDATE_LIMIT = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=? WHERE {5}=?", 
@@ -190,7 +190,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	
 	
 	/**
-	 * The statment to create a contest-language reference.
+	 * The statement to create a contest-language reference.
 	 */
 	private static final String INSERT_CONTEST_LANGUAGE = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}) VALUES(?, ?)", 
@@ -199,7 +199,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 				  						   DatabaseConstants.CONTEST_LANGUAGE_LANGUAGE_ID});
 
 	/**
-	 * The statment to delete the contest-language references.
+	 * The statement to delete the contest-language references.
 	 */
 	private static final String DELETE_CONTEST_LANGUAGE = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 
@@ -208,7 +208,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 
 	
 	/**
-	 * The statment to create a language.
+	 * The statement to create a language.
 	 */
 	private static final String INSERT_LANGUAGE = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", 
@@ -224,7 +224,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_DATE}); 
     
 	/**
-	 * The statment to update a language.
+	 * The statement to update a language.
 	 */
 	private static final String UPDATE_LANGUAGE = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=? WHERE {7}=?", 
@@ -238,7 +238,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 				  						   DatabaseConstants.LANGUAGE_LANGUAGE_ID}); 
 
 	/**
-	 * The statment to delete a language.
+	 * The statement to delete a language.
 	 */
 	private static final String DELETE_LANGUAGE_CONTEST = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 
@@ -246,14 +246,14 @@ public class ContestPersistenceImpl implements ContestPersistence {
 										   DatabaseConstants.CONTEST_LANGUAGE_LANGUAGE_ID}); 
 	
 	/**
-	 * The statment to delete a language.
+	 * The statement to delete a language.
 	 */
 	private static final String DELETE_LANGUAGE = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 
 				 new Object[] {DatabaseConstants.LANGUAGE_TABLE, 
 							   DatabaseConstants.LANGUAGE_LANGUAGE_ID});	
 	/**
-	 * The statment to delete a language.
+	 * The statement to delete a language.
 	 */
 	private static final String DELETE_SUBMISSION = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 

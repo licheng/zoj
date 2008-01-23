@@ -32,7 +32,7 @@ import java.util.List;
 public class ForumPersistenceImpl implements ForumPersistence {
 	
 	/**
-	 * The statment to create a forum.
+	 * The statement to create a forum.
 	 */
 	private static final String INSERT_FORUM = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}) VALUES(?, ?, ?, ?, ?, ?, 1)", 
@@ -45,7 +45,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_DATE,				  						   
 				  						   DatabaseConstants.FORUM_ACTIVE}); 
 	/**
-	 * The statment to update a forum.
+	 * The statement to update a forum.
 	 */
 	private static final String UPDATE_FORUM = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=? WHERE {5}=?", 
@@ -57,7 +57,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				  						   DatabaseConstants.FORUM_FORUM_ID}); 
 	
 	/**
-	 * The statment to delete a forum.
+	 * The statement to delete a forum.
 	 */
 	private static final String DELETE_FORUM = 
 		MessageFormat.format("UPDATE {0} SET {1}=0, {2}=?, {3}=? WHERE {4}=?", 
@@ -91,7 +91,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 	
 	
 	/**
-	 * The statment to create a thread.
+	 * The statement to create a thread.
 	 */
 	private static final String INSERT_THREAD = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}) VALUES(?, ?, ?, ?, ?, ?, ?, 1)", 
@@ -105,7 +105,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_DATE,
 				  						   DatabaseConstants.THREAD_ACTIVE}); 
 	/**
-	 * The statment to update a thread.
+	 * The statement to update a thread.
 	 */
 	private static final String UPDATE_THREAD = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=? WHERE {6}=?", 
@@ -118,7 +118,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				  						   DatabaseConstants.THREAD_THREAD_ID}); 
 	
 	/**
-	 * The statment to delete a thread.
+	 * The statement to delete a thread.
 	 */
 	private static final String DELETE_THREAD = 
 		MessageFormat.format("UPDATE {0} SET {1}=0, {2}=?, {3}=? WHERE {4}=?", 
@@ -153,7 +153,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				   					       DatabaseConstants.THREAD_ACTIVE});
 	
 	/**
-	 * The statment to create a post.
+	 * The statement to create a post.
 	 */
 	private static final String INSERT_POST = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}) VALUES(?, ?, ?, ?, ?, ?, ?, 1)", 
@@ -167,7 +167,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_DATE,
 				  						   DatabaseConstants.POST_ACTIVE}); 
 	/**
-	 * The statment to update a post.
+	 * The statement to update a post.
 	 */
 	private static final String UPDATE_POST = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=? WHERE {6}=?", 
@@ -180,7 +180,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
 				  						   DatabaseConstants.POST_POST_ID}); 
 	
 	/**
-	 * The statment to delete a post.
+	 * The statement to delete a post.
 	 */
 	private static final String DELETE_POST = 
 		MessageFormat.format("UPDATE {0} SET {1}=0, {2}=?, {3}=? WHERE {4}=?", 

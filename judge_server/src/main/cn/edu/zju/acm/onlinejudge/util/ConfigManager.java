@@ -1,7 +1,11 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Properties;
 
 public class ConfigManager {
@@ -44,6 +48,41 @@ public class ConfigManager {
     
     public static String getImagePath() {
         return getValue("image_path");
+    }
+    
+    public static EmailTemplate getEmailTemplate(String name) throws ConfigurationException, IOException {
+    	if (name == null) {
+    		throw new IllegalArgumentException("name should not be null");
+    	}
+    	if (name.trim().length() == 0) {
+    		throw new IllegalArgumentException("name should not be empty");
+    	}
+    	
+    	String title = getValue(name + "_title");
+    	if (title == null) {
+    		throw new ConfigurationException(name + "_title is missing");
+    	}
+    	
+    	String replyTo = getValue(name + "_replyTo");
+    	
+    	String templateFile = getValue(name + "_templateFile");
+    	if (templateFile == null) {
+    		throw new ConfigurationException(name + "_templateFile is missing");
+    	}
+    	
+    	StringBuilder content = new StringBuilder();
+    	FileReader reader = new FileReader(templateFile);
+    	char[] buffer = new char[10240];
+    	for (;;) {
+    		int l = reader.read(buffer, 0, 10240);
+    		if (l == -1) {
+    			break;
+    		}
+    		content.append(buffer, 0, l);
+    	}
+    	
+    	return new EmailTemplate(title, replyTo, content.toString());
+
     }
         
 }

@@ -36,7 +36,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 	
 	
 	/**
-	 * The statment to get the contest limit id.
+	 * The statement to get the contest limit id.
 	 */
 	private static final String GET_CONTEST_LIMIT_ID = 
 		MessageFormat.format("SELECT {0} FROM {1} WHERE {2}=?", 
@@ -47,11 +47,11 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 	
 	
 	/**
-	 * The statment to create a Problem.
+	 * The statement to create a Problem.
 	 */
 	private static final String INSERT_PROBLEM = 
-		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14})"
-				+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)", 
+		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15})"
+				+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)", 
 							 new Object[] {DatabaseConstants.PROBLEM_TABLE, 				  						   
 				  						   DatabaseConstants.PROBLEM_CONTEST_ID,
 				  						   DatabaseConstants.PROBLEM_TITLE,
@@ -66,17 +66,18 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 				  						   DatabaseConstants.CREATE_DATE,
 				  						   DatabaseConstants.LAST_UPDATE_USER,
 				  						   DatabaseConstants.LAST_UPDATE_DATE,				  						   
-				  						   DatabaseConstants.CONTEST_ACTIVE});
+				  						   DatabaseConstants.CONTEST_ACTIVE,
+				  						   DatabaseConstants.PROBLEM_COLOR});
 	
 	
 	
 	
 	/**
-	 * The statment to update a Problem.
+	 * The statement to update a Problem.
 	 */
 	private static final String UPDATE_PROBLEM = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, "
-				+ "{9}={9}+1, {10}=?, {11}=?, {12}={12}+1 WHERE {13}=?", 
+				+ "{9}={9}+1, {10}=?, {11}=?, {12}={12}+1, {13}=? WHERE {14}=?", 
 							 new Object[] {DatabaseConstants.PROBLEM_TABLE,  
 										   DatabaseConstants.PROBLEM_CONTEST_ID,
 										   DatabaseConstants.PROBLEM_TITLE,
@@ -90,10 +91,11 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_USER,
 				  						   DatabaseConstants.LAST_UPDATE_DATE,
 				  						   DatabaseConstants.PROBLEM_REVISION,
+				  						   DatabaseConstants.PROBLEM_COLOR,
 				  						   DatabaseConstants.PROBLEM_PROBLEM_ID}); 
 	
 	/**
-	 * The statment to delete a problem.
+	 * The statement to delete a problem.
 	 */
 	private static final String DELETE_PROBLEM = 
 		MessageFormat.format("UPDATE {0} SET {1}=CONCAT({2}, {1}), {3}=CONCAT({2}, {3}), " +
@@ -154,7 +156,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 	
 	
 	/**
-	 * The statment to create a Limit.
+	 * The statement to create a Limit.
 	 */
 	private static final String INSERT_LIMIT = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}) VALUES(?, ?, ?, ?)", 
@@ -165,7 +167,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 				  						   DatabaseConstants.LIMITS_SUBMISSION_LIMIT});
 	
 	/**
-	 * The statment to update a Limit.
+	 * The statement to update a Limit.
 	 */
 	private static final String UPDATE_LIMIT = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=? WHERE {5}=?", 
@@ -249,6 +251,8 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
             ps.setTimestamp(11, new Timestamp(new Date().getTime()));
             ps.setLong(12, user);
             ps.setTimestamp(13, new Timestamp(new Date().getTime()));
+            ps.setString(14, problem.getColor());
+            
             ps.executeUpdate();                                               
             problem.setId(Database.getLastId(conn, ps, rs));   
             
@@ -322,7 +326,8 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
             
             ps.setLong(9, user);
             ps.setTimestamp(10, new Timestamp(new Date().getTime()));
-            ps.setLong(11, problem.getId());
+            ps.setString(11, problem.getColor());
+            ps.setLong(12, problem.getId());
             ps.executeUpdate();                                                              
             
             conn.commit();

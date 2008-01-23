@@ -43,7 +43,7 @@ import java.util.List;
 public class SubmissionPersistenceImpl implements SubmissionPersistence {
 		    
 	/**
-	 * The statment to create a Submission.
+	 * The statement to create a Submission.
 	 */
 	private static final String INSERT_SUBMISSION = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}," +
@@ -66,7 +66,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.SUBMISSION_ACTIVE});
 	
 	/**
-	 * The statment to update a Submission.
+	 * The statement to update a Submission.
 	 */
 	private static final String UPDATE_SUBMISSION = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, "
@@ -87,7 +87,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.SUBMISSION_SUBMISSION_ID}); 
 	
 	/**
-	 * The statment to delete a submission.
+	 * The statement to delete a submission.
 	 */
 	private static final String INACTIVE_SUBMISSION = 
 		MessageFormat.format("UPDATE {0} SET {1}=0, {2}=?, {3}=? WHERE {4}=?", 
@@ -159,7 +159,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 										   DatabaseConstants.PROBLEM_ACTIVE});
 	
 	/**
-	 * The statment to create a judge_reply.
+	 * The statement to create a judge_reply.
 	 */
 	private static final String INSERT_JUDGE_REPLY = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", 
@@ -175,7 +175,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_DATE}); 
     
 	/**
-	 * The statment to update a judge_reply.
+	 * The statement to update a judge_reply.
 	 */
 	private static final String UPDATE_JUDGE_REPLY = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=? WHERE {7}=?", 
@@ -189,14 +189,14 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.JUDGE_REPLY_JUDGE_REPLY_ID}); 
 	
 	/**
-	 * The statment to delete a judge_reply.
+	 * The statement to delete a judge_reply.
 	 */
 	private static final String DELETE_JUDGE_REPLY = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 
 				 new Object[] {DatabaseConstants.JUDGE_REPLY_TABLE, 
 							   DatabaseConstants.JUDGE_REPLY_JUDGE_REPLY_ID});	
 	/**
-	 * The statment to delete a judge_reply.
+	 * The statement to delete a judge_reply.
 	 */
 	private static final String DELETE_SUBMISSION = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 
@@ -1043,6 +1043,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 
         
     }
+    
     public List searchQQs(long contestId) throws PersistenceException {
         Connection conn = null;
         PreparedStatement ps = null;

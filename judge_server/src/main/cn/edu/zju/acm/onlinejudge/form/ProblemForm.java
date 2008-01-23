@@ -97,7 +97,8 @@ public class ProblemForm extends ActionForm implements Serializable {
      */
     private boolean specialJudge = false;
     
-
+    private String color = null;
+    
     private FormFile description = null;
     private FormFile inputData = null;
     private FormFile outputData = null;
@@ -408,7 +409,8 @@ public class ProblemForm extends ActionForm implements Serializable {
         this.memoryLimit = String.valueOf(limit.getMemoryLimit());
         this.submissionLimit = String.valueOf(limit.getSubmissionLimit());
         this.outputLimit = String.valueOf(limit.getOutputLimit());
-                
+        this.color = problem.getColor();
+
     }
     
     public Problem toProblem() throws ParseException, NumberFormatException, PersistenceException {
@@ -438,8 +440,16 @@ public class ProblemForm extends ActionForm implements Serializable {
         problem.setLimit(limit);
         problem.setChecker(specialJudge);
 
- 
+        problem.setColor(color);
         return problem;
     }
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
 
 }

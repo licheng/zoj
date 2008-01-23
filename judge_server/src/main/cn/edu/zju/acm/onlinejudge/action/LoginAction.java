@@ -4,6 +4,8 @@
 package cn.edu.zju.acm.onlinejudge.action;
 
 
+import javax.servlet.http.Cookie;
+
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -59,8 +61,8 @@ public class LoginAction extends BaseAction {
     		
     	LoginForm loginForm = (LoginForm) form;    	
     	String forwardPath = context.getRequest().getParameter("forward");
-    	    	
-    	if (loginForm.getHandle() == null) {    		
+
+    	if (loginForm.getHandle() == null) {
     		context.setAttribute("forward", forwardPath);
     		return handleSuccess(mapping, context, "failure");
     	}    	    	
@@ -69,8 +71,20 @@ public class LoginAction extends BaseAction {
     	if (errors.size() > 0) {
     		context.setAttribute("forward", forwardPath);
     		return handleFailure(mapping, context, errors);
-    	}    	     	    	    	
-    	    	
+    	}    	     	
+    	
+    	/*
+    	if (loginForm.isRememberMe()) {
+    		 Cookie ch = new Cookie("oj_handle", loginForm.getHandle());
+    		 ch.setMaxAge(3600 * 24 * 30);
+    		 context.getResponse().addCookie(ch);
+    		 
+    		 Cookie cp = new Cookie("oj_password", loginForm.getPassword());
+    		 cp.setMaxAge(3600 * 24 * 30);
+    		 context.getResponse().addCookie(cp);
+    	} 
+    	 */
+    	
     	if (forwardPath != null) {    		    		
     		return handleSuccess(new ActionForward(forwardPath, true), context, forwardPath);
     	}

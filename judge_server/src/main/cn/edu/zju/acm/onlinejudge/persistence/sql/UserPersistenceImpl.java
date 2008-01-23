@@ -49,7 +49,7 @@ public class UserPersistenceImpl implements UserPersistence {
 												
 	
 	/**
-	 * The statment to create a user.
+	 * The statement to create a user.
 	 */
 	private static final String INSERT_USER = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, " +
@@ -88,7 +88,7 @@ public class UserPersistenceImpl implements UserPersistence {
 	
 	
 	/**
-	 * The statment to update a user.
+	 * The statement to update a user.
 	 */
 	private static final String UPDATE_USER = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=MD5(?), {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, {9}=?, " +
@@ -121,7 +121,7 @@ public class UserPersistenceImpl implements UserPersistence {
 				  						   DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
 
 	/**
-	 * The statment to delete a thread.
+	 * The statement to delete a thread.
 	 */
 	private static final String DELETE_USER = 
 		MessageFormat.format("UPDATE {0} SET {1}=0, {2}=?, {3}=? WHERE {4}=?", 
@@ -210,7 +210,7 @@ public class UserPersistenceImpl implements UserPersistence {
 	
 	
     /**
-	 * The statment to create a user preference.
+	 * The statement to create a user preference.
 	 */
 	private static final String INSERT_USER_PREFERENCE = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}) " +
@@ -229,7 +229,7 @@ public class UserPersistenceImpl implements UserPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_USER,
 				  						   DatabaseConstants.LAST_UPDATE_DATE}); 
 	/**
-	 * The statment to update a user preference.
+	 * The statement to update a user preference.
 	 */
 	private static final String UPDATE_USER_PREFERENCE = 
 		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, {9}=? " +
@@ -264,7 +264,7 @@ public class UserPersistenceImpl implements UserPersistence {
 	
 	
 	/**
-	 * The statment to create a confirmation code.
+	 * The statement to create a confirmation code.
 	 */
 	private static final String INSERT_CODE = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}) VALUES(?, ?)", 
@@ -273,7 +273,16 @@ public class UserPersistenceImpl implements UserPersistence {
 				  						   DatabaseConstants.CONFIRMATION_CODE});
 	
 	/**
-	 * The statment to delete a confirmation code.
+	 * The statement to update a confirmation code.
+	 */
+	private static final String UPDATE_CODE = 
+		MessageFormat.format("UPDATE {0} SET {1}=? WHERE {2}=?", 
+							 new Object[] {DatabaseConstants.CONFIRMATION_TABLE, 
+				  						   DatabaseConstants.CONFIRMATION_CODE,
+				  						   DatabaseConstants.CONFIRMATION_USER_PROFILE_ID});
+	
+	/**
+	 * The statement to delete a confirmation code.
 	 */
 	private static final String DELETE_CODE = 
 		MessageFormat.format("DELETE FROM {0} WHERE {1}=?", 
@@ -893,10 +902,16 @@ public class UserPersistenceImpl implements UserPersistence {
         try {
         	conn = Database.createConnection();        	
 	
-            ps = conn.prepareStatement(INSERT_CODE);  
-            ps.setLong(1, id);
-            ps.setString(2, code);
-            ps.executeUpdate();            
+        	ps = conn.prepareStatement(UPDATE_CODE);
+        	ps.setString(1, code);
+        	ps.setLong(2, id);
+        	int row = ps.executeUpdate();
+        	if (row == 0) {
+	            ps = conn.prepareStatement(INSERT_CODE);  
+	            ps.setLong(1, id);
+	            ps.setString(2, code);
+	            ps.executeUpdate();            
+        	}
             
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create code.", e);
