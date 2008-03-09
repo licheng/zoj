@@ -33,10 +33,10 @@
 #include "util.h"
 
 // The uid for executing the program to be judged
-DEFINE_ARG(int, uid, "");
+DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
 
 // The uid for executing the program to be judged
-DEFINE_ARG(int, gid, "");
+DEFINE_ARG(int, gid, "The uid for executing the program to be judged");
 
 int sendRunningMessage(int fdSocket,
                        double timeConsumption,

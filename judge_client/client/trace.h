@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 #include "judge_result.h"
 
 class TraceCallback {
@@ -38,11 +40,13 @@ class TraceCallback {
             TraceCallback::instance_ = NULL;
         }
 
-        virtual int onClone() {
-            return 0;
+        virtual bool onClone() {
+            return false;
         }
 
-        virtual int onExecve();
+        virtual bool onExecve();
+
+        virtual bool onOpen(const string& path, int flags);
 
         virtual void onMemoryLimitExceeded();
 

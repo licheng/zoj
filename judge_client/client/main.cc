@@ -51,16 +51,18 @@
 
 // The root directory which contains problems, scripts and working directory of
 // the client
-DEFINE_ARG(string, root, "");
+DEFINE_ARG(string, root, "The root directory of the client");
 
 // The ip address of the queue service to which this client connects
-DEFINE_ARG(string, queue_address, "");
+DEFINE_ARG(string, queue_address, "The ip address of the queue service to which"
+                                  "this client connects");
 
 // The port of the queue service to which this client connects
-DEFINE_ARG(int, queue_port, "");
+DEFINE_ARG(int, queue_port, "The port of the queue service to which this client"
+                            "connects");
 
 // All languages supported by this client
-DEFINE_ARG(string, lang, "");
+DEFINE_ARG(string, lang, "All programming languages supported by this client");
 
 #define MAX_TIME_LIMIT 300
 #define MAX_MEMORY_LIMIT (1024 * 1024)

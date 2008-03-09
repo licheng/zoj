@@ -26,7 +26,7 @@
 DECLARE_ARG(string, root);
 
 // If true, all logs are written to stderr as well
-DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "");
+DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to stderr as well");
 
 #define MAX_LOG_FILE_SIZE 262144 // 256KB
 

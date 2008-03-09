@@ -165,6 +165,15 @@ void SplitString(const string& str, char separator, vector<string>* output);
 
 string StringPrintf(const char *format, ...);
 
+static inline bool StringStartsWith(const string& s, const string& prefix) {
+    return prefix.size() <= s.size() && s.substr(0, prefix.size()) == prefix;
+}
+
+static inline bool StringEndsWidth(const string& s, const string& suffix) {
+    return suffix.size() <= s.size() &&
+        s.substr(s.size() - suffix.size()) == suffix;
+}
+
 static inline int isFlagsReadOnly(int flags) {
     return !((flags & O_WRONLY) == O_WRONLY ||
              (flags & O_RDWR) == O_RDWR ||

@@ -60,6 +60,6 @@ CreateDir working 750
 # Prepare /log
 CreateDir log 750
 
-cmd="bin/judge --lang=$supported_source_file_types $*"
+cmd="./judge_client --lang=$supported_source_file_types $*"
 echo $cmd
-#eval $cmd
+eval $cmd

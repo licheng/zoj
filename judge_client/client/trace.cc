@@ -33,12 +33,12 @@
 
 TraceCallback* TraceCallback::instance_;
 
-int TraceCallback::onExecve() {
+bool TraceCallback::onExecve() {
     if (result_ < 0) {
         result_ = RUNNING;
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
@@ -73,6 +73,7 @@ void TraceCallback::onSIGCHLD(pid_t pid) {
                     result_ = TIME_LIMIT_EXCEEDED;
                     break;
                 case SIGSEGV:
+                case SIGBUS:
                     LOG(INFO)<<"Segmentation fault";
                     result_ = SEGMENTATION_FAULT;
                     break;
@@ -100,6 +101,26 @@ void TraceCallback::onError() {
     result_ = INTERNAL_ERROR;
 }
 
+bool TraceCallback::onOpen(const string& path, int flags) {
+    if ((flags & O_WRONLY) == O_WRONLY ||
+        (flags & O_RDWR) == O_RDWR ||
+        (flags & O_CREAT) == O_CREAT ||
+        (flags & O_APPEND) == O_APPEND) {
+        return false;
+    }
+    if (path.empty()) {
+        return false;
+    }
+    if (path[0] == '/' || path[0] == '.') {
+        if (!(StringStartsWith(path, "/proc/") ||
+              StringEndsWidth(path, ".so") ||
+              StringEndsWidth(path, ".a"))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ExecutiveCallback::onExit(pid_t pid) {
     timeConsumption_ = readTimeConsumption(pid);
     memoryConsumption_ = readMemoryConsumption(pid);
@@ -111,24 +132,64 @@ static void sigchldHandler(int sig, siginfo_t* siginfo, void* context) {
     }
 }
 
+int readStringFromTracedProcess(pid_t pid,
+                                int address,
+                                char* buffer,
+                                int maxLength) {
+    for (int i = 0; i < maxLength; i += 4) {
+        int data;
+        if (kmmon_readmem(pid, address + i, &data) < 0) {
+            return -1;
+        }
+        char* p = (char*) &data;
+        for (int j = 0; j < 4; j++, p++) {
+            if (*p && i + j < maxLength) {
+                buffer[i + j] = *p;
+            } else {
+                buffer[i + j] = 0;
+                return 0;
+            }
+        }
+    }
+    buffer[maxLength] = 0;
+    return 0;
+}
+
 static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
-    if (!TraceCallback::getInstance()) {
+    TraceCallback* callback = TraceCallback::getInstance();
+    if (!callback) {
         return;
     }
     pid_t pid = siginfo->si_pid;
     int syscall = siginfo->si_value.sival_int;
     if (syscall == SYS_exit || syscall == SYS_exit_group) {
-        TraceCallback::getInstance()->onExit(pid);
+        callback->onExit(pid);
         kmmon_continue(pid);
     } else if (syscall == SYS_brk) {
-        TraceCallback::getInstance()->onMemoryLimitExceeded();
+        callback->onMemoryLimitExceeded();
         kmmon_kill(pid);
     } else if (syscall == SYS_clone ||
                syscall == SYS_fork ||
                syscall == SYS_vfork) {
-        TraceCallback::getInstance()->onClone();
+        callback->onClone();
     } else if (syscall == SYS_execve) {
-        if (TraceCallback::getInstance()->onExecve()) {
+        if (callback->onExecve()) {
+            kmmon_continue(pid);
+        } else {
+            kmmon_kill(pid);
+        }
+    } else if (syscall == SYS_open) {
+        char buffer[PATH_MAX + 1];
+        int address, flags;
+        if (kmmon_getreg(pid, EBX, &address) < 0 ||
+            kmmon_getreg(pid, ECX, &flags) < 0) {
+            LOG(ERROR)<<"Fail to read register values from traced process";
+            callback->onError();
+        } else if (readStringFromTracedProcess(
+                    pid, address, buffer, sizeof(buffer)) < 0) {
+            LOG(ERROR)<<"Fail to read memory from traced process";
+            callback->onError();
+        } else if (callback->onOpen(buffer, flags)) {
             kmmon_continue(pid);
         } else {
             kmmon_kill(pid);
