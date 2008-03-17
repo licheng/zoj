@@ -75,6 +75,7 @@ class LogFile {
             }
             if (ARG_logtostderr) {
                 fprintf(stderr, "%s", message.c_str());
+                fflush(stderr);
             }
         }
     }

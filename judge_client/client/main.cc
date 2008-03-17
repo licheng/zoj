@@ -51,7 +51,7 @@
 
 // The root directory which contains problems, scripts and working directory of
 // the client
-DEFINE_ARG(string, root, "The root directory of the client");
+DECLARE_ARG(string, root);
 
 // The ip address of the queue service to which this client connects
 DEFINE_ARG(string, queue_address, "The ip address of the queue service to which"
@@ -373,7 +373,7 @@ void sigtermHandler(int sig) {
     terminated = 1;
 }
 
-int main(int argc, char* argv[]) {
+int execMain(int argc, char* argv[]) {
     if (parseArguments(argc, argv) < 0) {
         return 1;
     }

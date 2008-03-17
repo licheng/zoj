@@ -62,11 +62,25 @@ int monitor(int fdSocket,
     double timeConsumption = 0;
     int memoryConsumption = 0;
     do {
+        struct timespec request, remain;
+        request.tv_sec = 1;
+        request.tv_nsec = 0;
+        while (result < 0 &&
+               !callback.hasExited() &&
+               nanosleep(&request, &remain) < 0) {
+            if (errno != EINTR) {
+                LOG(SYSCALL_ERROR)<<"Fail to sleep";
+                kill(pid, SIGKILL);
+                return INTERNAL_ERROR;
+            }
+            request = remain;
+        }
         double ts;
         int ms;
-        if (callback.getResult() == JUDGING) {
+        if (callback.hasExited()) {
             ts = callback.getTimeConsumption();
             ms = callback.getMemoryConsumption();
+            result = callback.getResult();
         } else {
             ts = readTimeConsumption(pid);
             ms = readMemoryConsumption(pid);
@@ -89,32 +103,13 @@ int monitor(int fdSocket,
         if (result == MEMORY_LIMIT_EXCEEDED) {
             memoryConsumption = memoryLimit + 1;
         }
-        if (result < 0 &&
-            callback.getResult() &&
-            callback.getResult() != RUNNING) {
-            result = callback.getResult();
-        }
         if (sendRunningMessage(fdSocket,
                                timeConsumption,
                                memoryConsumption) == -1) {
             if (!callback.hasExited()) {
                 kill(pid, SIGKILL);
             }
-            result = INTERNAL_ERROR;
-        }
-        struct timespec request, remain;
-        request.tv_sec = 1;
-        request.tv_nsec = 0;
-        while (result < 0 &&
-               !callback.hasExited() &&
-               nanosleep(&request, &remain) < 0) {
-            if (errno != EINTR) {
-                LOG(SYSCALL_ERROR);
-                kill(pid, SIGKILL);
-                result = INTERNAL_ERROR;
-                break;
-            }
-            request = remain;
+            return INTERNAL_ERROR;
         }
     } while (result < 0);
     return result;
@@ -140,12 +135,12 @@ int runExe(int fdSocket,
     info.procLimit = 1;
     info.fileLimit = 5;
     info.trace = 1;
+    ExecutiveCallback callback;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
         LOG(ERROR)<<"Fail to execute the program";
         return INTERNAL_ERROR;
     }
-    ExecutiveCallback callback;
     return monitor(fdSocket, pid, timeLimit, memoryLimit, callback);
 }
 

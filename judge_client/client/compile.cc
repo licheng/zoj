@@ -21,6 +21,7 @@
 
 #include <string>
 
+#include <arpa/inet.h>
 #include <sys/wait.h>
 
 #include "args.h"
@@ -89,6 +90,9 @@ int doCompile(int fdSocket, const string& sourceFilename) {
         } else {
             LOG(INFO)<<"Compilation error";
             sendReply(fdSocket, COMPILATION_ERROR);
+            uint16_t len = htons(count);
+            writen(fdSocket, &len, sizeof(len));
+            writen(fdSocket, errorMessage, count);
         }
         return -1;
     }

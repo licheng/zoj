@@ -138,3 +138,8 @@ int parseArguments(int argc, char* argv[]) {
     }
     return 0;
 }
+
+// The root directory which contains problems, scripts and working directory of
+// the client
+DEFINE_ARG(string, root, "The root directory of the client");
+

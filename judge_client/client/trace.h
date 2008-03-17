@@ -32,7 +32,8 @@ class TraceCallback {
         TraceCallback():
             result_(-1),
             timeConsumption_(0),
-            memoryConsumption_(0) {
+            memoryConsumption_(0),
+            exited_(false) {
             TraceCallback::instance_ = this;
         }
 
@@ -72,8 +73,8 @@ class TraceCallback {
             return memoryConsumption_;
         }
 
-        int hasExited() const {
-            return result_ >= 0 && result_ != RUNNING;
+        bool hasExited() const {
+            return exited_;
         }
 
         static TraceCallback* getInstance() {
@@ -84,6 +85,7 @@ class TraceCallback {
         int result_;
         double timeConsumption_;
         int memoryConsumption_;
+        bool exited_;
 
     private:
         static TraceCallback* instance_;
@@ -91,7 +93,6 @@ class TraceCallback {
 
 class ExecutiveCallback: public TraceCallback {
     public:
-        virtual void onExit(pid_t pid);
 
 };
 

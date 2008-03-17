@@ -95,6 +95,7 @@ void TraceCallback::onSIGCHLD(pid_t pid) {
             }
             break;
     }
+    exited_ = true;
 }
 
 void TraceCallback::onError() {
@@ -121,14 +122,16 @@ bool TraceCallback::onOpen(const string& path, int flags) {
     return true;
 }
 
-void ExecutiveCallback::onExit(pid_t pid) {
-    timeConsumption_ = readTimeConsumption(pid);
-    memoryConsumption_ = readMemoryConsumption(pid);
-}
+static struct sigaction sigchld_act;
 
 static void sigchldHandler(int sig, siginfo_t* siginfo, void* context) {
     if (TraceCallback::getInstance()) {
         TraceCallback::getInstance()->onSIGCHLD(siginfo->si_pid);
+    }
+    if (sigchld_act.sa_sigaction) {
+        sigchld_act.sa_sigaction(sig, siginfo, context);
+    } else if (sigchld_act.sa_handler) {
+        sigchld_act.sa_handler(sig);
     }
 }
 
@@ -157,11 +160,13 @@ int readStringFromTracedProcess(pid_t pid,
 
 static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
     TraceCallback* callback = TraceCallback::getInstance();
+    pid_t pid = siginfo->si_pid;
     if (!callback) {
+        LOG(INFO)<<"No callback instance found";
+        kmmon_continue(pid);
         return;
     }
-    pid_t pid = siginfo->si_pid;
-    int syscall = siginfo->si_value.sival_int;
+    int syscall = siginfo->si_int;
     if (syscall == SYS_exit || syscall == SYS_exit_group) {
         callback->onExit(pid);
         kmmon_continue(pid);
@@ -189,6 +194,7 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
                     pid, address, buffer, sizeof(buffer)) < 0) {
             LOG(ERROR)<<"Fail to read memory from traced process";
             callback->onError();
+            kmmon_kill(pid);
         } else if (callback->onOpen(buffer, flags)) {
             kmmon_continue(pid);
         } else {
@@ -209,4 +215,7 @@ void installHandlers() {
     sigaction(KMMON_SIG, &act, &oact);
     act.sa_sigaction = sigchldHandler;
     sigaction(SIGCHLD, &act, &oact);
+    if (oact.sa_sigaction != sigchldHandler) {
+        sigchld_act = oact;
+    }
 }

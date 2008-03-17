@@ -32,8 +32,12 @@ endif
 judge_client: $(OBJS) -lkmmon
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(UNITTESTS): %_unittest : %.o %_unittest.o -lcppunit -lkmmon
-util_unittest: args.o util.o trace.o logging.o
+$(UNITTESTS): %_unittest : %.o %_unittest.o -lcppunit
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+util_unittest: args.o util.o trace.o logging.o -lkmmon
+compile_unittest: args.o util.o trace.o logging.o -lkmmon
+run_unittest: args.o util.o trace.o logging.o -lkmmon
 
 $(UNITTEST_RUNS): %.run : %
 	@echo -n "Running $<: "
