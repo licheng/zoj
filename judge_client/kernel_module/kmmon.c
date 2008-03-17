@@ -62,22 +62,18 @@ asmlinkage int (*old_fork)(struct pt_regs);
 asmlinkage int (*old_vfork)(struct pt_regs);
 asmlinkage unsigned long (*old_brk)(unsigned long);
 
-void suicide(void) {
+asmlinkage void suicide(void) {
     send_sig(SIGKILL, current, 1);
 }
 
-struct kmmon_siginfo {
-    struct siginfo info;
-    int data;
-};
-
-int notify_tracer(int syscall) {
-    struct siginfo info;
+asmlinkage int notify_tracer(int syscall) {
     struct task_struct* p = current;
+    struct siginfo info;
     info.si_signo = KMMON_SIG;
+    info.si_int = syscall;
+    info.si_code = SI_QUEUE;
     info.si_pid = p->pid;
     info.si_uid = p->uid;
-    info.si_value.sival_int = syscall;
     for (;;) {
         struct task_struct* q = p->parent;
         if (q == NULL) {
@@ -98,6 +94,7 @@ int notify_tracer(int syscall) {
     while (current->exit_code == KMMON_SIG) {
         current->state = TASK_STOPPED;
         schedule();
+        printk("wake up\n");
     }
     return current->exit_code;
 }
@@ -109,36 +106,39 @@ void asm_stuff(void) {
         ".globl new_int80\n"
         ".align 4,0x90\n"
 "new_int80:\n"
-        "pushl %%ebx;"
+        "pushl %%ebx;" // save EBX
         "movl %%esp, %%ebx;"
-        "andl %0, %%ebx;"
-        "movl %c1(%%ebx), %%ebx;"
-        "andl %2, %c3(%%ebx);"
-        "jz normal;"
-        "movl %4, %%ebx;"
-        "movl 0(%%ebx, %%eax), %%ebx;"
-        "andl $3, %%ebx;"
-        "jz normal;"
-        "jnp disable;"
-        "pushl %%eax;"
+        "andl %0, %%ebx;" // get the address of struct thread_info
+        "movl %c1(%%ebx), %%ebx;" // get the address of struct task
+        "andl %2, %c3(%%ebx);" // test if KMMON_MASK is set in task->flags
+        "jz normal;" // if not, jump to normal syscall
+        "movl %4, %%ebx;" // load the address of syscall_filter_table
+        "movl 0(%%ebx, %%eax), %%ebx;" // load the status of current syscall in
+                                       // syscall_filter_table
+        "andl $3, %%ebx;" 
+        "jz normal;" // 0 means enabled
+        "jnp disable;" // Not 0, only can be 1 or 3. If the parity flag is not
+                       // set, it should have odd number of 1s in the result,
+                       // which is 1. Jump to disable.
         "pushl %%ecx;"
         "pushl %%edx;"
         "pushl %%esi;"
         "pushl %%edi;"
-        "call notify_tracer;"
-        "andl $-1, %%eax;"
+        "pushl %%eax;"
+        "call notify_tracer;" // notify the tracer
+        "andl $-1, %%eax;" // test if the return valud is 0
+        "popl %%eax;"
         "popl %%edi;"
         "popl %%esi;"
         "popl %%edx;"
         "popl %%ecx;"
-        "popl %%eax;"
-        "jz normal;"
+        "jz normal;" // 0 means not killed, jump to normal syscall.
 "disable:\n"
-        "call suicide;"
-        "movl $0x03ff, %%eax;"
+        "call suicide;" // kill the process
+        "movl $0xffff, %%eax;" // set to an invalid syscall
 "normal:\n"
-        "popl %%ebx;"
-        "jmp *%5;"
+        "popl %%ebx;" // restore EBX
+        "jmp *%5;" // jump to original int80
         :
         : "i"(-THREAD_SIZE),
           "i"(&((struct thread_info*)0)->task),
@@ -147,14 +147,6 @@ void asm_stuff(void) {
           "i"(syscall_filter_table),
           "m"(orig_syscall)
     );
-}
-
-inline struct task_struct* find_task(pid_t pid) {
-    struct task_struct* ret;
-    rcu_read_lock();
-    ret = find_task_by_pid(pid);
-    rcu_read_unlock();
-    return ret;
 }
 
 asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long addr, unsigned long data) {
@@ -167,9 +159,10 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
         case KMMON_KILL:
         case KMMON_READMEM:
         case KMMON_GETREG:
-            p = find_task(pid);
+            rcu_read_lock();
+            p = find_task_by_pid(pid);
             if (!p || !(p->flags & KMMON_MASK) || !(p->state & TASK_STOPPED)) {
-                printk(KERN_ERR "Invalid pid: %ld", pid);
+                printk(KERN_ERR "Invalid pid: %ld\n", pid);
                 return -1;
             }
             if (request == KMMON_READMEM) {
@@ -177,15 +170,15 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 struct vm_area_struct *vma;
                 int offset, len, tmp;
                 if (p->mm == NULL) {
-                    printk("Fail to get mm: %ld\n", pid);
+                    printk(KERN_ERR "Fail to get mm: %ld\n", pid);
                     return -1;
                 }
                 if (get_user_pages(p, p->mm, addr, 1, 0, 1, &page, &vma) <= 0) {
-                    printk("Fail to get user pages: %ld, %lx\n", pid, addr);
+                    printk(KERN_ERR "Fail to get user pages: %ld, %lx\n", pid, addr);
                     return -1;
                 }
                 if (PageHighMem(page)) {
-                    printk("High mem page: %ld, %lx\n", pid, addr);
+                    printk(KERN_ERR "High mem page: %ld, %lx\n", pid, addr);
                     return -1;
                 }
                 offset = addr & (PAGE_SIZE - 1);
@@ -198,6 +191,7 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 p->exit_code = request == KMMON_KILL;
                 wake_up_process(p);
             }
+            rcu_read_unlock();
             break;
         default:
             return -1;
@@ -246,7 +240,6 @@ int init(void) {
         printk(KERN_ERR "Fail to find sys_call_table\n");
         return -1;
     }
-    printk(KERN_INFO "sys_call_table: %lx\n", (unsigned long) orign_sys_call_table);
     old_ni_syscall  = orign_sys_call_table[__NR_kmmon];
     old_clone = orign_sys_call_table[__NR_clone];
     old_fork = orign_sys_call_table[__NR_fork];

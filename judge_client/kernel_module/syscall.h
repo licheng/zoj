@@ -18,8 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+// 0: enable
+// 1: disable
+// 3: notify tracer
 static char syscall_filter_table[512] = {
-    1, /*0, restart_syscall*/
+    0, /*0, restart_syscall*/
     3, /*1, exit*/
     1, /*2, fork*/
     0, /*3, read*/
@@ -30,7 +33,7 @@ static char syscall_filter_table[512] = {
     1, /*8, creat*/
     1, /*9, link*/
     1, /*10, unlink*/
-    0, /*11, execve*/
+    3, /*11, execve*/
     1, /*12, chdir*/
     0, /*13, time*/
     1, /*14, mknod*/

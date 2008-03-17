@@ -28,6 +28,6 @@
 #define KMMON_KILL 2
 #define KMMON_READMEM 3
 #define KMMON_GETREG 4
-#define KMMON_SIG 45
+#define KMMON_SIG 51
 
 #endif
