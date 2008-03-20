@@ -172,7 +172,7 @@
         </war>
     </target>
     
-    <target name="deploywar" depends="makewar">
+    <target name="deploy" depends="makewar">
         <copy file="${warfile}" todir="${tomcat_path}" />
     </target>
 
