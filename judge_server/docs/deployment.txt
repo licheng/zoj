@@ -1,0 +1,36 @@
+Database
+1) install MySQL 5.0 or above. The default charset should be UTF8
+2) create a database named zoj, or something else
+3) execute docs/all.sql by
+source ~/zoj-read-only/judge_server/docs/all.sql
+
+
+
+Servlet Container
+You could use Tomcat, JBoss or something else.
+
+Judge Server
+1) Check out zoj source
+svn checkout http://zoj.googlecode.com/svn/trunk/ zoj-read-only
+
+2) modify conf/log4j.properties.
+The log file path need be chagned.
+
+3) modify oj.conf.
+image_path, judge_server, home_url need be changed.
+image_path is the directory containing all problem images.
+judge_server should be in the format of 'host:port:threadNumber'
+home_url will be used in email templates.
+You need configure the smtp if forgotPassword is enabled.
+You could also enable/disable some features if necessary.
+e.g. if the server is for a local contest, you could disable
+problemset, editProfile, register, forgotPassword features
+
+4) modify data_source.properties
+
+5) modify build.xml
+tomcat_path should be changed to correct application deploy path
+
+6) run ant build
+
+Judge Client
