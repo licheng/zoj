@@ -908,7 +908,7 @@ VALUES(101, 'Aborted', 'Aborted', false, 1, NOW(), 1, NOW());
 
 INSERT INTO user_profile(user_profile_id, handle, nickname, password, email_address, reg_date, first_name, last_name, address_line1, address_line2, city, state, country_id, zip_code, phone_number, 
 birth_date, gender, school, major, graduate_student, graduation_year, student_number, active, confirmed, super_admin, create_user, create_date, last_update_user, last_update_date)
-VALUES(1, 'admin', 'admin', password('admin'), 'admin@admin.com', NOW(), 'first', 'last', 'address_line1', 'address_line2', 'city', 'state', 44, 'zip', 'phone', 
+VALUES(1, 'admin', 'admin', MD5('admin'), 'admin@admin.com', NOW(), 'first', 'last', 'address_line1', 'address_line2', 'city', 'state', 44, 'zip', 'phone', 
 NOW(), 'M', NULL, NULL, 0, NULL, NULL, 1, 1, 1, 1, NOW(), 1, NOW());
 
 INSERT INTO user_preference(user_profile_id, plan, problem_paging, submission_paging, status_paging, user_paging, post_paging, thread_paging, create_user, create_date, last_update_user, last_update_date)

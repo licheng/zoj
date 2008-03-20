@@ -133,7 +133,7 @@
 
     <target name="makewar" depends="compile">
         <mkdir dir="${deploydir}" />
-        <war warfile="${warfile}">
+        <war warfile="${warfile}" webxml="${webdir}/web.xml">
             <fileset dir="${webdir}" />
 
             <classes dir="${build_classdir}" includes="**" />
@@ -147,6 +147,7 @@
             <classes dir="${configdir}" includes="log4j.properties" />
             -->
 
+            
             <lib dir="${libdir}" includes="${struts.jar.name}" />
             <lib dir="${libdir}" includes="${mail.jar.name}" />
             <lib dir="${libdir}" includes="${antlr.jar.name}" />
