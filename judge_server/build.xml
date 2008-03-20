@@ -133,24 +133,19 @@
 
     <target name="makewar" depends="compile">
         <mkdir dir="${deploydir}" />
-        <war warfile="${warfile}"
-            webxml="${configdir}/web.xml">
+        <war warfile="${warfile}">
             <fileset dir="${webdir}" />
 
             <classes dir="${build_classdir}" includes="**" />
 
             <classes dir="${configdir}" includes="${message_resources.name}" />
-            
             <classes dir="${configdir}" includes="${data_source.properties.name}" />
-            <classes dir="${configdir}" includes="oj.conf" />
             <classes dir="${configdir}" includes="${log4j.properties.name}" />
-
+            <classes dir="${configdir}" includes="oj.conf" />
+            
             <!--
             <classes dir="${configdir}" includes="log4j.properties" />
             -->
-
-            <webinf dir="${configdir}" includes="*.xml" />
-            <webinf dir="${configdir}" includes="*.tld" />
 
             <lib dir="${libdir}" includes="${struts.jar.name}" />
             <lib dir="${libdir}" includes="${mail.jar.name}" />
