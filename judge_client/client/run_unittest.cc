@@ -29,38 +29,48 @@
 #include "trace.h"
 #include "util.h"
 
-DECLARE_ARG(string, root);
+DEFINE_ARG(string, root, "");
+DEFINE_ARG(int, uid, "");
+DEFINE_ARG(int, gid, "");
 
 class DoRunTest: public TestFixture {
   protected:
     void setUp() {
-        ARG_root = "..";
+        ARG_root = tmpnam(NULL);
+        fn_ = ARG_root + "/" TESTDIR "/output";
+        system(("testdata/create_test_env.sh " + ARG_root).c_str());
         fp_ = tmpfile();
         fd_ = fileno(fp_);
-        tmpnam(fn_);
         installHandlers();
     }
     
     void tearDown() {
+        uninstallHandlers();
         fclose(fp_);
-        unlink(fn_);
+        system(("rm -rf " + ARG_root).c_str());
     }
 
     FILE* fp_;
     int fd_;
-    char fn_[1024];
+    string fn_;
     char buf_[32];
 };
 
 TEST_F(DoRunTest, Success) {
-    ASSERT_EQUAL(0, doRun(fd_, TESTDIR "/ac", "cc", TESTDIR "/a+b.in", fn_,
+    ASSERT_EQUAL(0, doRun(fd_, ARG_root + "/" TESTDIR "/ac", "cc",
+                          ARG_root + "/" TESTDIR "/a+b.in", fn_,
                           10, 1000, 1000));
-    ASSERT(!system(StringPrintf("diff %s " TESTDIR "/a+b.out", fn_).c_str()));
+    ASSERT(!system(StringPrintf("diff %s %s",
+                                (ARG_root + "/" TESTDIR "/a+b.out").c_str(),
+                                fn_.c_str()).c_str()));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(0, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
-    ASSERT_EQUAL(RUNNING, (int)buf_[0]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
+    while (size > 0) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
 }
 
 TEST_F(DoRunTest, TimeLimitExceeded) {
@@ -77,3 +87,64 @@ TEST_F(DoRunTest, TimeLimitExceeded) {
     ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
     ASSERT_EQUAL(TIME_LIMIT_EXCEEDED, (int)buf_[0]);
 }
+
+TEST_F(DoRunTest, MemoryLimitExceeded) {
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/mle", "cc", TESTDIR "/a+b.in", fn_,
+                           10, 1, 1000));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(1, (int)size % 9);
+    lseek(fd_, 0, SEEK_SET);
+    while (size > 9) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(MEMORY_LIMIT_EXCEEDED, (int)buf_[0]);
+}
+
+TEST_F(DoRunTest, OutputLimitExceeded) {
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/ole", "cc", TESTDIR "/a+b.in", fn_,
+                           10, 1000, 1));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(1, (int)size % 9);
+    lseek(fd_, 0, SEEK_SET);
+    while (size > 9) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(OUTPUT_LIMIT_EXCEEDED, (int)buf_[0]);
+}
+
+TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/sigsegv", "cc", TESTDIR "/a+b.in", fn_,
+                           10, 1000, 1000));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(1, (int)size % 9);
+    lseek(fd_, 0, SEEK_SET);
+    while (size > 9) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(SEGMENTATION_FAULT, (int)buf_[0]);
+}
+
+TEST_F(DoRunTest, FloatingPointError) {
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/fpe", "cc", TESTDIR "/a+b.in", fn_,
+                           10, 1000, 1000));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(1, (int)size % 9);
+    lseek(fd_, 0, SEEK_SET);
+    while (size > 9) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(FLOATING_POINT_ERROR, (int)buf_[0]);
+}
+

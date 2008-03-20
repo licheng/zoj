@@ -42,11 +42,12 @@ int kmmon_readmem(pid_t pid, unsigned long addr, int* value);
 } 
 #endif 
 
-#define EBX 0
-#define EAX 1
-#define ECX 2
-#define EDX 3
-#define ESI 4
-#define EDI 5
+#define KMMON_REG_EAX 0
+#define KMMON_REG_EBX 1
+#define KMMON_REG_ECX 2
+#define KMMON_REG_EDX 2
+#define KMMON_REG_ESI 3
+#define KMMON_REG_EDI 4
+#define KMMON_REG_EBP 5
 
 #endif

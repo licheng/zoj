@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
+#include "main.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +52,7 @@
 
 // The root directory which contains problems, scripts and working directory of
 // the client
-DECLARE_ARG(string, root);
+DEFINE_ARG(string, root, "The root directory of the client");
 
 // The ip address of the queue service to which this client connects
 DEFINE_ARG(string, queue_address, "The ip address of the queue service to which"
@@ -64,10 +65,11 @@ DEFINE_ARG(int, queue_port, "The port of the queue service to which this client"
 // All languages supported by this client
 DEFINE_ARG(string, lang, "All programming languages supported by this client");
 
-#define MAX_TIME_LIMIT 300
-#define MAX_MEMORY_LIMIT (1024 * 1024)
-#define MAX_OUTPUT_LIMIT (16 * 1024)
-#define MAX_DATA_FILE_SIZE (16 * 1024)
+// The uid for executing the program to be judged
+DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
+
+// The uid for executing the program to be judged
+DEFINE_ARG(int, gid, "The uid for executing the program to be judged");
 
 // Returns true if the specified file type is supported by the server
 bool isSupportedSourceFileType(const string& sourceFileType) {
@@ -82,7 +84,7 @@ int readHeader(int fdSocket,
                string* sourceFileType,
                unsigned int* problemId,
                unsigned int* version) {
-    unsigned char header[9];
+    unsigned char header[HEADER_SIZE];
     int num = readn(fdSocket, header, sizeof(header));
     if (num < sizeof(header)) {
         LOG(ERROR)<<"Fail to read header";
@@ -92,8 +94,8 @@ int readHeader(int fdSocket,
     const char* sourceFileTypes[] = {"cc", "cpp", "pas", "c", "java", "cs"};
     if (header[0] == 0 ||
         header[0] > sizeof(sourceFileTypes) / sizeof(sourceFileTypes[0])) {
-        LOG(ERROR)<<"Invalid source file type "<<header[0];
-        sendReply(fdSocket, UNSUPPORTED_SOURCE_FILE_TYPE);
+        LOG(ERROR)<<"Invalid source file type "<<(int)header[0];
+        sendReply(fdSocket, INVALID_SOURCE_FILE_TYPE);
         return -1;
     }
     *sourceFileType = sourceFileTypes[header[0] - 1];
@@ -103,7 +105,7 @@ int readHeader(int fdSocket,
         return -1;
     }
     *problemId = ntohl(*(long*)(header + 1));
-    *version = ntohl(*(long*)(header + 5));
+    *version = ntohl(*(long*)(header + 1 + sizeof(*problemId)));
     return 0;
 }
 
@@ -112,7 +114,7 @@ int readTestcase(int fdSocket,
                  unsigned int* timeLimit,
                  unsigned int* memoryLimit,
                  unsigned int* outputLimit) {
-    unsigned char message[9];
+    unsigned char message[TESTCASE_MSG_SIZE];
     int num = readn(fdSocket, message, sizeof(message));
     if (num < sizeof(message)) {
         LOG(ERROR)<<"Fail to read testcase request";
@@ -122,19 +124,19 @@ int readTestcase(int fdSocket,
     *testcase = message[0];
     *timeLimit = ntohs(*(short*)(message + 1));
     if (*timeLimit == 0 || *timeLimit > MAX_TIME_LIMIT) {
-        LOG(ERROR)<<"Invalid time limit"<<*timeLimit;
+        LOG(ERROR)<<"Invalid time limit "<<*timeLimit;
         sendReply(fdSocket, INVALID_TIME_LIMIT);
         return -1;
     }
     *memoryLimit = ntohl(*(long*)(message + 3));
     if (*memoryLimit == 0 || *memoryLimit > MAX_MEMORY_LIMIT) {
-        LOG(ERROR)<<"Invalid memory limit"<<*memoryLimit;
+        LOG(ERROR)<<"Invalid memory limit "<<*memoryLimit;
         sendReply(fdSocket, INVALID_MEMORY_LIMIT);
         return -1;
     }
     *outputLimit = ntohs(*(short*)(message + 7));
     if (*outputLimit == 0 || *outputLimit > MAX_OUTPUT_LIMIT) {
-        LOG(ERROR)<<"Invalid output limit"<<*outputLimit;
+        LOG(ERROR)<<"Invalid output limit "<<*outputLimit;
         sendReply(fdSocket, INVALID_OUTPUT_LIMIT);
         return -1;
     }
@@ -198,7 +200,7 @@ int readSourceFilename(int fdSocket, string* sourceFilename) {
 
 int saveSourceFile(int fdSocket, const string& sourceFileName) {
     unsigned short size;
-    if (readn(fdSocket, &size, 2) < 2) {
+    if (readn(fdSocket, &size, sizeof(size)) < sizeof(size)) {
         LOG(ERROR)<<"Fail to read file size";
         sendReply(fdSocket, INVALID_DATA_SIZE);
         return -1;

@@ -27,18 +27,20 @@
 #include "compile.h"
 #include "judge_result.h"
 
-DECLARE_ARG(string, root);
+DEFINE_ARG(string, root, "");
 
 class DoCompileTest: public TestFixture {
   protected:
     void setUp() {
-        ARG_root = "..";
+        ARG_root = tmpnam(NULL);
+        system(("testdata/create_test_env.sh " + ARG_root).c_str());
         fp_ = tmpfile();
         fd_ = fileno(fp_);
     }
 
     void tearDown() {
         fclose(fp_);
+        system(("rm -rf " + ARG_root).c_str());
     }
 
     FILE* fp_;
@@ -47,7 +49,7 @@ class DoCompileTest: public TestFixture {
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, doCompile(fd_, TESTDIR "/ac.cc"));
+    ASSERT_EQUAL(0, doCompile(fd_, ARG_root +  "/" TESTDIR "/ac.cc"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
@@ -56,7 +58,7 @@ TEST_F(DoCompileTest, Success) {
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, doCompile(fd_, TESTDIR "/ce.cc"));
+    ASSERT_EQUAL(-1, doCompile(fd_, ARG_root + "/" TESTDIR "/ce.cc"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)4, read(fd_, buf_, 4));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);

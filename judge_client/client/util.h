@@ -191,6 +191,7 @@ string getLocalTimeAsString(const char* format);
 
 // Returns true if the address represents the localhost
 static inline bool isLocalHost(const string& address) {
+    return false;
     return address == "127.0.0.1" || address == "localhost";
 }
 

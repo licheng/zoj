@@ -26,7 +26,7 @@
 
 #include "args.h"
 
-DEFINE_OPTIONAL_ARG(string, root, "/tmp", "");
+DEFINE_ARG(string, root, "");
 
 class TestSetLimit : public TestFixture {
   protected:

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "judge_result.h"
 #include "logging.h"
@@ -170,19 +171,19 @@ int compareTextFiles(const string& outputFilename,
     return ret;
 }
 
-int runSpecialJudgeExe(const string& specialJudgeFilename,
+int runSpecialJudgeExe(string specialJudgeFilename,
                        const string& inputFilename,
                        const string& programOutputFilename) {
-    LOG(INFO)<<"Running special judge";
+    LOG(INFO)<<"Running special judge "<<specialJudgeFilename;
     string workingDirectory = 
         specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
-    string relativeProgramOutputFilename =
-        ARG_root + "/working/" + toString(getpid()) + "/" +
-        programOutputFilename;
+    specialJudgeFilename =
+        specialJudgeFilename.substr(workingDirectory.size() + 1);
+    char path[PATH_MAX + 1];
+    getcwd(path, sizeof(path));
     const char* commands[] = {
-        "judge",
-        "judge",
-        relativeProgramOutputFilename.c_str(),
+        specialJudgeFilename.c_str(),
+        specialJudgeFilename.c_str(),
         inputFilename.substr(inputFilename.rfind('/') + 1).c_str(),
         NULL};
     StartupInfo info;
@@ -191,8 +192,7 @@ int runSpecialJudgeExe(const string& specialJudgeFilename,
     info.timeLimit = 10;
     info.memoryLimit = 256 * 1024;
     info.outputLimit = 16;
-    info.fileLimit = 6; // stdin, stdout, stderr,
-                        // input, output, program output
+    info.fileLimit = 5; // stdin, stdout, stderr, input
     info.trace = 1;
     info.workingDirectory = workingDirectory.c_str();
     ExecutiveCallback callback;
@@ -208,8 +208,8 @@ int runSpecialJudgeExe(const string& specialJudgeFilename,
             return INTERNAL_ERROR;
         }
     }
-    if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Special judge terminated by signal "<<WTERMSIG(status);
+    callback.processResult(status);
+    if (callback.getResult()) {
         return INTERNAL_ERROR;
     }
     switch (WEXITSTATUS(status)) {

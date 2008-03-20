@@ -53,14 +53,39 @@ void TraceCallback::onExit(pid_t pid) {
 }
 
 void TraceCallback::onSIGCHLD(pid_t pid) {
-    int status;
-    while (waitpid(pid, &status, 0) < 0) {
-        if (errno != EINTR) {
-            LOG(SYSCALL_ERROR);
-            result_ = INTERNAL_ERROR;
-            return;
+    exited_ = true;
+}
+
+void TraceCallback::onError() {
+    result_ = INTERNAL_ERROR;
+}
+
+bool TraceCallback::onOpen(const string& path, int flags) {
+    if ((flags & O_WRONLY) == O_WRONLY ||
+        (flags & O_RDWR) == O_RDWR ||
+        (flags & O_CREAT) == O_CREAT ||
+        (flags & O_APPEND) == O_APPEND) {
+        LOG(INFO)<<"Opening "<<path<<" with flags 0x"
+                 <<hex<<flags<<" is not allowed";
+        return false;
+    }
+    if (path.empty()) {
+        LOG(INFO)<<"Can not open an empty file";
+        return false;
+    }
+    if (path[0] == '/' || path[0] == '.') {
+        if (!(StringStartsWith(path, "/proc/") ||
+              StringEndsWidth(path, ".so") ||
+              StringEndsWidth(path, ".a"))) {
+            LOG(INFO)<<"Opening "<<path<<" with flags 0x"
+                     <<hex<<flags<<" is not allowed";
+            return false;
         }
     }
+    return true;
+}
+
+void TraceCallback::processResult(int status) {
     switch (result_) {
         case -1:
             // Before the first execve is invoked.
@@ -94,44 +119,15 @@ void TraceCallback::onSIGCHLD(pid_t pid) {
                     result_ = INTERNAL_ERROR;
             }
             break;
+        case MEMORY_LIMIT_EXCEEDED:
+            LOG(INFO)<<"Memory limit exceeded";
+            break;
     }
-    exited_ = true;
 }
-
-void TraceCallback::onError() {
-    result_ = INTERNAL_ERROR;
-}
-
-bool TraceCallback::onOpen(const string& path, int flags) {
-    if ((flags & O_WRONLY) == O_WRONLY ||
-        (flags & O_RDWR) == O_RDWR ||
-        (flags & O_CREAT) == O_CREAT ||
-        (flags & O_APPEND) == O_APPEND) {
-        return false;
-    }
-    if (path.empty()) {
-        return false;
-    }
-    if (path[0] == '/' || path[0] == '.') {
-        if (!(StringStartsWith(path, "/proc/") ||
-              StringEndsWidth(path, ".so") ||
-              StringEndsWidth(path, ".a"))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-static struct sigaction sigchld_act;
 
 static void sigchldHandler(int sig, siginfo_t* siginfo, void* context) {
     if (TraceCallback::getInstance()) {
         TraceCallback::getInstance()->onSIGCHLD(siginfo->si_pid);
-    }
-    if (sigchld_act.sa_sigaction) {
-        sigchld_act.sa_sigaction(sig, siginfo, context);
-    } else if (sigchld_act.sa_handler) {
-        sigchld_act.sa_handler(sig);
     }
 }
 
@@ -186,8 +182,8 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
     } else if (syscall == SYS_open) {
         char buffer[PATH_MAX + 1];
         int address, flags;
-        if (kmmon_getreg(pid, EBX, &address) < 0 ||
-            kmmon_getreg(pid, ECX, &flags) < 0) {
+        if (kmmon_getreg(pid, KMMON_REG_EBX, &address) < 0 ||
+            kmmon_getreg(pid, KMMON_REG_ECX, &flags) < 0) {
             LOG(ERROR)<<"Fail to read register values from traced process";
             callback->onError();
         } else if (readStringFromTracedProcess(
@@ -207,15 +203,18 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
     }
 }
 
+static struct sigaction sigchld_act;
+
 void installHandlers() {
-    struct sigaction act, oact;
+    struct sigaction act;
     act.sa_sigaction = sigkmmonHandler;
     sigemptyset(&act.sa_mask);
     act.sa_flags = SA_SIGINFO;
-    sigaction(KMMON_SIG, &act, &oact);
+    sigaction(KMMON_SIG, &act, NULL);
     act.sa_sigaction = sigchldHandler;
-    sigaction(SIGCHLD, &act, &oact);
-    if (oact.sa_sigaction != sigchldHandler) {
-        sigchld_act = oact;
-    }
+    sigaction(SIGCHLD, &act, &sigchld_act);
+}
+
+void uninstallHandlers() {
+    sigaction(SIGCHLD, &sigchld_act, NULL);
 }

@@ -31,6 +31,7 @@
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/preempt.h>
+#include <linux/ptrace.h>
 #include <linux/rbtree.h>
 #include <linux/sched.h>
 #include <linux/signal.h>
@@ -62,7 +63,8 @@ asmlinkage int (*old_fork)(struct pt_regs);
 asmlinkage int (*old_vfork)(struct pt_regs);
 asmlinkage unsigned long (*old_brk)(unsigned long);
 
-asmlinkage void suicide(void) {
+asmlinkage void suicide(int syscall) {
+    printk("Restricted syscall %d\n", syscall);
     send_sig(SIGKILL, current, 1);
 }
 
@@ -94,7 +96,6 @@ asmlinkage int notify_tracer(int syscall) {
     while (current->exit_code == KMMON_SIG) {
         current->state = TASK_STOPPED;
         schedule();
-        printk("wake up\n");
     }
     return current->exit_code;
 }
@@ -134,7 +135,9 @@ void asm_stuff(void) {
         "popl %%ecx;"
         "jz normal;" // 0 means not killed, jump to normal syscall.
 "disable:\n"
+        "pushl %%eax;"
         "call suicide;" // kill the process
+        "popl %%eax;"
         "movl $0xffff, %%eax;" // set to an invalid syscall
 "normal:\n"
         "popl %%ebx;" // restore EBX
@@ -186,7 +189,8 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 memcpy(&tmp, page_address(page) + offset, len);
                 put_user(tmp, (unsigned long*)data);
             } else if (request == KMMON_GETREG) {
-                put_user(*((int*)p->thread.esp0 - 6 - addr), (unsigned long*)data);
+                unsigned long reg_table[] = {EAX, EBX, ECX, EDX, ESI, EDI, EBP};
+                put_user(*((int*)p->thread.esp0 - 6 - reg_table[addr]), (unsigned long*)data);
             } else {
                 p->exit_code = request == KMMON_KILL;
                 wake_up_process(p);

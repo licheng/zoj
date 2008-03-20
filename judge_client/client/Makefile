@@ -9,12 +9,13 @@ OBJS:=$(patsubst %.cc,%.o,$(SOURCES))
 UNITTESTS:=$(patsubst %.cc,%,$(UNITTEST_SOURCES))
 UNITTEST_RUNS:=$(patsubst %.cc,%.run,$(UNITTEST_SOURCES))
 
-.PHONY: all clean rebuild $(UNITTEST_RUNS) test
+.PHONY: all clean rebuild $(UNITTEST_RUNS) test testdata
 
 all: judge_client
 
 clean:
-	@rm -f $(ALL_OBJS) $(ALL_DEPS) judge_client $(UNITTESTS)
+	rm -f $(ALL_OBJS) $(ALL_DEPS) judge_client $(UNITTESTS)
+	@make -C testdata clean
 
 rebuild: clean all
 
@@ -38,9 +39,16 @@ $(UNITTESTS): %_unittest : %.o %_unittest.o -lcppunit
 util_unittest: args.o util.o trace.o logging.o -lkmmon
 compile_unittest: args.o util.o trace.o logging.o -lkmmon
 run_unittest: args.o util.o trace.o logging.o -lkmmon
+check_unittest: args.o util.o trace.o logging.o -lkmmon
+main_unittest: $(filter-out main.o main_stub.o,$(OBJS)) -lkmmon
 
-$(UNITTEST_RUNS): %.run : %
+testdata:
+	make -C testdata all
+
+$(UNITTEST_RUNS): %.run : % testdata
 	@echo -n "Running $<: "
 	@-./$<
 	@echo "******************************************************************************"
 	@echo
+
+

@@ -33,10 +33,10 @@
 #include "util.h"
 
 // The uid for executing the program to be judged
-DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
+DECLARE_ARG(int, uid);
 
 // The uid for executing the program to be judged
-DEFINE_ARG(int, gid, "The uid for executing the program to be judged");
+DECLARE_ARG(int, gid);
 
 int sendRunningMessage(int fdSocket,
                        double timeConsumption,
@@ -57,61 +57,76 @@ int monitor(int fdSocket,
             pid_t pid,
             int timeLimit,
             int memoryLimit,
-            const TraceCallback& callback) {
+            TraceCallback* callback) {
     int result = -1;
     double timeConsumption = 0;
     int memoryConsumption = 0;
-    do {
+    while (result < 0 && !callback->hasExited()) {
         struct timespec request, remain;
         request.tv_sec = 1;
         request.tv_nsec = 0;
         while (result < 0 &&
-               !callback.hasExited() &&
+               !callback->hasExited() &&
                nanosleep(&request, &remain) < 0) {
             if (errno != EINTR) {
                 LOG(SYSCALL_ERROR)<<"Fail to sleep";
                 kill(pid, SIGKILL);
-                return INTERNAL_ERROR;
+                result = INTERNAL_ERROR;
             }
             request = remain;
         }
         double ts;
         int ms;
-        if (callback.hasExited()) {
-            ts = callback.getTimeConsumption();
-            ms = callback.getMemoryConsumption();
-            result = callback.getResult();
-        } else {
+        if (result < 0 && !callback->hasExited()) {
             ts = readTimeConsumption(pid);
             ms = readMemoryConsumption(pid);
-        }
-        if (ts > timeConsumption) {
-            timeConsumption = ts;
-        }
-        if (ms > memoryConsumption) {
-            memoryConsumption = ms;
-        }
-        if (timeConsumption > timeLimit) {
-            result = TIME_LIMIT_EXCEEDED;
-        }
-        if (result == TIME_LIMIT_EXCEEDED) {
-            timeConsumption = timeLimit + 0.01;
-        }
-        if (memoryConsumption > memoryLimit) {
-            result = MEMORY_LIMIT_EXCEEDED;
-        }
-        if (result == MEMORY_LIMIT_EXCEEDED) {
-            memoryConsumption = memoryLimit + 1;
-        }
-        if (sendRunningMessage(fdSocket,
-                               timeConsumption,
-                               memoryConsumption) == -1) {
-            if (!callback.hasExited()) {
-                kill(pid, SIGKILL);
+            if (ts > timeConsumption) {
+                timeConsumption = ts;
             }
+            if (ms > memoryConsumption) {
+                memoryConsumption = ms;
+            }
+            if (timeConsumption > timeLimit) {
+                result = TIME_LIMIT_EXCEEDED;
+            }
+            if (result == TIME_LIMIT_EXCEEDED) {
+                timeConsumption = timeLimit + 0.01;
+            }
+            if (memoryConsumption > memoryLimit) {
+                result = MEMORY_LIMIT_EXCEEDED;
+            }
+            if (result == MEMORY_LIMIT_EXCEEDED) {
+                memoryConsumption = memoryLimit + 1;
+            }
+            if (sendRunningMessage(fdSocket,
+                                   timeConsumption,
+                                   memoryConsumption) == -1) {
+                if (!callback->hasExited()) {
+                    kill(pid, SIGKILL);
+                }
+                result = INTERNAL_ERROR;
+                break;
+            }
+        }
+    }
+    int status;
+    while (waitpid(pid, &status, 0) < 0) {
+        if (errno != EINTR) {
+            LOG(SYSCALL_ERROR);
             return INTERNAL_ERROR;
         }
-    } while (result < 0);
+    }
+    if (result < 0) {
+        if (callback->getResult() == 0) {
+            if (sendRunningMessage(fdSocket,
+                                   callback->getTimeConsumption(),
+                                   callback->getMemoryConsumption()) == -1) {
+                result = INTERNAL_ERROR;
+            }
+        }
+        callback->processResult(status);
+        result = callback->getResult();
+    }
     return result;
 }
 
@@ -141,7 +156,7 @@ int runExe(int fdSocket,
         LOG(ERROR)<<"Fail to execute the program";
         return INTERNAL_ERROR;
     }
-    return monitor(fdSocket, pid, timeLimit, memoryLimit, callback);
+    return monitor(fdSocket, pid, timeLimit, memoryLimit, &callback);
 }
 
 inline int isNativeExe(const string& sourceFileType) {
