@@ -388,36 +388,37 @@ public abstract class BaseAction extends Action {
 
           
     protected ActionForward checkContestViewPermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset, boolean checkStart) throws Exception {
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
         return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.VIEW);
     }
     
     protected ActionForward checkContestParticipatePermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset, boolean checkStart) throws Exception {
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
         return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.PARTICIPATE);
     }    
     
     protected ActionForward checkContestAdminPermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset, boolean checkStart) throws Exception {
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
         return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.ADMIN);
     }    
     
     protected ActionForward checkContestPermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset, 
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, 
             boolean checkStart, PermissionLevel level) throws Exception {
         // get the contest
         AbstractContest contest = context.getContest();
-        if (contest == null || contest instanceof Contest == isProblemset) {
+        if (contest == null || (isProblemset != null && (contest instanceof Contest == isProblemset.booleanValue()))) {
             context.setAttribute("contest", null);
             ActionMessages messages = new ActionMessages();       
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nocontestid"));
             this.saveErrors(context.getRequest(), messages);
-            context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");   
+            if (isProblemset != null) {
+            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+            }
             return handleFailure(mapping, context, messages, "nopermission");
         }
         
         context.setAttribute("contest", contest);
-        
         // check contest permission 
         UserSecurity userSecurity = context.getUserSecurity();
         boolean hasPermisstion = false;
@@ -432,9 +433,11 @@ public abstract class BaseAction extends Action {
             ActionMessages messages = new ActionMessages();       
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nopermission"));
             this.saveErrors(context.getRequest(), messages);
-            context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");   
+            if (isProblemset != null) {
+            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+            }
             return handleFailure(mapping, context, messages, "nopermission");                   
-        }
+        }        
         
         // check start time
         if (checkStart && !userSecurity.canAdminContest(contest.getId())) {
@@ -444,12 +447,12 @@ public abstract class BaseAction extends Action {
     }
     
     protected ActionForward checkProblemViewPermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset) throws Exception {
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
         return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.VIEW);
     }
     
     protected ActionForward checkProblemParticipatePermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset) throws Exception {
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
         return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.PARTICIPATE);
     }    
     
@@ -458,12 +461,12 @@ public abstract class BaseAction extends Action {
     
     
     protected ActionForward checkProblemAdminPermission(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset) throws Exception {
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
         return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.ADMIN);
     } 
     
     protected ActionForward checkProblemPermission(ActionMapping mapping, ContextAdapter context, 
-            boolean isProblemset, PermissionLevel level) throws Exception {
+    		Boolean isProblemset, PermissionLevel level) throws Exception {
     	
         
         Problem problem = context.getProblem();
@@ -473,11 +476,14 @@ public abstract class BaseAction extends Action {
         	contest = ContestManager.getInstance().getContest(problem.getContestId());
     	}
     	
-        if (problem == null || contest == null || (contest instanceof Contest) == isProblemset) {        	
+        if (problem == null || contest == null || 
+        		(isProblemset != null && (contest instanceof Contest) == isProblemset.booleanValue())) {        	
         	ActionMessages messages = new ActionMessages();       
             messages.add("message", new ActionMessage("onlinejudge.showproblem.noproblemid"));
             this.saveErrors(context.getRequest(), messages);
-            context.setAttribute("back", "showContests.do");   
+            if (isProblemset != null) {
+            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+            }   
             return handleFailure(mapping, context, messages, "nopermission");
         }
         
@@ -498,7 +504,9 @@ public abstract class BaseAction extends Action {
             ActionMessages messages = new ActionMessages();       
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nopermission"));
             this.saveErrors(context.getRequest(), messages);
-            context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");   
+            if (isProblemset != null) {
+            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+            }
             return handleFailure(mapping, context, messages, "nopermission");                   
         }
         

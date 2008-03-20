@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Properties;
 
@@ -70,15 +71,29 @@ public class ConfigManager {
     		throw new ConfigurationException(name + "_templateFile is missing");
     	}
     	
+    	
+    	
     	StringBuilder content = new StringBuilder();
-    	FileReader reader = new FileReader(templateFile);
-    	char[] buffer = new char[10240];
-    	for (;;) {
-    		int l = reader.read(buffer, 0, 10240);
-    		if (l == -1) {
-    			break;
+    	
+    	InputStreamReader reader = null;
+    	try {
+    		reader = new InputStreamReader(ConfigManager.class.getClassLoader().getResourceAsStream(templateFile));
+	    	char[] buffer = new char[10240];
+	    	for (;;) {
+	    		int l = reader.read(buffer, 0, 10240);
+	    		if (l == -1) {
+	    			break;
+	    		}
+	    		content.append(buffer, 0, l);
+	    	}
+    	} finally {
+    		if (reader != null) {
+    			try {
+    				reader.close();
+    			} catch (Exception e) {
+    				
+    			}
     		}
-    		content.append(buffer, 0, l);
     	}
     	
     	return new EmailTemplate(title, replyTo, content.toString());

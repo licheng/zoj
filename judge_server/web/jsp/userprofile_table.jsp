@@ -17,7 +17,6 @@
     }
 %>
 
-<form name="userProfileForm" method="post" action="<%=actionPath%>">
 
     <logic:messagesPresent property="error">
     <div class="internalError">
@@ -27,11 +26,13 @@
 
 <div id="content_title"><%=title%></div>
 <div id="content_body">
+<form name="userProfileForm" method="post" action="<%=actionPath%>">
+
         <blockquote>
         <table class="profileTable">
             <tr>
                 <td align="right"><b>Handle Info</b></td>             
-            </li>
+            </tr>
             <tr>
                 <td align="right">Handle</td>             
                 <td>                                      
@@ -40,7 +41,7 @@
                         <logic:present name="ProfileForm">
                             value="<bean:write name="ProfileForm" property="handle" />"
                         </logic:present>
-                    >
+                    />
                     <span class="error">*
                         <logic:messagesPresent property="handle">
                             <html:errors property="handle"/>
@@ -49,11 +50,11 @@
                     </logic:equal>
                     <logic:equal name="pageId" value="EditProfile">
                         <span class="user_name"> <bean:write name="oj_user" property="handle"/></span>
-                        <input name="handle" type="hidden" value="<bean:write name="oj_user" property="handle" scope="session"/>"
+                        <input name="handle" type="hidden" value="<bean:write name="oj_user" property="handle" scope="session"/>" />
                     </logic:equal>
                 </td>
             </tr>
-            
+
             <logic:notEqual name="pageId" value="Register">
             <tr>
                 <td align="right">Password</td>             
@@ -364,7 +365,7 @@
 
     <div class="profileButtons">
         <div class="profileButton">
-            <input class="button" name="profile" type="submit" id="profile" value="<%=submitName%>">
+            <input class="button" name="profile" type="submit" id="profile" value="<%=submitName%>" />
         </div>
         <div class="profileButton">
             <input class="button" name="cacel" type="reset" id="cacel" value="Reset">

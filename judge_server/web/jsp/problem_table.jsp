@@ -100,7 +100,7 @@ function deleteProblem(problemId) {
                         </logic:messagesPresent>
                     </span>
                 </td>
-            </td>                               	              
+            </tr>                               	              
             
             <tr>
                 <td align="right">Code</td>
@@ -156,6 +156,19 @@ function deleteProblem(problemId) {
                     <span class="error">
                         <logic:messagesPresent property="author">
                             <html:errors property="author"/>
+                        </logic:messagesPresent>
+                    </span>
+                <td> 
+            </tr>
+            <tr>
+                <td align="right">Color</td>
+                <td>
+                    <input name="color" type="text"
+                        value="<bean:write name="ProblemForm" property="color" />"
+                    > <font color="red">red</font>, <font color="black">black</font>, <font color="008000">008000</font>, ..., <a href="<%=request.getContextPath()%>/color_table.html" target="_blank">more</a>
+                    <span class="error">
+                        <logic:messagesPresent property="color">
+                            <html:errors property="color"/>
                         </logic:messagesPresent>
                     </span>
                 <td> 
@@ -290,8 +303,6 @@ function deleteProblem(problemId) {
                     onclick="javascript:switchLimits();return true;"
                     >
                 <td> 
-            </tr>
-            
             </tr>
 
             <tr>

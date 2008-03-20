@@ -35,6 +35,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
 import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
+import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
@@ -75,29 +76,29 @@ public class ShowSubmissionAction extends BaseAction {
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
         HttpServletResponse response = context.getResponse();
-        if (!context.isAdmin()) {
-            response.sendError(404);
-            return null;
-        }
         
         long id = Utility.parseLong(context.getRequest().getParameter("submissionId"));
-        boolean download = "true".equalsIgnoreCase(context.getRequest().getParameter("download"));
         
-        SubmissionPersistence submissionPersistence = PersistenceManager.getInstance().getSubmissionPersistence();
-        Submission submission = submissionPersistence.getSubmission(id);
+        Submission submission = ContestManager.getInstance().getSubmission(id);
         if (submission == null) {
             response.sendError(404);
             return null;
         }
+        Problem problem = ContestManager.getInstance().getProblem(submission.getProblemId());
+        context.setAttribute("problem", problem);
+        ActionForward forward = checkProblemAdminPermission(mapping, context, null);
+        if (forward != null) {
+            response.sendError(404);
+            return null;
+        }
                 
-        response.setContentType("text/plain");   
+        response.setContentType("text/plain");
+        boolean download = "true".equalsIgnoreCase(context.getRequest().getParameter("download"));        
         if (download) { 
             response.setHeader("Content-disposition", 
                     "attachment; filename=" + id + "." + submission.getLanguage().getOptions());
-            response.getOutputStream().write(submission.getContent().getBytes());
-        } else {
-            response.getOutputStream().write(submission.getContent().getBytes());
         }
+        response.getOutputStream().write(submission.getContent().getBytes());
         
         response.getOutputStream().close();
                 

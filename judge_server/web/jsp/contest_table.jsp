@@ -124,7 +124,7 @@ function checkLocalProblemFile(pform) {
                         </logic:messagesPresent>
                     </span>
                 </td>
-            </td>        
+            </tr>        
             <tr>
                 <td align="right">Description</td>
                 <td>

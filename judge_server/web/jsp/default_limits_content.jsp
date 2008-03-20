@@ -64,5 +64,5 @@
                         </logic:messagesPresent>
                 </span>
                 <br>
-                </blockquote>                  
+                                  
                 </div>

@@ -389,9 +389,9 @@ public class UserPersistenceImpl implements UserPersistence {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-        	conn = Database.createConnection();        	
-	
-            ps = conn.prepareStatement(UPDATE_USER);  
+        	conn = Database.createConnection();     
+
+        	ps = conn.prepareStatement(UPDATE_USER);  
             ps.setString(1, profile.getHandle());
             ps.setString(2, profile.getPassword());
             ps.setString(3, profile.getEmail());

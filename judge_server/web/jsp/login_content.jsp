@@ -17,16 +17,17 @@
                 <logic:present name="forward">
                 <input name="forward" type="hidden" value="<bean:write name="forward"/>"/>
                 </logic:present>
-                <ul class="profileFields">
+                <%--
                     <logic:messagesPresent property="reason">
-                    <li>
                         <font color="red"><html:errors property="reason"/></font>
-                    </li>
                     </logic:messagesPresent>
-                    <li>
-                        <div class="profileFieldName">Handle</div>
-                        <div class="profileField">
-                            <input name="handle" type="text"/
+                --%>
+                <blockquote>
+                <table class="profileTable">
+                  <tr>
+                      <td align="right">Handle</td>             
+                      <td>                                      
+                          <input name="handle" type="text"/
                                 <logic:present name="LoginForm">
                                     value="<bean:write name="LoginForm" property="handle" />"
                                 </logic:present>
@@ -36,40 +37,39 @@
                                     <html:errors property="handle"/>
                                 </logic:messagesPresent>
                             </span>
-                        </div>
-                    </li>
-
-                    <li>
-                        <div class="profileFieldName">Password</div>
-                        <div class="profileField">
-                            <input name="password" type="password" value="">
+                      </td>
+                  </tr>
+                  <tr>
+                      <td align="right">Password</td>             
+                      <td>                                      
+                          <input name="password" type="password" value="">
                             <span class="error">
                                 <logic:messagesPresent property="password">
                                     <html:errors property="password"/>
                                 </logic:messagesPresent>
                             </span>
-                        </div>
-                    </li>
-
-                    <li>
-                        <div class="profileFieldName"></div>
-                        <%--
-                        <div class="profileFieldCheckBox">
-                            <input type="checkbox" name="rememberMe" value="checkbox" />Remember Me
-                        </div>
-                        --%>
-                    </li>
-                    <li/>
-                    <li>
-                        <div class="profileFieldName"></div>
-                        <div class="profileButton">
-                            <input type="submit" value="Login"/>
-                        </div>
-                    </li>
-                </ul>
+                      </td>
+                  </tr>
+<%--                  
+                  <tr>
+                      <td align="right"></td>             
+                      <td>                                      
+                          <input type="checkbox" name="rememberMe"/>Remember Me
+                      </td>
+                  </tr>
+--%>                  
+                  </table>
+                  </blockquote>
+    <div class="profileButtons">
+        <div class="profileButton">
+            <input type="submit" value="Login">
+        </div>
+    </div>                  
             </form>
-            <%--
-            <p><br><b>Forgot your password?</b> <a href="#">Click here</a>.<br>
-            <b>New to ZOJ?</b> <a href="<%=request.getContextPath()%>/register.do">Register now</a>.</p>
-            --%>
+            
+            <br/>
+            <blockquote>
+            <b>Forgot your password?</b> <a href="<%=request.getContextPath()%>/forgotPassword.do">Click here</a><br/>
+            <b>New to ZOJ?</b> <a href="<%=request.getContextPath()%>/register.do">Register now</a>
+            </blockquote>
         </div>

@@ -11,11 +11,13 @@ import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.cache.Cache;
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Contest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
+import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
 import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 
@@ -27,6 +29,8 @@ public class ContestManager {
 	
 	private final Cache problemCache;
 	
+	private final Cache submissionCache;
+		
 	private final Cache descriptionCache;
 	
 	private final Cache contestsCache;
@@ -48,6 +52,7 @@ public class ContestManager {
     	contestProblemsCache = new Cache(60000, 50);  
     	contestCache = new Cache(60000, 30); 
     	problemCache = new Cache(60000, 50); 
+    	submissionCache = new Cache(10000, 50);
     	descriptionCache = new Cache(60000, 50);
     	contestsCache = new Cache(60000, 20);    
         problemCountCache = new Cache(60000, 20);
@@ -160,6 +165,20 @@ public class ContestManager {
     			problemCache.put(key, problem);
     		}
     		return problem;
+    	}
+    }
+    
+    public Submission getSubmission(long submissionId) throws PersistenceException {
+    	Object key = new Long(submissionId);
+    	synchronized (submissionCache) {
+    		Submission submission = (Submission) submissionCache.get(key);
+    		if (submission == null) {
+    			SubmissionPersistence submissionPersistence 
+    				= PersistenceManager.getInstance().getSubmissionPersistence();
+    			submission = submissionPersistence.getSubmission(submissionId);
+    			submissionCache.put(key, submission);
+    		}
+    		return submission;
     	}
     }
     

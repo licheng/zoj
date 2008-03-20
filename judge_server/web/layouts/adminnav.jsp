@@ -73,7 +73,7 @@
 
 
 
-                <tr><td class="icpc_logo"><img src="<%=request.getContextPath()%>/image/cpc_acm.jpg"/</td></tr>
+                <tr><td class="icpc_logo"><img src="<%=request.getContextPath()%>/image/cpc_acm.jpg"/></td></tr>
 
                 <%
                   } else {

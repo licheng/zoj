@@ -197,11 +197,9 @@
                         <td class="runTime">Run Time(ms)</td>
                         <td class="runMemory">Run Memory(KB)</td>
                         <td class="runUserName">User Name</td>
-                        <logic:present name="oj_security">
-                        <logic:equal name="oj_security" property="superAdmin" value="true">
+                        <% if (admin) { %>
                             <td class="runAdmin">Admin</td>
-                        </logic:equal>
-                        </logic:present>
+                        <% } %>
                     </tr>
                     <%
                     long userId = -1;
@@ -235,11 +233,9 @@
                         <td class="runTime"><%=submission.getTimeConsumption()%></td>
                         <td class="runMemory"><%=submission.getMemoryConsumption()%></td>
                         <td class="runUserName"><font color="db6d00"><%=submission.getUserName()%></font></td>
-                        <logic:present name="oj_security">
-                        <logic:equal name="oj_security" property="superAdmin" value="true">
+                        <% if (admin) { %>
                             <td class="runAdmin"><a href="<%=request.getContextPath()%>/showSubmission.do?submissionId=<%=submission.getId()%>" target="_blank">Source</a></td>
-                        </logic:equal>
-                        </logic:present>
+                        <% } %>                        
                     </tr>
                     <%
                     }

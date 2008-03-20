@@ -20,7 +20,7 @@
         <logic:messagesNotPresent property="error">
         <div id="content_title"><bean:write name="contest" property="title"/> - <bean:write name="problem" property="code"/></div>
         <div id="content_body">
-            <center><span class="bigProblemTitle"><bean:write name="problem" property="title"/></font></span></center>
+            <center><span class="bigProblemTitle"><bean:write name="problem" property="title"/></span></center>
             <hr>
             <center>
                 <font color="green">Time Limit: </font> <bean:write name="problem" property="limit.timeLimit"/> Second<logic:greaterThan name="problem" property="limit.timeLimit" value="1">s</logic:greaterThan>

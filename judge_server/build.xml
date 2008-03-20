@@ -3,7 +3,7 @@
 <project name="Online Review" default="compile" basedir=".">
 
     <!-- alter values to match your deployment -->
-    <property name="tomcat_path" value="d:\jboss\server\default\deploy" />
+    <property name="tomcat_path" value="c:\jboss\server\default\deploy" />
 
     <property name="package" value="cn.edu.zju.acm.onlinejudge" />
     <property name="packagedir" value="cn/edu/zju/acm/onlinejudge" />
@@ -47,6 +47,8 @@
     <!-- for compilation -->
     <property name="struts.jar.name" value="struts.jar" />
     <property name="struts.jar" value="${libdir}/${struts.jar.name}" />
+    <property name="mail.jar.name" value="mail.jar" />
+    <property name="mail.jar" value="${libdir}/${mail.jar.name}" />
 
     <!-- for testing only -->
     <property name="junit.jar.name" value="junit.jar" />
@@ -88,6 +90,7 @@
 
     <path id="buildlibs">
         <pathelement location="${struts.jar}" />
+        <pathelement location="${mail.jar}" />
         <pathelement location="${servlet-api.jar}" />
         <pathelement location="${commons-dbcp-1.2.jar}" />
         <pathelement location="${log4j-1.2.11.jar}" />
@@ -150,6 +153,7 @@
             <webinf dir="${configdir}" includes="*.tld" />
 
             <lib dir="${libdir}" includes="${struts.jar.name}" />
+            <lib dir="${libdir}" includes="${mail.jar.name}" />
             <lib dir="${libdir}" includes="${antlr.jar.name}" />
             <lib dir="${libdir}" includes="${commons_beanutils.jar.name}" />
             <lib dir="${libdir}" includes="${commons_digester.jar.name}" />
@@ -193,6 +197,7 @@
 
 
             <lib dir="${libdir}" includes="${struts.jar.name}" />
+            <lib dir="${libdir}" includes="${mail.jar.name}" />
             <lib dir="${libdir}" includes="${antlr.jar.name}" />
             <lib dir="${libdir}" includes="${commons_beanutils.jar.name}" />
             <lib dir="${libdir}" includes="${commons_digester.jar.name}" />

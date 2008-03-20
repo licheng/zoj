@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS submission_status;
 DROP TABLE IF EXISTS submission;
 DROP TABLE IF EXISTS problem;
 DROP TABLE IF EXISTS contest;
@@ -93,6 +94,11 @@ CREATE TABLE user_preference (
 ) ENGINE = InnoDb;
 
 CREATE TABLE confirmation (
+    user_profile_id     BIGINT          NOT NULL PRIMARY KEY,
+    code                VARCHAR(32)     NOT NULL
+) ENGINE = InnoDb;
+
+CREATE TABLE password_confirmation (
     user_profile_id     BIGINT          NOT NULL PRIMARY KEY,
     code                VARCHAR(32)     NOT NULL
 ) ENGINE = InnoDb;
@@ -345,6 +351,12 @@ CREATE TABLE user_contest_ip (
     PRIMARY KEY (user_profile_id, contest_id)
 ) ENGINE = InnoDb;
 
+CREATE TABLE submission_status (
+    user_profile_id     BIGINT          NOT NULL,
+    problem_id          BIGINT          NOT NULL,   
+    status              VARCHAR(32)     NULL  
+) ENGINE = InnoDb;
+
 ALTER TABLE user_contest_ip
     ADD CONSTRAINT fk_user_contest_ip_user_profile FOREIGN KEY (user_profile_id)
         REFERENCES user_profile (user_profile_id)
@@ -553,6 +565,14 @@ ALTER TABLE forum_reference
         REFERENCES reference (reference_id)
             ON DELETE RESTRICT;
 
+ALTER TABLE submission_status
+    ADD CONSTRAINT fk_submission_status_user_profile_id FOREIGN KEY (user_profile_id)
+        REFERENCES user_profile (user_profile_id)
+            ON DELETE RESTRICT;
+ALTER TABLE submission_status
+    ADD CONSTRAINT fk_submission_status_problem_id FOREIGN KEY (problem_id)
+        REFERENCES problem (problem_id)
+            ON DELETE RESTRICT;    
 
 DELETE FROM country;
 
@@ -830,7 +850,7 @@ DELETE FROM language;
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
   VALUES(1, 'C', 'C', 'c', 'gcc x.x.x', 1, NOW(), 1, NOW());
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
-  VALUES(2, 'C++', 'C++', 'cc', 'VC 6.0', 1, NOW(), 1, NOW());
+  VALUES(2, 'C++', 'C++', 'cc', 'g++ x.x.x', 1, NOW(), 1, NOW());
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
   VALUES(3, 'FPC', 'Free Pascal', 'pas', 'Free Pascal', 1, NOW(), 1, NOW());
 
@@ -885,3 +905,12 @@ INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_us
 VALUES(19, 'Judging', 'Judging', false, 1, NOW(), 1, NOW());
 INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
 VALUES(101, 'Aborted', 'Aborted', false, 1, NOW(), 1, NOW());
+
+INSERT INTO user_profile(user_profile_id, handle, nickname, password, email_address, reg_date, first_name, last_name, address_line1, address_line2, city, state, country_id, zip_code, phone_number, 
+birth_date, gender, school, major, graduate_student, graduation_year, student_number, active, confirmed, super_admin, create_user, create_date, last_update_user, last_update_date)
+VALUES(1, 'admin', 'admin', password('admin'), 'admin@admin.com', NOW(), 'first', 'last', 'address_line1', 'address_line2', 'city', 'state', 44, 'zip', 'phone', 
+NOW(), 'M', NULL, NULL, 0, NULL, NULL, 1, 1, 1, 1, NOW(), 1, NOW());
+
+INSERT INTO user_preference(user_profile_id, plan, problem_paging, submission_paging, status_paging, user_paging, post_paging, thread_paging, create_user, create_date, last_update_user, last_update_date)
+VALUES(1, '', 100, 20, 20, 20, 20, 20, 1, NOW(), 1, NOW());
+

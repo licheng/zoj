@@ -66,7 +66,15 @@ function deleteProblem(code, problemId) {
                     Set solved = (Set) request.getAttribute("solved");
                     List problems = (List) request.getAttribute("problems");
                     ContestStatistics statistics = (ContestStatistics) request.getAttribute("ContestStatistics");
-                    boolean showColor = (problems.size() > 0 && ((Problem) problems.get(0)).getColor() != null);
+                    
+                    boolean showColor = false;
+                    for (int i = 0; i < problems.size(); ++i) {
+                      Problem p = (Problem) problems.get(i);
+                      if (p.getColor() != null && p.getColor().trim().length() > 0) {
+                        showColor = true;
+                        break;
+                      }
+                    }
                     %>
                     
                     <tr class="rowHeader">
@@ -89,7 +97,7 @@ function deleteProblem(code, problemId) {
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
                     	<% if (showColor) { %>
-                        <td class="problemColor" bgcolor="<%=problem.getColor() == null ? "white" : problem.getColor()%>" > </td>
+                        <td class="problemColor" bgcolor="<%=problem.getColor() == null || problem.getColor().trim().length() == 0 ? "white" : problem.getColor()%>" > </td>
                       	<% } %>
                     
                         <td class="problemSolved"><%=solved.contains(new Long(problem.getId())) ? "Yes" : ""%></td>

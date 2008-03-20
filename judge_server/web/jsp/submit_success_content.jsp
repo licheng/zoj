@@ -10,7 +10,7 @@
 %>
         <div id="content_title">Submit Successfully</div>
         <div id="content_body">
-            Your source has been submitted. The submission id is <font color='red'><bean:write name="submissionId"/></font>. Please check the <a href="<%=request.getContextPath() + "/" + actionPath%>?contestId=<bean:write name="contest" property="id"/>"><font color="blue">status</font></a> page.</p>    
+            <p>Your source has been submitted. The submission id is <font color='red'><bean:write name="submissionId"/></font>. Please check the <a href="<%=request.getContextPath() + "/" + actionPath%>?contestId=<bean:write name="contest" property="id"/>"><font color="blue">status</font></a> page.</p>    
         </div>
         
         

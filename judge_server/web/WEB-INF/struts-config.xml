@@ -28,6 +28,9 @@
                    type="cn.edu.zju.acm.onlinejudge.form.RoleForm"/>
         <form-bean name="LimitForm"
                    type="cn.edu.zju.acm.onlinejudge.form.LimitForm"/>
+        <form-bean name="ResetPasswordForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ResetPasswordForm"/>
+                   
     </form-beans>
      
 
@@ -121,8 +124,18 @@
             <forward name="success" path="/home_message.jsp" redirect="false"/>
             <forward name="failure" path="/register.jsp" redirect="false"/>
         </action>
-
-
+        
+        <!-- forgot password -->
+        <action path="/forgotPassword" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ForgotPasswordAction">
+            <forward name="success" path="/forgot_password.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/resetPassword" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ResetPasswordAction"
+            validate="true" name="ResetPasswordForm" scope="request" input="/reset_password.jsp">
+            <forward name="message" path="/home_message.jsp" redirect="false"/>
+            <forward name="failure" path="/reset_password.jsp" redirect="false"/>
+        </action>
+        
         <!-- Administration -->
         <action path="/manageContests" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.CreateContestAction"
                 validate="true" name="ContestForm" scope="request" input="/manage_contests.jsp">
