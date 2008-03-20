@@ -169,7 +169,7 @@ static inline bool StringStartsWith(const string& s, const string& prefix) {
     return prefix.size() <= s.size() && s.substr(0, prefix.size()) == prefix;
 }
 
-static inline bool StringEndsWidth(const string& s, const string& suffix) {
+static inline bool StringEndsWith(const string& s, const string& suffix) {
     return suffix.size() <= s.size() &&
         s.substr(s.size() - suffix.size()) == suffix;
 }

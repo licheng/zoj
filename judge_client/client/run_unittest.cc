@@ -58,10 +58,10 @@ class DoRunTest: public TestFixture {
 
 TEST_F(DoRunTest, Success) {
     ASSERT_EQUAL(0, doRun(fd_, ARG_root + "/" TESTDIR "/ac", "cc",
-                          ARG_root + "/" TESTDIR "/a+b.in", fn_,
+                          ARG_root + "/" TESTDIR "/1.in", fn_,
                           10, 1000, 1000));
     ASSERT(!system(StringPrintf("diff %s %s",
-                                (ARG_root + "/" TESTDIR "/a+b.out").c_str(),
+                                (ARG_root + "/" TESTDIR "/1.out").c_str(),
                                 fn_.c_str()).c_str()));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(0, (int)size % 9);
@@ -74,7 +74,7 @@ TEST_F(DoRunTest, Success) {
 }
 
 TEST_F(DoRunTest, TimeLimitExceeded) {
-    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/tle", "cc", TESTDIR "/a+b.in", fn_,
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/tle", "cc", TESTDIR "/1.in", fn_,
                            1, 1000, 1000));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
@@ -89,7 +89,7 @@ TEST_F(DoRunTest, TimeLimitExceeded) {
 }
 
 TEST_F(DoRunTest, MemoryLimitExceeded) {
-    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/mle", "cc", TESTDIR "/a+b.in", fn_,
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/mle", "cc", TESTDIR "/1.in", fn_,
                            10, 1, 1000));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
@@ -104,7 +104,7 @@ TEST_F(DoRunTest, MemoryLimitExceeded) {
 }
 
 TEST_F(DoRunTest, OutputLimitExceeded) {
-    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/ole", "cc", TESTDIR "/a+b.in", fn_,
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/ole", "cc", TESTDIR "/1.in", fn_,
                            10, 1000, 1));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
@@ -119,7 +119,7 @@ TEST_F(DoRunTest, OutputLimitExceeded) {
 }
 
 TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
-    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/sigsegv", "cc", TESTDIR "/a+b.in", fn_,
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/sigsegv", "cc", TESTDIR "/1.in", fn_,
                            10, 1000, 1000));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
@@ -134,7 +134,7 @@ TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
 }
 
 TEST_F(DoRunTest, FloatingPointError) {
-    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/fpe", "cc", TESTDIR "/a+b.in", fn_,
+    ASSERT_EQUAL(-1, doRun(fd_, TESTDIR "/fpe", "cc", TESTDIR "/1.in", fn_,
                            10, 1000, 1000));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);

@@ -57,10 +57,12 @@ int saveSourceFile(int fdSocket, const string& sourceFileName);
 
 bool isValidDataStructure(const string& dir);
 
+int checkData(int fdSocket, const string& data_dir);
+
 int saveData(int fdSocket, unsigned int problemId, unsigned int version);
 
 // Deal with a single judge request
-void process(int fdSocket);
+int process(int fdSocket);
 
 int execMain(int argc, char* argv[]);
 

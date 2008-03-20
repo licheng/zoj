@@ -75,8 +75,8 @@ bool TraceCallback::onOpen(const string& path, int flags) {
     }
     if (path[0] == '/' || path[0] == '.') {
         if (!(StringStartsWith(path, "/proc/") ||
-              StringEndsWidth(path, ".so") ||
-              StringEndsWidth(path, ".a"))) {
+              StringEndsWith(path, ".so") ||
+              StringEndsWith(path, ".a"))) {
             LOG(INFO)<<"Opening "<<path<<" with flags 0x"
                      <<hex<<flags<<" is not allowed";
             return false;

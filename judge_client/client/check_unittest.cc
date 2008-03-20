@@ -51,8 +51,8 @@ class DoCheckTest: public TestFixture {
 
 TEST_F(DoCheckTest, Accepted) {
     ASSERT_EQUAL(0, doCheck(fd_,
-                            ARG_root + "/" TESTDIR "/a+b.in",
-                            ARG_root + "/" TESTDIR "/a+b.out",
+                            ARG_root + "/" TESTDIR "/1.in",
+                            ARG_root + "/" TESTDIR "/1.out",
                             ARG_root + "/" TESTDIR "/ac.out",
                             ""));
     lseek(fd_, 0, SEEK_SET);
@@ -65,8 +65,8 @@ TEST_F(DoCheckTest, Accepted) {
 
 TEST_F(DoCheckTest, WrongAnswer) {
     ASSERT_EQUAL(0, doCheck(fd_,
-                            ARG_root + "/" TESTDIR "/a+b.in",
-                            ARG_root + "/" TESTDIR "/a+b.out",
+                            ARG_root + "/" TESTDIR "/1.in",
+                            ARG_root + "/" TESTDIR "/1.out",
                             ARG_root + "/" TESTDIR "/wa.out",
                             ""));
     lseek(fd_, 0, SEEK_SET);
@@ -79,8 +79,8 @@ TEST_F(DoCheckTest, WrongAnswer) {
 
 TEST_F(DoCheckTest, PresentationError) {
     ASSERT_EQUAL(0, doCheck(fd_,
-                            ARG_root + "/" TESTDIR "/a+b.in",
-                            ARG_root + "/" TESTDIR "/a+b.out",
+                            ARG_root + "/" TESTDIR "/1.in",
+                            ARG_root + "/" TESTDIR "/1.out",
                             ARG_root + "/" TESTDIR "/pe.out",
                             ""));
     lseek(fd_, 0, SEEK_SET);
@@ -93,10 +93,10 @@ TEST_F(DoCheckTest, PresentationError) {
 
 TEST_F(DoCheckTest, SpecialJudgeAccepted) {
     ASSERT_EQUAL(0, doCheck(fd_,
-                            ARG_root + "/" TESTDIR "/a+b.in",
-                            ARG_root + "/" TESTDIR "/a+b.out",
+                            ARG_root + "/" TESTDIR "/1.in",
+                            ARG_root + "/" TESTDIR "/1.out",
                             ARG_root + "/" TESTDIR "/ac.out",
-                            ARG_root + "/" TESTDIR "/spj"));
+                            ARG_root + "/" TESTDIR "/judge"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
@@ -107,10 +107,10 @@ TEST_F(DoCheckTest, SpecialJudgeAccepted) {
 
 TEST_F(DoCheckTest, SpecialJudgeWrongAnswer) {
     ASSERT_EQUAL(0, doCheck(fd_,
-                            ARG_root + "/" TESTDIR "/a+b.in",
-                            ARG_root + "/" TESTDIR "/a+b.out",
+                            ARG_root + "/" TESTDIR "/1.in",
+                            ARG_root + "/" TESTDIR "/1.out",
                             ARG_root + "/" TESTDIR "/wa.out",
-                            ARG_root + "/" TESTDIR "/spj"));
+                            ARG_root + "/" TESTDIR "/judge"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
@@ -121,10 +121,10 @@ TEST_F(DoCheckTest, SpecialJudgeWrongAnswer) {
 
 TEST_F(DoCheckTest, SpecialJudgePresentationError) {
     ASSERT_EQUAL(0, doCheck(fd_,
-                            ARG_root + "/" TESTDIR "/a+b.in",
-                            ARG_root + "/" TESTDIR "/a+b.out",
+                            ARG_root + "/" TESTDIR "/1.in",
+                            ARG_root + "/" TESTDIR "/1.out",
                             ARG_root + "/" TESTDIR "/pe.out",
-                            ARG_root + "/" TESTDIR "/spj"));
+                            ARG_root + "/" TESTDIR "/judge"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);

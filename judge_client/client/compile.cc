@@ -96,5 +96,6 @@ int doCompile(int fdSocket, const string& sourceFilename) {
         }
         return -1;
     }
+    LOG(INFO)<<"Compilation done";
     return 0;
 }
