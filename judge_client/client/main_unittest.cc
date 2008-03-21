@@ -807,25 +807,22 @@ class ProcessTest : public TestFixture {
         read(fd, buf_, size);
         close(fd);
         size = htonl(size);
-        write(fd_, "\0", 1);
+        write(fd_, buf_, padding_);
         write(fd_, &size, sizeof(size));
         size = ntohl(size);
         write(fd_, buf_, size);
-        data_end_position_ = source_end_position_ + 1 + sizeof(size) + size;
+        data_end_position_ = source_end_position_ + padding_ + sizeof(size) + size;
     }
 
     void writeTestcase(int testcase) {
         if (testcase_end_positions_.empty()) {
-            write(fd_, "\0\0", 2);
-            testcase_end_positions_.push_back(data_end_position_ + 2);
+            testcase_end_positions_.push_back(data_end_position_);
         } else {
-            char padding[11] = {0};
-            write(fd_, padding, sizeof(padding));
-            testcase_end_positions_.push_back(
-                    testcase_end_positions_.back() + sizeof(padding));
+            testcase_end_positions_.push_back(testcase_end_positions_.back());
         }
+        write(fd_, buf_, padding_);
         write(fd_, createTestcase(testcase, 10, 1000, 1000), TESTCASE_MSG_SIZE);
-        testcase_end_positions_.back() += TESTCASE_MSG_SIZE;
+        testcase_end_positions_.back() += TESTCASE_MSG_SIZE + padding_;
     }
 
     FILE* fp_;
@@ -835,6 +832,7 @@ class ProcessTest : public TestFixture {
     int header_end_position_;
     int source_end_position_;
     int data_end_position_;
+    int padding_;
     vector<int> testcase_end_positions_;
     string source_file_;
     string data_file_;
@@ -900,6 +898,7 @@ TEST_F(ProcessTest, InvalidTestcase) {
 TEST_F(ProcessTest, NoTestcase) {
     writeHeader();
     writeSourceFile();
+    padding_ = 2;
     writeTestcase(0);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(0, process(fd_));
@@ -913,7 +912,9 @@ TEST_F(ProcessTest, NoTestcase) {
 TEST_F(ProcessTest, MultipleTestcase) {
     writeHeader();
     writeSourceFile();
+    padding_ = 2;
     writeTestcase(1);
+    padding_ = 11;
     writeTestcase(3);
     writeTestcase(2);
     writeTestcase(0);
@@ -940,3 +941,44 @@ TEST_F(ProcessTest, MultipleTestcase) {
     ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
     ASSERT_EQUAL((off_t)(testcase_end_positions_.back()), lseek(fd_, 0, SEEK_END));
 }
+
+TEST_F(ProcessTest, DataSynchronization) {
+    system(StringPrintf("rm -rf %s/prob/0/0", ARG_root.c_str()).c_str());
+    writeHeader();
+    writeSourceFile();
+    padding_ = 1;
+    writeData();
+    padding_ = 3;
+    writeTestcase(1);
+    padding_ = 11;
+    writeTestcase(3);
+    writeTestcase(2);
+    writeTestcase(0);
+    lseek(fd_, 0, SEEK_SET);
+    ASSERT_EQUAL(0, process(fd_));
+    lseek(fd_, source_end_position_, SEEK_SET);
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1)); 
+    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
+    lseek(fd_, data_end_position_, SEEK_SET);
+    ASSERT_EQUAL((ssize_t)3, read(fd_, buf_, 3)); 
+    ASSERT_EQUAL(COMPILING, (int)buf_[0]);
+    ASSERT_EQUAL(READY, (int)buf_[1]);
+    ASSERT_EQUAL(COMPILING, (int)buf_[2]);
+    lseek(fd_, testcase_end_positions_[0], SEEK_SET);
+    ASSERT_EQUAL((ssize_t)11, read(fd_, buf_, 11)); 
+    ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+    ASSERT_EQUAL(JUDGING, (int)buf_[9]);
+    ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
+    lseek(fd_, testcase_end_positions_[1], SEEK_SET);
+    ASSERT_EQUAL((ssize_t)11, read(fd_, buf_, 11)); 
+    ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+    ASSERT_EQUAL(JUDGING, (int)buf_[9]);
+    ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
+    lseek(fd_, testcase_end_positions_[2], SEEK_SET);
+    ASSERT_EQUAL((ssize_t)11, read(fd_, buf_, 11)); 
+    ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+    ASSERT_EQUAL(JUDGING, (int)buf_[9]);
+    ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
+    ASSERT_EQUAL((off_t)(testcase_end_positions_.back()), lseek(fd_, 0, SEEK_END));
+}
+
