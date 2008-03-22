@@ -555,6 +555,12 @@ void daemonize() {
         LOG(SYSCALL_ERROR)<<"Fail to ignore SIGHUP";
         exit(1);
     }
+
+    // attach file descriptor 0, 1, 2 to /dev/null
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, 0);
+    dup2(fd, 1);
+    dup2(fd, 2);
     
     // close all other file descriptors
     for (int i = 3; i < 100; i++) {
