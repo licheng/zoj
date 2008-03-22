@@ -42,7 +42,7 @@ public class JudgeService {
                         Socket socket = serverSocket.accept();
                         logger.info("Connection from " + socket.getInetAddress().getCanonicalHostName() + ":"
                                 + socket.getPort());
-                        JudgeClient client = new JudgeClient(queue, socket, 5);
+                        JudgeClient client = new JudgeClient(queue, socket, getClientNumber());
                         synchronized (clients) {
                             for (int i = clients.size() - 1; i >= 0; --i) {
                                 if (!clients.get(i).isAlive()) {
@@ -58,6 +58,13 @@ public class JudgeService {
                 }
             }
         }.start();
+    }
+    private int getClientNumber() {
+    	try {
+    		return Integer.parseInt(ConfigManager.getValue("client_max_job"));
+    	} catch (Exception e) {
+    		return 1;
+    	}
     }
 
     public boolean judge(Submission submission) throws Exception {

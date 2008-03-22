@@ -44,6 +44,8 @@ public class ShowRunsAction extends BaseAction {
     
 	private final List judgeReplies;
 	
+	private final List adminJudgeReplies;
+	
     /**
      * <p>
      * Default constructor.
@@ -61,8 +63,11 @@ public class ShowRunsAction extends BaseAction {
     	judgeReplies.add(JudgeReply.MEMORY_LIMIT_EXCEEDED);
     	judgeReplies.add(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
     	judgeReplies.add(JudgeReply.COMPILATION_ERROR); 
-    	judgeReplies.add(JudgeReply.QUEUING);
-        
+    	
+    	adminJudgeReplies = new ArrayList(judgeReplies);
+    	adminJudgeReplies.add(JudgeReply.QUEUING);
+    	adminJudgeReplies.add(JudgeReply.JUDGE_INTERNAL_ERROR);
+    	
     }
 
     
@@ -88,7 +93,9 @@ public class ShowRunsAction extends BaseAction {
             return forward;
         }
         
-    	context.setAttribute("judgeReplies", judgeReplies);
+    	context.setAttribute("judgeReplies", context.isAdmin() ? adminJudgeReplies : judgeReplies);
+    	
+    	
         context.setAttribute("totalSubmissions", new Long(0));
     	// check contest
     	boolean isRejudge = "true".equalsIgnoreCase(context.getRequest().getParameter("rejudge"));
