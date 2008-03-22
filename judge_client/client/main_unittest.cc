@@ -204,7 +204,7 @@ TEST_F(ReadTestcaseTest, InvalidTestcase) {
 }
 
 TEST_F(ReadTestcaseTest, InvalidTimeLimitZero) {
-    write(fd_, createTestcase(0, 0, 1, 1), TESTCASE_MSG_SIZE);
+    write(fd_, createTestcase(1, 0, 1, 1), TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, readTestcase(fd_, &testcase_, &timeLimit_,
                                   &memoryLimit_, &outputLimit_));
@@ -215,7 +215,7 @@ TEST_F(ReadTestcaseTest, InvalidTimeLimitZero) {
 }
 
 TEST_F(ReadTestcaseTest, InvalidTimeLimitMaxPlusOne) {
-    write(fd_, createTestcase(0, MAX_TIME_LIMIT + 1, 1, 1), TESTCASE_MSG_SIZE);
+    write(fd_, createTestcase(1, MAX_TIME_LIMIT + 1, 1, 1), TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, readTestcase(fd_, &testcase_, &timeLimit_,
                                   &memoryLimit_, &outputLimit_));
@@ -226,7 +226,7 @@ TEST_F(ReadTestcaseTest, InvalidTimeLimitMaxPlusOne) {
 }
 
 TEST_F(ReadTestcaseTest, InvalidMemoryLimitZero) {
-    write(fd_, createTestcase(0, 1, 0, 1), TESTCASE_MSG_SIZE);
+    write(fd_, createTestcase(1, 1, 0, 1), TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, readTestcase(fd_, &testcase_, &timeLimit_,
                                   &memoryLimit_, &outputLimit_));
@@ -237,7 +237,7 @@ TEST_F(ReadTestcaseTest, InvalidMemoryLimitZero) {
 }
 
 TEST_F(ReadTestcaseTest, InvalidMemoryLimitMaxPlusOne) {
-    write(fd_, createTestcase(0, 1, MAX_MEMORY_LIMIT + 1, 1),
+    write(fd_, createTestcase(1, 1, MAX_MEMORY_LIMIT + 1, 1),
           TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, readTestcase(fd_, &testcase_, &timeLimit_,
@@ -249,7 +249,7 @@ TEST_F(ReadTestcaseTest, InvalidMemoryLimitMaxPlusOne) {
 }
 
 TEST_F(ReadTestcaseTest, InvalidOutputLimitZero) {
-    write(fd_, createTestcase(0, 1, 1, 0), TESTCASE_MSG_SIZE);
+    write(fd_, createTestcase(1, 1, 1, 0), TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, readTestcase(fd_, &testcase_, &timeLimit_,
                                   &memoryLimit_, &outputLimit_));
@@ -260,7 +260,7 @@ TEST_F(ReadTestcaseTest, InvalidOutputLimitZero) {
 }
 
 TEST_F(ReadTestcaseTest, InvalidOutputLimitMaxPlusOne) {
-    write(fd_, createTestcase(0, 1, 1, MAX_OUTPUT_LIMIT + 1),
+    write(fd_, createTestcase(1, 1, 1, MAX_OUTPUT_LIMIT + 1),
           TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, readTestcase(fd_, &testcase_, &timeLimit_,
@@ -272,7 +272,7 @@ TEST_F(ReadTestcaseTest, InvalidOutputLimitMaxPlusOne) {
 }
 
 TEST_F(ReadTestcaseTest, ValidTestcaseAllLimitOne) {
-    write(fd_, createTestcase(0, 1, 1, 1),
+    write(fd_, createTestcase(1, 1, 1, 1),
           TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(0, readTestcase(fd_, &testcase_, &timeLimit_,
@@ -282,7 +282,7 @@ TEST_F(ReadTestcaseTest, ValidTestcaseAllLimitOne) {
 
 TEST_F(ReadTestcaseTest, ValidTestcaseAllLimitMax) {
     write(fd_,
-          createTestcase(0, MAX_TIME_LIMIT, MAX_MEMORY_LIMIT, MAX_OUTPUT_LIMIT),
+          createTestcase(1, MAX_TIME_LIMIT, MAX_MEMORY_LIMIT, MAX_OUTPUT_LIMIT),
           TESTCASE_MSG_SIZE);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(0, readTestcase(fd_, &testcase_, &timeLimit_,
@@ -888,17 +888,18 @@ TEST_F(ProcessTest, InvalidTestcase) {
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(-1, process(fd_));
     lseek(fd_, source_end_position_, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)3, read(fd_, buf_, 3)); 
+    ASSERT_EQUAL((ssize_t)4, read(fd_, buf_, 4)); 
     ASSERT_EQUAL(READY, (int)buf_[0]);
     ASSERT_EQUAL(COMPILING, (int)buf_[1]);
-    ASSERT_EQUAL(INTERNAL_ERROR, (int)buf_[2]);
-    ASSERT_EQUAL((off_t)(source_end_position_ + 3), lseek(fd_, 0, SEEK_END));
+    ASSERT_EQUAL(READY, (int)buf_[2]);
+    ASSERT_EQUAL(INTERNAL_ERROR, (int)buf_[3]);
+    ASSERT_EQUAL((off_t)(source_end_position_ + 4), lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(ProcessTest, NoTestcase) {
     writeHeader();
     writeSourceFile();
-    padding_ = 2;
+    padding_ = 3;
     writeTestcase(0);
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL(0, process(fd_));
@@ -912,7 +913,7 @@ TEST_F(ProcessTest, NoTestcase) {
 TEST_F(ProcessTest, MultipleTestcase) {
     writeHeader();
     writeSourceFile();
-    padding_ = 2;
+    padding_ = 3;
     writeTestcase(1);
     padding_ = 11;
     writeTestcase(3);
@@ -948,7 +949,7 @@ TEST_F(ProcessTest, DataSynchronization) {
     writeSourceFile();
     padding_ = 1;
     writeData();
-    padding_ = 3;
+    padding_ = 4;
     writeTestcase(1);
     padding_ = 11;
     writeTestcase(3);

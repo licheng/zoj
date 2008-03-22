@@ -62,7 +62,7 @@ int doCompile(int fdSocket, const string& sourceFilename) {
         sendReply(fdSocket, INTERNAL_ERROR);
         return -1;
     }
-    static char errorMessage[16384];
+    static signed char errorMessage[16384];
     int count = readn(fdPipe[0], errorMessage, sizeof(errorMessage));
     close(fdPipe[0]);
     if (count < 0) {
@@ -92,6 +92,11 @@ int doCompile(int fdSocket, const string& sourceFilename) {
             sendReply(fdSocket, COMPILATION_ERROR);
             uint16_t len = htons(count);
             writen(fdSocket, &len, sizeof(len));
+            for (int i = 0; i < count; ++i) {
+                if (errorMessage[i] <= 0) {
+                    errorMessage[i] = '?';
+                }
+            }
             writen(fdSocket, errorMessage, count);
         }
         return -1;

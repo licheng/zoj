@@ -24,7 +24,7 @@
 static char syscall_filter_table[512] = {
     0, /*0, restart_syscall*/
     3, /*1, exit*/
-    1, /*2, fork*/
+    3, /*2, fork*/
     0, /*3, read*/
     0, /*4, write*/
     3, /*5, open*/
@@ -212,7 +212,7 @@ static char syscall_filter_table[512] = {
     1, /*187, sendfile*/
     1, /*188, getpmsg*/
     1, /*189, putpmsg*/
-    1, /*190, vfork*/
+    3, /*190, vfork*/
     0, /*191, ugetrlimit*/
     0, /*192, mmap2*/
     0, /*193, truncate64*/

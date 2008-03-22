@@ -172,7 +172,11 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
     } else if (syscall == SYS_clone ||
                syscall == SYS_fork ||
                syscall == SYS_vfork) {
-        callback->onClone();
+        if (callback->onClone()) {
+            kmmon_continue(pid);
+        } else {
+            kmmon_kill(pid);
+        }
     } else if (syscall == SYS_execve) {
         if (callback->onExecve()) {
             kmmon_continue(pid);

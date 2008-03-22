@@ -187,7 +187,11 @@ int doRun(int fdSocket,
     }
     if (result) {
         sendReply(fdSocket, result);
-        return -1;
+        if (result == INTERNAL_ERROR) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
     return 0;
 }

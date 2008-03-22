@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include "args.h"
 #include "compile.h"
@@ -33,7 +34,12 @@ class DoCompileTest: public TestFixture {
   protected:
     void setUp() {
         ARG_root = tmpnam(NULL);
-        system(("testdata/create_test_env.sh " + ARG_root).c_str());
+        ASSERT_EQUAL(0, mkdir(ARG_root.c_str(), 0700));
+        ASSERT_EQUAL(0, mkdir((ARG_root + "/script").c_str(), 0700));
+        ASSERT_EQUAL(0, link("../script/compile.sh", 
+                             (ARG_root + "/script/compile.sh").c_str()));
+        ASSERT_EQUAL(0, link(TESTDIR "/ac.cc", (ARG_root + "/ac.cc").c_str()));
+        ASSERT_EQUAL(0, link(TESTDIR "/ce.cc", (ARG_root + "/ce.cc").c_str()));
         fp_ = tmpfile();
         fd_ = fileno(fp_);
     }
@@ -49,7 +55,7 @@ class DoCompileTest: public TestFixture {
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, doCompile(fd_, ARG_root +  "/" TESTDIR "/ac.cc"));
+    ASSERT_EQUAL(0, doCompile(fd_, ARG_root +  "/ac.cc"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
@@ -58,7 +64,7 @@ TEST_F(DoCompileTest, Success) {
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, doCompile(fd_, ARG_root + "/" TESTDIR "/ce.cc"));
+    ASSERT_EQUAL(-1, doCompile(fd_, ARG_root + "/ce.cc"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)4, read(fd_, buf_, 4));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
@@ -69,3 +75,5 @@ TEST_F(DoCompileTest, Failure) {
     off_t pos = lseek(fd_, 0, SEEK_CUR);
     ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
+
+// TODO add a unittest for invalid chars

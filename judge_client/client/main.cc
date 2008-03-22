@@ -51,26 +51,22 @@
 #include "trace.h"
 #include "util.h"
 
-// The root directory which contains problems, scripts and working directory of
-// the client
 DEFINE_ARG(string, root, "The root directory of the client");
 
-// The ip address of the queue service to which this client connects
 DEFINE_ARG(string, queue_address, "The ip address of the queue service to which"
                                   "this client connects");
 
-// The port of the queue service to which this client connects
 DEFINE_ARG(int, queue_port, "The port of the queue service to which this client"
                             "connects");
 
-// All languages supported by this client
 DEFINE_ARG(string, lang, "All programming languages supported by this client");
 
-// The uid for executing the program to be judged
 DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
 
-// The uid for executing the program to be judged
 DEFINE_ARG(int, gid, "The uid for executing the program to be judged");
+
+DEFINE_OPTIONAL_ARG(bool, daemonize, true, "If true, the program will be "
+                                           "started as a daemon process");
 
 // Returns true if the specified file type is supported by the server
 bool isSupportedSourceFileType(const string& sourceFileType) {
@@ -124,19 +120,19 @@ int readTestcase(int fdSocket,
     }
     *testcase = message[0];
     *timeLimit = ntohs(*(short*)(message + 1));
-    if (*timeLimit == 0 || *timeLimit > MAX_TIME_LIMIT) {
+    if (*testcase && *timeLimit == 0 || *timeLimit > MAX_TIME_LIMIT) {
         LOG(ERROR)<<"Invalid time limit "<<*timeLimit;
         sendReply(fdSocket, INVALID_TIME_LIMIT);
         return -1;
     }
     *memoryLimit = ntohl(*(long*)(message + 3));
-    if (*memoryLimit == 0 || *memoryLimit > MAX_MEMORY_LIMIT) {
+    if (*testcase && *memoryLimit == 0 || *memoryLimit > MAX_MEMORY_LIMIT) {
         LOG(ERROR)<<"Invalid memory limit "<<*memoryLimit;
         sendReply(fdSocket, INVALID_MEMORY_LIMIT);
         return -1;
     }
     *outputLimit = ntohs(*(short*)(message + 7));
-    if (*outputLimit == 0 || *outputLimit > MAX_OUTPUT_LIMIT) {
+    if (*testcase && *outputLimit == 0 || *outputLimit > MAX_OUTPUT_LIMIT) {
         LOG(ERROR)<<"Invalid output limit "<<*outputLimit;
         sendReply(fdSocket, INVALID_OUTPUT_LIMIT);
         return -1;
@@ -431,6 +427,7 @@ int process(int fdSocket) {
     if (doCompile(fdSocket, sourceFilename) == -1) {
         return -1;
     }
+    sendReply(fdSocket, READY);
 
     for (;;) {
         unsigned int testcase;
@@ -461,26 +458,121 @@ int process(int fdSocket) {
             LOG(ERROR)<<"Invalid test case "<<testcase;
             sendReply(fdSocket, INVALID_TESTCASE);
             return -1;
-        } else if (doRun(fdSocket,
-                         binaryFilename,
-                         sourceFileType,
-                         inputFilename,
-                         programOutputFilename,
-                         timeLimit,
-                         memoryLimit,
-                         outputLimit) == -1 ||
-                   doCheck(fdSocket,
-                           inputFilename,
-                           outputFilename,
-                           programOutputFilename,
-                           specialJudgeFilename) == -1) {
-            return -1;
+        } else {
+            int result = doRun(fdSocket,
+                               binaryFilename,
+                               sourceFileType,
+                               inputFilename,
+                               programOutputFilename,
+                               timeLimit,
+                               memoryLimit,
+                               outputLimit);
+            if (result == -1 ||
+                result == 0 && doCheck(fdSocket,
+                                       inputFilename,
+                                       outputFilename,
+                                       programOutputFilename,
+                                       specialJudgeFilename) == -1) {
+                return -1;
+            }
         }
     }
     return 0;
 }
 
-int connect(const string& address, int port) {
+int createServerSocket(int* port) {
+    int fdServerSocket = socket(PF_INET, SOCK_STREAM, 6);
+    if (fdServerSocket == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to create socket";
+        return -1;
+    }
+    int optionValue = 1;
+    if (setsockopt(fdServerSocket, 
+                   SOL_SOCKET,
+                   SO_REUSEADDR,
+                   &optionValue,
+                   sizeof(optionValue)) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to set socket option";
+        close(fdServerSocket);
+        return -1;
+    }
+    sockaddr_in address;
+    memset(&address, 0, sizeof(address));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = htonl(INADDR_ANY); 
+    address.sin_port = 0;
+    if (bind(fdServerSocket,
+             (struct sockaddr*)&address,
+             sizeof(address)) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to bind";
+        close(fdServerSocket);
+        return -1;
+    }
+    if (listen(fdServerSocket, 32) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to listen";
+        close(fdServerSocket);
+        return -1;
+    }
+    socklen_t len = sizeof(address);
+    if (getsockname(fdServerSocket,
+                    (struct sockaddr*)&address,
+                    &len) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to get socket port";
+        close(fdServerSocket);
+        return -1;
+    }
+    *port = ntohs(address.sin_port);
+    return fdServerSocket;
+}
+
+void daemonize() {
+    umask(0);
+    int pid = fork();
+    if (pid < 0) {
+        LOG(SYSCALL_ERROR);
+        exit(1);
+    } else if (pid > 0) {
+        exit(0);
+    }
+
+    // start a new session
+    setsid();
+
+    // ignore SIGHUP
+    if (installSignalHandler(SIGHUP, SIG_IGN) == SIG_ERR) {
+        LOG(SYSCALL_ERROR)<<"Fail to ignore SIGHUP";
+        exit(1);
+    }
+    
+    // close all other file descriptors
+    for (int i = 3; i < 100; i++) {
+        close(i);
+    }
+}
+
+int alreadyRunning() {
+    int fd = open((ARG_root + "/judge.pid").c_str(), O_RDWR | O_CREAT, 0640);
+    if (fd < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to open judge.pid";
+        exit(1);
+    }
+    if (lockFile(fd, F_SETLK) == -1) {
+        if (errno == EACCES || errno == EAGAIN) {
+            close(fd);
+            return 1;
+        } else {
+            LOG(SYSCALL_ERROR)<<"Fail to lock judge.pid";
+            exit(1);
+        }
+    }
+    ftruncate(fd, 0);
+    char buffer[20];
+    sprintf(buffer, "%ld", (long)getpid());
+    write(fd, buffer, strlen(buffer) + 1);
+    return 0;
+}
+
+int connectTo(const string& address, int port) {
     int fdSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (fdSocket == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create socket";
@@ -495,16 +587,18 @@ int connect(const string& address, int port) {
         close(fdSocket);
         return -1;
     }
+    LOG(INFO)<<"Connecting to "<<address<<":"<<port;
     if (connect(fdSocket, (const sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to connect to "<<address<<":"<<port;
         close(fdSocket);
         return -1;
     }
+    LOG(INFO)<<"Connected";
     return fdSocket;
 }
 
 int terminated = 0;
-int socket_closed = 1;
+int socket_closed = 0;
 
 void sigtermHandler(int sig) {
     terminated = 1;
@@ -514,10 +608,68 @@ void sigpipeHandler(int sig) {
     socket_closed = 1;
 }
 
+void notifyQueue(int port) {
+    port = htonl(port);
+    socket_closed = 1;
+    // Loops until SIGTERM is received.
+    int fdSocket = -1;
+    while (!terminated) {
+        if (socket_closed) {
+            if (fdSocket >= 0) {
+                close(fdSocket);
+            }
+            fdSocket = connectTo(ARG_queue_address, ARG_queue_port);
+            if (fdSocket >= 0) {
+                socket_closed = 0;
+            }
+        }
+        if (!socket_closed && !terminated) {
+            if (writen(fdSocket, &port, sizeof(port)) != -1) {
+                LOG(INFO)<<"Port sent";
+            }
+        }
+        sleep(10);
+    }
+    if (fdSocket >= 0) {
+        close(fdSocket);
+    }
+}
+
+int childMain(int fdSocket) {
+    string working_root =
+        StringPrintf("%s/working/%d", ARG_root.c_str(), getpid());
+    if (mkdir(working_root.c_str(), 0777) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_root;
+        sendReply(fdSocket, INTERNAL_ERROR);
+        return 1;
+    }
+
+    // installs handlers for tracing.
+    installHandlers();
+
+    // Loops until SIGTERM is received.
+    while (!socket_closed && !terminated) {
+        process(fdSocket);
+        // clear all temporary files.
+        system(StringPrintf("rm -f %s/*", working_root.c_str()).c_str());
+    }
+    close(fdSocket);
+    system(StringPrintf("rm -rf %s", working_root.c_str()).c_str());
+    return 0;
+}
+
 int execMain(int argc, char* argv[]) {
     if (parseArguments(argc, argv) < 0) {
         return 1;
     }
+    if (ARG_daemonize) {
+        daemonize();
+        if (alreadyRunning()) {
+            LOG(ERROR)<<"Another instance of judge_client exists";
+            return 1;
+        }
+    }
+
     if (chdir(ARG_root.c_str()) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<ARG_root<<endl;
         return 1;
@@ -534,43 +686,44 @@ int execMain(int argc, char* argv[]) {
     sigemptyset(&mask);
     installSignalHandler(SIGTERM, sigtermHandler, 0, mask);
 
-    // prevents SIGPIPE to terminate the process.
-    installSignalHandler(SIGPIPE, SIG_IGN);
+    // prevents SIGPIPE to terminate the processes.
+    installSignalHandler(SIGPIPE, sigpipeHandler);
 
-    // installs handlers for tracing.
-    installHandlers();
-
-    string working_root =
-        StringPrintf("%s/working/%d", ARG_root.c_str(), getpid());
-    if (mkdir(working_root.c_str(), 0777) < 0) {
-        LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_root;
+    int port;
+    int fdServerSocket = createServerSocket(&port);
+    if (fdServerSocket == -1) {
         return 1;
     }
+    LOG(INFO)<<"Listening on port "<<port;
 
-    // Loops until SIGTERM is received.
-    while (!terminated) {
-        int sleep_period = 1;
-        int fdSocket = 0;
-        while (socket_closed && !terminated) {
-            if (connect(ARG_queue_address, ARG_queue_port) == 0) {
-                socket_closed = 0;
-            } else {
-                sleep(sleep_period);
-                sleep_period *= 2;
-                if (sleep_period > 64) {
-                    sleep_period = 64;
-                }
-            }
-        }
-        if (!terminated) {
-            process(fdSocket);
-            // clear all temporary files.
-            system(StringPrintf("rm -f %s/*", working_root.c_str()).c_str());
-        }
-        if (terminated && !socket_closed) {
-            close(fdSocket);
-        }
+    pid_t pid = fork();
+    if (pid < 0) {
+        LOG(SYSCALL_ERROR);
+        return 1;
+    } else if (pid == 0) {
+        notifyQueue(port);
+        return 0;
     }
-    system(StringPrintf("rm -rf %s", working_root.c_str()).c_str());
+    
+    // Waiting for judge queue to connect
+    while (!terminated) {
+        sockaddr_in address;
+        socklen_t addressLength = sizeof(sockaddr_in);
+        int fdSocket = accept(
+                fdServerSocket, (struct sockaddr*)&address, &addressLength);
+        if (fdSocket == -1) {
+            LOG(SYSCALL_ERROR);
+            continue;
+        }
+        LOG(INFO)<<"Received connection from "<<address.sin_addr.s_addr<<":"<<address.sin_port;
+        pid_t pid = fork();
+        if (pid < 0) {
+            LOG(SYSCALL_ERROR);
+            return 1;
+        } else if (pid == 0) {
+            exit(childMain(fdSocket));
+        }
+        close(fdSocket);
+    }
     return 0;
 }
