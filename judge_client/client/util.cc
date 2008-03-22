@@ -45,7 +45,7 @@ int setLimit(int resource, unsigned int limit) {
     return 0;
 }
 
-double readTimeConsumption(int pid) {
+int readTimeConsumption(int pid) {
     char buffer[64];
     sprintf(buffer, "/proc/%d/stat", pid);
     FILE* fp = fopen(buffer, "r");
@@ -66,7 +66,7 @@ double readTimeConsumption(int pid) {
     if (clktck == 0) {
         clktck = sysconf(_SC_CLK_TCK);
     }
-    return (utime + stime + 0.0) / clktck;
+    return int((utime + stime + 0.0) / clktck * 1000);
 }
 
 int readMemoryConsumption(int pid) {

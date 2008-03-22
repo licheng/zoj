@@ -54,7 +54,7 @@ TEST_F(TestSetLimit, Invalid) {
 }
 
 TEST(readTimeConsumptionInvalidPID) {
-    ASSERT_EQUAL(-1.0, readTimeConsumption(-1));
+    ASSERT_EQUAL(-1, readTimeConsumption(-1));
 }
 
 TEST(readTimeConsumptionNormal) {

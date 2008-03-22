@@ -67,7 +67,7 @@ class TraceCallback {
             result_ = result;
         }
 
-        double getTimeConsumption() const {
+        int getTimeConsumption() const {
             return timeConsumption_;
         }
 
@@ -85,7 +85,7 @@ class TraceCallback {
 
     protected:
         int result_;
-        double timeConsumption_;
+        int timeConsumption_;
         int memoryConsumption_;
         bool exited_;
 

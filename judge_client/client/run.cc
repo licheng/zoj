@@ -39,12 +39,12 @@ DECLARE_ARG(int, uid);
 DECLARE_ARG(int, gid);
 
 int sendRunningMessage(int fdSocket,
-                       double timeConsumption,
+                       int timeConsumption,
                        int memoryConsumption) {
     char message[9];
     message[0] = RUNNING;
     *(unsigned int*)(message + 1) =
-        htonl((unsigned int)(timeConsumption * 1000));
+        htonl((unsigned int)(timeConsumption));
     *(unsigned int*)(message + 5) = htonl(memoryConsumption);
     if (writen(fdSocket, message, sizeof(message)) == -1) {
         LOG(ERROR)<<"Fail to send running message";
@@ -59,8 +59,9 @@ int monitor(int fdSocket,
             int memoryLimit,
             TraceCallback* callback) {
     int result = -1;
-    double timeConsumption = 0;
+    int timeConsumption = 0;
     int memoryConsumption = 0;
+    timeLimit *= 1000;
     while (result < 0 && !callback->hasExited()) {
         struct timespec request, remain;
         request.tv_sec = 1;
@@ -75,7 +76,7 @@ int monitor(int fdSocket,
             }
             request = remain;
         }
-        double ts;
+        int ts;
         int ms;
         if (result < 0 && !callback->hasExited()) {
             ts = readTimeConsumption(pid);
@@ -90,7 +91,7 @@ int monitor(int fdSocket,
                 result = TIME_LIMIT_EXCEEDED;
             }
             if (result == TIME_LIMIT_EXCEEDED) {
-                timeConsumption = timeLimit + 0.01;
+                timeConsumption = timeLimit + 1;
             }
             if (memoryConsumption > memoryLimit) {
                 result = MEMORY_LIMIT_EXCEEDED;
@@ -118,14 +119,22 @@ int monitor(int fdSocket,
     }
     if (result < 0) {
         if (callback->getResult() == 0) {
-            if (sendRunningMessage(fdSocket,
-                                   callback->getTimeConsumption(),
-                                   callback->getMemoryConsumption()) == -1) {
-                result = INTERNAL_ERROR;
-            }
+            timeConsumption = callback->getTimeConsumption();
+            memoryConsumption = callback->getMemoryConsumption();
         }
         callback->processResult(status);
         result = callback->getResult();
+        if (result == TIME_LIMIT_EXCEEDED) {
+            timeConsumption = timeLimit + 1;
+        }
+        if (result == MEMORY_LIMIT_EXCEEDED) {
+            memoryConsumption = memoryLimit + 1;
+        }
+        if (sendRunningMessage(fdSocket,
+                               timeConsumption,
+                               memoryConsumption) == -1) {
+            result = INTERNAL_ERROR;
+        }
     }
     return result;
 }

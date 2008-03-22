@@ -37,10 +37,10 @@ using namespace std;
 // Returns 0 on success, -1 otherwise.
 int setLimit(int resource, unsigned int limit);
 
-// Returns the current time consumption of the specified process in seconds,
-// including both of the user time and the system time. If no such process
-// exists, returns -1.
-double readTimeConsumption(int pid);
+// Returns the current time consumption of the specified process in
+// milliseconds, including both of the user time and the system time. If no
+// such process exists, returns -1.
+int readTimeConsumption(int pid);
 
 // Returns the current maximum virtual memory consumption of the specified
 // process in kilobytes. VmExe and VmLib are excluded. If no such process

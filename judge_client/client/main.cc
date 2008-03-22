@@ -364,6 +364,18 @@ int saveData(int fdSocket, unsigned int problemId, unsigned int version) {
     if (checkData(fdSocket, tempDir) == -1) {
         return -1;
     }
+    if (link((tempDir + "/1.in").c_str(),
+             (tempDir + "/input").c_str()) == -1) {
+        LOG(SYSCALL_ERROR)<<"Can not create input";
+        sendReply(fdSocket, INTERNAL_ERROR);
+        return -1;
+    }
+    if (link((tempDir + "/1.out").c_str(),
+             (tempDir + "/output").c_str()) == -1) {
+        LOG(SYSCALL_ERROR)<<"Can not create output";
+        sendReply(fdSocket, INTERNAL_ERROR);
+        return -1;
+    }
     if (rename(tempDir.c_str(), versionDir.c_str()) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to rename "<<tempDir<<" to "<<versionDir;
         sendReply(fdSocket, INTERNAL_ERROR);

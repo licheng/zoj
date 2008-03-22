@@ -179,11 +179,20 @@ int runSpecialJudgeExe(string specialJudgeFilename,
         specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
     specialJudgeFilename =
         specialJudgeFilename.substr(workingDirectory.size() + 1);
+    string pOutputFilename = workingDirectory + "/p.out";
+    unlink(pOutputFilename.c_str());
+    if (link(programOutputFilename.c_str(), pOutputFilename.c_str()) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to link from "<<programOutputFilename
+                          <<" to "<<pOutputFilename;
+        return INTERNAL_ERROR;
+    }
     char path[PATH_MAX + 1];
     getcwd(path, sizeof(path));
     const char* commands[] = {
         specialJudgeFilename.c_str(),
         specialJudgeFilename.c_str(),
+        "p.out",
+        inputFilename.substr(inputFilename.rfind('/') + 1).c_str(),
         inputFilename.substr(inputFilename.rfind('/') + 1).c_str(),
         NULL};
     StartupInfo info;
@@ -192,7 +201,7 @@ int runSpecialJudgeExe(string specialJudgeFilename,
     info.timeLimit = 10;
     info.memoryLimit = 256 * 1024;
     info.outputLimit = 16;
-    info.fileLimit = 5; // stdin, stdout, stderr, input
+    info.fileLimit = 6; // stdin, stdout, stderr, input
     info.trace = 1;
     info.workingDirectory = workingDirectory.c_str();
     ExecutiveCallback callback;
