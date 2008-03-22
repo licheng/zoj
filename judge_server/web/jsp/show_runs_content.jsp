@@ -35,7 +35,7 @@
         <logic:messagesNotPresent property="error">
         <div id="content_title"><bean:write name="contest" property="title"/></div>
         <div id="content_body">
-            <form name="SubmissionSearchForm" method="POST" action="<%=actionPath%>">
+            <form name="SubmissionSearchForm" method="GET" action="<%=actionPath%>">
             <input type="hidden" name="contestId" value="<bean:write name="contest" property="id"/>">
             <input type="hidden" name="search" value="<bean:write name="SubmissionSearchForm" property="search"/>">
                 <div id="searchRunsLink">
@@ -297,6 +297,7 @@ function rejudge() {
     if (!confirm("<bean:write name="totalSubmissions"/> submissions are selected. Are you sure to rejudge them?")) {
       return;
     }
+    document.SubmissionSearchForm.method = 'POST';
     document.SubmissionSearchForm.rejudge.value = 'true';
     document.SubmissionSearchForm.submit();
 } 

@@ -23,7 +23,7 @@ public class CachedJudgeQueue extends JudgeQueue {
         if (cache.size() == this.cacheSize) {
             cacheIndex.remove(cache.poll().getId());
         }
-        cache.push(submission);
+        cache.offer(submission);
         cacheIndex.put(submission.getId(), submission);
         return submission;
     }

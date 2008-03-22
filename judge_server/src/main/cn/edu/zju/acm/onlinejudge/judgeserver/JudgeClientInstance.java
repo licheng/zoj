@@ -242,7 +242,11 @@ public class JudgeClientInstance extends Thread {
                 List<Reference> specialJudges = DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
                         ReferenceType.CHECKER_SOURCE);
                 if (specialJudges.size() > 0) {
-                    zipOut.putNextEntry(new ZipEntry(String.format("judge.%s", specialJudges.get(0).getContentType())));
+                	String contentType = "cc";
+                	if (specialJudges.get(0).getContentType() != null) {
+                		contentType = specialJudges.get(0).getContentType();
+                	}
+                    zipOut.putNextEntry(new ZipEntry(String.format("judge.%s", contentType)));
                     CopyUtils.copy(specialJudges.get(0).getContent(), zipOut);
                 }
             }

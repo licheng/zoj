@@ -61,6 +61,7 @@ public class ShowRunsAction extends BaseAction {
     	judgeReplies.add(JudgeReply.MEMORY_LIMIT_EXCEEDED);
     	judgeReplies.add(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
     	judgeReplies.add(JudgeReply.COMPILATION_ERROR); 
+    	judgeReplies.add(JudgeReply.QUEUING);
         
     }
 
@@ -167,7 +168,8 @@ public class ShowRunsAction extends BaseAction {
             submission.setJudgeReply(JudgeReply.QUEUING);
             submission.setMemoryConsumption(0);
             submission.setTimeConsumption(0);
-            JudgeService.getInstance().judge(submission);    
+            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0);
+            JudgeService.getInstance().rejudge(submission);    
         }
         
     }

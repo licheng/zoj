@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
+import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 
 public class JudgeService {
     private CachedJudgeQueue queue;
@@ -16,11 +17,11 @@ public class JudgeService {
     private ServerSocket serverSocket;
 
     private static JudgeService instance;
-    /*
-     * static { try { instance = new JudgeService(128,
-     * Integer.parseInt(ConfigManager.getValue("queue_port"))); } catch
-     * (Exception e) { throw new ExceptionInInitializerError(e); } }
-     */
+    
+    static { try { instance = new JudgeService(128,
+     Integer.parseInt(ConfigManager.getValue("queue_port"))); } catch
+     (Exception e) { throw new ExceptionInInitializerError(e); } }
+    
 
     private List<JudgeClient> clients = new ArrayList<JudgeClient>();
 

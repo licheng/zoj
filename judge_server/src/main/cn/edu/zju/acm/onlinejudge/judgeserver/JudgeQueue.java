@@ -26,7 +26,7 @@ class JudgeQueue {
 
     public synchronized void rejudge(Submission submission) {
         submission.setJudgeReply(JudgeReply.QUEUING);
-        rejudgeList.push(submission);
+        rejudgeList.offer(submission);
         notifyAll();
     }
 

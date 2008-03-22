@@ -226,6 +226,7 @@
         <action path="/showContestRuns" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRunsAction"
             validate="false" name="SubmissionSearchForm" scope="request" input="/show_contest_runs.jsp">
             <forward name="success" path="/show_contest_runs.jsp" redirect="false"/>
+            
             <forward name="failure" path="/show_contest_runs.jsp" redirect="false"/>
             <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
         </action>
