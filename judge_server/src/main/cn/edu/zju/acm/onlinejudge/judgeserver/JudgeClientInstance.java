@@ -88,14 +88,14 @@ public class JudgeClientInstance extends Thread {
                     e.printStackTrace();
                     submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
                 }
-                if (submission.getJudgeReply() == JudgeReply.JUDGE_INTERNAL_ERROR) {
-                    queue.rejudge(submission);
-                    break;
-                }
                 submissionDAO.beginTransaction();
                 submissionDAO.update(submission);
                 submissionDAO.commitTransaction();
                 submission.setContent(null);
+                if (submission.getJudgeReply() == JudgeReply.JUDGE_INTERNAL_ERROR) {
+                    // queue.rejudge(submission);
+                    break;
+                }
                 synchronized (this) {
                     while (this.tired) {
                         this.wait();
