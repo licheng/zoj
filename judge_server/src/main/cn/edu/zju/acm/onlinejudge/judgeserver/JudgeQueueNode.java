@@ -14,19 +14,19 @@ public class JudgeQueueNode {
     private static SubmissionDAO submissionDAO = DAOFactory.getSubmissionDAO();
 
     public JudgeQueueNode(Submission submission) {
-	submissionId = submission.getId();
-	submissionReference = new WeakReference<Submission>(submission);
+        submissionId = submission.getId();
+        submissionReference = new WeakReference<Submission>(submission);
     }
 
     public Submission getSubmission() throws Exception {
-	Submission submission = submissionReference.get();
-	if (submission == null) {
-	    submission = submissionDAO.getSubmission(submissionId);
-	}
-	return submission;
+        Submission submission = submissionReference.get();
+        if (submission == null) {
+            submission = submissionDAO.getSubmission(submissionId);
+        }
+        return submission;
     }
 
     public long getSubmissionId() {
-	return submissionId;
+        return submissionId;
     }
 }

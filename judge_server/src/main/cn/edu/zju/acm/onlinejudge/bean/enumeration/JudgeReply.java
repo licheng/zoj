@@ -3,6 +3,9 @@
  */
 package cn.edu.zju.acm.onlinejudge.bean.enumeration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  * This class represents the Judge Reply.
@@ -13,15 +16,7 @@ package cn.edu.zju.acm.onlinejudge.bean.enumeration;
  */
 public class JudgeReply {
 
-    // public static final int OutputLimitExceeded = 8;
-    // public final static JudgeReply OUT_OF_CONTEST_TIME = new JudgeReply(8,
-    // "Out of Contest Time", "Out of Contest Time", null, false);
-    // public final static JudgeReply RESTRICTED_FUNCTION = new JudgeReply(9,
-    // "Restricted Function", "Restricted Function", null, false);
-    // public final static JudgeReply OUTPUT_LIMIT_EXCEEDED = new JudgeReply(10,
-    // "Output Limit Exceeded", "Output Limit Exceeded", null, false);
-
-    // public static final int Success = 0;
+    private static List<JudgeReply> replies = new ArrayList<JudgeReply>();    
 
     public final static JudgeReply QUEUING = new JudgeReply(0, "Queuing", "Queuing", null, false);
 
@@ -35,43 +30,59 @@ public class JudgeReply {
 
     public final static JudgeReply ACCEPTED = new JudgeReply(5, "Accepted", "Accepted", null, false);
 
-    public final static JudgeReply TIME_LIMIT_EXCEEDED =
-	    new JudgeReply(6, "Time Limit Exceeded", "Time Limit Exceeded", null, false);
+    public final static JudgeReply TIME_LIMIT_EXCEEDED = new JudgeReply(6, "Time Limit Exceeded",
+            "Time Limit Exceeded", null, false);
 
-    public final static JudgeReply MEMORY_LIMIT_EXCEEDED =
-	    new JudgeReply(7, "Memory Limit Exceeded", "Memory Limit Exceeded", null, false);
+    public final static JudgeReply MEMORY_LIMIT_EXCEEDED = new JudgeReply(7, "Memory Limit Exceeded",
+            "Memory Limit Exceeded", null, false);
 
-    public final static JudgeReply OUT_OF_CONTEST_TIME =
-	    new JudgeReply(8, "Out of Contest Time", "Out of Contest Time", null, false);
+    public final static JudgeReply OUT_OF_CONTEST_TIME = new JudgeReply(8, "Out of Contest Time",
+            "Out of Contest Time", null, false);
 
-    public final static JudgeReply RESTRICTED_FUNCTION =
-	    new JudgeReply(9, "Restricted Function", "Restricted Function", null, false);
+    public final static JudgeReply RESTRICTED_FUNCTION = new JudgeReply(9, "Restricted Function",
+            "Restricted Function", null, false);
 
-    public final static JudgeReply OUTPUT_LIMIT_EXCEEDED =
-	    new JudgeReply(10, "Output Limit Exceeded", "Output Limit Exceeded", null, false);
+    public final static JudgeReply OUTPUT_LIMIT_EXCEEDED = new JudgeReply(10, "Output Limit Exceeded",
+            "Output Limit Exceeded", null, false);
 
-    public final static JudgeReply NO_SUCH_PROBLEM =
-	    new JudgeReply(11, "No such Problem", "No such Problem", null, false);
+    public final static JudgeReply COMPILATION_ERROR = new JudgeReply(12, "Compilation Error", "Compilation Error",
+            null, false);
 
-    public final static JudgeReply COMPILATION_ERROR =
-	    new JudgeReply(12, "Compilation Error", "Compilation Error", null, false);
+    public final static JudgeReply PRESENTATION_ERROR = new JudgeReply(13, "Presentation Error", "Presentation Error",
+            null, false);
 
-    public final static JudgeReply PRESENTATION_ERROR =
-	    new JudgeReply(13, "Presentation Error", "Presentation Error", null, false);
+    public final static JudgeReply JUDGE_INTERNAL_ERROR = new JudgeReply(14, "Judge Internal Error",
+            "Judge Internal Error", null, false);
 
-    public final static JudgeReply JUDGE_INTERNAL_ERROR =
-	    new JudgeReply(14, "Judge Internal Error", "Judge Internal Error", null, false);
+    public final static JudgeReply FLOATING_POINT_ERROR = new JudgeReply(15, "Floating Point Error",
+            "Floating Point Error", null, false);
 
-    public final static JudgeReply FLOATING_POINT_ERROR =
-	    new JudgeReply(15, "Floating Point Error", "Floating Point Error", null, false);
-
-    public final static JudgeReply SEGMENTATION_FAULT =
-	    new JudgeReply(16, "Segmentation Fault", "Segmentation Fault", null, false);
+    public final static JudgeReply SEGMENTATION_FAULT = new JudgeReply(16, "Segmentation Fault", "Segmentation Fault",
+            null, false);
 
     public final static JudgeReply JUDGING = new JudgeReply(19, "Judging", "Judging", null, false);
-    
-    public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED = new JudgeReply(20, "Submission Limit Exceeded", "Submission Limit Exceeded", null, false);
 
+    public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED = new JudgeReply(20, "Submission Limit Exceeded",
+            "Submission Limit Exceeded", null, false);
+    public final static JudgeReply READY = new JudgeReply(100, "Ready", "Ready", null, false);
+    public final static JudgeReply UNSUPPORTED_SOURCE_FILE_TYPE = new JudgeReply(101, "Unsupported Source File Type",
+            "Unsupported Source File Type", null, false);
+    public final static JudgeReply NO_SUCH_PROBLEM = new JudgeReply(102, "No Such Problem",
+            "No Such Problem", null, false);
+    public final static JudgeReply INVALID_TESTCASE = new JudgeReply(103, "Invalid Testcase",
+            "Invalid Testcase", null, false);
+    public final static JudgeReply INVALID_TIME_LIMIT = new JudgeReply(104, "Invalid Time Limit",
+            "Invalid Time Limit", null, false);
+    public final static JudgeReply INVALID_MEMORY_LIMIT = new JudgeReply(105, "Invalid Time Limit",
+            "Invalid Time Limit", null, false);
+    public final static JudgeReply INVALID_OUTPUT_LIMIT = new JudgeReply(106, "Invalid Output Limit",
+            "Invalid Output Limit", null, false);
+    public final static JudgeReply INVALID_DATA_SIZE = new JudgeReply(107, "Invalid Data Size",
+            "Invalid Data Size", null, false);
+    public final static JudgeReply INVALID_DATA = new JudgeReply(108, "Invalid Data",
+            "Invalid Data", null, false);
+    public final static JudgeReply INVALID_SOURCE_FILE_TYPE = new JudgeReply(109, "Invalid Source File Type",
+            "Invalid Source File Type", null, false);
     /**
      * <p>
      * Represents the id of JudgeReply.
@@ -106,43 +117,44 @@ public class JudgeReply {
      * </p>
      */
     private String style;
-
+    
     /**
      * <p>
      * Create a new instance of JudgeReply.
      * </p>
      * 
      * @param id
-     *                the id of JudgeReply.
+     *            the id of JudgeReply.
      * @param name
-     *                the name of JudgeReply.
+     *            the name of JudgeReply.
      * @param description
-     *                the description of JudgeReply.
+     *            the description of JudgeReply.
      * @param committed
-     *                whether it is committed.
+     *            whether it is committed.
      * @param style
-     *                wthe style
+     *            wthe style
      * 
      * @throws NullPointerException
-     *                 if any argument is null.
+     *             if any argument is null.
      * @throws IllegalArgumentException
-     *                 if the name is an empty string.
+     *             if the name is an empty string.
      */
     public JudgeReply(long id, String name, String description, String style, boolean committed) {
-	if (name == null) {
-	    throw new NullPointerException("name should not be null.");
-	}
-	if (description == null) {
-	    throw new NullPointerException("description should not be null.");
-	}
-	if (name.trim().length() == 0) {
-	    throw new IllegalArgumentException("name should not be empty string.");
-	}
-	this.id = id;
-	this.name = name;
-	this.description = description;
-	this.committed = committed;
-	this.style = style;
+        if (name == null) {
+            throw new NullPointerException("name should not be null.");
+        }
+        if (description == null) {
+            throw new NullPointerException("description should not be null.");
+        }
+        if (name.trim().length() == 0) {
+            throw new IllegalArgumentException("name should not be empty string.");
+        }
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.committed = committed;
+        this.style = style;
+        replies.add(this);
     }
 
     /**
@@ -153,7 +165,7 @@ public class JudgeReply {
      * @return id the id of the JudgeReply.
      */
     public long getId() {
-	return this.id;
+        return this.id;
     }
 
     /**
@@ -164,7 +176,7 @@ public class JudgeReply {
      * @return id the name of the JudgeReply.
      */
     public String getName() {
-	return this.name;
+        return this.name;
     }
 
     /**
@@ -175,7 +187,7 @@ public class JudgeReply {
      * @return id the description of the JudgeReply.
      */
     public String getDescription() {
-	return this.description;
+        return this.description;
     }
 
     /**
@@ -186,7 +198,7 @@ public class JudgeReply {
      * @return true if the JudgeReply is committed.
      */
     public boolean isCommitted() {
-	return this.committed;
+        return this.committed;
     }
 
     /**
@@ -197,7 +209,7 @@ public class JudgeReply {
      * @return id the style of the JudgeReply.
      */
     public String getStyle() {
-	return this.style;
+        return this.style;
     }
 
     /**
@@ -207,7 +219,7 @@ public class JudgeReply {
      * @return the name
      */
     public String toString() {
-	return this.name;
+        return this.name;
     }
 
     /**
@@ -218,10 +230,10 @@ public class JudgeReply {
      * @return true if and only if the ids of the two are the same.
      * 
      * @param object
-     *                the object to compare.
+     *            the object to compare.
      */
     public boolean equals(Object object) {
-	return object instanceof JudgeReply && this.id == ((JudgeReply) object).id;
+        return object instanceof JudgeReply && this.id == ((JudgeReply) object).id;
     }
 
     /**
@@ -232,7 +244,7 @@ public class JudgeReply {
      * @return the hash code of this instance.
      */
     public int hashCode() {
-	return new Long(this.id).hashCode();
+        return new Long(this.id).hashCode();
     }
 
     /**
@@ -243,48 +255,15 @@ public class JudgeReply {
      * @return the JudgeReply Type represented by id, or null if none is found.
      * 
      * @param id
-     *                the id of JudgeReply
+     *            the id of JudgeReply
      */
     public static JudgeReply findById(long id) {
-	if (QUEUING.id == id) {
-	    return QUEUING;
-	} else if (COMPILING.id == id) {
-	    return COMPILING;
-	} else if (RUNNING.id == id) {
-	    return RUNNING;
-	} else if (RUNTIME_ERROR.id == id) {
-	    return RUNTIME_ERROR;
-	} else if (WRONG_ANSWER.id == id) {
-	    return WRONG_ANSWER;
-	} else if (ACCEPTED.id == id) {
-	    return ACCEPTED;
-	} else if (TIME_LIMIT_EXCEEDED.id == id) {
-	    return TIME_LIMIT_EXCEEDED;
-	} else if (MEMORY_LIMIT_EXCEEDED.id == id) {
-	    return MEMORY_LIMIT_EXCEEDED;
-	} else if (OUT_OF_CONTEST_TIME.id == id) {
-	    return OUT_OF_CONTEST_TIME;
-	} else if (RESTRICTED_FUNCTION.id == id) {
-	    return RESTRICTED_FUNCTION;
-	} else if (OUTPUT_LIMIT_EXCEEDED.id == id) {
-	    return OUTPUT_LIMIT_EXCEEDED;
-	} else if (NO_SUCH_PROBLEM.id == id) {
-	    return NO_SUCH_PROBLEM;
-	} else if (COMPILATION_ERROR.id == id) {
-	    return COMPILATION_ERROR;
-	} else if (PRESENTATION_ERROR.id == id) {
-	    return PRESENTATION_ERROR;
-	} else if (JUDGE_INTERNAL_ERROR.id == id) {
-	    return JUDGE_INTERNAL_ERROR;
-	} else if (SEGMENTATION_FAULT.id == id) {
-	    return SEGMENTATION_FAULT;
-	} else if (FLOATING_POINT_ERROR.id == id) {
-	    return FLOATING_POINT_ERROR;
-	} else if (SUBMISSION_LIMIT_EXCEEDED.id == id) {
-        return SUBMISSION_LIMIT_EXCEEDED;
-    } else {
-	    return null;
-	}
+        for (JudgeReply reply : replies) {
+            if (reply.getId() == id) {
+                return reply;
+            }
+        }
+        return null;
     }
 
     /**
@@ -295,49 +274,16 @@ public class JudgeReply {
      * @return the JudgeReply Type represented by name, or null if none matchs.
      * 
      * @param name
-     *                the name of JudgeReply.
+     *            the name of JudgeReply.
      */
     public static JudgeReply findByName(String name) {
-	if (QUEUING.description.equalsIgnoreCase(name)) {
-	    return QUEUING;
-	} else if (COMPILING.description.equalsIgnoreCase(name)) {
-	    return COMPILING;
-	} else if (RUNNING.description.equalsIgnoreCase(name)) {
-	    return RUNNING;
-	} else if (RUNTIME_ERROR.description.equalsIgnoreCase(name)) {
-	    return RUNTIME_ERROR;
-	} else if (WRONG_ANSWER.description.equalsIgnoreCase(name)) {
-	    return WRONG_ANSWER;
-	} else if (ACCEPTED.description.equalsIgnoreCase(name)) {
-	    return ACCEPTED;
-	} else if (TIME_LIMIT_EXCEEDED.description.equalsIgnoreCase(name)) {
-	    return TIME_LIMIT_EXCEEDED;
-	} else if (MEMORY_LIMIT_EXCEEDED.description.equalsIgnoreCase(name)) {
-	    return MEMORY_LIMIT_EXCEEDED;
-	} else if (OUT_OF_CONTEST_TIME.description.equalsIgnoreCase(name)) {
-	    return OUT_OF_CONTEST_TIME;
-	} else if (RESTRICTED_FUNCTION.description.equalsIgnoreCase(name)) {
-	    return RESTRICTED_FUNCTION;
-	} else if (OUTPUT_LIMIT_EXCEEDED.description.equalsIgnoreCase(name)) {
-	    return OUTPUT_LIMIT_EXCEEDED;
-	} else if (NO_SUCH_PROBLEM.description.equalsIgnoreCase(name)) {
-	    return NO_SUCH_PROBLEM;
-	} else if (COMPILATION_ERROR.description.equalsIgnoreCase(name)) {
-	    return COMPILATION_ERROR;
-	} else if (PRESENTATION_ERROR.description.equalsIgnoreCase(name)) {
-	    return PRESENTATION_ERROR;
-	} else if (FLOATING_POINT_ERROR.description.equalsIgnoreCase(name)) {
-	    return FLOATING_POINT_ERROR;
-	} else if (SEGMENTATION_FAULT.description.equalsIgnoreCase(name)) {
-        return SEGMENTATION_FAULT;
-    } else if (JUDGE_INTERNAL_ERROR.description.equalsIgnoreCase(name)) {
-        return JUDGE_INTERNAL_ERROR;
-    } else if (SUBMISSION_LIMIT_EXCEEDED.description.equalsIgnoreCase(name)) {
-        return SUBMISSION_LIMIT_EXCEEDED;
-    } else {
-	    return null;
-	}
-    
+        for (JudgeReply reply : replies) {
+            if (reply.getName().equals(name)) {
+                return reply;
+            }
+        }
+        return null;
+
     }
 
 }

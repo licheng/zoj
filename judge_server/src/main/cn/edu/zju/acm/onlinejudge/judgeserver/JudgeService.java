@@ -1,96 +1,99 @@
 package cn.edu.zju.acm.onlinejudge.judgeserver;
 
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
-import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 
 public class JudgeService {
-    private Map<String, JudgeServer> serverMap = new HashMap<String, JudgeServer>();
+    private CachedJudgeQueue queue;
 
-    private JudgeQueue queue;
-
-    private int maxSubmissionsInCache = 0;
-
-    private int cacheCapacity;
-
-    private JudgeCache cache;
+    private ServerSocket serverSocket;
 
     private static JudgeService instance;
-    static {
-	instance = new JudgeService(128);
-	try {
-	    for (String value : ConfigManager.getValues("judge_server")) {
-		String[] s = value.split(":");
-		instance.addJudgeServer(InetAddress.getByName(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
-	    }
-	} catch (Exception e) {
-	    throw new ExceptionInInitializerError(e);
-	}
-    }
+    /*
+     * static { try { instance = new JudgeService(128,
+     * Integer.parseInt(ConfigManager.getValue("queue_port"))); } catch
+     * (Exception e) { throw new ExceptionInInitializerError(e); } }
+     */
 
-    public JudgeService(int cacheCapacity) {
-	queue = new JudgeQueue() {
+    private List<JudgeClient> clients = new ArrayList<JudgeClient>();
 
-	    @Override
-	    public synchronized Submission poll() throws Exception {
-		Submission submission = super.poll();
-		cache.add(submission);
-		return submission;
-	    }
+    private Logger logger;
 
-	    @Override
-	    public synchronized boolean push(Submission submission) {
-		if (cache.get(submission.getId()) == null) {
-		    return super.push(submission);
-		}
-		return false;
-	    }
-	};
-	if (cacheCapacity < 128) {
-	    cacheCapacity = 128;
-	}
-	this.cacheCapacity = cacheCapacity;
-	cache = new JudgeCache(cacheCapacity);
-	maxSubmissionsInCache = 32;
-    }
-
-    public void addJudgeServer(InetAddress address, int port, int maxJobs) throws InterruptedException {
-	JudgeServer server = new JudgeServer(queue, address, port, maxJobs);
-	synchronized (serverMap) {
-	    serverMap.put(address + ":" + port, server);
-	    maxSubmissionsInCache += maxJobs;
-	    if (cacheCapacity < maxSubmissionsInCache) {
-		synchronized (queue) {
-		    cache = new JudgeCache(cacheCapacity * 2, cache);
-		}
-	    }
-	    server.start();
-	}
-
-    }
-
-    public void removeJudgeServer(InetAddress address, int port) throws InterruptedException {
-	synchronized (serverMap) {
-	    JudgeServer server = serverMap.remove(address + ":" + port);
-	    if (server != null) {
-		maxSubmissionsInCache -= server.getMaxJobs();
-		server.stop();
-	    }
-	}
+    public JudgeService(int cacheCapacity, int port) throws IOException {
+        logger = Logger.getLogger(JudgeService.class.getName());
+        if (cacheCapacity < 128) {
+            cacheCapacity = 128;
+        }
+        queue = new CachedJudgeQueue(cacheCapacity);
+        this.serverSocket = new ServerSocket(port);
+        logger.info("Listening on port " + port);
+        new Thread() {
+            public void run() {
+                while (!serverSocket.isClosed()) {
+                    try {
+                        Socket socket = serverSocket.accept();
+                        logger.info("Connection from " + socket.getInetAddress().getCanonicalHostName() + ":"
+                                + socket.getPort());
+                        JudgeClient client = new JudgeClient(queue, socket, 5);
+                        synchronized (clients) {
+                            for (int i = clients.size() - 1; i >= 0; --i) {
+                                if (!clients.get(i).isAlive()) {
+                                    clients.remove(i);
+                                }
+                            }
+                            client.start();
+                            clients.add(client);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
     }
 
     public boolean judge(Submission submission) throws Exception {
-	return queue.push(submission);
+        return queue.push(submission);
+    }
+
+    public void rejudge(Submission submission) throws Exception {
+        queue.pushIgnoreCache(submission);
     }
 
     public Submission getSubmission(long id) {
-	return cache.get(id);
+        return queue.getSubmissionInCache(id);
     }
 
     public static JudgeService getInstance() {
-	return instance;
+        return instance;
+    }
+
+    public List<JudgeClient> getClients() {
+        synchronized (clients) {
+            for (int i = clients.size() - 1; i >= 0; --i) {
+                if (!clients.get(i).isAlive()) {
+                    clients.remove(i);
+                }
+            }
+            return new ArrayList<JudgeClient>(clients);
+        }
+    }
+
+    public void terminate() {
+        try {
+            this.serverSocket.close();
+            for (JudgeClient client : this.clients) {
+                client.terminate();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

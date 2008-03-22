@@ -5,10 +5,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
-	JudgeCacheUnitTest.class,
-	JudgeDaemonUnitTest.class,
+	JudgeClientInstanceUnitTest.class,
 	JudgeQueueUnitTest.class,
-	JudgeServerProxyUnitTest.class,
-	JudgeServerUnitTest.class })
+	JudgeClientUnitTest.class })
 public class TestSuite {
 }
