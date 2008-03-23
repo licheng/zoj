@@ -36,4 +36,7 @@ tomcat_path should be changed to correct application deploy path
 
 6) run ant build
 
-Judge Client
+Judge Client (TODO)
+
+Start judge client
+/zoj/judge_client --root=/zoj --lang=cc,c,pas --uid=1000 --gid=1000 --daemonize --logtostderr=false --queue_address=127.0.0.1 --queue_port=8301

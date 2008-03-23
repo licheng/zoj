@@ -347,6 +347,7 @@ function deleteProblem(problemId) {
                 </logic:present>  
                 <td> 
             </tr>
+            <%--
             <tr>
                 <td align="right">Checker</td>
                 <td>
@@ -356,6 +357,8 @@ function deleteProblem(problemId) {
                 </logic:present>  
                 <td> 
             </tr>
+            --%>
+             
             <tr>
                 <td align="right">Checker Source</td>
                 <td>

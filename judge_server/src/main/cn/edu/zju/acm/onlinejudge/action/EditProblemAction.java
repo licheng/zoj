@@ -146,6 +146,13 @@ public class EditProblemAction extends BaseAction {
             return;
         }
         
+        String name = formFile.getFileName();
+        String contentType = null;
+        int p = name.lastIndexOf('.');
+        if (p != -1) {
+        	contentType = name.substring(p + 1);
+        }
+        
         byte[] data = formFile.getFileData();
         
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
@@ -153,12 +160,14 @@ public class EditProblemAction extends BaseAction {
         if (references.size() == 0) {
             Reference ref = new Reference();
             ref.setContent(data);
+            ref.setContentType(contentType);
             ref.setReferenceType(type);
             ref.setSize(data.length);
             referencePersistence.createProblemReference(problemId, ref, user);
         } else {
             Reference ref = (Reference) references.get(0);
             ref.setContent(data);
+            ref.setContentType(contentType);
             ref.setSize(data.length);            
             referencePersistence.updateReference(ref, user);
         }

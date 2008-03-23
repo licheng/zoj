@@ -322,6 +322,8 @@
         </action> 
         <action path="/showSubmission" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowSubmissionAction">             
         </action>         
+        <action path="/showImage" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowImageAction">             
+        </action>
          
         <action path="/exportContestProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ExportProblemsAction">            
         </action>

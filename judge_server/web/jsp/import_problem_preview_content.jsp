@@ -42,8 +42,9 @@ function importProblems() {
 }
 
 </script>
-        <fieldset>
-            <legend>Import Problem Perview</legend><br>
+        <div id="content_title">Import Problem Perview</div>
+                <div id="content_body">
+                
             <logic:messagesPresent property="error">
             <div class="internalError">
                 <html:errors property="error"/>
@@ -115,7 +116,7 @@ function importProblems() {
 	        <td><%=e[i].getText() == null ? "No" : "Yes"%></td>
 	        <td><%=e[i].getInput() == null ? "No" : "Yes"%></td>
 	        <td><%=e[i].getOutput() == null ? "No" : "Yes"%></td>
-			<td><%=e[i].getChecker() == null ? (problem.isChecker() ? "No" : "N/A") : "Yes"%></td>
+			<td><%=e[i].getCheckerSource() == null ? (problem.isChecker() ? "No" : "N/A") : "Yes"%></td>
 		    </tr>
 	        <%
 		                }
@@ -127,9 +128,13 @@ function importProblems() {
                         for (Iterator it = pack.getImages().keySet().iterator(); it.hasNext();) {
 			                Object imageName = it.next();
             %>
-                <%=imageName+"<br>"%>
+                <%=imageName%>
+            <% if (Boolean.TRUE == pack.getUsedImages().get(imageName)) {%>
+                - <font color="red">already exists</font>
+            <% }%>
+                <br>
             <%
-		                }
+		       }
             %>
             </p>
             <p>
@@ -144,5 +149,5 @@ function importProblems() {
             %>
 
             </logic:messagesNotPresent>
-        </fieldset>
+        </div>
 

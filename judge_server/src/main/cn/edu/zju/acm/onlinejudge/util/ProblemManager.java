@@ -39,7 +39,7 @@ public class ProblemManager {
 	
 	public static final String CHECKER_FILE = "checker";
 	
-    public static final String CHECKER_SOURCE_FILE = "checker_source";
+    public static final String CHECKER_SOURCE_FILE = "checker";
     
     public static final String JUDGE_SOLUTION_FILE = "solution";
     
@@ -277,21 +277,31 @@ public class ProblemManager {
             entry.setCheckerSource(checkerSource);
             entry.setCheckerSourceType(checkerSourceType);
 			
+			
 			problemPackage.getProblemEntries()[index] = entry;		
 			index++;
 		}
 		// retrieve images
 		Map imageMap = new HashMap();
+		Map usedImages = new HashMap();
 		for (Iterator it = files.keySet().iterator(); it.hasNext();) {
 			String path = (String) it.next();
 			if (path.startsWith(IMAGES_DIR + "/")) {
 				String imageName = path.substring(IMAGES_DIR.length() + 1);
 				imageMap.put(imageName, files.get(path));
+				usedImages.put(imageName, Boolean.valueOf(isUsed(imageName)));
+				
 			}
 		}
 		problemPackage.setImages(imageMap);
+		problemPackage.setUsedImages(usedImages);
 		
 		return problemPackage; 		
+	}
+	
+	private static boolean isUsed(String image) {
+		File f = new File(ConfigManager.getImagePath(), image);
+		return f.exists();
 	}
 	
     private static String getFileType(String code, String name, Map files) {

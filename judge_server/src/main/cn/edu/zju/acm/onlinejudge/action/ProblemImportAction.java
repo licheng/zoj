@@ -5,14 +5,10 @@ package cn.edu.zju.acm.onlinejudge.action;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.CopyUtils;
@@ -27,21 +23,12 @@ import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Limit;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
-import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
-import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 import cn.edu.zju.acm.onlinejudge.form.ProblemImportForm;
-import cn.edu.zju.acm.onlinejudge.persistence.AuthorizationPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
-import cn.edu.zju.acm.onlinejudge.security.RoleSecurity;
-import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
-import cn.edu.zju.acm.onlinejudge.util.PasswordManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ProblemEntry;
 import cn.edu.zju.acm.onlinejudge.util.ProblemManager;
@@ -107,9 +94,7 @@ public class ProblemImportAction extends BaseAction {
         if (in != null) {
 	        ActionMessages messages = new ActionMessages();
 	        pack = ProblemManager.importProblem(in, messages);
-            System.out.println("******lala");
-            System.out.println("******" + messages.size());
-            seePackage(pack, messages);
+            //seePackage(pack, messages);
             
 	        if (messages.size() > 0) {
 	        	return handleFailure(mapping, context, messages);
@@ -177,6 +162,7 @@ public class ProblemImportAction extends BaseAction {
                     ProblemManager.CHECKER_FILE, null);
             createReference(ReferenceType.CHECKER_SOURCE, problems[i].getCheckerSource(), problemId, 0,
                     ProblemManager.CHECKER_SOURCE_FILE, problems[i].getCheckerSourceType());
+            
             createReference(ReferenceType.JUDGE_SOLUTION, problems[i].getSolution(), problemId, 0,
                     ProblemManager.JUDGE_SOLUTION_FILE, problems[i].getSolutionType());
              
@@ -186,7 +172,6 @@ public class ProblemImportAction extends BaseAction {
         
         Map images = pack.getImages();
         String imagesPath = ConfigManager.getImagePath();
-        new File(imagesPath).mkdirs();
         for (Iterator it = images.keySet().iterator(); it.hasNext();) {
             String name = (String) it.next();                
             String path = imagesPath + "/" + name;
