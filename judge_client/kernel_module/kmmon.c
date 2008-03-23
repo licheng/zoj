@@ -63,7 +63,7 @@ asmlinkage int (*old_fork)(struct pt_regs);
 asmlinkage int (*old_vfork)(struct pt_regs);
 asmlinkage unsigned long (*old_brk)(unsigned long);
 
-asmlinkage void suicide(int syscall) {
+void suicide(int syscall) {
     printk("Restricted syscall %d\n", syscall);
     send_sig(SIGKILL, current, 1);
 }
@@ -109,14 +109,12 @@ void asm_stuff(void) {
 "new_int80:\n"
         "pushl %%ebx;" // save EBX
         "movl %%esp, %%ebx;"
-        "andl %0, %%ebx;" // get the address of struct thread_info
-        "movl %c1(%%ebx), %%ebx;" // get the address of struct task
-        "andl %2, %c3(%%ebx);" // test if KMMON_MASK is set in task->flags
+        "andl %0, %%ebx;"
+        "movl %c1(%%ebx), %%ebx;" // equals the "current" macro for i386
+        "testl %2, %c3(%%ebx);" // test if KMMON_MASK is set in current->flags
         "jz normal;" // if not, jump to normal syscall
         "movl %4, %%ebx;" // load the address of syscall_filter_table
-        "movl 0(%%ebx, %%eax), %%ebx;" // load the status of current syscall in
-                                       // syscall_filter_table
-        "andl $3, %%ebx;" 
+        "testl $3, 0(%%ebx, %%eax);" // check syscall_filter_table[syscall] 
         "jz normal;" // 0 means enabled
         "jnp disable;" // Not 0, only can be 1 or 3. If the parity flag is not
                        // set, it should have odd number of 1s in the result,
@@ -127,7 +125,7 @@ void asm_stuff(void) {
         "pushl %%edi;"
         "pushl %%eax;"
         "call notify_tracer;" // notify the tracer
-        "andl $-1, %%eax;" // test if the return valud is 0
+        "testl %%eax, %%eax;" // test if the return value is 0
         "popl %%eax;"
         "popl %%edi;"
         "popl %%esi;"
@@ -135,9 +133,7 @@ void asm_stuff(void) {
         "popl %%ecx;"
         "jz normal;" // 0 means not killed, jump to normal syscall.
 "disable:\n"
-        "pushl %%eax;"
         "call suicide;" // kill the process
-        "popl %%eax;"
         "movl $0xffff, %%eax;" // set to an invalid syscall
 "normal:\n"
         "popl %%ebx;" // restore EBX
