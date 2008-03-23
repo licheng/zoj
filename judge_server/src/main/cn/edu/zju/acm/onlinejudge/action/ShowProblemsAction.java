@@ -114,7 +114,7 @@ public class ShowProblemsAction extends BaseAction {
                 checkExists("Input", getReferenceLength(p, ReferenceType.INPUT), "ERROR", checkMessages, p);
                 if (p.isChecker()) {
                     checkExists("Output", getReferenceLength(p, ReferenceType.OUTPUT), "WARNING", checkMessages, p);
-                    checkExists("Checker", getReferenceLength(p, ReferenceType.CHECKER), "WARNING", checkMessages, p);
+                    //checkExists("Checker", getReferenceLength(p, ReferenceType.CHECKER), "WARNING", checkMessages, p);
                     checkExists("Checker source", getReferenceLength(p, ReferenceType.CHECKER_SOURCE), "ERROR", checkMessages, p);
                 } else {
                     checkExists("Output", getReferenceLength(p, ReferenceType.OUTPUT), "ERROR", checkMessages, p);
