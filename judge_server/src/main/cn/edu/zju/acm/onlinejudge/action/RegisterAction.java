@@ -17,6 +17,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.AuthorizationPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
 import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
+import cn.edu.zju.acm.onlinejudge.util.Features;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
 /**
@@ -52,7 +53,10 @@ public class RegisterAction extends BaseAction {
      * @throws Exception any errors happened
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-
+    	if (!Features.register()) {
+    		context.getResponse().sendError(404);
+            return null;
+    	}
     	UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
     	
     	ProfileForm profileForm = (ProfileForm) form;    	    	

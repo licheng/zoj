@@ -3,6 +3,7 @@ package cn.edu.zju.acm.onlinejudge.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -20,9 +21,17 @@ public class Utility {
     }    
     public static boolean validateTimestamp(String timestamp) {
         try {
-          return format.parse(timestamp) != null;
+        	Date date = format.parse(timestamp);
+        	
+        	Calendar c = Calendar.getInstance();
+        	c.setTime(date);
+        	int year = c.get(Calendar.YEAR);
+        	if (year < 1901 || year > 3000) {
+        		return false;
+        	}
+        	return true;
         } catch (ParseException e) {
-          return false;
+        	return false;
         }
     }
     

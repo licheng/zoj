@@ -13,6 +13,7 @@ import org.apache.struts.action.ActionMessages;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.form.ProfileForm;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
+import cn.edu.zju.acm.onlinejudge.util.Features;
 import cn.edu.zju.acm.onlinejudge.util.PasswordManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
@@ -49,6 +50,11 @@ public class EditProfileAction extends BaseAction {
      * @throws Exception any errors happened
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
+    	if (!Features.editProfile()) {
+    		context.getResponse().sendError(404);
+            return null;
+    	}
+    	
     	if (!isLogin(context)) {   
     		return handleSuccess(mapping, context, "login");    		    		
     	}

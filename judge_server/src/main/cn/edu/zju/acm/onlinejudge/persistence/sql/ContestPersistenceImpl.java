@@ -57,7 +57,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	 * The statement to update problem limit id.
 	 */
 	private static final String UPDATE_PROBLEM_LIMIT = 
-		MessageFormat.format("UPDATE {0} SET {1}=? WHERE WHERE {2}=? AND {3}=?", 
+		MessageFormat.format("UPDATE {0} SET {1}=? WHERE {2}=? AND {3}=?", 
 							 new Object[] {DatabaseConstants.PROBLEM_TABLE, 				  						   
 				  						   DatabaseConstants.PROBLEM_LIMITS_ID,
 				  						   DatabaseConstants.PROBLEM_LIMITS_ID,
@@ -323,7 +323,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
     
     /**
      * Update the default limit.
-     * @param limit the defalut limit.
+     * @param limit the default limit.
      * @throws PersistenceException if failed to update the default limit
      */
     public void updateDefaultLimit(Limit limit) throws PersistenceException{
@@ -466,6 +466,14 @@ public class ContestPersistenceImpl implements ContestPersistence {
         	// update the limit              
             Limit limit = contest.getLimit();
             if (limit.getId() != DEFAULT_LIMIT_ID) {
+            	ps = conn.prepareStatement(INSERT_LIMIT);
+                ps.setInt(1, limit.getTimeLimit());
+                ps.setInt(2, limit.getMemoryLimit());
+                ps.setInt(3, limit.getOutputLimit());
+                ps.setInt(4, limit.getSubmissionLimit());
+                ps.executeUpdate();                        
+                limit.setId(Database.getLastId(conn, ps, rs));      
+            	/*
             	if (contestLimitId == DEFAULT_LIMIT_ID) {
 	            	ps = conn.prepareStatement(INSERT_LIMIT);
 	                ps.setInt(1, limit.getTimeLimit());
@@ -482,13 +490,14 @@ public class ContestPersistenceImpl implements ContestPersistence {
 		            ps.setInt(4, limit.getSubmissionLimit());
 		            ps.setLong(5, limit.getId());
 		            ps.executeUpdate();
-	            }                                               
+	            }    
+	            */                                           
             }	 
             if (contestLimitId != limit.getId()) {
             	ps = conn.prepareStatement(UPDATE_PROBLEM_LIMIT);
             	ps.setLong(1, limit.getId());
-            	ps.setLong(1, contest.getId());
-                ps.setLong(1, contestLimitId);
+            	ps.setLong(2, contest.getId());
+                ps.setLong(3, contestLimitId);
                 ps.executeUpdate();
             }
             

@@ -3,7 +3,7 @@
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 <%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
-
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.Features" %>
         <logic:messagesPresent property="error">
         <div class="internalError">
             <html:errors property="error"/>
@@ -69,7 +69,11 @@
             
             <br/>
             <blockquote>
+            <% if (Features.forgotPassword()) {%>
             <b>Forgot your password?</b> <a href="<%=request.getContextPath()%>/forgotPassword.do">Click here</a><br/>
+            <% } %>
+            <% if (Features.register()) {%>
             <b>New to ZOJ?</b> <a href="<%=request.getContextPath()%>/register.do">Register now</a>
+            <% } %>
             </blockquote>
         </div>

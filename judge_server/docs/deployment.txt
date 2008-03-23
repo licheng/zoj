@@ -1,9 +1,12 @@
 Database
 1) install MySQL 5.0 or above. The default charset should be UTF8
-2) create a database named zoj, or something else
-3) execute docs/all.sql by
+2) since input/output data is stored in database and some input/output may be pretty large,
+you need change the 'max_allowed_packet' to fit the input/output size. 
+e.g. /etc/mysql/my.cnf
+max_allowed_packet = 64M
+3) create a database named zoj, or something else
+4) execute docs/all.sql by
 source ~/zoj-read-only/judge_server/docs/all.sql
-
 
 
 Servlet Container
@@ -14,7 +17,7 @@ Judge Server
 svn checkout http://zoj.googlecode.com/svn/trunk/ zoj-read-only
 
 2) modify conf/log4j.properties.
-The log file path need be chagned.
+The log file path need be changed.
 
 3) modify oj.conf.
 image_path, judge_server, home_url need be changed.

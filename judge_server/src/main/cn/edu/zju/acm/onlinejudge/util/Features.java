@@ -13,4 +13,7 @@ public class Features {
 	public static boolean register() {
 		return "true".equalsIgnoreCase(ConfigManager.getValue("feature_register"));
 	}
+	public static boolean forgotPassword() {
+		return "true".equalsIgnoreCase(ConfigManager.getValue("feature_forgotPassword"));
+	}
 }

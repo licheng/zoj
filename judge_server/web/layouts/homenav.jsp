@@ -6,7 +6,7 @@
                 <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"><div><a href="<%=request.getContextPath()%>">Home</a></div></img>
                 </td></tr>
                 <logic:present name="oj_user">
-<% if (Features.register()) {%>                
+<% if (Features.editProfile()) {%>                
                 <tr><td class="<%="EditProfile".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/editProfile.do">Edit Profile</a>
                 </td></tr>
