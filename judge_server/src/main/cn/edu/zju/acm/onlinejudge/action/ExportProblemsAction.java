@@ -107,7 +107,7 @@ public class ExportProblemsAction extends BaseAction {
                 zipReference(p, "output", ReferenceType.OUTPUT, out);
                 zipReference(p, "solution", ReferenceType.JUDGE_SOLUTION, out);
                 zipReference(p, "checker", ReferenceType.CHECKER, out);
-                zipReference(p, "checker_source", ReferenceType.CHECKER_SOURCE, out);
+                zipReference(p, "checker", ReferenceType.CHECKER_SOURCE, out);
                 
                 sb.append(p.getCode()).append(",");
                 sb.append(p.getTitle()).append(",");
@@ -144,7 +144,14 @@ public class ExportProblemsAction extends BaseAction {
             return;
         }
         Reference ref = (Reference) refs.get(0);
-        out.putNextEntry(new ZipEntry(p.getCode() + "/" + ref.getName()));
+        if (type == ReferenceType.CHECKER_SOURCE || type == ReferenceType.JUDGE_SOLUTION) {
+        	String contentType = ref.getContentType();
+        	if (contentType == null) {
+        		contentType = "cc";
+        	}
+        	fileName += "." + contentType;
+        }
+        out.putNextEntry(new ZipEntry(p.getCode() + "/" + fileName));
         
         byte[] data = ref.getContent();
         out.write(data);                               
