@@ -415,7 +415,7 @@
                 scope="request" />
     </action-mappings>
 
-    <controller tempDir="d:/zojdev_temp"
+    <controller tempDir="c:/tmp"
                 maxFileSize="256M"
                 bufferSize="4096"
                 contentType="text/html;charset=UTF-8" 

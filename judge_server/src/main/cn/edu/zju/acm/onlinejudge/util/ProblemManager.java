@@ -286,17 +286,26 @@ public class ProblemManager {
 		Map usedImages = new HashMap();
 		for (Iterator it = files.keySet().iterator(); it.hasNext();) {
 			String path = (String) it.next();
-			if (path.startsWith(IMAGES_DIR + "/")) {
-				String imageName = path.substring(IMAGES_DIR.length() + 1);
+			if (isImageFile(path)) {
+				String imageName = new File(path).getName();
 				imageMap.put(imageName, files.get(path));
 				usedImages.put(imageName, Boolean.valueOf(isUsed(imageName)));
-				
 			}
 		}
 		problemPackage.setImages(imageMap);
 		problemPackage.setUsedImages(usedImages);
 		
 		return problemPackage; 		
+	}
+	
+	private static boolean isImageFile(String path) {
+		String name = path.toLowerCase();
+		return name.endsWith(".bmp") ||
+			path.endsWith(".gif") ||
+			path.endsWith(".tif") ||
+			path.endsWith(".png") ||
+			path.endsWith(".jpg") ||
+			path.endsWith(".jpeg");
 	}
 	
 	private static boolean isUsed(String image) {
