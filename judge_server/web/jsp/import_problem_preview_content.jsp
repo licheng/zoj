@@ -129,8 +129,11 @@ function importProblems() {
 			                Object imageName = it.next();
             %>
                 <%=imageName%>
-            <% if (Boolean.TRUE == pack.getUsedImages().get(imageName)) {%>
-                - <font color="red">already exists</font>
+            <% if (pack.getUsedImages().containsKey(imageName)) {%>
+                - <font color="blue">Already Exists <%=pack.getUsedImages().get(imageName)%></font>
+            <% }%>
+            <% if (pack.getDuplicateImages().containsKey(imageName)) {%>
+                - <font color="red">Duplicate <%=pack.getUsedImages().get(imageName)%></font>
             <% }%>
                 <br>
             <%

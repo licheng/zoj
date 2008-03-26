@@ -11,9 +11,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -241,7 +243,7 @@ public class ProblemManager {
 		ProblemPackage problemPackage = new ProblemPackage();
 		problemPackage.setProblemEntries(new ProblemEntry[entryMap.size()]);
 		
-		// retrive checker, input, output
+		// retrieve checker, input, output
 		index = 0;
 		for (Iterator it = entryMap.keySet().iterator(); it.hasNext();) {
 			ProblemEntry entry = (ProblemEntry) entryMap.get(it.next());
@@ -284,17 +286,29 @@ public class ProblemManager {
 		// retrieve images
 		Map imageMap = new HashMap();
 		Map usedImages = new HashMap();
+		Map duplicateImages = new HashMap();
 		for (Iterator it = files.keySet().iterator(); it.hasNext();) {
 			String path = (String) it.next();
 			if (isImageFile(path)) {
 				String imageName = new File(path).getName();
+				
+				if (imageMap.containsKey(imageName)) {					
+					String s = (String) duplicateImages.get(imageName);
+					s = (s == null ? "" : s) + " " + path;
+					duplicateImages.put(imageName, s);
+				}
+				if (isUsed(imageName)) {
+					String s = (String) usedImages.get(imageName);
+					s = (s == null ? "" : s) + " " + path;
+					usedImages.put(imageName, s);
+				}
 				imageMap.put(imageName, files.get(path));
-				usedImages.put(imageName, Boolean.valueOf(isUsed(imageName)));
+
 			}
 		}
 		problemPackage.setImages(imageMap);
 		problemPackage.setUsedImages(usedImages);
-		
+		problemPackage.setDuplicateImages(duplicateImages);
 		return problemPackage; 		
 	}
 	
