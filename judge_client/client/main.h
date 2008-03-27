@@ -27,7 +27,7 @@ using namespace std;
 #define MAX_TIME_LIMIT 300
 #define MAX_MEMORY_LIMIT (1024 * 1024)
 #define MAX_OUTPUT_LIMIT (16 * 1024)
-#define MAX_DATA_FILE_SIZE (16 * 1024)
+#define MAX_DATA_FILE_SIZE (16 * 1024 * 1024)
 #define HEADER_SIZE 9
 #define TESTCASE_MSG_SIZE 9
 
