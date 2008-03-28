@@ -730,7 +730,9 @@ int execMain(int argc, char* argv[]) {
         int fdSocket = accept(
                 fdServerSocket, (struct sockaddr*)&address, &addressLength);
         if (fdSocket == -1) {
-            LOG(SYSCALL_ERROR);
+            if (errno != EINTR) {
+                LOG(SYSCALL_ERROR);
+            }
             continue;
         }
         LOG(INFO)<<"Received connection from "<<address.sin_addr.s_addr<<":"<<address.sin_port;

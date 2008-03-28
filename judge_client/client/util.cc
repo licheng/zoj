@@ -263,15 +263,6 @@ sighandler_t installSignalHandler(
     act.sa_handler = handler;
     act.sa_mask = mask;
     act.sa_flags = flags;
-    if (signal == SIGALRM) {
-#ifdef SA_INTERRUPT
-        act.sa_flags |= SA_INTERRUPT;
-#endif
-    } else {
-#ifdef SA_RESTART
-        act.sa_flags |= SA_RESTART;
-#endif
-    }
     if (sigaction(signal, &act, &oact) < 0) {
         return SIG_ERR;
     }
