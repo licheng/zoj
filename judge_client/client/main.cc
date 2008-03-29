@@ -671,7 +671,7 @@ int childMain(int fdSocket) {
     // Loops until SIGTERM is received.
     while (!socket_closed && !terminated) {
         if (process(fdSocket) == -1) {
-            return -1;
+            break;
         }
         // clear all temporary files.
         system(StringPrintf("rm -f %s/*", working_root.c_str()).c_str());
