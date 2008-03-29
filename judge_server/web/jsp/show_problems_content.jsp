@@ -121,7 +121,6 @@ function deleteProblem(code, problemId) {
                         <td class="problemAdmin">
                             <a href="<%=request.getContextPath()%>/edit<%=actionName%>.do?problemId=<%=problem.getId()%>"><font color="red">Edit</font></a>
                             <a href="javascript:deleteProblem('<%=problem.getCode()%>',<%=problem.getId()%>)"><font color="red">Delete</font></a>
-                            
                         </td>
                         <% } %> 
                                                 
@@ -132,15 +131,13 @@ function deleteProblem(code, problemId) {
 
                     
                 </table>
-              <logic:present name="oj_security">
-              <logic:equal name="oj_security" property="superAdmin" value="true" scope="session">                
-              <blockquote>
-              	<a href="<%=request.getContextPath()%>/add<%=actionName%>.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Add Problem</font></a>&nbsp;&nbsp;&nbsp;
-              	<a href="<%=request.getContextPath()%>/export<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Export Problems</font></a>&nbsp;&nbsp;&nbsp;
-              	<a href="<%=request.getContextPath()%>/show<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>&check=ture"><font color="red">Check Problems</font></a>
-            	</blockquote>
-            	</logic:equal>
-              </logic:present>
+                <% if (admin) { %>
+                <blockquote>
+                <a href="<%=request.getContextPath()%>/add<%=actionName%>.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Add Problem</font></a>&nbsp;&nbsp;&nbsp;
+                <a href="<%=request.getContextPath()%>/export<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Export Problems</font></a>&nbsp;&nbsp;&nbsp;
+                <a href="<%=request.getContextPath()%>/show<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>&check=ture"><font color="red">Check Problems</font></a>
+                </blockquote>
+                <% } %>   
                 
             </form>
             
