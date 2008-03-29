@@ -159,7 +159,7 @@ int runExe(int fdSocket,
     info.procLimit = 1;
     info.fileLimit = 5;
     info.trace = 1;
-    ExecutiveCallback callback;
+    TraceCallback callback;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
         LOG(ERROR)<<"Fail to execute the program";

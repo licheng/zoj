@@ -739,6 +739,8 @@ TEST_F(SaveDataTest, Normal) {
     ASSERT_EQUAL((off_t)(sizeof(size) + size + 2), lseek(fd_, 0, SEEK_END));
 }
 
+DECLARE_ARG(bool, logtostderr);
+
 class ProcessTest : public TestFixture {
   protected:
     void setUp() {
@@ -773,12 +775,13 @@ class ProcessTest : public TestFixture {
         source_file_ = "ac.cc";
         data_file_ = "data.zip";
         installHandlers();
+        ARG_logtostderr = true;
     }
 
     void tearDown() {
         uninstallHandlers();
         fclose(fp_);
-        system(StringPrintf("rm -rf %s", ARG_root.c_str()).c_str());
+//        system(StringPrintf("rm -rf %s", ARG_root.c_str()).c_str());
     }
 
     void writeHeader() {

@@ -48,12 +48,7 @@ int doCompile(int fdSocket, const string& sourceFilename) {
     StartupInfo info;
     info.fdStderr = fdPipe[1];
     info.timeLimit = 30;
-    class Callback: public TraceCallback {
-        public:
-            // Nothing special should be done when the compiling process
-            // terminates.
-            virtual void onSIGCHLD(pid_t) { }
-    } callback;
+    TraceCallback callback;
     pid_t pid = createShellProcess(command.c_str(), info);
     close(fdPipe[1]);
     if (pid < 0) {

@@ -204,7 +204,7 @@ int runSpecialJudgeExe(string specialJudgeFilename,
     info.fileLimit = 6; // stdin, stdout, stderr, input
     info.trace = 1;
     info.workingDirectory = workingDirectory.c_str();
-    ExecutiveCallback callback;
+    TraceCallback callback;
     pid_t pid = createProcess(commands, info);
     if (pid == -1) {
         LOG(ERROR)<<"Fail to execute special judge";

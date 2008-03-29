@@ -626,6 +626,10 @@ void sigpipeHandler(int sig) {
     socket_closed = 1;
 }
 
+void sigchldHandler(int sig) {
+    while (waitpid(-1, NULL, 0) > 0 || errno == EINTR);
+}
+
 void notifyQueue(int port) {
     port = htonl(port);
     socket_closed = 1;
@@ -702,9 +706,9 @@ int execMain(int argc, char* argv[]) {
     }
     ARG_root = path;
 
-    sigset_t mask;
-    sigemptyset(&mask);
-    installSignalHandler(SIGTERM, sigtermHandler, 0, mask);
+    installSignalHandler(SIGCHLD, sigchldHandler);
+
+    installSignalHandler(SIGTERM, sigtermHandler);
 
     // prevents SIGPIPE to terminate the processes.
     installSignalHandler(SIGPIPE, sigpipeHandler);

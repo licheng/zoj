@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     int a, b;
     int result = 0;
-    ifstream fin(argv[1]);
+    ifstream fin(argv[2]);
     while (fin>>a>>b) {
         string s;
         for (;;) {

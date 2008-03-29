@@ -93,11 +93,6 @@ class TraceCallback {
         static TraceCallback* instance_;
 };
 
-class ExecutiveCallback: public TraceCallback {
-    public:
-
-};
-
 void installHandlers();
 void uninstallHandlers();
 
