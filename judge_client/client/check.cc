@@ -98,13 +98,13 @@ class TextFile {
         int fd_; 
 
         // A internal buffer used to store unread characters
-        char buffer_[1024];
+        unsigned char buffer_[1024];
         
         // The number of available characters in the buffer
         size_t bufferSize_;
 
         // A pointer pointing to the next available character in the buffer
-        char* ptr_;
+        unsigned char* ptr_;
 
         // the filename associated with this instance
         const string filename_;
