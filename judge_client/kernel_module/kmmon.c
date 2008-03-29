@@ -63,12 +63,7 @@ asmlinkage int (*old_fork)(struct pt_regs);
 asmlinkage int (*old_vfork)(struct pt_regs);
 asmlinkage unsigned long (*old_brk)(unsigned long);
 
-void suicide(int syscall) {
-    printk("Restricted syscall %d\n", syscall);
-    send_sig(SIGKILL, current, 1);
-}
-
-asmlinkage int notify_tracer(int syscall) {
+int notify_tracer(int syscall) {
     struct task_struct* p = current;
     struct siginfo info;
     info.si_signo = KMMON_SIG;
@@ -97,7 +92,12 @@ asmlinkage int notify_tracer(int syscall) {
         current->state = TASK_STOPPED;
         schedule();
     }
-    return current->exit_code;
+    if (current->exit_code) {
+        send_sig(SIGKILL, current, 1);
+        return 0xffff; // An invlaid syscall
+    } else {
+        return syscall;
+    }
 }
 
 extern void new_int80(void);
@@ -116,25 +116,15 @@ void asm_stuff(void) {
         "movl %4, %%ebx;" // load the address of syscall_filter_table
         "testl $3, 0(%%ebx, %%eax);" // check syscall_filter_table[syscall] 
         "jz normal;" // 0 means enabled
-        "jnp disable;" // Not 0, only can be 1 or 3. If the parity flag is not
-                       // set, it should have odd number of 1s in the result,
-                       // which is 1. Jump to disable.
         "pushl %%ecx;"
         "pushl %%edx;"
         "pushl %%esi;"
         "pushl %%edi;"
-        "pushl %%eax;"
         "call notify_tracer;" // notify the tracer
-        "testl %%eax, %%eax;" // test if the return value is 0
-        "popl %%eax;"
         "popl %%edi;"
         "popl %%esi;"
         "popl %%edx;"
         "popl %%ecx;"
-        "jz normal;" // 0 means not killed, jump to normal syscall.
-"disable:\n"
-        "call suicide;" // kill the process
-        "movl $0xffff, %%eax;" // set to an invalid syscall
 "normal:\n"
         "popl %%ebx;" // restore EBX
         "jmp *%5;" // jump to original int80

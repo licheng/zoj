@@ -19,21 +19,20 @@
  */
 
 // 0: enable
-// 1: disable
-// 3: notify tracer
+// 1: notify tracer
 static char syscall_filter_table[512] = {
     0, /*0, restart_syscall*/
-    3, /*1, exit*/
-    3, /*2, fork*/
+    1, /*1, exit*/
+    1, /*2, fork*/
     0, /*3, read*/
     0, /*4, write*/
-    3, /*5, open*/
+    1, /*5, open*/
     0, /*6, close*/
     0, /*7, waitpid*/
     1, /*8, creat*/
     1, /*9, link*/
     1, /*10, unlink*/
-    3, /*11, execve*/
+    1, /*11, execve*/
     1, /*12, chdir*/
     0, /*13, time*/
     1, /*14, mknod*/
@@ -142,7 +141,7 @@ static char syscall_filter_table[512] = {
     1, /*117, ipc*/
     0, /*118, fsync*/
     0, /*119, sigreturn*/
-    3, /*120, clone*/
+    1, /*120, clone*/
     0, /*121, setdomainname*/
     0, /*122, uname*/
     0, /*123, modify_ldt*/
@@ -212,7 +211,7 @@ static char syscall_filter_table[512] = {
     1, /*187, sendfile*/
     1, /*188, getpmsg*/
     1, /*189, putpmsg*/
-    3, /*190, vfork*/
+    1, /*190, vfork*/
     0, /*191, ugetrlimit*/
     0, /*192, mmap2*/
     0, /*193, truncate64*/
@@ -262,7 +261,7 @@ static char syscall_filter_table[512] = {
     1, /*237, fremovexattr*/
     0, /*238, tkill*/
     1, /*239, sendfile64*/
-    0, /*240, futex*/
+    1, /*240, futex*/
     1, /*241, sched_setaffinity*/
     1, /*242, sched_getaffinity*/
     0, /*243, set_thread_area*/
@@ -274,7 +273,7 @@ static char syscall_filter_table[512] = {
     1, /*249, io_cancel*/
     1, /*250, fadvise64*/
     1, /*251, unused*/
-    3, /*252, exit_group*/
+    1, /*252, exit_group*/
     1, /*253, lookup_dcookie*/
     1, /*254, epoll_create*/
     1, /*255, epoll_ctl*/
@@ -296,4 +295,48 @@ static char syscall_filter_table[512] = {
     1, /*271, utimes*/
     1, /*272, fadvise64_64*/
     1, /*273, vserver*/
+	1, /*274, mbind*/
+	1, /*275, get_mempolicy*/
+	1, /*276, set_mempolicy*/
+	1, /*277, mq_open*/
+	1, /*278, mq_unlink*/
+	1, /*279, mq_timedsend*/
+	1, /*280, mq_timedreceive*/
+	1, /*281, mq_notify*/
+	1, /*282, mq_getsetattr*/
+	1, /*283, kexec_load*/
+	1, /*284, waitid*/
+	1, /*285, ni_syscall*/
+	1, /*286, add_key*/
+	1, /*287, request_key*/
+	1, /*288, keyctl*/
+	1, /*289, ioprio_set*/
+	1, /*290, ioprio_get*/
+	1, /*291, inotify_init*/
+	1, /*292, inotify_add_watch*/
+	1, /*293, inotify_rm_watch*/
+	1, /*294, migrate_pages*/
+	1, /*295, openat*/
+	1, /*296, mkdirat*/
+	1, /*297, mknodat*/
+	1, /*298, fchownat*/
+	1, /*299, futimesat*/
+	1, /*300, fstatat64*/
+	1, /*301, unlinkat*/
+	1, /*302, renameat*/
+	1, /*303, linkat*/
+	1, /*304, symlinkat*/
+	1, /*305, readlinkat*/
+	1, /*306, fchmodat*/
+	1, /*307, faccessat*/
+	1, /*308, pselect6*/
+	1, /*309, ppoll*/
+	1, /*310, unshare*/
+	1, /*311, set_robust_list*/
+	1, /*312, get_robust_list*/
+	1, /*313, splice*/
+	1, /*314, sync_file_range*/
+	1, /*315, tee*/
+	1, /*316, vmsplice*/
+	1, /*317, move_pages*/
 };

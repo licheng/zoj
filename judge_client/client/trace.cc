@@ -201,8 +201,7 @@ static void sigkmmonHandler(int sig, siginfo_t* siginfo, void* context) {
             kmmon_kill(pid);
         }
     } else {
-        LOG(ERROR)<<"Unexpected syscall "<<syscall;
-        TraceCallback::getInstance()->onError();
+        LOG(INFO)<<"Restricted syscall "<<syscall;
         kmmon_kill(pid);
     }
 }

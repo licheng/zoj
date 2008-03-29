@@ -781,7 +781,7 @@ class ProcessTest : public TestFixture {
     void tearDown() {
         uninstallHandlers();
         fclose(fp_);
-//        system(StringPrintf("rm -rf %s", ARG_root.c_str()).c_str());
+        system(StringPrintf("rm -rf %s", ARG_root.c_str()).c_str());
     }
 
     void writeHeader() {
