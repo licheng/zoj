@@ -161,8 +161,23 @@ TEST_F(DoRunTest, FloatingPointError) {
     ASSERT_EQUAL(FLOATING_POINT_ERROR, (int)buf_[0]);
 }
 
-TEST_F(DoRunTest, RuntimeErrorRestrictedFunction) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/rf", "cc", TESTDIR "/1.in", fn_,
+TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
+    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/rf_link", "cc", TESTDIR "/1.in", fn_,
+                          10, 1000, 1000));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(1, (int)size % 9);
+    lseek(fd_, 0, SEEK_SET);
+    while (size > 9) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(RUNTIME_ERROR, (int)buf_[0]);
+}
+
+TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionOpen) {
+    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/rf_open", "cc", TESTDIR "/1.in", fn_,
                           10, 1000, 1000));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);

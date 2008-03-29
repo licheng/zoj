@@ -26,6 +26,7 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 #include <linux/fcntl.h>
+#include <linux/highmem.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
@@ -155,24 +156,26 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 return -1;
             }
             if (request == KMMON_READMEM) {
-                struct page *page;
+                struct page* page;
+                struct mm_struct *mm;
                 struct vm_area_struct *vma;
                 int offset, len, tmp;
-                if (p->mm == NULL) {
+                mm = get_task_mm(p);
+                if (mm == NULL) {
                     printk(KERN_ERR "Fail to get mm: %ld\n", pid);
                     return -1;
                 }
-                if (get_user_pages(p, p->mm, addr, 1, 0, 1, &page, &vma) <= 0) {
+                if (get_user_pages(p, mm, addr, 1, 0, 1, &page, &vma) <= 0) {
                     printk(KERN_ERR "Fail to get user pages: %ld, %lx\n", pid, addr);
                     return -1;
                 }
-                if (PageHighMem(page)) {
-                    printk(KERN_ERR "High mem page: %ld, %lx\n", pid, addr);
-                    return -1;
-                }
                 offset = addr & (PAGE_SIZE - 1);
-                len = sizeof(data) > PAGE_SIZE - offset ? PAGE_SIZE - offset : sizeof(data);
-                memcpy(&tmp, page_address(page) + offset, len);
+                len = sizeof(data) > PAGE_SIZE - offset ? PAGE_SIZE - offset
+                                                        : sizeof(data);
+                copy_from_user_page(vma, page, addr, &tmp,
+                                    kmap(page) + offset, sizeof(tmp));
+                kunmap(page);
+                put_page(page);
                 put_user(tmp, (unsigned long*)data);
             } else if (request == KMMON_GETREG) {
                 unsigned long reg_table[] = {EAX, EBX, ECX, EDX, ESI, EDI, EBP};
