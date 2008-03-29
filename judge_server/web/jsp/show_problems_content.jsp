@@ -9,6 +9,9 @@
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.ContestStatistics" %>
 <%@ page import="java.text.MessageFormat" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.security.UserSecurity" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.AbstractContest" %>
+
 
 <%
     boolean isProblemset =  "Problems".equals(request.getAttribute("region"));    
@@ -17,6 +20,9 @@
         + (isProblemset ? "Problems" : "ContestProblems") + ".do";
     String problemLink = request.getContextPath() + "/show" + actionName + ".do";
     String showProblemsAction = isProblemset ? "showProblems.do" : "showContestProblems.do";
+    UserSecurity userSecurity = (UserSecurity) request.getSession().getAttribute("oj_security");
+    AbstractContest contest = (AbstractContest) request.getAttribute("contest");
+    boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
 %>
 
 <logic:present name="oj_security">
@@ -85,11 +91,9 @@ function deleteProblem(code, problemId) {
                         <td class="problemId">ID</td>
                         <td class="problemTitle">Title</td>
                         <td class="problemStatus">Status</td>
-                        <logic:present name="oj_security">
-                        <logic:equal name="oj_security" property="superAdmin" value="true">
+                        <% if (admin) { %>
                             <td class="problemAdmin">Admin</td>
-                        </logic:equal>
-                        </logic:present>
+                        <% } %>                     
                     </tr>
                     <%
                     for (int i = 0; i < problems.size(); ++i) {
@@ -113,16 +117,14 @@ function deleteProblem(code, problemId) {
                             }
                         %>
                         <td class="problemStatus"><%=status%></td>
-
-                        <logic:present name="oj_security">
-                        <logic:equal name="oj_security" property="superAdmin" value="true">
+                        <% if (admin) { %>
                         <td class="problemAdmin">
-                        	<a href="<%=request.getContextPath()%>/edit<%=actionName%>.do?problemId=<%=problem.getId()%>"><font color="red">Edit</font></a>
-                        	<a href="javascript:deleteProblem('<%=problem.getCode()%>',<%=problem.getId()%>)"><font color="red">Delete</font></a>
-                        	
+                            <a href="<%=request.getContextPath()%>/edit<%=actionName%>.do?problemId=<%=problem.getId()%>"><font color="red">Edit</font></a>
+                            <a href="javascript:deleteProblem('<%=problem.getCode()%>',<%=problem.getId()%>)"><font color="red">Delete</font></a>
+                            
                         </td>
-                        </logic:equal>
-                        </logic:present>
+                        <% } %> 
+                                                
                     </tr>
                     <%
                     }
