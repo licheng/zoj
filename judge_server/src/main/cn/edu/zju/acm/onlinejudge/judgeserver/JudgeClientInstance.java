@@ -72,7 +72,6 @@ public class JudgeClientInstance extends Thread {
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
             logger.info("Start testing");
-            this.test();
             while (!this.isInterrupted()) {
                 Submission submission;
                 try {
@@ -115,19 +114,6 @@ public class JudgeClientInstance extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void test() throws JudgeServerErrorException, IOException, PersistenceException {
-        Submission submission = new Submission();
-        submission.setId(Long.MAX_VALUE);
-        submission.setLanguage(LanguageManager.getLanguageByExtension("cc"));
-        submission.setContent("#include<iostream>\nusing namespace std;"
-                + "int main(){int a,b;while(cin>>a>>b)cout<<a+b<<endl;return 0;}");
-        submission.setProblemId(0);
-        this.judge(submission);
-        if (submission.getJudgeReply() != JudgeReply.ACCEPTED) {
-            throw new JudgeServerErrorException();
         }
     }
 
