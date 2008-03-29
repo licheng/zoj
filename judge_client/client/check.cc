@@ -179,21 +179,14 @@ int runSpecialJudgeExe(string specialJudgeFilename,
         specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
     specialJudgeFilename =
         specialJudgeFilename.substr(workingDirectory.size() + 1);
-    string pOutputFilename = workingDirectory + "/p.out";
-    unlink(pOutputFilename.c_str());
-    if (link(programOutputFilename.c_str(), pOutputFilename.c_str()) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to link from "<<programOutputFilename
-                          <<" to "<<pOutputFilename;
-        return INTERNAL_ERROR;
-    }
     char path[PATH_MAX + 1];
     getcwd(path, sizeof(path));
     const char* commands[] = {
         specialJudgeFilename.c_str(),
         specialJudgeFilename.c_str(),
-        "p.out",
-        inputFilename.substr(inputFilename.rfind('/') + 1).c_str(),
-        inputFilename.substr(inputFilename.rfind('/') + 1).c_str(),
+        programOutputFilename.substr(workingDirectory.size() + 1).c_str(),
+        inputFilename.substr(workingDirectory.size() + 1).c_str(),
+        inputFilename.substr(workingDirectory.size() + 1).c_str(),
         NULL};
     StartupInfo info;
     info.stdinFilename = programOutputFilename.c_str();
@@ -240,9 +233,21 @@ int doCheck(int fdSocket,
     sendReply(fdSocket, JUDGING);
     int result;
     if (access(specialJudgeFilename.c_str(), F_OK) == 0) {
-        result = runSpecialJudgeExe(specialJudgeFilename,
-                                    inputFilename,
-                                    programOutputFilename);
+        string workingDirectory = 
+            specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
+        string temp =
+            StringPrintf("%s/p%d.out", workingDirectory.c_str(), getpid());
+        unlink(temp.c_str());
+        if (link(programOutputFilename.c_str(), temp.c_str()) == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to link from "<<programOutputFilename
+                              <<" to "<<temp;
+            result = INTERNAL_ERROR;
+        } else {
+            result = runSpecialJudgeExe(specialJudgeFilename,
+                                        inputFilename,
+                                        temp);
+            unlink(temp.c_str());
+        }
     } else {
         result = compareTextFiles(outputFilename,
                                   programOutputFilename);
