@@ -90,7 +90,7 @@ int notify_tracer(int syscall) {
     send_sig_info(KMMON_SIG, &info, p);
     rcu_read_unlock();
     while (current->exit_code == KMMON_SIG) {
-        current->state = TASK_STOPPED;
+        set_current_state(TASK_STOPPED);
         schedule();
     }
     if (current->exit_code) {
@@ -141,6 +141,8 @@ void asm_stuff(void) {
 
 asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long addr, unsigned long data) {
     struct task_struct* p;
+    int ret = 0;
+    preempt_disable();
     switch (request) {
         case KMMON_TRACEME:
             current->flags |= KMMON_MASK;
@@ -149,11 +151,11 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
         case KMMON_KILL:
         case KMMON_READMEM:
         case KMMON_GETREG:
-            rcu_read_lock();
             p = find_task_by_pid(pid);
             if (!p || !(p->flags & KMMON_MASK) || !(p->state & TASK_STOPPED)) {
                 printk(KERN_ERR "Invalid pid: %ld\n", pid);
-                return -1;
+                ret = -1;
+                break;
             }
             if (request == KMMON_READMEM) {
                 struct page* page;
@@ -163,11 +165,13 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 mm = get_task_mm(p);
                 if (mm == NULL) {
                     printk(KERN_ERR "Fail to get mm: %ld\n", pid);
-                    return -1;
+                    ret = -1;
+                    break;
                 }
                 if (get_user_pages(p, mm, addr, 1, 0, 1, &page, &vma) <= 0) {
                     printk(KERN_ERR "Fail to get user pages: %ld, %lx\n", pid, addr);
-                    return -1;
+                    ret = -1;
+                    break;
                 }
                 offset = addr & (PAGE_SIZE - 1);
                 len = sizeof(data) > PAGE_SIZE - offset ? PAGE_SIZE - offset
@@ -177,6 +181,7 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 kunmap(page);
                 put_page(page);
                 put_user(tmp, (unsigned long*)data);
+                mmput(mm);
             } else if (request == KMMON_GETREG) {
                 unsigned long reg_table[] = {EAX, EBX, ECX, EDX, ESI, EDI, EBP};
                 put_user(*((int*)p->thread.esp0 - 6 - reg_table[addr]), (unsigned long*)data);
@@ -184,12 +189,13 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 p->exit_code = request == KMMON_KILL;
                 wake_up_process(p);
             }
-            rcu_read_unlock();
             break;
         default:
-            return -1;
+            ret = -1;
+            break;
     }
-    return 0;
+    preempt_enable();
+    return ret;
 }
 
 #define DEFINE_CLONE(func) \
