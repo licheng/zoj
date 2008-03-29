@@ -70,7 +70,7 @@ public class JudgeClientInstance extends Thread {
             this.socket.connect(address, JudgeClient.CONNECTION_TIMEOUT);
             logger.info("Connected");
             this.in = new DataInputStream(socket.getInputStream());
-            this.out = new DataOutputStream(socket.getOutputStream());            
+            this.out = new DataOutputStream(socket.getOutputStream());
             logger.info("Start testing");
             this.test();
             while (!this.isInterrupted()) {
@@ -84,6 +84,9 @@ public class JudgeClientInstance extends Thread {
                 }
                 try {
                     this.judge(submission);
+                } catch (IOException e) {
+                    queue.rejudge(submission);
+                    throw e;
                 } catch (JudgeServerErrorException e) {
                     e.printStackTrace();
                     submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
@@ -115,7 +118,7 @@ public class JudgeClientInstance extends Thread {
         }
     }
 
-    private void test() throws JudgeServerErrorException {
+    private void test() throws JudgeServerErrorException, IOException, PersistenceException {
         Submission submission = new Submission();
         submission.setId(Long.MAX_VALUE);
         submission.setLanguage(LanguageManager.getLanguageByExtension("cc"));
@@ -128,72 +131,65 @@ public class JudgeClientInstance extends Thread {
         }
     }
 
-    private void judge(Submission submission) throws JudgeServerErrorException {
-        try {
-            logger.info("Problem " + submission.getId());
-            Problem problem = problemDAO.getProblem(submission.getProblemId());
-            int reply = this.sendRequest(submission.getLanguage().getOptions(), problem.getId(), problem.getRevision(),
-                    submission.getContent());
-            saveReply(reply);
-            if (reply == JudgeReply.NO_SUCH_PROBLEM.getId()) {
-                reply = sendProblem(problem);
-                saveReply(reply);
-            }
-            if (reply != JudgeReply.READY.getId()) {
-                throw new JudgeServerErrorException();
-            }
+    private void judge(Submission submission) throws JudgeServerErrorException, IOException, PersistenceException {
+        logger.info("Problem " + submission.getId());
+        Problem problem = problemDAO.getProblem(submission.getProblemId());
+        int reply = this.sendRequest(submission.getLanguage().getOptions(), problem.getId(), problem.getRevision(),
+                submission.getContent());
+        logJudgeReply(reply);
+        if (reply == JudgeReply.NO_SUCH_PROBLEM.getId()) {
+            reply = sendProblem(problem);
+            logJudgeReply(reply);
+        }
+        if (reply != JudgeReply.READY.getId()) {
+            throw new JudgeServerErrorException();
+        }
+        reply = this.in.readByte();
+        logJudgeReply(reply);
+        if (reply != JudgeReply.COMPILING.getId()) {
+            throw new JudgeServerErrorException();
+        }
+        submission.setJudgeReply(JudgeReply.COMPILING);
+        reply = this.in.readByte();
+        logJudgeReply(reply);
+        if (reply == JudgeReply.COMPILATION_ERROR.getId()) {
+            submission.setJudgeReply(JudgeReply.COMPILATION_ERROR);
+            submission.setJudgeComment(in.readUTF());
+            return;
+        } else if (reply != JudgeReply.READY.getId()) {
+            throw new JudgeServerErrorException();
+        }
+        Limit limit = problem.getLimit();
+        this.sendTestcase(1, limit.getTimeLimit(), limit.getMemoryLimit(), limit.getOutputLimit());
+        submission.setJudgeReply(JudgeReply.RUNNING);
+        for (;;) {
             reply = this.in.readByte();
-            saveReply(reply);
-            if (reply != JudgeReply.COMPILING.getId()) {
-                throw new JudgeServerErrorException();
+            if (reply != JudgeReply.RUNNING.getId()) {
+                break;
             }
-            submission.setJudgeReply(JudgeReply.COMPILING);
+            int timeConsumption = this.in.readInt();
+            int memoryConsumption = this.in.readInt();
+            submission.setTimeConsumption(timeConsumption);
+            submission.setMemoryConsumption(memoryConsumption);
+            logger.info("Running " + timeConsumption + " " + memoryConsumption);
+        }
+        logJudgeReply(reply);
+        if (reply == JudgeReply.JUDGING.getId()) {
+            submission.setJudgeReply(JudgeReply.JUDGING);
             reply = this.in.readByte();
-            saveReply(reply);
-            if (reply == JudgeReply.COMPILATION_ERROR.getId()) {
-                submission.setJudgeReply(JudgeReply.COMPILATION_ERROR);
-                submission.setJudgeComment(in.readUTF());
-                return;
-            } else if (reply != JudgeReply.READY.getId()) {
-                throw new JudgeServerErrorException();
-            }
-            Limit limit = problem.getLimit();
-            this.sendTestcase(1, limit.getTimeLimit(), limit.getMemoryLimit(), limit.getOutputLimit());
-            submission.setJudgeReply(JudgeReply.RUNNING);
-            for (;;) {
-                reply = this.in.readByte();
-                if (reply != JudgeReply.RUNNING.getId()) {
-                    break;
-                }
-                int timeConsumption = this.in.readInt();
-                int memoryConsumption = this.in.readInt();
-                submission.setTimeConsumption(timeConsumption);
-                submission.setMemoryConsumption(memoryConsumption);
-                logger.info("Running " + timeConsumption + " " + memoryConsumption);
-            }
-            saveReply(reply);
-            if (reply == JudgeReply.JUDGING.getId()) {
-                submission.setJudgeReply(JudgeReply.JUDGING);
-                reply = this.in.readByte();
-                saveReply(reply);
-            }
-            if (reply == JudgeReply.JUDGE_INTERNAL_ERROR.getId()) {
-                throw new JudgeServerErrorException();
-            }
-            this.sendTestcase(0, 0, 0, 0);
-            submission.setJudgeReply(JudgeReply.findById(reply));
-            if (submission.getJudgeReply() == null) {
-                throw new JudgeServerErrorException();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new JudgeServerErrorException(e);
-        } catch (PersistenceException e) {
-            throw new JudgeServerErrorException(e);
+            logJudgeReply(reply);
+        }
+        if (reply == JudgeReply.JUDGE_INTERNAL_ERROR.getId()) {
+            throw new JudgeServerErrorException();
+        }
+        this.sendTestcase(0, 0, 0, 0);
+        submission.setJudgeReply(JudgeReply.findById(reply));
+        if (submission.getJudgeReply() == null) {
+            throw new JudgeServerErrorException();
         }
     }
 
-    private void saveReply(int reply) {
+    private void logJudgeReply(int reply) {
         JudgeReply r = JudgeReply.findById(reply);
         if (r == null) {
             logger.error("Invalid judge reply " + reply);
@@ -242,10 +238,10 @@ public class JudgeClientInstance extends Thread {
                 List<Reference> specialJudges = DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
                         ReferenceType.CHECKER_SOURCE);
                 if (specialJudges.size() > 0) {
-                	String contentType = "cc";
-                	if (specialJudges.get(0).getContentType() != null) {
-                		contentType = specialJudges.get(0).getContentType();
-                	}
+                    String contentType = "cc";
+                    if (specialJudges.get(0).getContentType() != null) {
+                        contentType = specialJudges.get(0).getContentType();
+                    }
                     zipOut.putNextEntry(new ZipEntry(String.format("judge.%s", contentType)));
                     CopyUtils.copy(specialJudges.get(0).getContent(), zipOut);
                 }
@@ -260,8 +256,8 @@ public class JudgeClientInstance extends Thread {
                 fin.close();
             }
             int reply = in.readByte();
-            saveReply(reply);
             if (reply == JudgeReply.COMPILING.getId()) {
+                logJudgeReply(reply);
                 reply = in.readByte();
             }
             return reply;

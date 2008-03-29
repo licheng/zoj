@@ -17,11 +17,14 @@ public class JudgeService {
     private ServerSocket serverSocket;
 
     private static JudgeService instance;
-    
-    static { try { instance = new JudgeService(128,
-     Integer.parseInt(ConfigManager.getValue("queue_port"))); } catch
-     (Exception e) { throw new ExceptionInInitializerError(e); } }
-    
+
+    static {
+        try {
+            instance = new JudgeService(128, Integer.parseInt(ConfigManager.getValue("queue_port")));
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private List<JudgeClient> clients = new ArrayList<JudgeClient>();
 
@@ -59,12 +62,13 @@ public class JudgeService {
             }
         }.start();
     }
+
     private int getClientNumber() {
-    	try {
-    		return Integer.parseInt(ConfigManager.getValue("client_max_job"));
-    	} catch (Exception e) {
-    		return 1;
-    	}
+        try {
+            return Integer.parseInt(ConfigManager.getValue("client_max_job"));
+        } catch (Exception e) {
+            return 1;
+        }
     }
 
     public boolean judge(Submission submission) throws Exception {
