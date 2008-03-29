@@ -11,11 +11,12 @@ int main(int argc, char* argv[]) {
     int a, b;
     int result = 0;
     ifstream fin(argv[2]);
+    ifstream gin(argv[1]);
     while (fin>>a>>b) {
         string s;
         for (;;) {
-            getline(cin, s);
-            if (cin.fail()) {
+            getline(gin, s);
+            if (gin.fail()) {
                 return 1;
             }
             if (s.find_first_not_of(" \t") != string::npos) {
@@ -35,8 +36,8 @@ int main(int argc, char* argv[]) {
     }
     for (;;) {
         string s;
-        getline(cin, s);
-        if (cin.fail()) {
+        getline(gin, s);
+        if (gin.fail()) {
             break;
         }
         if (s.find_first_not_of(" \t") != string::npos) {

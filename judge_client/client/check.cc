@@ -238,7 +238,7 @@ int doCheck(int fdSocket,
         string temp =
             StringPrintf("%s/p%d.out", workingDirectory.c_str(), getpid());
         unlink(temp.c_str());
-        if (link(programOutputFilename.c_str(), temp.c_str()) == -1) {
+        if (symlink(programOutputFilename.c_str(), temp.c_str()) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to link from "<<programOutputFilename
                               <<" to "<<temp;
             result = INTERNAL_ERROR;
