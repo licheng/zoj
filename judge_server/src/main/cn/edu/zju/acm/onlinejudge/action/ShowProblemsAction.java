@@ -106,7 +106,10 @@ public class ShowProblemsAction extends BaseAction {
         context.setAttribute("totalPages", new Long(totalPages));
         context.setAttribute("currentPage", new Long(pageNumber));                 
          
-        if (context.isAdmin() && "ture".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
+        
+        
+        if (checkContestAdminPermission(mapping, context, false, true) == null
+        	&& "ture".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
             List<String> checkMessages = new ArrayList<String>();
             for (Object obj : problems) {
                 Problem p = (Problem) obj;
