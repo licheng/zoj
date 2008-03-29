@@ -646,9 +646,7 @@ void notifyQueue(int port) {
             }
         }
         if (!socket_closed && !terminated) {
-            if (writen(fdSocket, &port, sizeof(port)) != -1) {
-                LOG(INFO)<<"Port sent";
-            }
+            writen(fdSocket, &port, sizeof(port));
         }
         sleep(10);
     }
