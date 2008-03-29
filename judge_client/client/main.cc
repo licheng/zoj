@@ -627,7 +627,8 @@ void sigpipeHandler(int sig) {
 }
 
 void sigchldHandler(int sig) {
-    while (waitpid(-1, NULL, WNOHANG) > 0 || errno == EINTR);
+    int pid;
+    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0 || pid < 0 && errno == EINTR);
 }
 
 void notifyQueue(int port) {
