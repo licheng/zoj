@@ -30,6 +30,7 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
+#include <linux/mman.h>
 #include <linux/module.h>
 #include <linux/preempt.h>
 #include <linux/ptrace.h>
@@ -63,6 +64,10 @@ asmlinkage int (*old_clone)(struct pt_regs);
 asmlinkage int (*old_fork)(struct pt_regs);
 asmlinkage int (*old_vfork)(struct pt_regs);
 asmlinkage unsigned long (*old_brk)(unsigned long);
+asmlinkage void* (*old_mmap2)(void *start, size_t length, int prot,
+                              int flags, int fd, off_t pgoffset);
+asmlinkage void* (*old_mmap)(void *start, size_t length, int prot,
+                             int flags, int fd, off_t offset);
 
 int notify_tracer(int syscall) {
     struct task_struct* p = current;
@@ -159,8 +164,8 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
             }
             if (request == KMMON_READMEM) {
                 struct page* page;
-                struct mm_struct *mm;
-                struct vm_area_struct *vma;
+                struct mm_struct* mm;
+                struct vm_area_struct* vma;
                 int offset, len, tmp;
                 mm = get_task_mm(p);
                 if (mm == NULL) {
@@ -213,6 +218,44 @@ DEFINE_CLONE(fork);
 
 DEFINE_CLONE(vfork);
 
+__always_inline int mmap_allowed(int flags, size_t length) {
+    if ((current->flags & KMMON_MASK) && (flags & MAP_ANONYMOUS)) {
+        int allow = 1;
+        unsigned long mem_limit;
+        preempt_disable();
+        mem_limit = current->signal->rlim[RLIMIT_DATA].rlim_cur;
+        if (mem_limit < RLIM_INFINITY) {
+            struct mm_struct* mm = current->mm;
+            if (mm->brk - mm->start_data + length > mem_limit) {
+                allow = 0;
+            }
+        }
+        preempt_enable();
+        if (!allow) {
+            notify_tracer(45);
+            send_sig(SIGKILL, current, 1);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+asmlinkage void* kmmon_mmap(void *start, size_t length, int prot,
+                            int flags, int fd, off_t offset) {
+    if (!mmap_allowed(flags, length)) {
+        return (void*)-1;
+    }
+    return old_mmap(start, length, prot, flags, fd, offset);
+}
+
+asmlinkage void* kmmon_mmap2(void *start, size_t length, int prot,
+                             int flags, int fd, off_t pgoffset) {
+    if (!mmap_allowed(flags, length)) {
+        return (void*)-1;
+    }
+    return old_mmap2(start, length, prot, flags, fd, pgoffset);
+}
+
 asmlinkage unsigned long kmmon_brk(unsigned long brk) {
     unsigned long ret = old_brk(brk);
     if ((current->flags & KMMON_MASK) && brk && ret < brk) {
@@ -244,11 +287,14 @@ int init(void) {
     old_fork = orign_sys_call_table[__NR_fork];
     old_vfork = orign_sys_call_table[__NR_vfork];
     old_brk = orign_sys_call_table[__NR_brk];
+    old_mmap2 = orign_sys_call_table[__NR_mmap2];
     orign_sys_call_table[__NR_kmmon] = kmmon;
     orign_sys_call_table[__NR_clone] = kmmon_clone;
     orign_sys_call_table[__NR_fork] = kmmon_fork;
     orign_sys_call_table[__NR_vfork] = kmmon_vfork;
     orign_sys_call_table[__NR_brk] = kmmon_brk;
+    orign_sys_call_table[__NR_mmap] = kmmon_mmap;
+    orign_sys_call_table[__NR_mmap2] = kmmon_mmap2;
     new_syscall = (unsigned long)&new_int80;
     p_idt80->off_low = (unsigned short)(new_syscall & 0x0000ffff);
     p_idt80->off_high = (unsigned short)((new_syscall>>16) & 0x0000ffff);
@@ -261,6 +307,8 @@ void cleanup(void) {
     orign_sys_call_table[__NR_fork] = old_fork;
     orign_sys_call_table[__NR_vfork] = old_vfork;
     orign_sys_call_table[__NR_brk] = old_brk;
+    orign_sys_call_table[__NR_mmap] = old_mmap;
+    orign_sys_call_table[__NR_mmap2] = old_mmap2;
     p_idt80->off_low = (unsigned short)(orig_syscall & 0x0000ffff);
     p_idt80->off_high = (unsigned short)((orig_syscall>>16) & 0x0000ffff);
     return;
