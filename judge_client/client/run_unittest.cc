@@ -49,8 +49,13 @@ class DoRunTest: public TestFixture {
         ASSERT_EQUAL(0, link(TESTDIR "/tle", (ARG_root + "/tle").c_str()));
         ASSERT_EQUAL(0, link(TESTDIR "/ole", (ARG_root + "/ole").c_str()));
         ASSERT_EQUAL(0, link(TESTDIR "/mle", (ARG_root + "/mle").c_str()));
+        ASSERT_EQUAL(0, link(TESTDIR "/mle_mmap",
+                             (ARG_root + "/mle_mmap").c_str()));
         ASSERT_EQUAL(0, link(TESTDIR "/fpe", (ARG_root + "/fpe").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/rf", (ARG_root + "/rf").c_str()));
+        ASSERT_EQUAL(0, link(TESTDIR "/rf_link",
+                             (ARG_root + "/rf_link").c_str()));
+        ASSERT_EQUAL(0, link(TESTDIR "/rf_open",
+                             (ARG_root + "/rf_open").c_str()));
         ASSERT_EQUAL(0, link(TESTDIR "/pe", (ARG_root + "/pe").c_str()));
         ASSERT_EQUAL(0, link(TESTDIR "/sigsegv",
                              (ARG_root + "/sigsegv").c_str()));
@@ -104,6 +109,21 @@ TEST_F(DoRunTest, TimeLimitExceeded) {
 TEST_F(DoRunTest, MemoryLimitExceeded) {
     ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/mle", "cc", TESTDIR "/1.in", fn_,
                           10, 1, 1000));
+    off_t size = lseek(fd_, 0, SEEK_END);
+    ASSERT_EQUAL(1, (int)size % 9);
+    lseek(fd_, 0, SEEK_SET);
+    while (size > 9) {
+        ASSERT_EQUAL((ssize_t)9, read(fd_, buf_, 9));
+        ASSERT_EQUAL(RUNNING, (int)buf_[0]);
+        size -= 9;
+    }
+    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(MEMORY_LIMIT_EXCEEDED, (int)buf_[0]);
+}
+
+TEST_F(DoRunTest, MemoryLimitExceededMMap) {
+    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/mle_mmap", "cc", TESTDIR "/1.in", fn_,
+                          10, 100000, 1000));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);

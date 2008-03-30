@@ -124,6 +124,9 @@ int monitor(int fdSocket,
         }
         callback->processResult(status);
         result = callback->getResult();
+        if (memoryConsumption > memoryLimit) {
+            result = MEMORY_LIMIT_EXCEEDED;
+        }
         if (result == TIME_LIMIT_EXCEEDED) {
             timeConsumption = timeLimit + 1;
         }
