@@ -221,13 +221,15 @@ DEFINE_CLONE(vfork);
 __always_inline int mmap_allowed(int flags, size_t length) {
     if ((current->flags & KMMON_MASK) && (flags & MAP_ANONYMOUS)) {
         int allow = 1;
-        unsigned long mem_limit;
+        unsigned long* mem_limit;
         preempt_disable();
-        mem_limit = current->signal->rlim[RLIMIT_DATA].rlim_cur;
-        if (mem_limit < RLIM_INFINITY) {
+        mem_limit = &current->signal->rlim[RLIMIT_DATA].rlim_cur;
+        if (*mem_limit < RLIM_INFINITY) {
             struct mm_struct* mm = current->mm;
-            if (mm->brk - mm->start_data + length > mem_limit) {
+            if (mm->brk - mm->start_data + length > *mem_limit) {
                 allow = 0;
+            } else {
+                *mem_limit -= length;
             }
         }
         preempt_enable();
