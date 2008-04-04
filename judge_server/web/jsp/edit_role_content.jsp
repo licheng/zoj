@@ -181,7 +181,7 @@ function addPermissionTable(permisisonType, cid, pid, cText, pText) {
             <br>            
             <br>
             <input value="Edit Role" type="submit">
-            <input value="Cancle" type="button">
+            <input value="Cancel" type="button">
             </blockquote>
             </form>
         </div>
