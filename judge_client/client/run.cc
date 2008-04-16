@@ -32,42 +32,36 @@
 #include "trace.h"
 #include "util.h"
 
-// The uid for executing the program to be judged
-DECLARE_ARG(int, uid);
-
-// The uid for executing the program to be judged
-DECLARE_ARG(int, gid);
-
-int sendRunningMessage(int fdSocket,
-                       int timeConsumption,
-                       int memoryConsumption) {
-    char message[9];
-    message[0] = RUNNING;
-    *(unsigned int*)(message + 1) =
-        htonl((unsigned int)(timeConsumption));
-    *(unsigned int*)(message + 5) = htonl(memoryConsumption);
-    if (writen(fdSocket, message, sizeof(message)) == -1) {
+int SendRunningMessage(int sock,
+                       uint32_t time_consumption,
+                       uint32_t memory_consumption) {
+    time_consumption = htonl(time_consumption);
+    memory_consumption = htonl(memory_consumption);
+    uint8_t reply = RUNNING;
+    if (Writen(sock, &reply, sizeof(reply)) == -1 ||
+        Writen(sock, &time_consumption, sizeof(time_consumption)) == -1 ||
+        Writen(sock, &memory_consumption, sizeof(memory_consumption)) == -1) {
         LOG(ERROR)<<"Fail to send running message";
         return -1;
     }
     return 0;
 }
 
-int monitor(int fdSocket,
+int monitor(int sock,
             pid_t pid,
-            int timeLimit,
-            int memoryLimit,
+            int time_limit,
+            int memory_limit,
             TraceCallback* callback) {
     int result = -1;
-    int timeConsumption = 0;
-    int memoryConsumption = 0;
-    timeLimit *= 1000;
-    while (result < 0 && !callback->hasExited()) {
+    int time_consumption = 0;
+    int memory_consumption = 0;
+    time_limit *= 1000;
+    while (result < 0 && !callback->HasExited()) {
         struct timespec request, remain;
         request.tv_sec = 1;
         request.tv_nsec = 0;
         while (result < 0 &&
-               !callback->hasExited() &&
+               !callback->HasExited() &&
                nanosleep(&request, &remain) < 0) {
             if (errno != EINTR) {
                 LOG(SYSCALL_ERROR)<<"Fail to sleep";
@@ -78,31 +72,31 @@ int monitor(int fdSocket,
         }
         int ts;
         int ms;
-        if (result < 0 && !callback->hasExited()) {
-            ts = readTimeConsumption(pid);
-            ms = readMemoryConsumption(pid);
-            if (ts > timeConsumption) {
-                timeConsumption = ts;
+        if (result < 0 && !callback->HasExited()) {
+            ts = ReadTimeConsumption(pid);
+            ms = ReadMemoryConsumption(pid);
+            if (ts > time_consumption) {
+                time_consumption = ts;
             }
-            if (ms > memoryConsumption) {
-                memoryConsumption = ms;
+            if (ms > memory_consumption) {
+                memory_consumption = ms;
             }
-            if (timeConsumption > timeLimit) {
+            if (time_consumption > time_limit) {
                 result = TIME_LIMIT_EXCEEDED;
             }
             if (result == TIME_LIMIT_EXCEEDED) {
-                timeConsumption = timeLimit + 1;
+                time_consumption = time_limit + 1;
             }
-            if (memoryConsumption > memoryLimit) {
+            if (memory_consumption > memory_limit) {
                 result = MEMORY_LIMIT_EXCEEDED;
             }
             if (result == MEMORY_LIMIT_EXCEEDED) {
-                memoryConsumption = memoryLimit + 1;
+                memory_consumption = memory_limit + 1;
             }
-            if (sendRunningMessage(fdSocket,
-                                   timeConsumption,
-                                   memoryConsumption) == -1) {
-                if (!callback->hasExited()) {
+            if (SendRunningMessage(sock,
+                                   time_consumption,
+                                   memory_consumption) == -1) {
+                if (!callback->HasExited()) {
                     kill(pid, SIGKILL);
                 }
                 result = INTERNAL_ERROR;
@@ -118,87 +112,93 @@ int monitor(int fdSocket,
         }
     }
     if (result < 0) {
-        if (callback->getResult() == 0) {
-            timeConsumption = callback->getTimeConsumption();
-            memoryConsumption = callback->getMemoryConsumption();
+        if (callback->GetResult() == 0) {
+            time_consumption = callback->GetTimeConsumption();
+            memory_consumption = callback->GetMemoryConsumption();
         }
-        callback->processResult(status);
-        result = callback->getResult();
-        if (memoryConsumption > memoryLimit) {
+        callback->ProcessResult(status);
+        result = callback->GetResult();
+        if (memory_consumption > memory_limit) {
             result = MEMORY_LIMIT_EXCEEDED;
         }
         if (result == TIME_LIMIT_EXCEEDED) {
-            timeConsumption = timeLimit + 1;
+            time_consumption = time_limit + 1;
         }
         if (result == MEMORY_LIMIT_EXCEEDED) {
-            memoryConsumption = memoryLimit + 1;
+            memory_consumption = memory_limit + 1;
         }
-        if (sendRunningMessage(fdSocket,
-                               timeConsumption,
-                               memoryConsumption) == -1) {
+        if (SendRunningMessage(sock,
+                               time_consumption,
+                               memory_consumption) == -1) {
             result = INTERNAL_ERROR;
         }
     }
     return result;
 }
 
-int runExe(int fdSocket,
-            const string& exeFilename,
-            const string& inputFilename,
-            const string& programOutputFilename,
-            int timeLimit,
-            int memoryLimit,
-            int outputLimit) {
+int RunExe(int sock,
+           const string& exe_filename,
+           const string& input_filename,
+           const string& program_output_filename,
+           int time_limit,
+           int memory_limit,
+           int output_limit,
+           int uid,
+           int gid) {
     LOG(INFO)<<"Running";
-    const char* commands[] = {exeFilename.c_str(), exeFilename.c_str(), NULL};
+    const char* commands[] = {exe_filename.c_str(), exe_filename.c_str(), NULL};
     StartupInfo info;
-    info.stdinFilename = inputFilename.c_str();
-    info.stdoutFilename = programOutputFilename.c_str();
-    info.uid = ARG_uid;
-    info.gid = ARG_gid;
-    info.timeLimit = timeLimit;
-    info.memoryLimit = memoryLimit;
-    info.outputLimit = outputLimit;
-    info.procLimit = 1;
-    info.fileLimit = 5;
+    info.stdin_filename = input_filename.c_str();
+    info.stdout_filename = program_output_filename.c_str();
+    info.uid = uid;
+    info.gid = gid;
+    info.time_limit = time_limit;
+    info.memory_limit = memory_limit;
+    info.output_limit = output_limit;
+    info.proc_limit = 1;
+    info.file_limit = 5;
     info.trace = 1;
     TraceCallback callback;
-    pid_t pid = createProcess(commands, info);
+    pid_t pid = CreateProcess(commands, info);
     if (pid == -1) {
         LOG(ERROR)<<"Fail to execute the program";
         return INTERNAL_ERROR;
     }
-    return monitor(fdSocket, pid, timeLimit, memoryLimit, &callback);
+    return monitor(sock, pid, time_limit, memory_limit, &callback);
 }
 
-inline int isNativeExe(const string& sourceFileType) {
-    return sourceFileType == "cc" ||
-           sourceFileType == "c" ||
-           sourceFileType == "pas";
+inline int IsNativeExe(const string& source_file_type) {
+    return source_file_type == "cc" ||
+           source_file_type == "c" ||
+           source_file_type == "pas";
 }
 
-int doRun(int fdSocket,
-          const string& programName,
-          const string& sourceFileType,
-          const string& inputFilename,
-          const string& programOutputFilename,
-          int timeLimit,
-          int memoryLimit,
-          int outputLimit) {
+int DoRun(int sock,
+          const string& program_name,
+          const string& source_file_type,
+          const string& input_filename,
+          const string& program_output_filename,
+          int time_limit,
+          int memory_limit,
+          int output_limit,
+          int uid,
+          int gid) {
     int result;
-    if (isNativeExe(sourceFileType)) {
-        result = runExe(fdSocket,
-                        programName,
-                        inputFilename,
-                        programOutputFilename,
-                        timeLimit,
-                        memoryLimit,
-                        outputLimit);
+    if (IsNativeExe(source_file_type)) {
+        result = RunExe(sock,
+                        program_name,
+                        input_filename,
+                        program_output_filename,
+                        time_limit,
+                        memory_limit,
+                        output_limit,
+                        uid,
+                        gid);
     } else {
         return -1;
     }
     if (result) {
-        sendReply(fdSocket, result);
+        SendReply(sock, result);
         if (result == INTERNAL_ERROR) {
             return -1;
         } else {

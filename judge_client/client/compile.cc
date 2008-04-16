@@ -29,40 +29,36 @@
 #include "trace.h"
 #include "util.h"
 
-// The root directory which contains problems, scripts and working directory of
-// the client
-DECLARE_ARG(string, root);
-
-int doCompile(int fdSocket, const string& sourceFilename) {
+int DoCompile(int sock, const string& root, const string& source_filename) {
     LOG(INFO)<<"Compiling";
-    sendReply(fdSocket, COMPILING);
+    SendReply(sock, COMPILING);
     string command =
-        ARG_root + "/script/compile.sh '" + sourceFilename + "'";
+        root + "/script/compile.sh '" + source_filename + "'";
     LOG(INFO)<<"Command: "<<command;
-    int fdPipe[2];
-    if (pipe(fdPipe) < 0) {
+    int fd_pipe[2];
+    if (pipe(fd_pipe) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to create pipe";
-        sendReply(fdSocket, INTERNAL_ERROR);
+        SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
     StartupInfo info;
-    info.fdStderr = fdPipe[1];
-    info.timeLimit = 30;
+    info.fd_stderr = fd_pipe[1];
+    info.time_limit = 30;
     TraceCallback callback;
-    pid_t pid = createShellProcess(command.c_str(), info);
-    close(fdPipe[1]);
+    pid_t pid = CreateShellProcess(command.c_str(), info);
+    close(fd_pipe[1]);
     if (pid < 0) {
         LOG(INFO)<<"Compilation failed";
-        close(fdPipe[0]);
-        sendReply(fdSocket, INTERNAL_ERROR);
+        close(fd_pipe[0]);
+        SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
-    static signed char errorMessage[16384];
-    int count = readn(fdPipe[0], errorMessage, sizeof(errorMessage));
-    close(fdPipe[0]);
+    static signed char error_message[16384];
+    int count = Readn(fd_pipe[0], error_message, sizeof(error_message));
+    close(fd_pipe[0]);
     if (count < 0) {
         LOG(ERROR)<<"Fail to read error messages";
-        sendReply(fdSocket, INTERNAL_ERROR);
+        SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
     int status;
@@ -74,25 +70,25 @@ int doCompile(int fdSocket, const string& sourceFilename) {
     }
     if (WIFSIGNALED(status)) {
         LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
-        sendReply(fdSocket, INTERNAL_ERROR);
+        SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
     status = WEXITSTATUS(status);
     if (status) {
         if (status >= 126) {
-            LOG(INFO)<<"Compilation failed";
-            sendReply(fdSocket, INTERNAL_ERROR);
+            LOG(INFO)<<"Running compile.sh failed";
+            SendReply(sock, INTERNAL_ERROR);
         } else {
             LOG(INFO)<<"Compilation error";
-            sendReply(fdSocket, COMPILATION_ERROR);
+            SendReply(sock, COMPILATION_ERROR);
             uint16_t len = htons(count);
-            writen(fdSocket, &len, sizeof(len));
+            Writen(sock, &len, sizeof(len));
             for (int i = 0; i < count; ++i) {
-                if (errorMessage[i] <= 0) {
-                    errorMessage[i] = '?';
+                if (error_message[i] <= 0) {
+                    error_message[i] = '?';
                 }
             }
-            writen(fdSocket, errorMessage, count);
+            Writen(sock, error_message, count);
         }
         return -1;
     }

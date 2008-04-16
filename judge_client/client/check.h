@@ -24,10 +24,11 @@
 
 using namespace std;
 
-int doCheck(int fdSocket,
-            const string& inputFilename,
-            const string& outputFilename,
-            const string& programOutputFilename,
-            const string& specialJudgeFilename);
+int DoCheck(int sock,
+            int special_judge_uid,
+            const string& input_filename,
+            const string& output_filename,
+            const string& program_output_filename,
+            const string& special_judge_filename);
 
 #endif

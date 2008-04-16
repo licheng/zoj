@@ -26,36 +26,37 @@
 
 #include "args.h"
 #include "compile.h"
-#include "judge_result.h"
-
-DEFINE_ARG(string, root, "");
+#include "global.h"
 
 class DoCompileTest: public TestFixture {
   protected:
-    void setUp() {
-        ARG_root = tmpnam(NULL);
-        ASSERT_EQUAL(0, mkdir(ARG_root.c_str(), 0700));
-        ASSERT_EQUAL(0, mkdir((ARG_root + "/script").c_str(), 0700));
-        ASSERT_EQUAL(0, link("../script/compile.sh", 
-                             (ARG_root + "/script/compile.sh").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/ac.cc", (ARG_root + "/ac.cc").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/ce.cc", (ARG_root + "/ce.cc").c_str()));
+    virtual void SetUp() {
+        root_ = tmpnam(NULL);
+        ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
+        ASSERT_EQUAL(0, mkdir((root_ + "/script").c_str(), 0700));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(),
+                                (root_ + "/script/compile.sh").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.cc").c_str(),
+                                (root_ + "/ac.cc").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(),
+                                (root_ + "/ce.cc").c_str()));
         fp_ = tmpfile();
         fd_ = fileno(fp_);
     }
 
-    void tearDown() {
+    virtual void TearDown() {
         fclose(fp_);
-        system(("rm -rf " + ARG_root).c_str());
+        system(("rm -rf " + root_).c_str());
     }
 
     FILE* fp_;
     int fd_;
     char buf_[1024 * 16];
+    string root_;
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, doCompile(fd_, ARG_root +  "/ac.cc"));
+    ASSERT_EQUAL(0, DoCompile(fd_, root_, root_ +  "/ac.cc"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
@@ -64,7 +65,7 @@ TEST_F(DoCompileTest, Success) {
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, doCompile(fd_, ARG_root + "/ce.cc"));
+    ASSERT_EQUAL(-1, DoCompile(fd_, root_, root_ + "/ce.cc"));
     lseek(fd_, 0, SEEK_SET);
     ASSERT_EQUAL((ssize_t)4, read(fd_, buf_, 4));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);

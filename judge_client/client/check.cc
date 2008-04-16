@@ -25,18 +25,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "judge_result.h"
+#include "global.h"
 #include "logging.h"
 #include "args.h"
 #include "trace.h"
 #include "util.h"
-
-// The root directory which contains problems, scripts and working directory of
-// the client
-DECLARE_ARG(string, root);
-
-// The uid for executing the program to be judged
-DECLARE_ARG(int, uid);
 
 class TextFile {
     public:
@@ -45,8 +38,8 @@ class TextFile {
             if (fd_ < 0) {
                 LOG(SYSCALL_ERROR)<<"Fail to open "<<filename;
             }
-            bufferSize_ = sizeof(buffer_);
-            ptr_ = buffer_ + bufferSize_;
+            buffer_size_ = sizeof(buffer_);
+            ptr_ = buffer_ + buffer_size_;
         }
 
         ~TextFile() {
@@ -58,19 +51,22 @@ class TextFile {
         // Returns the next character in the file. Returns 0 if EOF is reached,
         // -1 if any error occurs.
         int read() {
-            if (ptr_ - buffer_ >= bufferSize_) {
-                if (bufferSize_ < sizeof(buffer_)) {
-                    // The previous readn returns less characters than requested,
+            if (fd_ < 0) {
+                return -1;
+            }
+            if (ptr_ - buffer_ >= buffer_size_) {
+                if (buffer_size_ < sizeof(buffer_)) {
+                    // The previous Readn returns less characters than requested,
                     // which means EOF is reached. It is not necessary to invoke
                     // it again.
                     return 0;
                 }
-                bufferSize_ = readn(fd_, buffer_, sizeof(buffer_));
-                if ((int)bufferSize_ < 0) {
+                buffer_size_ = Readn(fd_, buffer_, sizeof(buffer_));
+                if ((int)buffer_size_ < 0) {
                     LOG(SYSCALL_ERROR)<<"Fail to read from "<<filename_;
                     return -1;
                 }
-                if (bufferSize_ == 0) {
+                if (buffer_size_ == 0) {
                     return 0;
                 }
                 ptr_ = buffer_;
@@ -80,7 +76,7 @@ class TextFile {
 
         // Returns the next non-white-space character. Returns 0 if EOF is
         // reached, -1 if any error occurs.
-        int skipWhiteSpaces() {
+        int SkipWhiteSpaces() {
             int ret;
             do {
                 ret = read();
@@ -101,7 +97,7 @@ class TextFile {
         unsigned char buffer_[1024];
         
         // The number of available characters in the buffer
-        size_t bufferSize_;
+        size_t buffer_size_;
 
         // A pointer pointing to the next available character in the buffer
         unsigned char* ptr_;
@@ -122,10 +118,10 @@ class TextFile {
 //    characters.
 // 3. WRONG_ANSWER
 //    Neither ACCEPTED nor PRESENTATION_ERROR
-int compareTextFiles(const string& outputFilename,
-                     const string& programOutputFilename) {
+int CompareTextFiles(const string& output_filename,
+                     const string& program_output_filename) {
     int ret = ACCEPTED;
-    TextFile f1(outputFilename), f2(programOutputFilename);
+    TextFile f1(output_filename), f2(program_output_filename);
     if (f1.fail() || f2.fail()) {
         return INTERNAL_ERROR;
     }
@@ -139,27 +135,27 @@ int compareTextFiles(const string& outputFilename,
             return WRONG_ANSWER;
         } else {
             if (isspace(c1)) {
-                c1 = f1.skipWhiteSpaces();
+                c1 = f1.SkipWhiteSpaces();
             }
             if (isspace(c2)) {
-                c2 = f2.skipWhiteSpaces();
+                c2 = f2.SkipWhiteSpaces();
             }
             while (c1 > 0 && c2 > 0) {
                 if (c1 != c2) {
                     return WRONG_ANSWER;
                 }
-                c1 = f1.skipWhiteSpaces();
-                c2 = f2.skipWhiteSpaces();
+                c1 = f1.SkipWhiteSpaces();
+                c2 = f2.SkipWhiteSpaces();
             }
             ret = PRESENTATION_ERROR;
         }
     }
     if (isspace(c1)) {
-        c1 = f1.skipWhiteSpaces();
+        c1 = f1.SkipWhiteSpaces();
         ret = PRESENTATION_ERROR;
     }
     if (isspace(c2)) {
-        c2 = f2.skipWhiteSpaces();
+        c2 = f2.SkipWhiteSpaces();
         ret = PRESENTATION_ERROR;
     }
     if (c1 < 0 || c2 < 0) {
@@ -171,34 +167,35 @@ int compareTextFiles(const string& outputFilename,
     return ret;
 }
 
-int runSpecialJudgeExe(string specialJudgeFilename,
-                       const string& inputFilename,
-                       const string& programOutputFilename) {
-    LOG(INFO)<<"Running special judge "<<specialJudgeFilename;
-    string workingDirectory = 
-        specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
-    specialJudgeFilename =
-        specialJudgeFilename.substr(workingDirectory.size() + 1);
+int RunSpecialJudgeExe(int uid,
+                       string special_judge_filename,
+                       const string& input_filename,
+                       const string& program_output_filename) {
+    LOG(INFO)<<"Running special judge "<<special_judge_filename;
+    string working_dir = 
+        special_judge_filename.substr(0, special_judge_filename.rfind('/'));
+    special_judge_filename =
+        special_judge_filename.substr(working_dir.size() + 1);
     char path[PATH_MAX + 1];
     getcwd(path, sizeof(path));
     const char* commands[] = {
-        specialJudgeFilename.c_str(),
-        specialJudgeFilename.c_str(),
-        programOutputFilename.substr(workingDirectory.size() + 1).c_str(),
-        inputFilename.substr(workingDirectory.size() + 1).c_str(),
-        inputFilename.substr(workingDirectory.size() + 1).c_str(),
+        special_judge_filename.c_str(),
+        special_judge_filename.c_str(),
+        program_output_filename.substr(working_dir.size() + 1).c_str(),
+        input_filename.substr(working_dir.size() + 1).c_str(),
+        input_filename.substr(working_dir.size() + 1).c_str(),
         NULL};
     StartupInfo info;
-    info.stdinFilename = programOutputFilename.c_str();
-    info.uid = ARG_uid;
-    info.timeLimit = 10;
-    info.memoryLimit = 256 * 1024;
-    info.outputLimit = 16;
-    info.fileLimit = 6; // stdin, stdout, stderr, input
+    info.stdin_filename = program_output_filename.c_str();
+    info.uid = uid;
+    info.time_limit = 10;
+    info.memory_limit = 256 * 1024;
+    info.output_limit = 16;
+    info.file_limit = 6; // stdin, stdout, stderr, input
     info.trace = 1;
-    info.workingDirectory = workingDirectory.c_str();
+    info.working_dir = working_dir.c_str();
     TraceCallback callback;
-    pid_t pid = createProcess(commands, info);
+    pid_t pid = CreateProcess(commands, info);
     if (pid == -1) {
         LOG(ERROR)<<"Fail to execute special judge";
         return INTERNAL_ERROR;
@@ -210,8 +207,8 @@ int runSpecialJudgeExe(string specialJudgeFilename,
             return INTERNAL_ERROR;
         }
     }
-    callback.processResult(status);
-    if (callback.getResult()) {
+    callback.ProcessResult(status);
+    if (callback.GetResult()) {
         return INTERNAL_ERROR;
     }
     switch (WEXITSTATUS(status)) {
@@ -224,35 +221,37 @@ int runSpecialJudgeExe(string specialJudgeFilename,
     }
 }
 
-int doCheck(int fdSocket,
-            const string& inputFilename,
-            const string& outputFilename,
-            const string& programOutputFilename,
-            const string& specialJudgeFilename) {
+int DoCheck(int sock,
+            int special_judge_uid,
+            const string& input_filename,
+            const string& output_filename,
+            const string& program_output_filename,
+            const string& special_judge_filename) {
     LOG(INFO)<<"Judging";
-    sendReply(fdSocket, JUDGING);
+    SendReply(sock, JUDGING);
     int result;
-    if (access(specialJudgeFilename.c_str(), F_OK) == 0) {
-        string workingDirectory = 
-            specialJudgeFilename.substr(0, specialJudgeFilename.rfind('/'));
+    if (access(special_judge_filename.c_str(), F_OK) == 0) {
+        string working_dir = 
+            special_judge_filename.substr(0, special_judge_filename.rfind('/'));
         string temp =
-            StringPrintf("%s/p%d.out", workingDirectory.c_str(), getpid());
+            StringPrintf("%s/p%d.out", working_dir.c_str(), getpid());
         unlink(temp.c_str());
-        if (symlink(programOutputFilename.c_str(), temp.c_str()) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to link from "<<programOutputFilename
+        if (symlink(program_output_filename.c_str(), temp.c_str()) == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to link from "<<program_output_filename
                               <<" to "<<temp;
             result = INTERNAL_ERROR;
         } else {
-            result = runSpecialJudgeExe(specialJudgeFilename,
-                                        inputFilename,
+            result = RunSpecialJudgeExe(special_judge_uid,
+                                        special_judge_filename,
+                                        input_filename,
                                         temp);
             unlink(temp.c_str());
         }
     } else {
-        result = compareTextFiles(outputFilename,
-                                  programOutputFilename);
+        result = CompareTextFiles(output_filename,
+                                  program_output_filename);
     }
-    sendReply(fdSocket, result);
+    SendReply(sock, result);
     switch(result) {
         case ACCEPTED:
             LOG(INFO)<<"Accepted";

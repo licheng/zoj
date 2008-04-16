@@ -24,31 +24,31 @@
 
 #include "util.h"
 
-vector<ArgumentInfo*>* infoList;
+vector<ArgumentInfo*>* info_list;
 
 ArgumentInfo::ArgumentInfo(string type,
                            string name,
-                           string defaultValue,
+                           string default_value,
                            string description,
                            bool optional,
                            void* reference)
     : type_(type),
       name_(name),
-      defaultValue_(defaultValue),
+      default_value_(default_value),
       description_(description),
       optional_(optional),
       reference_(reference) {
-    if (infoList == NULL) {
-        infoList = new vector<ArgumentInfo*>;
+    if (info_list == NULL) {
+        info_list = new vector<ArgumentInfo*>;
     }
-    infoList->push_back(this);
+    info_list->push_back(this);
 }
 
 void ArgumentInfo::Print() {
     cout<<string(8, ' ')<<"--"<<name_<<string(14 - name_.size(), ' ')
         <<description_<<endl<<string(24, ' ')<<"type: "<<type_;
     if (optional_) {
-        cout<<endl<<string(24, ' ')<<"default value: "<<defaultValue_;
+        cout<<endl<<string(24, ' ')<<"default value: "<<default_value_;
     }
     cout<<endl;
 }
@@ -81,18 +81,18 @@ bool ArgumentInfo::Assign(const string& value) {
     return true;
 }
 
-void printUsage() {
+void PrintUsage() {
     cout<<"Usage: judge [options] "<<endl;
-    for (int i = 0; i < infoList->size(); ++i) {
-        (*infoList)[i]->Print();
+    for (int i = 0; i < info_list->size(); ++i) {
+        (*info_list)[i]->Print();
     }
 }
 
-int parseArguments(int argc, char* argv[]) {
-    if (infoList == NULL) {
-        infoList = new vector<ArgumentInfo*>;
+int ParseArguments(int argc, char* argv[]) {
+    if (info_list == NULL) {
+        info_list = new vector<ArgumentInfo*>;
     }
-    vector<bool> assigned(infoList->size(), false);
+    vector<bool> assigned(info_list->size(), false);
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] == '-' && argv[i][1] == '-') {
             char* p = argv[i] + 2;
@@ -101,21 +101,21 @@ int parseArguments(int argc, char* argv[]) {
             }
             string name(argv[i] + 2, p - argv[i] - 2);
             bool found = false;
-            for (int j = 0; j < infoList->size(); ++j) {
-                if ((*infoList)[j]->name() == name) {
+            for (int j = 0; j < info_list->size(); ++j) {
+                if ((*info_list)[j]->GetName() == name) {
                     if (*p) {
-                        if (!(*infoList)[j]->Assign(p + 1)) {
+                        if (!(*info_list)[j]->Assign(p + 1)) {
                             cerr<<"Invalid value for argument "<<name<<endl;
-                            printUsage();
+                            PrintUsage();
                             return -1;
                         }
                     } else {
-                        if ((*infoList)[j]->type() != "bool") {
+                        if ((*info_list)[j]->GetType() != "bool") {
                             cerr<<"Missing value for argument "<<name<<endl;
-                            printUsage();
+                            PrintUsage();
                             return -1;
                         }
-                        (*infoList)[j]->Assign("true");
+                        (*info_list)[j]->Assign("true");
                     }
                     found = true;
                     assigned[j] = true;
@@ -124,15 +124,15 @@ int parseArguments(int argc, char* argv[]) {
             }
             if (!found) {
                 cerr<<"Invalid argument "<<name<<endl;
-                printUsage();
+                PrintUsage();
                 return -1;
             }
         }
     }
-    for (int i = 0; i < infoList->size(); ++i) {
-        if (!assigned[i] && !(*infoList)[i]->optional()) {
-            cerr<<"Missing argument "<<(*infoList)[i]->name()<<endl;
-            printUsage();
+    for (int i = 0; i < info_list->size(); ++i) {
+        if (!assigned[i] && !(*info_list)[i]->IsOptional()) {
+            cerr<<"Missing argument "<<(*info_list)[i]->GetName()<<endl;
+            PrintUsage();
             return -1;
         }
     }

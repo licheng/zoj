@@ -29,21 +29,21 @@ class ArgumentInfo {
   public:
     ArgumentInfo(string type,
                  string name,
-                 string defaultValue,
+                 string default_value,
                  string description,
                  bool optional,
                  void* reference);
     void Print();
     bool Assign(const string& value);
 
-    const string& type() { return type_; }
-    const string& name() { return name_; }
-    bool optional() { return optional_; }
+    const string& GetType() { return type_; }
+    const string& GetName() { return name_; }
+    bool IsOptional() { return optional_; }
 
   private:
     string type_;
     string name_;
-    string defaultValue_;
+    string default_value_;
     string description_;
     bool optional_;
     void* reference_;
@@ -58,15 +58,16 @@ class ArgumentInfo {
     type ARG_##name; \
     ArgumentInfo _info_##name(#type, #name, "", description, false, &ARG_##name)
 
-#define DEFINE_OPTIONAL_ARG(type, name, defaultValue, description) \
+#define DEFINE_OPTIONAL_ARG(type, name, default_value, description) \
     DEFINE_##type; \
-    type ARG_##name = defaultValue; \
-    ArgumentInfo _info_##name(#type, #name, #defaultValue, description, true, &ARG_##name)
+    type ARG_##name = default_value; \
+    ArgumentInfo _info_##name(#type, #name, #default_value, description, \
+                              true, &ARG_##name)
 
 #define DECLARE_ARG(type, name) \
     extern type ARG_##name
 
 // Extracts parameter values from the passed-in arguments.
-int parseArguments(int argc, char* argv[]);
+int ParseArguments(int argc, char* argv[]);
 
 #endif

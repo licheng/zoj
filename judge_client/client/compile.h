@@ -26,6 +26,6 @@ using namespace std;
 
 // Compiles the specified source file.
 // Returns 0 if compilation succeeded, or -1 on error.
-int doCompile(int fdSocket, const string& sourceFilename);
+int DoCompile(int sock, const string& root, const string& source_filename);
 
 #endif

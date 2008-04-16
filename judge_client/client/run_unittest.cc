@@ -25,61 +25,68 @@
 #include <unistd.h>
 
 #include "args.h"
-#include "judge_result.h"
+#include "global.h"
 #include "run.h"
 #include "trace.h"
 #include "util.h"
 
-DEFINE_ARG(string, root, "");
-DEFINE_ARG(int, uid, "");
-DEFINE_ARG(int, gid, "");
-DECLARE_ARG(bool, logtostderr);
-
 class DoRunTest: public TestFixture {
   protected:
-    void setUp() {
-        ARG_logtostderr = true;
-        ARG_root = tmpnam(NULL);
-        fn_ = ARG_root + "/output";
-        ASSERT_EQUAL(0, mkdir(ARG_root.c_str(), 0700));
-        ASSERT_EQUAL(0, link(TESTDIR "/1.in", (ARG_root + "/1.in").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/1.out", (ARG_root + "/1.out").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/ac", (ARG_root + "/ac").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/wa", (ARG_root + "/wa").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/tle", (ARG_root + "/tle").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/ole", (ARG_root + "/ole").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/mle", (ARG_root + "/mle").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/mle_mmap",
-                             (ARG_root + "/mle_mmap").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/fpe", (ARG_root + "/fpe").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/rf_link",
-                             (ARG_root + "/rf_link").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/rf_open",
-                             (ARG_root + "/rf_open").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/pe", (ARG_root + "/pe").c_str()));
-        ASSERT_EQUAL(0, link(TESTDIR "/sigsegv",
-                             (ARG_root + "/sigsegv").c_str()));
+    virtual void SetUp() {
+        root_ = tmpnam(NULL);
+        fn_ = root_ + "/output";
+        ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                                (root_ + "/1.in").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                                (root_ + "/1.out").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ac").c_str(),
+                                (root_ + "/ac").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/wa").c_str(),
+                                (root_ + "/wa").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(),
+                                (root_ + "/tle").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ole").c_str(),
+                                (root_ + "/ole").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/mle").c_str(),
+                                (root_ + "/mle").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/mle_mmap").c_str(),
+                                (root_ + "/mle_mmap").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/fpe").c_str(),
+                                (root_ + "/fpe").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_link").c_str(),
+                                (root_ + "/rf_link").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_open").c_str(),
+                                (root_ + "/rf_open").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/pe").c_str(),
+                                (root_ + "/pe").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/sigsegv").c_str(),
+                                (root_ + "/sigsegv").c_str()));
         fp_ = tmpfile();
         fd_ = fileno(fp_);
-        installHandlers();
+        InstallHandlers();
     }
     
-    void tearDown() {
-        uninstallHandlers();
-        fclose(fp_);
-        system(("rm -rf " + ARG_root).c_str());
+    virtual void TearDown() {
+        UninstallHandlers();
+        if (fp_) {
+            fclose(fp_);
+        }
+        system(("rm -rf " + root_).c_str());
     }
 
     FILE* fp_;
     int fd_;
     string fn_;
     char buf_[32];
+    string root_;
 };
 
 TEST_F(DoRunTest, Success) {
-    ASSERT_EQUAL(0, doRun(fd_, TESTDIR "/ac", "cc", TESTDIR "/1.in", fn_,
-                          10, 1000, 1000));
-    ASSERT(!system(StringPrintf("diff %s %s", TESTDIR "/1.out",
+    ASSERT_EQUAL(0, DoRun(fd_, (TESTDIR + "/ac").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1000, 1000, 0, 0));
+    ASSERT(!system(StringPrintf("diff %s %s", (TESTDIR + "/1.out").c_str(),
                                 fn_.c_str()).c_str()));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(0, (int)size % 9);
@@ -92,8 +99,9 @@ TEST_F(DoRunTest, Success) {
 }
 
 TEST_F(DoRunTest, TimeLimitExceeded) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/tle", "cc", TESTDIR "/1.in", fn_,
-                          1, 1000, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/tle").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          1, 1000, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -107,8 +115,9 @@ TEST_F(DoRunTest, TimeLimitExceeded) {
 }
 
 TEST_F(DoRunTest, MemoryLimitExceeded) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/mle", "cc", TESTDIR "/1.in", fn_,
-                          10, 1, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/mle").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -122,8 +131,9 @@ TEST_F(DoRunTest, MemoryLimitExceeded) {
 }
 
 TEST_F(DoRunTest, MemoryLimitExceededMMap) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/mle_mmap", "cc", TESTDIR "/1.in", fn_,
-                          10, 100000, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/mle_mmap").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 100000, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -137,8 +147,9 @@ TEST_F(DoRunTest, MemoryLimitExceededMMap) {
 }
 
 TEST_F(DoRunTest, OutputLimitExceeded) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/ole", "cc", TESTDIR "/1.in", fn_,
-                          10, 1000, 1));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/ole").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1000, 1, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -152,8 +163,9 @@ TEST_F(DoRunTest, OutputLimitExceeded) {
 }
 
 TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/sigsegv", "cc", TESTDIR "/1.in", fn_,
-                          10, 1000, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/sigsegv").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1000, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -167,8 +179,9 @@ TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
 }
 
 TEST_F(DoRunTest, FloatingPointError) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/fpe", "cc", TESTDIR "/1.in", fn_,
-                          10, 1000, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/fpe").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1000, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -182,8 +195,9 @@ TEST_F(DoRunTest, FloatingPointError) {
 }
 
 TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/rf_link", "cc", TESTDIR "/1.in", fn_,
-                          10, 1000, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/rf_link").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1000, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);
@@ -197,8 +211,9 @@ TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
 }
 
 TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionOpen) {
-    ASSERT_EQUAL(1, doRun(fd_, TESTDIR "/rf_open", "cc", TESTDIR "/1.in", fn_,
-                          10, 1000, 1000));
+    ASSERT_EQUAL(1, DoRun(fd_, (TESTDIR + "/rf_open").c_str(), "cc",
+                          (TESTDIR + "/1.in").c_str(), fn_,
+                          10, 1000, 1000, 0, 0));
     off_t size = lseek(fd_, 0, SEEK_END);
     ASSERT_EQUAL(1, (int)size % 9);
     lseek(fd_, 0, SEEK_SET);

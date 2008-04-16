@@ -25,14 +25,14 @@
 
 using namespace std;
 
-#include "judge_result.h"
+#include "global.h"
 
 class TraceCallback {
     public:
         TraceCallback():
             result_(-1),
-            timeConsumption_(0),
-            memoryConsumption_(0),
+            time_consumption_(0),
+            memory_consumption_(0),
             exited_(false) {
             TraceCallback::instance_ = this;
         }
@@ -41,59 +41,59 @@ class TraceCallback {
             TraceCallback::instance_ = NULL;
         }
 
-        virtual bool onClone() {
+        virtual bool OnClone() {
             return false;
         }
 
-        virtual bool onExecve();
+        virtual bool OnExecve();
 
-        virtual bool onOpen(const string& path, int flags);
+        virtual bool OnOpen(const string& path, int flags);
 
-        virtual void onMemoryLimitExceeded();
+        virtual void OnMemoryLimitExceeded();
 
-        virtual void onExit(pid_t pid);
+        virtual void OnExit(pid_t pid);
 
-        virtual void onSIGCHLD(pid_t pid);
+        virtual void OnSIGCHLD(pid_t pid);
 
-        virtual void onError();
+        virtual void OnError();
 
-        void processResult(int status);
+        void ProcessResult(int status);
 
-        int getResult() const {
+        int GetResult() const {
             return result_;
         }
 
-        void setResult(int result) {
+        void SetResult(int result) {
             result_ = result;
         }
 
-        int getTimeConsumption() const {
-            return timeConsumption_;
+        int GetTimeConsumption() const {
+            return time_consumption_;
         }
 
-        int getMemoryConsumption() const {
-            return memoryConsumption_;
+        int GetMemoryConsumption() const {
+            return memory_consumption_;
         }
 
-        bool hasExited() const {
+        bool HasExited() const {
             return exited_;
         }
 
-        static TraceCallback* getInstance() {
+        static TraceCallback* GetInstance() {
             return TraceCallback::instance_;
         }
 
     protected:
         int result_;
-        int timeConsumption_;
-        int memoryConsumption_;
+        int time_consumption_;
+        int memory_consumption_;
         bool exited_;
 
     private:
         static TraceCallback* instance_;
 };
 
-void installHandlers();
-void uninstallHandlers();
+void InstallHandlers();
+void UninstallHandlers();
 
 #endif

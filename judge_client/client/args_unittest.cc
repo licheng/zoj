@@ -28,126 +28,126 @@ DEFINE_OPTIONAL_ARG(bool, opt_bool, false, "");
 DEFINE_ARG(string, string, "");
 DEFINE_OPTIONAL_ARG(string, opt_string, "opt", "");
 
-TEST(parseArgumentsAllValid) {
+TEST(ParseArgumentsAllValid) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(4, argv));
-    CPPUNIT_ASSERT_EQUAL(1234, ARG_int);
-    CPPUNIT_ASSERT_EQUAL(true, ARG_bool);
-    CPPUNIT_ASSERT_EQUAL(string("test"), ARG_string);
-    CPPUNIT_ASSERT_EQUAL(1001, ARG_opt_int);
-    CPPUNIT_ASSERT_EQUAL(false, ARG_opt_bool);
-    CPPUNIT_ASSERT_EQUAL(string("opt"), ARG_opt_string);
+    ASSERT_EQUAL(0, ParseArguments(4, argv));
+    ASSERT_EQUAL(1234, ARG_int);
+    ASSERT_EQUAL(true, ARG_bool);
+    ASSERT_EQUAL(string("test"), ARG_string);
+    ASSERT_EQUAL(1001, ARG_opt_int);
+    ASSERT_EQUAL(false, ARG_opt_bool);
+    ASSERT_EQUAL(string("opt"), ARG_opt_string);
 }
 
-TEST(parseArgumentsNoInt) {
+TEST(ParseArgumentsNoInt) {
     char* argv[] = {"",
                     "--bool",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(3, argv));
+    ASSERT_EQUAL(-1, ParseArguments(3, argv));
 }
 
-TEST(parseArgumentsInvalidInt) {
+TEST(ParseArgumentsInvalidInt) {
     char* argv[] = {"",
                     "--int=invalid",
                     "--bool",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(4, argv));
+    ASSERT_EQUAL(-1, ParseArguments(4, argv));
 }
 
-TEST(parseArgumentsEmptyInt) {
+TEST(ParseArgumentsEmptyInt) {
     char* argv[] = {"",
                     "--int=",
                     "--bool",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(4, argv));
+    ASSERT_EQUAL(-1, ParseArguments(4, argv));
 }
 
-TEST(parseArgumentsNoBool) {
+TEST(ParseArgumentsNoBool) {
     char* argv[] = {"",
                     "--int=1234",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(3, argv));
+    ASSERT_EQUAL(-1, ParseArguments(3, argv));
 }
 
-TEST(parseArgumentsInvalidBool) {
+TEST(ParseArgumentsInvalidBool) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool=invalid",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(4, argv));
+    ASSERT_EQUAL(-1, ParseArguments(4, argv));
 }
 
-TEST(parseArgumentsEmptyBool) {
+TEST(ParseArgumentsEmptyBool) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool=",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(4, argv));
+    ASSERT_EQUAL(-1, ParseArguments(4, argv));
 }
 
-TEST(parseArgumentsValidBoolTrue) {
+TEST(ParseArgumentsValidBoolTrue) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool=true",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(4, argv));
-    CPPUNIT_ASSERT_EQUAL(true, ARG_bool);
+    ASSERT_EQUAL(0, ParseArguments(4, argv));
+    ASSERT_EQUAL(true, ARG_bool);
 }
 
-TEST(parseArgumentsValidBoolFalse) {
+TEST(ParseArgumentsValidBoolFalse) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool=false",
                     "--string=test"};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(4, argv));
-    CPPUNIT_ASSERT_EQUAL(false, ARG_bool);
+    ASSERT_EQUAL(0, ParseArguments(4, argv));
+    ASSERT_EQUAL(false, ARG_bool);
 }
 
-TEST(parseArgumentsNoString) {
+TEST(ParseArgumentsNoString) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool"};
-    CPPUNIT_ASSERT_EQUAL(-1, parseArguments(3, argv));
+    ASSERT_EQUAL(-1, ParseArguments(3, argv));
 }
 
-TEST(parseArgumentsEmptyString) {
+TEST(ParseArgumentsEmptyString) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--string="};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(4, argv));
-    CPPUNIT_ASSERT(ARG_string.empty());
+    ASSERT_EQUAL(0, ParseArguments(4, argv));
+    ASSERT(ARG_string.empty());
 }
 
-TEST(parseArgumentsOptionalInt) {
+TEST(ParseArgumentsOptionalInt) {
     char* argv[] = {"",
                     "--int=1234",
                     "--opt_int=1111",
                     "--bool",
                     "--string="};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(5, argv));
-    CPPUNIT_ASSERT_EQUAL(1111, ARG_opt_int);
+    ASSERT_EQUAL(0, ParseArguments(5, argv));
+    ASSERT_EQUAL(1111, ARG_opt_int);
 }
 
-TEST(parseArgumentsOptionalBool) {
+TEST(ParseArgumentsOptionalBool) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--opt_bool",
                     "--string="};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(5, argv));
-    CPPUNIT_ASSERT_EQUAL(true, ARG_opt_bool);
+    ASSERT_EQUAL(0, ParseArguments(5, argv));
+    ASSERT_EQUAL(true, ARG_opt_bool);
 }
 
-TEST(parseArgumentsOptionalString) {
+TEST(ParseArgumentsOptionalString) {
     char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--string=",
                     "--opt_string=test"};
-    CPPUNIT_ASSERT_EQUAL(0, parseArguments(5, argv));
-    CPPUNIT_ASSERT_EQUAL(string("test"), ARG_opt_string);
+    ASSERT_EQUAL(0, ParseArguments(5, argv));
+    ASSERT_EQUAL(string("test"), ARG_opt_string);
 }

@@ -26,15 +26,13 @@
 
 #include "args.h"
 
-DEFINE_ARG(string, root, "");
-
 class TestSetLimit : public TestFixture {
   protected:
-    virtual void setUp() {
+    virtual void SetUp() {
         getrlimit(RLIMIT_FSIZE, &original_);;
     }
 
-    virtual void tearDown() {
+    virtual void TearDown() {
         setrlimit(RLIMIT_FSIZE, &original_);
     }
 
@@ -42,7 +40,7 @@ class TestSetLimit : public TestFixture {
 };
 
 TEST_F(TestSetLimit, Normal) {
-    setLimit(RLIMIT_FSIZE, 1024 * 1024);
+    SetLimit(RLIMIT_FSIZE, 1024 * 1024);
     struct rlimit t;
     getrlimit(RLIMIT_FSIZE, &t);
     ASSERT_EQUAL(1024 * 1024, (int)t.rlim_cur);
@@ -50,15 +48,15 @@ TEST_F(TestSetLimit, Normal) {
 }
 
 TEST_F(TestSetLimit, Invalid) {
-    ASSERT_EQUAL(-1, setLimit(RLIMIT_FSIZE, -1));
+    ASSERT_EQUAL(-1, SetLimit(RLIMIT_FSIZE, -1));
 }
 
 TEST(readTimeConsumptionInvalidPID) {
-    ASSERT_EQUAL(-1, readTimeConsumption(-1));
+    ASSERT_EQUAL(-1, ReadTimeConsumption(-1));
 }
 
 TEST(readTimeConsumptionNormal) {
-    double ts = readTimeConsumption(getpid());
+    double ts = ReadTimeConsumption(getpid());
     // should be negative
     ASSERT(ts >= 0);
     // can not be too large
@@ -66,11 +64,11 @@ TEST(readTimeConsumptionNormal) {
 }
 
 TEST(readMemoryConsumptionInvalidPID) {
-    ASSERT_EQUAL(-1, readMemoryConsumption(-1));
+    ASSERT_EQUAL(-1, ReadMemoryConsumption(-1));
 }
 
 TEST(readMemoryConsumptionNormal) {
-    int ms = readMemoryConsumption(getpid());
+    int ms = ReadMemoryConsumption(getpid());
     // should be positive
     ASSERT(ms > 0);
     // can not be too large

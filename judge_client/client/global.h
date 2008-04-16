@@ -17,8 +17,18 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __JUDGE_RESULT_H
-#define __JUDGE_RESULT_H
+#ifndef __GLOBAL_H
+#define __GLOBAL_H
+
+#define CMD_TYPE 100
+#define CMD_CHANGE_MAX_JOBS 1
+#define CMD_DATA 2
+#define CMD_COMPILE 3
+#define CMD_JUDGE 4
+
+#define TYPE_CONTROL 1
+#define TYPE_DATA 2
+#define TYPE_JUDGE 3
 
 #define COMPILING 1
 #define RUNNING 2
@@ -35,14 +45,15 @@
 #define SEGMENTATION_FAULT 16
 #define JUDGING 19
 #define READY 100
-#define UNSUPPORTED_SOURCE_FILE_TYPE 101
-#define NO_SUCH_PROBLEM 102
-#define INVALID_TESTCASE 103
-#define INVALID_TIME_LIMIT 104
-#define INVALID_MEMORY_LIMIT 105
-#define INVALID_OUTPUT_LIMIT 106
-#define INVALID_DATA_SIZE 107
-#define INVALID_DATA 108
-#define INVALID_SOURCE_FILE_TYPE 109
+#define NO_SUCH_PROBLEM 101
+#define INVALID_INPUT 102
+
+#define MAX_JOBS 100
+#define MAX_LOG_FILE_SIZE 262144 // 256KB
+
+namespace global {
+    extern int terminated;
+    extern int socket_closed;
+}
 
 #endif

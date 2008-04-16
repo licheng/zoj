@@ -33,17 +33,63 @@ using namespace std;
 #define FATAL 4
 #define INFO 5
 #define SYSCALL_ERROR 0
-#define LOG(level) Log(__FILE__, __LINE__, level).stream()
+#define LOG(level) Log(__FILE__, __LINE__, level).GetStream()
+
+class LogFile {
+    public:
+        virtual ~LogFile();
+
+        virtual void Write(const string& message) = 0;
+};
+
+class DiskLogFile: public LogFile {
+    public:
+        DiskLogFile(const string& root) : root_(root), fd_(-1) { }
+        virtual ~DiskLogFile();
+
+        virtual void Write(const string& message);
+
+    private:
+        void CreateNewFile();
+
+        string root_;
+        int fd_;
+        int size_;
+};
+
+class PipeLogFile: public LogFile {
+    public:
+        PipeLogFile(int pipe): pipe_(pipe) { }
+        virtual ~PipeLogFile();
+
+        virtual void Write(const string& message);
+
+    private:
+        int pipe_;
+};
 
 class Log {
     public:
         Log(const char* filename, int lineNumber, int level);
         ~Log();
 
-        ostream& stream() { return messageStream_; }
+        static LogFile* GetLogFile() { return log_; }
+
+        static void SetLogFile(LogFile* log) { 
+            if (log_) {
+                delete log_;
+            }
+            log_ = log;
+        }
+
+        static void SetLogToStderr(bool value) { log_to_stderr_ = value; }
+
+        ostream& GetStream() { return message_stream_; }
 
     private:
-        ostringstream messageStream_;
+        ostringstream message_stream_;
+        static LogFile* log_;
+        static bool log_to_stderr_;
 };
 
 #endif

@@ -34,7 +34,7 @@
 #include "trace.h"
 #include "util.h"
 
-int setLimit(int resource, unsigned int limit) {
+int SetLimit(int resource, unsigned int limit) {
     struct rlimit t;
     t.rlim_max = limit + 1;
     t.rlim_cur = limit;
@@ -45,7 +45,7 @@ int setLimit(int resource, unsigned int limit) {
     return 0;
 }
 
-int readTimeConsumption(int pid) {
+int ReadTimeConsumption(int pid) {
     char buffer[64];
     sprintf(buffer, "/proc/%d/stat", pid);
     FILE* fp = fopen(buffer, "r");
@@ -69,7 +69,7 @@ int readTimeConsumption(int pid) {
     return int((utime + stime + 0.0) / clktck * 1000);
 }
 
-int readMemoryConsumption(int pid) {
+int ReadMemoryConsumption(int pid) {
     char buffer[64];
     sprintf(buffer, "/proc/%d/status", pid);
     FILE* fp = fopen(buffer, "r");
@@ -94,14 +94,14 @@ int readMemoryConsumption(int pid) {
     return vmSize - vmExe - vmLib;
 }
 
-int createProcess(const char* commands[], const StartupInfo& processInfo) {
-    const char* filename[] = {processInfo.stdinFilename,
-                              processInfo.stdoutFilename,
-                              processInfo.stderrFilename};
+int CreateProcess(const char* commands[], const StartupInfo& process_info) {
+    const char* filename[] = {process_info.stdin_filename,
+                              process_info.stdout_filename,
+                              process_info.stderr_filename};
     int mode[] = {O_RDONLY, O_RDWR | O_CREAT | O_TRUNC, O_RDWR};
-    int fd[] = {processInfo.fdStdin,
-                processInfo.fdStdout,
-                processInfo.fdStderr};
+    int fd[] = {process_info.fd_stdin,
+                process_info.fd_stdout,
+                process_info.fd_stderr};
     for (int i = 0; i < 3; i++) {
         if (filename[i]) {
             fd[i] = open(filename[i], mode[i], 0777);
@@ -135,61 +135,61 @@ int createProcess(const char* commands[], const StartupInfo& processInfo) {
     for (int i = 3; i < 100; i++) {
         close(i);
     }
-    if (processInfo.timeLimit) {
-        if (setLimit(RLIMIT_CPU, processInfo.timeLimit) == -1) {
+    if (process_info.time_limit) {
+        if (SetLimit(RLIMIT_CPU, process_info.time_limit) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set cpu limit to "
-                              <<processInfo.timeLimit<<'s';
+                              <<process_info.time_limit<<'s';
             raise(SIGKILL);
         }
     }
-    if (processInfo.memoryLimit) {
-        if (setLimit(RLIMIT_DATA, processInfo.memoryLimit * 1024) == -1) {
+    if (process_info.memory_limit) {
+        if (SetLimit(RLIMIT_DATA, process_info.memory_limit * 1024) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set memory limit to "
-                              <<processInfo.memoryLimit<<'k';
+                              <<process_info.memory_limit<<'k';
             raise(SIGKILL);
         }
     }
-    if (processInfo.outputLimit) {
-        if (setLimit(RLIMIT_FSIZE, processInfo.outputLimit * 1024) == -1) {
+    if (process_info.output_limit) {
+        if (SetLimit(RLIMIT_FSIZE, process_info.output_limit * 1024) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set output limit to "
-                              <<processInfo.outputLimit<<'k';
+                              <<process_info.output_limit<<'k';
             raise(SIGKILL);
         }
     }
-    if (processInfo.fileLimit) {
-        if (setLimit(RLIMIT_NOFILE, processInfo.fileLimit) == -1) {
+    if (process_info.file_limit) {
+        if (SetLimit(RLIMIT_NOFILE, process_info.file_limit) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set file limit to "
-                              <<processInfo.fileLimit;
+                              <<process_info.file_limit;
             raise(SIGKILL);
         }
     }
-    if (processInfo.workingDirectory) {
-        if (chdir(processInfo.workingDirectory) == -1) {
+    if (process_info.working_dir) {
+        if (chdir(process_info.working_dir) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to change working directory to "
-                              <<processInfo.workingDirectory;
+                              <<process_info.working_dir;
             raise(SIGKILL);
         }
     }
-    if (processInfo.gid) {
-        if (setgid(processInfo.gid) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set gid to "<<processInfo.gid;
+    if (process_info.gid) {
+        if (setgid(process_info.gid) == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to set gid to "<<process_info.gid;
             raise(SIGKILL);
         }
     }
-    if (processInfo.uid) {
-        if (setuid(processInfo.uid) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set uid to "<<processInfo.uid;
+    if (process_info.uid) {
+        if (setuid(process_info.uid) == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to set uid to "<<process_info.uid;
             raise(SIGKILL);
         }
     }
-    if (processInfo.procLimit) {
-        if (setLimit(RLIMIT_NPROC, processInfo.procLimit) == -1) {
+    if (process_info.proc_limit) {
+        if (SetLimit(RLIMIT_NPROC, process_info.proc_limit) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set process limit to "
-                              <<processInfo.procLimit;
+                              <<process_info.proc_limit;
             raise(SIGKILL);
         }
     }
-    if (processInfo.trace) {
+    if (process_info.trace) {
         if (kmmon_traceme() == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to trace";
             raise(SIGKILL);
@@ -202,14 +202,14 @@ int createProcess(const char* commands[], const StartupInfo& processInfo) {
     return -1;
 }
 
-int createShellProcess(const char* command, const StartupInfo& processInfo) {
+int CreateShellProcess(const char* command, const StartupInfo& process_info) {
     const char* commands[] = {"/bin/sh", "sh", "-c", command, NULL};
-    return createProcess(commands, processInfo);
+    return CreateProcess(commands, process_info);
 }
 
-ssize_t readn(int fd, void* buffer, size_t count) {
+ssize_t Readn(int fd, void* buffer, size_t count) {
 	char* p = (char*)buffer;
-	while (count > 0) {
+	while (count > 0 && !global::terminated) {
 		ssize_t num = read(fd, p, count);
 		if (num == -1) {
 			if (errno == EINTR) {
@@ -226,10 +226,16 @@ ssize_t readn(int fd, void* buffer, size_t count) {
 		p += num;
 		count -= num;
 	}
+    if (global::terminated) {
+        LOG(INFO)<<"Terminated";
+        if (count > 0) {
+            return -1;
+        }
+    }
 	return p - (char*)buffer;
 }
 
-int writen(int fd, const void* buffer, size_t count) {
+int Writen(int fd, const void* buffer, size_t count) {
 	const char*p = (const char*)buffer;
 	while (count > 0) {
 		int num = write(fd, p, count);
@@ -247,17 +253,17 @@ int writen(int fd, const void* buffer, size_t count) {
 	return 0;
 }
 
-sighandler_t installSignalHandler(int signal, sighandler_t handler) {
-    return installSignalHandler(signal, handler, 0);
+sighandler_t InstallSignalHandler(int signal, sighandler_t handler) {
+    return InstallSignalHandler(signal, handler, 0);
 }
 
-sighandler_t installSignalHandler(int signal, sighandler_t handler, int flags) {
+sighandler_t InstallSignalHandler(int signal, sighandler_t handler, int flags) {
     sigset_t mask;
     sigemptyset(&mask);
-    return installSignalHandler(signal, handler, flags, mask);
+    return InstallSignalHandler(signal, handler, flags, mask);
 }
 
-sighandler_t installSignalHandler(
+sighandler_t InstallSignalHandler(
         int signal, sighandler_t handler, int flags, sigset_t mask) {
     struct sigaction act, oact;
     act.sa_handler = handler;
@@ -293,7 +299,7 @@ string StringPrintf(const char* format, ...) {
     return buffer;
 }
 
-int lockFile(int fd, int cmd) {
+int LockFile(int fd, int cmd) {
     struct flock lock;
     lock.l_type = F_WRLCK;
     lock.l_start = 0;
@@ -302,12 +308,67 @@ int lockFile(int fd, int cmd) {
     return fcntl(fd, cmd, &lock);
 }
 
-string getLocalTimeAsString(const char* format) {
+string GetLocalTimeAsString(const char* format) {
     time_t t = time(NULL);
     struct tm tm;
     localtime_r(&t, &tm);
     char buf[1024];
     strftime(buf, sizeof(buf), format, &tm);
     return buf;
+}
+
+int ConnectTo(const string& address, int port) {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to create socket";
+        return -1;
+    }
+    struct sockaddr_in servaddr;
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(port);
+    if (inet_pton(AF_INET, address.c_str(), &servaddr.sin_addr) <= 0) {
+        LOG(SYSCALL_ERROR)<<"Invalid address "<<address;
+        close(sock);
+        return -1;
+    }
+    LOG(INFO)<<"Connecting to "<<address<<":"<<port;
+    if (connect(sock, (const sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to connect to "<<address<<":"<<port;
+        close(sock);
+        return -1;
+    }
+    LOG(INFO)<<"Connected";
+    return sock;
+}
+
+// Reads the file content from the given file descriptor and writes the file
+// specified by output_filename. Creates the file if not exists.
+//
+// Return 0 if success, or -1 if any error occurs.
+int SaveFile(int sock, const string& output_filename, size_t size) {
+    int fdFile = open(output_filename.c_str(),
+                      O_RDWR | O_CREAT | O_TRUNC, 0640);
+    if (fdFile == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to create file "<<output_filename;
+        return -1;
+    }
+    static char buffer[4096];
+    while (size) {
+        size_t count = min(size, sizeof(buffer));
+        if (Readn(sock, buffer, count) == -1) {
+            LOG(ERROR)<<"Fail to read file";
+            close(fdFile);
+            return -1;
+        }
+        if (Writen(fdFile, buffer, count) == -1) {
+            LOG(ERROR)<<"Fail to write to "<<output_filename;
+            close(fdFile);
+            return -1;
+        }
+        size -= count;
+    }
+    close(fdFile);
+    return 0;
 }
 

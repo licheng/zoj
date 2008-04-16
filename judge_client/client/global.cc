@@ -17,24 +17,7 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RUN_H
-#define __RUN_H
-
-#include <string>
-
-using namespace std;
-
-// Runs the specified program.
-// Returns 0 if execution succeeded, or -1 on error.
-int DoRun(int sock,
-          const string& program_name,
-          const string& source_file_type,
-          const string& input_filename,
-          const string& program_output_filename,
-          int time_limit,
-          int memory_limit,
-          int output_limit,
-          int uid,
-          int gid);
-
-#endif
+namespace global {
+    int terminated;
+    int socket_closed;
+}

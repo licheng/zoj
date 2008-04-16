@@ -25,7 +25,7 @@
 #include <fcntl.h>
 
 #include "args.h"
-#include "judge_result.h"
+#include "global.h"
 #include "main.h"
 #include "trace.h"
 #include "util.h"

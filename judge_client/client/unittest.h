@@ -20,13 +20,29 @@
 #ifndef __UNITTEST_H
 #define __UNITTEST_H
 
+#include <string>
+
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/ui/text/TestRunner.h>
 
+static inline std::string GetTestDir() {
+    char path[PATH_MAX + 1];
+    if (getcwd(path, sizeof(path)) == NULL) {
+        CPPUNIT_FAIL("Fail to get the current working dir");
+    }
+    return std::string(path) + "/testdata";
+}
+
 class TestFixture : public CppUnit::TestFixture {
+    public:
+        TestFixture(): TESTDIR(GetTestDir()) { }
+    protected:
+        virtual void SetUp() { }
+        virtual void TearDown() { }
+        const std::string TESTDIR;
 };
 
 #define TEST(name) \
@@ -46,9 +62,9 @@ class TestFixture : public CppUnit::TestFixture {
         CPPUNIT_TEST(test);\
         CPPUNIT_TEST_SUITE_END();\
         public:\
-               void setUp() { name::setUp(); }\
-               void tearDown() { name::tearDown(); }\
-               void test();\
+            void setUp() { name::SetUp(); }\
+            void tearDown() { name::TearDown(); }\
+            void test();\
     };\
     CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(__ ## name ## _ ## method,\
                                           "alltest");\
@@ -65,7 +81,5 @@ int main() {
     runner.run();
     return 0;
 }
-
-#define TESTDIR "testdata"
 
 #endif
