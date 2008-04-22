@@ -101,6 +101,10 @@ DiskLogFile::~DiskLogFile() {
     }
 }
 
+int DiskLogFile::GetFD() {
+    return fd_;
+}
+
 PipeLogFile::~PipeLogFile() {
     if (pipe_ >= 0) {
         close(pipe_);
@@ -111,4 +115,8 @@ void PipeLogFile::Write(const string& message) {
     if (pipe_ >= 0) {
         Writen(pipe_, message.c_str(), message.size());
     }
+}
+
+int PipeLogFile::GetFD() {
+    return pipe_;
 }

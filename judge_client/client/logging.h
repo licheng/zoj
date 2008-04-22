@@ -40,6 +40,8 @@ class LogFile {
         virtual ~LogFile();
 
         virtual void Write(const string& message) = 0;
+
+        virtual int GetFD() = 0;
 };
 
 class DiskLogFile: public LogFile {
@@ -48,6 +50,8 @@ class DiskLogFile: public LogFile {
         virtual ~DiskLogFile();
 
         virtual void Write(const string& message);
+
+        virtual int GetFD();
 
     private:
         void CreateNewFile();
@@ -63,6 +67,8 @@ class PipeLogFile: public LogFile {
         virtual ~PipeLogFile();
 
         virtual void Write(const string& message);
+
+        virtual int GetFD();
 
     private:
         int pipe_;

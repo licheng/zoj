@@ -132,8 +132,14 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
             close(fd[i]);
         }
     }
-    for (int i = 3; i < 100; i++) {
-        close(i);
+    int log_fd = 0;
+    if (Log::GetLogFile()) {
+        log_fd = Log::GetLogFile()->GetFD();
+    }
+    for (int i = 3; i < 100; ++i) {
+        if (i != log_fd) {
+            close(i);
+        }
     }
     if (process_info.time_limit) {
         if (SetLimit(RLIMIT_CPU, process_info.time_limit) == -1) {

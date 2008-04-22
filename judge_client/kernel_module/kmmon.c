@@ -32,32 +32,15 @@
 #include <linux/mm.h>
 #include <linux/mman.h>
 #include <linux/module.h>
-#include <linux/preempt.h>
 #include <linux/ptrace.h>
 #include <linux/rbtree.h>
 #include <linux/sched.h>
 #include <linux/signal.h>
 #include <linux/slab.h>
+#include <linux/stddef.h>
 #include <linux/string.h>
 
-/* struct for idtr */
-struct{
-    unsigned short limit;
-    unsigned int base;
-} __attribute__ ((packed)) idtr;
-
-/* struct for idt entry */
-struct idt{
-    unsigned short off_low;
-    unsigned short seg_selector;
-    unsigned char reserved, flag;
-    unsigned short off_high;
-};
-
-static struct idt *p_idt80;
-static unsigned long orig_syscall;
-
-static void ** orign_sys_call_table;
+static void ** orig_syscall_table;
 
 asmlinkage long (*old_ni_syscall)(void);
 asmlinkage int (*old_clone)(struct pt_regs);
@@ -68,6 +51,20 @@ asmlinkage void* (*old_mmap2)(void *start, size_t length, int prot,
                               int flags, int fd, off_t pgoffset);
 asmlinkage void* (*old_mmap)(void *start, size_t length, int prot,
                              int flags, int fd, off_t offset);
+
+/* struct for idt entry */
+struct idt{
+    unsigned short off_low;
+    unsigned short seg_selector;
+    unsigned char reserved, flag;
+    unsigned short off_high;
+};
+
+extern void new_int80(void);
+extern void new_sysenter(void);
+
+
+static struct idt* p_idt80;
 
 int notify_tracer(int syscall) {
     struct task_struct* p = current;
@@ -80,7 +77,7 @@ int notify_tracer(int syscall) {
     for (;;) {
         struct task_struct* q = p->parent;
         if (q == NULL) {
-            return 0;
+            return syscall;
         }
         p = q;
         if (!(q->flags & KMMON_MASK)) {
@@ -88,7 +85,7 @@ int notify_tracer(int syscall) {
         }
     }
     if (p->pid == 1) {
-        return 0;
+        return syscall;
     }
     current->exit_code = KMMON_SIG;
     rcu_read_lock();
@@ -100,54 +97,97 @@ int notify_tracer(int syscall) {
     }
     if (current->exit_code) {
         send_sig(SIGKILL, current, 1);
-        return 0xffff; // An invlaid syscall
+        return -1;
     } else {
         return syscall;
     }
 }
 
 extern void new_int80(void);
+extern void old_int80(void);
+extern void new_sysenter(void);
+extern void old_sysenter(void);
 
-void asm_stuff(void) {
+static unsigned long int80_resume_addr;
+static unsigned long sysenter_resume_addr;
+
+void asm_syscall(void) {
     __asm__ __volatile__ (
         ".globl new_int80\n"
-        ".align 4,0x90\n"
+        ".globl old_int80\n"
+        ".globl new_sysenter\n"
+        ".globl old_sysenter\n"
 "new_int80:\n"
         "pushl %%ebx;" // save EBX
         "movl %%esp, %%ebx;"
         "andl %0, %%ebx;"
         "movl %c1(%%ebx), %%ebx;" // equals the "current" macro for i386
         "testl %2, %c3(%%ebx);" // test if KMMON_MASK is set in current->flags
-        "jz normal;" // if not, jump to normal syscall
+        "jz end_new_int80;" // if not, jump to end
         "movl %4, %%ebx;" // load the address of syscall_filter_table
         "testl $3, 0(%%ebx, %%eax);" // check syscall_filter_table[syscall] 
-        "jz normal;" // 0 means enabled
+        "jz end_new_int80;" // 0 means enabled
+        "pushl %%ebp;"
         "pushl %%ecx;"
         "pushl %%edx;"
         "pushl %%esi;"
-        "pushl %%edi;"
         "call notify_tracer;" // notify the tracer
-        "popl %%edi;"
         "popl %%esi;"
         "popl %%edx;"
         "popl %%ecx;"
-"normal:\n"
+        "popl %%ebp;"
+"end_new_int80:\n"
         "popl %%ebx;" // restore EBX
-        "jmp *%5;" // jump to original int80
+        "popl %%edi;"
+        "cmpl $-1, %%eax;"
+        "jz int80_jump_back;"
+"old_int80:\n"
+        "nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;"
+"int80_jump_back:\n"
+        "jmp *%5;"
+"new_sysenter:\n"
+        "pushl %%ebx;" // save EBX
+        "movl %%esp, %%ebx;"
+        "andl %0, %%ebx;"
+        "movl %c1(%%ebx), %%ebx;" // equals the "current" macro for i386
+        "testl %2, %c3(%%ebx);" // test if KMMON_MASK is set in current->flags
+        "jz end_new_sysenter;" // if not, jump to end
+        "movl %4, %%ebx;" // load the address of syscall_filter_table
+        "testl $3, 0(%%ebx, %%eax);" // check syscall_filter_table[syscall] 
+        "jz end_new_sysenter;" // 0 means enabled
+        "pushl %%ebp;"
+        "pushl %%ecx;"
+        "pushl %%edx;"
+        "pushl %%esi;"
+        "call notify_tracer;" // notify the tracer
+        "popl %%esi;"
+        "popl %%edx;"
+        "popl %%ecx;"
+        "popl %%ebp;"
+"end_new_sysenter:\n"
+        "popl %%ebx;" // restore EBX
+        "popl %%edi;"
+        "cmpl $-1, %%eax;"
+        "jz sysenter_jump_back;"
+"old_sysenter:\n"
+        "nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;"
+"sysenter_jump_back:\n"
+        "jmp *%6;"
         :
         : "i"(-THREAD_SIZE),
           "i"(&((struct thread_info*)0)->task),
           "i"(KMMON_MASK),
           "i"(&((struct task_struct*)0)->flags),
           "i"(syscall_filter_table),
-          "m"(orig_syscall)
+          "m"(int80_resume_addr),
+          "m"(sysenter_resume_addr)
     );
 }
 
 asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long addr, unsigned long data) {
     struct task_struct* p;
     int ret = 0;
-    preempt_disable();
+    rcu_read_lock();
     switch (request) {
         case KMMON_TRACEME:
             current->flags |= KMMON_MASK;
@@ -157,8 +197,8 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
         case KMMON_READMEM:
         case KMMON_GETREG:
             p = find_task_by_pid(pid);
-            if (!p || !(p->flags & KMMON_MASK) || !(p->state & TASK_STOPPED)) {
-                printk(KERN_ERR "Invalid pid: %ld\n", pid);
+            if (!p || !(p->flags & KMMON_MASK)) {
+                printk(KERN_ERR "Invalid pid: %ld, %d\n", pid, p->flags);
                 ret = -1;
                 break;
             }
@@ -189,7 +229,10 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 mmput(mm);
             } else if (request == KMMON_GETREG) {
                 unsigned long reg_table[] = {EAX, EBX, ECX, EDX, ESI, EDI, EBP};
-                put_user(*((int*)p->thread.esp0 - 6 - reg_table[addr]), (unsigned long*)data);
+                put_user(*(int*)((char*)p->thread.esp0 -
+                                 sizeof(struct pt_regs) +
+                                 reg_table[addr]), 
+                         (unsigned long*)data);
             } else {
                 p->exit_code = request == KMMON_KILL;
                 wake_up_process(p);
@@ -199,7 +242,7 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
             ret = -1;
             break;
     }
-    preempt_enable();
+    rcu_read_unlock();
     return ret;
 }
 
@@ -222,7 +265,7 @@ __always_inline int mmap_allowed(int flags, size_t length) {
     if ((current->flags & KMMON_MASK) && (flags & MAP_ANONYMOUS)) {
         int allow = 1;
         unsigned long* mem_limit;
-        preempt_disable();
+        rcu_read_lock();
         mem_limit = &current->signal->rlim[RLIMIT_DATA].rlim_cur;
         if (*mem_limit < RLIM_INFINITY) {
             struct mm_struct* mm = current->mm;
@@ -232,7 +275,7 @@ __always_inline int mmap_allowed(int flags, size_t length) {
                 *mem_limit -= length;
             }
         }
-        preempt_enable();
+        rcu_read_unlock();
         if (!allow) {
             notify_tracer(45);
             send_sig(SIGKILL, current, 1);
@@ -267,53 +310,97 @@ asmlinkage unsigned long kmmon_brk(unsigned long brk) {
     return ret;
 }
 
+
+__always_inline void inline_hook(unsigned long hook_addr,
+                                 unsigned long new_syscall_start_addr,
+                                 unsigned long old_syscall_start_addr,
+                                 unsigned long* resume_addr) {
+    char hook_code[] = { 0x57, 0xbf, 0, 0, 0, 0, 0xff, 0xe7 };
+    *resume_addr = hook_addr + 11;
+    *(unsigned long*)(hook_code + 2) = new_syscall_start_addr;
+    memcpy((void*)old_syscall_start_addr, (void*)hook_addr, 11);
+    memcpy((void*)hook_addr, hook_code, sizeof(hook_code));
+}
+
 int init(void) {
     char *p;
-    unsigned new_syscall;
-    orign_sys_call_table = 0;
+    struct {
+        unsigned short limit;
+        unsigned int base;
+    } __attribute__ ((packed)) idtr;
+    unsigned long syscall_entry;
+    unsigned long sysenter_low, sysenter_high;
+
+    preempt_disable();
     __asm__ ("sidt %0":"=m"(idtr));
     p_idt80 = (struct idt*)(idtr.base + sizeof(struct idt) * 0x80);
-    orig_syscall = (p_idt80->off_high << 16) | p_idt80->off_low;
-    for (p = (char*)orig_syscall; p < (char*)orig_syscall + 1024; p++) {
+    syscall_entry = (p_idt80->off_high << 16) | p_idt80->off_low;
+    for (p = (char*)syscall_entry; p < (char*)syscall_entry + 1024; p++) {
         if (*(p + 0) == '\xff' && *(p + 1) == '\x14' && *(p + 2) == '\x85') {
-            orign_sys_call_table = (void**)*(unsigned long*)(p + 3);
+            orig_syscall_table = (void**)*(unsigned long*)(p + 3);
+            inline_hook((unsigned long)p,
+                        (unsigned long)new_int80,
+                        (unsigned long)old_int80,
+                        &int80_resume_addr);
             break;
         }
     }
-    if (!orign_sys_call_table) {
+    __asm__ __volatile__ (
+        "movl $0x176, %%ecx;"
+        "rdmsr;"
+        : "=a"(sysenter_low),
+          "=d"(sysenter_high)
+        :
+    );
+    for (p = (char*)sysenter_low; p < (char*)sysenter_low + 1024; p++) {
+        if (*(p + 0) == '\xff' && *(p + 1) == '\x14' && *(p + 2) == '\x85') {
+            if (!orig_syscall_table) {
+                orig_syscall_table = (void**)*(unsigned long*)(p + 3);
+            }
+            inline_hook((unsigned long)p,
+                        (unsigned long)new_sysenter,
+                        (unsigned long)old_sysenter,
+                        &sysenter_resume_addr);
+            break;
+        }
+    }
+    if (!orig_syscall_table) {
         printk(KERN_ERR "Fail to find sys_call_table\n");
         return -1;
     }
-    old_ni_syscall  = orign_sys_call_table[__NR_kmmon];
-    old_clone = orign_sys_call_table[__NR_clone];
-    old_fork = orign_sys_call_table[__NR_fork];
-    old_vfork = orign_sys_call_table[__NR_vfork];
-    old_brk = orign_sys_call_table[__NR_brk];
-    old_mmap2 = orign_sys_call_table[__NR_mmap2];
-    orign_sys_call_table[__NR_kmmon] = kmmon;
-    orign_sys_call_table[__NR_clone] = kmmon_clone;
-    orign_sys_call_table[__NR_fork] = kmmon_fork;
-    orign_sys_call_table[__NR_vfork] = kmmon_vfork;
-    orign_sys_call_table[__NR_brk] = kmmon_brk;
-    orign_sys_call_table[__NR_mmap] = kmmon_mmap;
-    orign_sys_call_table[__NR_mmap2] = kmmon_mmap2;
-    new_syscall = (unsigned long)&new_int80;
-    p_idt80->off_low = (unsigned short)(new_syscall & 0x0000ffff);
-    p_idt80->off_high = (unsigned short)((new_syscall>>16) & 0x0000ffff);
+    old_ni_syscall  = orig_syscall_table[__NR_kmmon];
+    old_clone = orig_syscall_table[__NR_clone];
+    old_fork = orig_syscall_table[__NR_fork];
+    old_vfork = orig_syscall_table[__NR_vfork];
+    old_brk = orig_syscall_table[__NR_brk];
+    old_mmap2 = orig_syscall_table[__NR_mmap2];
+    orig_syscall_table[__NR_kmmon] = kmmon;
+    orig_syscall_table[__NR_clone] = kmmon_clone;
+    orig_syscall_table[__NR_fork] = kmmon_fork;
+    orig_syscall_table[__NR_vfork] = kmmon_vfork;
+    orig_syscall_table[__NR_brk] = kmmon_brk;
+    orig_syscall_table[__NR_mmap] = kmmon_mmap;
+    orig_syscall_table[__NR_mmap2] = kmmon_mmap2;
+    preempt_enable();
     return 0;
 }
 
 void cleanup(void) {
-    orign_sys_call_table[__NR_kmmon] = old_ni_syscall;
-    orign_sys_call_table[__NR_clone] = old_clone;
-    orign_sys_call_table[__NR_fork] = old_fork;
-    orign_sys_call_table[__NR_vfork] = old_vfork;
-    orign_sys_call_table[__NR_brk] = old_brk;
-    orign_sys_call_table[__NR_mmap] = old_mmap;
-    orign_sys_call_table[__NR_mmap2] = old_mmap2;
-    p_idt80->off_low = (unsigned short)(orig_syscall & 0x0000ffff);
-    p_idt80->off_high = (unsigned short)((orig_syscall>>16) & 0x0000ffff);
-    return;
+    preempt_disable();
+    orig_syscall_table[__NR_kmmon] = old_ni_syscall;
+    orig_syscall_table[__NR_clone] = old_clone;
+    orig_syscall_table[__NR_fork] = old_fork;
+    orig_syscall_table[__NR_vfork] = old_vfork;
+    orig_syscall_table[__NR_brk] = old_brk;
+    orig_syscall_table[__NR_mmap] = old_mmap;
+    orig_syscall_table[__NR_mmap2] = old_mmap2;
+    if (int80_resume_addr) {
+        memcpy((void*)(int80_resume_addr - 11), (void*)old_int80, 11);
+    }
+    if (sysenter_resume_addr) {
+        memcpy((void*)(sysenter_resume_addr - 11), (void*)old_sysenter, 11);
+    }
+    preempt_enable();
 }
 
 module_init(init);
