@@ -131,18 +131,22 @@ void asm_syscall(void) {
         "pushl %%ecx;"
         "pushl %%edx;"
         "pushl %%esi;"
+        "pushl %%edi;"
         "call notify_tracer;" // notify the tracer
+        "popl %%edi;"
         "popl %%esi;"
         "popl %%edx;"
         "popl %%ecx;"
         "popl %%ebp;"
 "end_new_int80:\n"
         "popl %%ebx;" // restore EBX
-        "popl %%edi;"
         "cmpl $-1, %%eax;"
-        "jz int80_jump_back;"
+        "jz int80_jump_back;" // if returns -1, skip the syscall
 "old_int80:\n"
-        "nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;"
+        "pushl %5;"
+        "jmp *0xffffffff(, %%eax, 4);" // call *syscall_table(, %%eax, 4)
+                                       // 0xffffffff is a place holder
+                                       // It will be replaced in inline_hook()
 "int80_jump_back:\n"
         "jmp *%5;"
 "new_sysenter:\n"
@@ -159,18 +163,22 @@ void asm_syscall(void) {
         "pushl %%ecx;"
         "pushl %%edx;"
         "pushl %%esi;"
+        "pushl %%edi;"
         "call notify_tracer;" // notify the tracer
+        "popl %%edi;"
         "popl %%esi;"
         "popl %%edx;"
         "popl %%ecx;"
         "popl %%ebp;"
 "end_new_sysenter:\n"
         "popl %%ebx;" // restore EBX
-        "popl %%edi;"
         "cmpl $-1, %%eax;"
-        "jz sysenter_jump_back;"
+        "jz sysenter_jump_back;" // if returns -1, skip the syscall
 "old_sysenter:\n"
-        "nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;nop;"
+        "pushl %6;"
+        "jmp *0xffffffff(, %%eax, 4);" // call *syscall_table(, %%eax, 4)
+                                       // 0xffffffff is a place holder
+                                       // It will be replaced in inline_hook()
 "sysenter_jump_back:\n"
         "jmp *%6;"
         :
@@ -315,11 +323,11 @@ __always_inline void inline_hook(unsigned long hook_addr,
                                  unsigned long new_syscall_start_addr,
                                  unsigned long old_syscall_start_addr,
                                  unsigned long* resume_addr) {
-    char hook_code[] = { 0x57, 0xbf, 0, 0, 0, 0, 0xff, 0xe7 };
-    *resume_addr = hook_addr + 11;
-    *(unsigned long*)(hook_code + 2) = new_syscall_start_addr;
-    memcpy((void*)old_syscall_start_addr, (void*)hook_addr, 11);
-    memcpy((void*)hook_addr, hook_code, sizeof(hook_code));
+    char hook_code[] = { 0xe9, 0, 0, 0, 0};
+    *resume_addr = hook_addr + 7;
+    *(unsigned long*)(old_syscall_start_addr + 9) = (unsigned long)orig_syscall_table;
+    *(unsigned long*)(hook_code + 1) = new_syscall_start_addr - hook_addr - 5;
+    memcpy((void*)hook_addr, hook_code, 5);
 }
 
 int init(void) {
@@ -386,6 +394,7 @@ int init(void) {
 }
 
 void cleanup(void) {
+    char code[] = { 0xff, 0x14, 0x85, 0, 0, 0, 0 };
     preempt_disable();
     orig_syscall_table[__NR_kmmon] = old_ni_syscall;
     orig_syscall_table[__NR_clone] = old_clone;
@@ -394,11 +403,12 @@ void cleanup(void) {
     orig_syscall_table[__NR_brk] = old_brk;
     orig_syscall_table[__NR_mmap] = old_mmap;
     orig_syscall_table[__NR_mmap2] = old_mmap2;
+    *(unsigned long*)(code + 3) = (unsigned long)orig_syscall_table;
     if (int80_resume_addr) {
-        memcpy((void*)(int80_resume_addr - 11), (void*)old_int80, 11);
+        memcpy((void*)(int80_resume_addr - 7), code, 7);
     }
     if (sysenter_resume_addr) {
-        memcpy((void*)(sysenter_resume_addr - 11), (void*)old_sysenter, 11);
+        memcpy((void*)(sysenter_resume_addr - 7), code, 7);
     }
     preempt_enable();
 }
