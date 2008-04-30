@@ -239,7 +239,7 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 unsigned long reg_table[] = {EAX, EBX, ECX, EDX, ESI, EDI, EBP};
                 put_user(*(int*)((char*)p->thread.esp0 -
                                  sizeof(struct pt_regs) +
-                                 reg_table[addr]), 
+                                 reg_table[addr] * sizeof(long)), 
                          (unsigned long*)data);
             } else {
                 p->exit_code = request == KMMON_KILL;
