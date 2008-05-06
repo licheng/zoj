@@ -212,15 +212,4 @@ int ConnectTo(const string& address, int port);
 
 int SaveFile(int sock, const string& output_filename, size_t size);
 
-DECLARE_ARG(string, lang);
-
-// Returns true if the specified file type is supported by the server
-static inline bool IsSupportedSourceFileType(const string& sourceFileType) {
-    vector<string> supportedLanguages;
-    SplitString(ARG_lang, ',', &supportedLanguages);
-    return find(supportedLanguages.begin(),
-                supportedLanguages.end(),
-                sourceFileType) != supportedLanguages.end();
-}
-
 #endif

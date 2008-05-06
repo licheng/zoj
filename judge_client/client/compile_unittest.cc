@@ -40,41 +40,39 @@ class DoCompileTest: public TestFixture {
                                 (root_ + "/ac.cc").c_str()));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(),
                                 (root_ + "/ce.cc").c_str()));
-        fp_ = tmpfile();
-        fd_ = fileno(fp_);
+        fd_[0] = fd_[1] = -1;
+        ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
     }
 
     virtual void TearDown() {
-        fclose(fp_);
+        if (fd_[0] >= 0) {
+            close(fd_[0]);
+        }
+        if (fd_[1] >= 0) {
+            close(fd_[1]);
+        }
         system(("rm -rf " + root_).c_str());
     }
 
-    FILE* fp_;
-    int fd_;
+    int fd_[2];
     char buf_[1024 * 16];
     string root_;
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, DoCompile(fd_, root_, root_ +  "/ac.cc"));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)1, read(fd_, buf_, 1));
+    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, root_ +  "/ac.cc"));
+    ASSERT_EQUAL((ssize_t)1, read(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, DoCompile(fd_, root_, root_ + "/ce.cc"));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)4, read(fd_, buf_, 4));
+    ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, root_ + "/ce.cc"));
+    ASSERT_EQUAL((ssize_t)4, read(fd_[0], buf_, 4));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(COMPILATION_ERROR, (int)buf_[1]);
     int len = ntohs(*(uint16_t*)(buf_ + 2));
     ASSERT(len);
-    ASSERT_EQUAL((ssize_t)len, read(fd_, buf_, len));
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
+    ASSERT_EQUAL((ssize_t)len, read(fd_[0], buf_, len + 1));
 }
 
 // TODO add a unittest for invalid chars

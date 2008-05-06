@@ -17,21 +17,30 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RUN_H
-#define __RUN_H
+#ifndef __LOG_SERVER_H
+#define __LOG_SERVER_H
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
-// Runs the specified program.
-// Returns 0 if execution succeeded, or -1 on error.
-int DoRun(int sock,
-          const string& source_file_type,
-          int time_limit,
-          int memory_limit,
-          int output_limit,
-          int uid,
-          int gid);
+class LogClient;
+
+class LogServer {
+    public:
+        ~LogServer();
+
+        static LogServer* Create(const string& root);
+
+        void Start();
+
+    private:
+        LogServer(const string& root, int server_sock)
+                : root_(root), server_sock_(server_sock) { }
+        string root_;
+        int server_sock_;
+        vector<LogClient*> clients_;
+};
 
 #endif

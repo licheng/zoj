@@ -20,6 +20,7 @@
 #include "unittest.h"
 
 #include <fcntl.h>
+#include <sys/socket.h>
 
 #include "check.h"
 #include "global.h"
@@ -30,123 +31,114 @@ class DoCheckTest: public TestFixture {
     virtual void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                                (root_ + "/1.in").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                                (root_ + "/1.out").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/judge").c_str(),
-                                (root_ + "/judge").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(),
-                                (root_ + "/ac.out").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(),
-                                (root_ + "/wa.out").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(),
-                                (root_ + "/pe.out").c_str()));
-        fp_ = tmpfile();
-        fd_ = fileno(fp_);
+        ASSERT_EQUAL(0, chdir(root_.c_str()));
+        fd_[0] = fd_[1] = -1;
+        ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         InstallHandlers();
     }
 
     virtual void TearDown() {
         UninstallHandlers();
-        if (fp_) {
-            fclose(fp_);
+        if (fd_[0] >= 0) {
+            close(fd_[0]);
+        }
+        if (fd_[1] >= 0) {
+            close(fd_[1]);
         }
         system(("rm -rf " + root_).c_str());
     }
 
-    FILE* fp_;
-    int fd_;
+    int fd_[2];
     char buf_[32];
     string root_;
 };
 
 TEST_F(DoCheckTest, Accepted) {
-    ASSERT_EQUAL(0, DoCheck(fd_,
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                            (root_ + "/input").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                            (root_ + "/output").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(),
+                            (root_ + "/p.out").c_str()));
+    ASSERT_EQUAL(0, DoCheck(fd_[1],
                             0,
-                            root_ + "/1.in",
-                            root_ + "/1.out",
-                            root_ + "/ac.out",
                             ""));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
+    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[1]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(DoCheckTest, WrongAnswer) {
-    ASSERT_EQUAL(0, DoCheck(fd_,
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                            (root_ + "/input").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                            (root_ + "/output").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(),
+                            (root_ + "/p.out").c_str()));
+    ASSERT_EQUAL(0, DoCheck(fd_[1],
                             0,
-                            root_ + "/1.in",
-                            root_ + "/1.out",
-                            root_ + "/wa.out",
                             ""));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
+    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[1]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(DoCheckTest, PresentationError) {
-    ASSERT_EQUAL(0, DoCheck(fd_,
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                            (root_ + "/input").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                            (root_ + "/output").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(),
+                            (root_ + "/p.out").c_str()));
+    ASSERT_EQUAL(0, DoCheck(fd_[1],
                             0,
-                            root_ + "/1.in",
-                            root_ + "/1.out",
-                            root_ + "/pe.out",
                             ""));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
+    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(PRESENTATION_ERROR, (int)buf_[1]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(DoCheckTest, SpecialJudgeAccepted) {
-    ASSERT_EQUAL(0, DoCheck(fd_,
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                            (root_ + "/input").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                            (root_ + "/output").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(),
+                            (root_ + "/p.out").c_str()));
+    ASSERT_EQUAL(0, DoCheck(fd_[1],
                             0,
-                            root_ + "/1.in",
-                            root_ + "/1.out",
-                            root_ + "/ac.out",
                             root_ + "/judge"));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
+    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[1]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(DoCheckTest, SpecialJudgeWrongAnswer) {
-    ASSERT_EQUAL(0, DoCheck(fd_,
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                            (root_ + "/input").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                            (root_ + "/output").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(),
+                            (root_ + "/p.out").c_str()));
+    ASSERT_EQUAL(0, DoCheck(fd_[1],
                             0,
-                            root_ + "/1.in",
-                            root_ + "/1.out",
-                            root_ + "/wa.out",
                             root_ + "/judge"));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
+    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[1]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }
 
 TEST_F(DoCheckTest, SpecialJudgePresentationError) {
-    ASSERT_EQUAL(0, DoCheck(fd_,
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
+                            (root_ + "/input").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
+                            (root_ + "/output").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(),
+                            (root_ + "/p.out").c_str()));
+    ASSERT_EQUAL(0, DoCheck(fd_[1],
                             0,
-                            root_ + "/1.in",
-                            root_ + "/1.out",
-                            root_ + "/pe.out",
                             root_ + "/judge"));
-    lseek(fd_, 0, SEEK_SET);
-    ASSERT_EQUAL((ssize_t)2, read(fd_, buf_, 2));
+    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(PRESENTATION_ERROR, (int)buf_[1]);
-    off_t pos = lseek(fd_, 0, SEEK_CUR);
-    ASSERT_EQUAL(pos, lseek(fd_, 0, SEEK_END));
 }

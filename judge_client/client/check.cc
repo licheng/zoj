@@ -168,32 +168,25 @@ int CompareTextFiles(const string& output_filename,
 }
 
 int RunSpecialJudgeExe(int uid,
-                       string special_judge_filename,
-                       const string& input_filename,
-                       const string& program_output_filename) {
+                       string special_judge_filename) {
     LOG(INFO)<<"Running special judge "<<special_judge_filename;
-    string working_dir = 
-        special_judge_filename.substr(0, special_judge_filename.rfind('/'));
-    special_judge_filename =
-        special_judge_filename.substr(working_dir.size() + 1);
     char path[PATH_MAX + 1];
     getcwd(path, sizeof(path));
     const char* commands[] = {
         special_judge_filename.c_str(),
         special_judge_filename.c_str(),
-        program_output_filename.substr(working_dir.size() + 1).c_str(),
-        input_filename.substr(working_dir.size() + 1).c_str(),
-        input_filename.substr(working_dir.size() + 1).c_str(),
+        "p.out",
+        "input",
+        "output",
         NULL};
     StartupInfo info;
-    info.stdin_filename = program_output_filename.c_str();
+    info.stdin_filename = "p.out";
     info.uid = uid;
     info.time_limit = 10;
     info.memory_limit = 256 * 1024;
     info.output_limit = 16;
     info.file_limit = 6; // stdin, stdout, stderr, input
     info.trace = 1;
-    info.working_dir = working_dir.c_str();
     TraceCallback callback;
     pid_t pid = CreateProcess(commands, info);
     if (pid == -1) {
@@ -223,33 +216,15 @@ int RunSpecialJudgeExe(int uid,
 
 int DoCheck(int sock,
             int special_judge_uid,
-            const string& input_filename,
-            const string& output_filename,
-            const string& program_output_filename,
             const string& special_judge_filename) {
     LOG(INFO)<<"Judging";
     SendReply(sock, JUDGING);
     int result;
     if (access(special_judge_filename.c_str(), F_OK) == 0) {
-        string working_dir = 
-            special_judge_filename.substr(0, special_judge_filename.rfind('/'));
-        string temp =
-            StringPrintf("%s/p%d.out", working_dir.c_str(), getpid());
-        unlink(temp.c_str());
-        if (symlink(program_output_filename.c_str(), temp.c_str()) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to link from "<<program_output_filename
-                              <<" to "<<temp;
-            result = INTERNAL_ERROR;
-        } else {
-            result = RunSpecialJudgeExe(special_judge_uid,
-                                        special_judge_filename,
-                                        input_filename,
-                                        temp);
-            unlink(temp.c_str());
-        }
+        result = RunSpecialJudgeExe(special_judge_uid,
+                                    special_judge_filename);
     } else {
-        result = CompareTextFiles(output_filename,
-                                  program_output_filename);
+        result = CompareTextFiles("output", "p.out");
     }
     SendReply(sock, result);
     switch(result) {

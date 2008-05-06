@@ -28,20 +28,23 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-static inline std::string GetTestDir() {
+static inline std::string GetWorkingDir() {
     char path[PATH_MAX + 1];
     if (getcwd(path, sizeof(path)) == NULL) {
         CPPUNIT_FAIL("Fail to get the current working dir");
     }
-    return std::string(path) + "/testdata";
+    return path;
 }
 
 class TestFixture : public CppUnit::TestFixture {
     public:
-        TestFixture(): TESTDIR(GetTestDir()) { }
+        TestFixture():
+                CURRENT_WORKING_DIR(GetWorkingDir()),
+                TESTDIR(CURRENT_WORKING_DIR + "/testdata") { }
     protected:
         virtual void SetUp() { }
         virtual void TearDown() { }
+        const std::string CURRENT_WORKING_DIR;
         const std::string TESTDIR;
 };
 
@@ -72,6 +75,7 @@ class TestFixture : public CppUnit::TestFixture {
 
 #define ASSERT_EQUAL CPPUNIT_ASSERT_EQUAL
 #define ASSERT CPPUNIT_ASSERT
+#define FAIL CPPUNIT_FAIL
 
 int main() {
     CPPUNIT_NS::TextUi::TestRunner runner;

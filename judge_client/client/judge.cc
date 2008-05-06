@@ -27,13 +27,21 @@
 #include "trace.h"
 #include "util.h"
 
+DEFINE_ARG(string, lang, "All programming languages supported by this client");
+
+// Returns true if the specified file type is supported by the server
+bool IsSupportedSourceFileType(const string& sourceFileType) {
+    vector<string> supportedLanguages;
+    SplitString(ARG_lang, ',', &supportedLanguages);
+    return find(supportedLanguages.begin(),
+                supportedLanguages.end(),
+                sourceFileType) != supportedLanguages.end();
+}
+
 int ExecCompileCommand(int sock,
                        const string& root,
                        const string& working_root,
-                       string* source_file_type,
-                       string* source_filename,
-                       string* binary_filename,
-                       string* program_output_filename) {
+                       string* source_file_type) {
     uint32_t submission_id;
     uint8_t source_file_type_id;
     uint32_t source_file_length;
@@ -73,20 +81,14 @@ int ExecCompileCommand(int sock,
     }
     LOG(INFO)<<"Source file type: "<<source_file_type;
     SendReply(sock, READY);
-    *binary_filename = StringPrintf("%s/%u",
-                                   working_root.c_str(),
-                                   (unsigned int)submission_id);
-    *source_filename = *binary_filename + "." + *source_file_type;
-    *program_output_filename = StringPrintf("%s/%u.out",
-                                           working_root.c_str(),
-                                           (unsigned int)submission_id);
     LOG(INFO)<<"Saving source file";
-    if (SaveFile(sock, *source_filename, source_file_length) == -1) {
+    string source_filename = "p." + *source_file_type;
+    if (SaveFile(sock, source_filename.c_str(), source_file_length) == -1) {
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
 
-    if (DoCompile(sock, root, *source_filename) == -1) {
+    if (DoCompile(sock, root, source_filename.c_str()) == -1) {
         return -1;
     }
     SendReply(sock, READY);
@@ -95,9 +97,7 @@ int ExecCompileCommand(int sock,
 
 int ExecJudgeCommand(int sock,
                      const string& root,
-                     const string& binary_filename,
                      const string& source_file_type,
-                     const string& program_output_filename,
                      int uid,
                      int gid) {
     uint32_t problem_id;
@@ -159,23 +159,27 @@ int ExecJudgeCommand(int sock,
         SendReply(sock, INVALID_INPUT);
         return -1;
     }
+    if (symlink(input_filename.c_str(), "input") == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to create symlink to "<<input_filename;
+        SendReply(sock, INTERNAL_ERROR);
+        return -1;
+    }
     int result = DoRun(sock,
-                       binary_filename,
                        source_file_type,
-                       input_filename,
-                       program_output_filename,
                        time_limit,
                        memory_limit,
                        output_limit,
                        uid,
                        gid);
-    if (result == -1 ||
-        result == 0 && DoCheck(sock,
-                               uid,
-                               input_filename,
-                               output_filename,
-                               program_output_filename,
-                               special_judge_filename) == -1) {
+    if (result == -1) {
+        return -1;
+    }
+    if (symlink(output_filename.c_str(), "output") == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to create symlink to "<<output_filename;
+        SendReply(sock, INTERNAL_ERROR);
+        return -1;
+    }
+    if (DoCheck(sock, uid, special_judge_filename) == -1) {
         return -1;
     }
     return 0;
@@ -331,18 +335,6 @@ int SaveData(int sock, const string& root,
     if (CheckData(sock, root, tempDir) == -1) {
         return -1;
     }
-    if (link((tempDir + "/1.in").c_str(),
-             (tempDir + "/input").c_str()) == -1) {
-        LOG(SYSCALL_ERROR)<<"Can not create input";
-        SendReply(sock, INTERNAL_ERROR);
-        return -1;
-    }
-    if (link((tempDir + "/1.out").c_str(),
-             (tempDir + "/output").c_str()) == -1) {
-        LOG(SYSCALL_ERROR)<<"Can not create output";
-        SendReply(sock, INTERNAL_ERROR);
-        return -1;
-    }
     if (rename(tempDir.c_str(), revisionDir.c_str()) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to rename "<<tempDir<<" to "<<revisionDir;
         SendReply(sock, INTERNAL_ERROR);
@@ -366,6 +358,11 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port,
             SendReply(sock, INTERNAL_ERROR);
             return 1;
         }
+    }
+    if (chdir(working_root.c_str()) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<working_root;
+        SendReply(sock, INTERNAL_ERROR);
+        return 1;
     }
 
     // installs handlers for tracing.
@@ -391,18 +388,13 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port,
             ExecCompileCommand(sock,
                                root,
                                working_root,
-                               &source_file_type, 
-                               &source_filename,
-                               &binary_filename,
-                               &program_output_filename);
+                               &source_file_type);
         } else if (command == CMD_JUDGE) {
             if (source_filename.empty()) {
                 SendReply(sock, INVALID_INPUT);
             } else {
                 ExecJudgeCommand(sock, root,
-                                 binary_filename,
                                  source_file_type,
-                                 program_output_filename,
                                  uid,
                                  gid);
             }

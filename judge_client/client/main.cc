@@ -25,12 +25,11 @@
 
 #include "global.h"
 #include "logging.h"
+#include "log_server.h"
 #include "args.h"
 #include "util.h"
 
 DEFINE_ARG(string, root, "The root directory of the client");
-
-DEFINE_ARG(string, lang, "All programming languages supported by this client");
 
 DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
 
@@ -79,26 +78,27 @@ void Daemonize() {
     }
 }
 
-int AlreadyRunning() {
+int Lock() {
     int fd = open((ARG_root + "/judge.pid").c_str(), O_RDWR | O_CREAT, 0640);
     if (fd < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to open judge.pid";
-        exit(1);
+        return -1;
     }
     if (LockFile(fd, F_SETLK) == -1) {
         if (errno == EACCES || errno == EAGAIN) {
+            LOG(ERROR)<<"Another instance of judge_client exists";
             close(fd);
-            return 1;
+            return -1;
         } else {
             LOG(SYSCALL_ERROR)<<"Fail to lock judge.pid";
-            exit(1);
+            return -1;
         }
     }
     ftruncate(fd, 0);
     char buffer[20];
     sprintf(buffer, "%ld", (long)getpid());
     write(fd, buffer, strlen(buffer) + 1);
-    return 0;
+    return fd;
 }
 
 void SIGTERMHandler(int sig) {
@@ -115,19 +115,6 @@ int ControlMain(const string& root, const string& queue_address, int queue_port,
 int main(int argc, char* argv[]) {
     if (ParseArguments(argc, argv) < 0) {
         return 1;
-    }
-
-    Log::SetLogFile(new DiskLogFile(ARG_root));
-    if (ARG_daemonize || !ARG_logtostderr) {
-        Log::SetLogToStderr(false);
-    }
-
-    if (ARG_daemonize) {
-        Daemonize();
-        if (AlreadyRunning()) {
-            LOG(ERROR)<<"Another instance of judge_client exists";
-            return 1;
-        }
     }
 
     if (chdir(ARG_root.c_str()) < 0) {
@@ -148,4 +135,39 @@ int main(int argc, char* argv[]) {
     // prevents SIGPIPE to terminate the processes.
     InstallSignalHandler(SIGPIPE, SIGPIPEHandler);
 
+    LogServer* log_server = LogServer::Create(ARG_root);
+
+    if (log_server == NULL) {
+        return 1;
+    }
+
+    int fd = -1;
+    if (ARG_daemonize) {
+        fd = Lock();
+        if (fd < 0) {
+            return 1;
+        }
+        Daemonize();
+    }
+
+    if (ARG_daemonize || !ARG_logtostderr) {
+        Log::SetLogToStderr(false);
+    }
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        return 1;
+    }
+    if (pid == 0) {
+        log_server->Start();
+    } else {
+        if (fd >= 0) {
+            close(fd);
+        }
+        delete log_server;
+        Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
+        return ControlMain(ARG_root, ARG_queue_address, ARG_queue_port,
+                           ARG_uid, ARG_gid);
+    }
+    return 0;
 }

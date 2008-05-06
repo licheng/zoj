@@ -137,19 +137,16 @@ int monitor(int sock,
 }
 
 int RunExe(int sock,
-           const string& exe_filename,
-           const string& input_filename,
-           const string& program_output_filename,
            int time_limit,
            int memory_limit,
            int output_limit,
            int uid,
            int gid) {
     LOG(INFO)<<"Running";
-    const char* commands[] = {exe_filename.c_str(), exe_filename.c_str(), NULL};
+    const char* commands[] = {"p", "p", NULL};
     StartupInfo info;
-    info.stdin_filename = input_filename.c_str();
-    info.stdout_filename = program_output_filename.c_str();
+    info.stdin_filename = "input";
+    info.stdout_filename = "p.out";
     info.uid = uid;
     info.gid = gid;
     info.time_limit = time_limit;
@@ -174,10 +171,7 @@ inline int IsNativeExe(const string& source_file_type) {
 }
 
 int DoRun(int sock,
-          const string& program_name,
           const string& source_file_type,
-          const string& input_filename,
-          const string& program_output_filename,
           int time_limit,
           int memory_limit,
           int output_limit,
@@ -186,9 +180,6 @@ int DoRun(int sock,
     int result;
     if (IsNativeExe(source_file_type)) {
         result = RunExe(sock,
-                        program_name,
-                        input_filename,
-                        program_output_filename,
                         time_limit,
                         memory_limit,
                         output_limit,

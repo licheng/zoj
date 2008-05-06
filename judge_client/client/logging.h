@@ -27,12 +27,13 @@
 
 using namespace std;
 
+#define SYSCALL_ERROR 0
 #define DEBUG 1
 #define WARNING 2
 #define ERROR 3
 #define FATAL 4
 #define INFO 5
-#define SYSCALL_ERROR 0
+#define RAW 6
 #define LOG(level) Log(__FILE__, __LINE__, level).GetStream()
 
 class LogFile {
@@ -41,37 +42,39 @@ class LogFile {
 
         virtual void Write(const string& message) = 0;
 
-        virtual int GetFD() = 0;
+        virtual void Close() = 0;
 };
 
 class DiskLogFile: public LogFile {
     public:
-        DiskLogFile(const string& root) : root_(root), fd_(-1) { }
+        DiskLogFile(const string& filename) : filename_(filename), fd_(-1) { }
         virtual ~DiskLogFile();
 
         virtual void Write(const string& message);
 
-        virtual int GetFD();
+        virtual void Close();
 
     private:
         void CreateNewFile();
 
-        string root_;
+        string filename_;
         int fd_;
         int size_;
 };
 
-class PipeLogFile: public LogFile {
+class UnixDomainSocketLogFile: public LogFile {
     public:
-        PipeLogFile(int pipe): pipe_(pipe) { }
-        virtual ~PipeLogFile();
+        UnixDomainSocketLogFile(const string& root) : sock_(-1), root_(root) { }
+        virtual ~UnixDomainSocketLogFile();
 
         virtual void Write(const string& message);
 
-        virtual int GetFD();
+        virtual void Close();
 
     private:
-        int pipe_;
+        void Connect();
+        int sock_;
+        string root_;
 };
 
 class Log {
@@ -79,13 +82,17 @@ class Log {
         Log(const char* filename, int lineNumber, int level);
         ~Log();
 
-        static LogFile* GetLogFile() { return log_; }
-
         static void SetLogFile(LogFile* log) { 
             if (log_) {
                 delete log_;
             }
             log_ = log;
+        }
+
+        static void Close() {
+            if (log_) {
+                log_->Close();
+            }
         }
 
         static void SetLogToStderr(bool value) { log_to_stderr_ = value; }
