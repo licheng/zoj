@@ -164,21 +164,19 @@ int RunExe(int sock,
     return monitor(sock, pid, time_limit, memory_limit, &callback);
 }
 
-inline int IsNativeExe(const string& source_file_type) {
-    return source_file_type == "cc" ||
-           source_file_type == "c" ||
-           source_file_type == "pas";
+inline int IsNativeExe(int compiler) {
+    return compiler != COMPILER_JAVAC;
 }
 
 int DoRun(int sock,
-          const string& source_file_type,
+          int compiler,
           int time_limit,
           int memory_limit,
           int output_limit,
           int uid,
           int gid) {
     int result;
-    if (IsNativeExe(source_file_type)) {
+    if (IsNativeExe(compiler)) {
         result = RunExe(sock,
                         time_limit,
                         memory_limit,

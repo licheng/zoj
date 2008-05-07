@@ -20,6 +20,10 @@
 #ifndef __GLOBAL_H
 #define __GLOBAL_H
 
+#include <string>
+
+using namespace std;
+
 #define CMD_TYPE 100
 #define CMD_CHANGE_MAX_JOBS 1
 #define CMD_DATA 2
@@ -51,9 +55,21 @@
 #define MAX_JOBS 100
 #define MAX_LOG_FILE_SIZE 262144 // 256KB
 
+#define COMPILER_GPP 0
+#define COMPILER_FREE_PASCAL 2
+#define COMPILER_GCC 3
+#define COMPILER_JAVAC 4
+
+struct CompilerInfo {
+    int id;
+    const char* compiler;
+    const char* source_file_type;
+};
+
 namespace global {
     extern int terminated;
     extern int socket_closed;
+    extern CompilerInfo COMPILER_LIST[4];
 }
 
 #endif

@@ -17,7 +17,15 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "global.h"
+
 namespace global {
     int terminated;
     int socket_closed;
+    CompilerInfo COMPILER_LIST[4] = {
+        {COMPILER_GPP, "g++", "cc"},
+        {COMPILER_FREE_PASCAL, "fp", "pas"},
+        {COMPILER_GCC, "gcc", "c"},
+        {COMPILER_JAVAC, "javac", "java"}
+    };
 }

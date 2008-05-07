@@ -41,54 +41,54 @@ bool IsSupportedSourceFileType(const string& sourceFileType) {
 int ExecCompileCommand(int sock,
                        const string& root,
                        const string& working_root,
-                       string* source_file_type) {
+                       int* compiler) {
     uint32_t submission_id;
-    uint8_t source_file_type_id;
+    uint8_t compiler_id;
     uint32_t source_file_length;
     uint16_t checksum;
     if (ReadUint32(sock, &submission_id) == -1 ||
-        ReadUint8(sock, &source_file_type_id) == -1 ||
+        ReadUint8(sock, &compiler_id) == -1 ||
         ReadUint32(sock, &source_file_length) == -1 ||
         ReadUint16(sock, &checksum) == -1) {
         return -1;
     }
     LOG(INFO)<<StringPrintf("Compile Id:%u Type:%u",
                             (unsigned int)submission_id,
-                            source_file_type_id);
+                            compiler);
     if (CheckSum(CMD_COMPILE) +
         CheckSum(submission_id) +
-        CheckSum(source_file_type_id) +
+        CheckSum(compiler_id) +
         CheckSum(source_file_length) != checksum) {
         LOG(ERROR)<<"Invalid checksum "<<checksum;
         SendReply(sock, INVALID_INPUT);
         return -1;
     }
-    const char* source_file_type_list[] =
-            {"cc", "cpp", "pas", "c", "java", "cs"};
-    const int max_source_file_type =
-            sizeof(source_file_type_list) / sizeof(source_file_type_list[0]);
-    if (source_file_type_id == 0 ||
-        source_file_type_id > max_source_file_type) {
-        LOG(ERROR)<<"Invalid source file type "<<(int)source_file_type_id;
+    *compiler = -1;
+    const int COMPILER_NUM =
+        sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
+    for (int i = 0; i < COMPILER_NUM; ++i) {
+        if (compiler_id == global::COMPILER_LIST[i].id) {
+            *compiler = compiler_id;
+            break;
+        }
+    }
+    if (*compiler < 0) {
+        LOG(ERROR)<<"Invalid compiler "<<(int)compiler;
         SendReply(sock, INVALID_INPUT);
         return -1;
     }
-    *source_file_type = source_file_type_list[source_file_type_id];
-    if (!IsSupportedSourceFileType(source_file_type->c_str())) {
-        LOG(ERROR)<<"Unsupported source file type "<<source_file_type;
-        SendReply(sock, INVALID_INPUT);
-        return -1;
-    }
-    LOG(INFO)<<"Source file type: "<<source_file_type;
+    LOG(INFO)<<"Compiler:"<<*compiler;
     SendReply(sock, READY);
     LOG(INFO)<<"Saving source file";
-    string source_filename = "p." + *source_file_type;
+    string source_filename =
+        StringPrintf("p.%s",
+                     global::COMPILER_LIST[*compiler].source_file_type);
     if (SaveFile(sock, source_filename.c_str(), source_file_length) == -1) {
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
 
-    if (DoCompile(sock, root, source_filename.c_str()) == -1) {
+    if (DoCompile(sock, root, *compiler, source_filename) == -1) {
         return -1;
     }
     SendReply(sock, READY);
@@ -97,7 +97,7 @@ int ExecCompileCommand(int sock,
 
 int ExecJudgeCommand(int sock,
                      const string& root,
-                     const string& source_file_type,
+                     int compiler,
                      int uid,
                      int gid) {
     uint32_t problem_id;
@@ -165,7 +165,7 @@ int ExecJudgeCommand(int sock,
         return -1;
     }
     int result = DoRun(sock,
-                       source_file_type,
+                       compiler,
                        time_limit,
                        memory_limit,
                        output_limit,
@@ -267,7 +267,7 @@ int CheckData(int sock, const string& root, const string& data_dir) {
                           <<out[in.size()]<<".out";
                 ret = -1;
             }
-        } else if (DoCompile(sock, root, data_dir + "/" + judge) == -1) {
+        } else if (DoCompile(sock, root, 0, data_dir + "/" + judge) == -1) {
             return -1;
         }
     }
@@ -369,7 +369,7 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port,
     InstallHandlers();
 
     int ret = 0;
-    string source_file_type;
+    int compiler = -1;
     string source_filename;
     string binary_filename;
     string program_output_filename;
@@ -388,13 +388,13 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port,
             ExecCompileCommand(sock,
                                root,
                                working_root,
-                               &source_file_type);
+                               &compiler);
         } else if (command == CMD_JUDGE) {
-            if (source_filename.empty()) {
+            if (compiler < 0) {
                 SendReply(sock, INVALID_INPUT);
             } else {
                 ExecJudgeCommand(sock, root,
-                                 source_file_type,
+                                 compiler,
                                  uid,
                                  gid);
             }

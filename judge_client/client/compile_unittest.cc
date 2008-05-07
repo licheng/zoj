@@ -60,13 +60,13 @@ class DoCompileTest: public TestFixture {
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, root_ +  "/ac.cc"));
+    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, COMPILER_GPP, root_ +  "/ac.cc"));
     ASSERT_EQUAL((ssize_t)1, read(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, root_ + "/ce.cc"));
+    ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, COMPILER_GPP, root_ + "/ce.cc"));
     ASSERT_EQUAL((ssize_t)4, read(fd_[0], buf_, 4));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(COMPILATION_ERROR, (int)buf_[1]);
