@@ -381,6 +381,7 @@ int init(void) {
     old_fork = orig_syscall_table[__NR_fork];
     old_vfork = orig_syscall_table[__NR_vfork];
     old_brk = orig_syscall_table[__NR_brk];
+    old_mmap = orig_syscall_table[__NR_mmap];
     old_mmap2 = orig_syscall_table[__NR_mmap2];
     orig_syscall_table[__NR_kmmon] = kmmon;
     orig_syscall_table[__NR_clone] = kmmon_clone;
