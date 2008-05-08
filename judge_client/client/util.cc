@@ -348,28 +348,33 @@ int ConnectTo(const string& address, int port) {
 //
 // Return 0 if success, or -1 if any error occurs.
 int SaveFile(int sock, const string& output_filename, size_t size) {
-    int fdFile = open(output_filename.c_str(),
-                      O_RDWR | O_CREAT | O_TRUNC, 0640);
-    if (fdFile == -1) {
+    int fd = open(output_filename.c_str(),
+                  O_RDWR | O_CREAT | O_TRUNC, 0640);
+    if (fd == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create file "<<output_filename;
         return -1;
     }
     static char buffer[4096];
-    while (size) {
-        size_t count = min(size, sizeof(buffer));
-        if (Readn(sock, buffer, count) == -1) {
+    while (size && !global::terminated) {
+        int count = min(size, sizeof(buffer));
+        count = Readn(sock, buffer, count);
+        if (count <= 0) {
             LOG(ERROR)<<"Fail to read file";
-            close(fdFile);
+            close(fd);
             return -1;
         }
-        if (Writen(fdFile, buffer, count) == -1) {
+        if (Writen(fd, buffer, count) == -1) {
             LOG(ERROR)<<"Fail to write to "<<output_filename;
-            close(fdFile);
+            close(fd);
             return -1;
         }
         size -= count;
     }
-    close(fdFile);
+    close(fd);
+    if (size) {
+        LOG(ERROR)<<"Terminated";
+        return -1;
+    }
     return 0;
 }
 

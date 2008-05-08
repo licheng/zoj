@@ -29,6 +29,7 @@ using namespace std;
 #define CMD_DATA 2
 #define CMD_COMPILE 3
 #define CMD_JUDGE 4
+#define CMD_TESTCASE 5
 
 #define TYPE_CONTROL 1
 #define TYPE_DATA 2
@@ -54,6 +55,7 @@ using namespace std;
 
 #define MAX_JOBS 100
 #define MAX_LOG_FILE_SIZE 262144 // 256KB
+#define MAX_DATA_FILE_SIZE 16 * 1024 * 1024 // 16MB
 
 #define COMPILER_GPP 0
 #define COMPILER_FREE_PASCAL 2

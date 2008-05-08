@@ -20,7 +20,10 @@
 #ifndef __UNITTEST_H
 #define __UNITTEST_H
 
+#include <iostream>
 #include <string>
+
+using namespace std;
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
@@ -28,7 +31,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-static inline std::string GetWorkingDir() {
+static inline string GetWorkingDir() {
     char path[PATH_MAX + 1];
     if (getcwd(path, sizeof(path)) == NULL) {
         CPPUNIT_FAIL("Fail to get the current working dir");
@@ -44,17 +47,32 @@ class TestFixture : public CppUnit::TestFixture {
     protected:
         virtual void SetUp() { }
         virtual void TearDown() { }
-        const std::string CURRENT_WORKING_DIR;
-        const std::string TESTDIR;
+        const string CURRENT_WORKING_DIR;
+        const string TESTDIR;
 };
 
 #define TEST(name) \
     class __ ## name ## Test: public CPPUNIT_NS::TestCase {\
         CPPUNIT_TEST_SUITE(__ ## name ## Test);\
-        CPPUNIT_TEST(test);\
+        CPPUNIT_TEST(_test);\
         CPPUNIT_TEST_SUITE_END();\
         public:\
+            void setUp() { done_ = false; }\
+            void tearDown() {\
+                if (done_) {\
+                    cout<<"\x1b[32mPass\x1b[0m"<<endl<<endl;\
+                } else {\
+                    cout<<"\x1b[31mFailed\x1b[0m"<<endl<<endl;\
+                }\
+            }\
+            void _test() {\
+                cout<<endl<<"****** " #name " ******"<<endl;\
+                test();\
+                done_ = true;\
+            }\
             void test();\
+        private:\
+            bool done_;\
     };\
     CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(__ ## name ## Test, "alltest");\
     void __ ## name ## Test::test()
@@ -62,12 +80,29 @@ class TestFixture : public CppUnit::TestFixture {
 #define TEST_F(name, method) \
     class __ ## name ## _ ## method : public name {\
         CPPUNIT_TEST_SUITE(__ ## name ## _ ## method);\
-        CPPUNIT_TEST(test);\
+        CPPUNIT_TEST(_test);\
         CPPUNIT_TEST_SUITE_END();\
         public:\
-            void setUp() { name::SetUp(); }\
-            void tearDown() { name::TearDown(); }\
+            void setUp() {\
+                done_ = false;\
+                name::SetUp();\
+            }\
+            void tearDown() {\
+                if (done_) {\
+                    cout<<"\x1b[32mPass\x1b[0m"<<endl<<endl;\
+                } else {\
+                    cout<<"\x1b[31mFailed\x1b[0m"<<endl<<endl;\
+                }\
+                name::TearDown();\
+            }\
+            void _test() {\
+                cout<<endl<<"****** " #name "." #method " ******"<<endl;\
+                test();\
+                done_ = true;\
+            }\
             void test();\
+        private:\
+            bool done_;\
     };\
     CPPUNIT_TEST_SUITE_NAMED_REGISTRATION(__ ## name ## _ ## method,\
                                           "alltest");\

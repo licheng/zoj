@@ -27,15 +27,57 @@
 #include "trace.h"
 #include "util.h"
 
-DEFINE_ARG(string, lang, "All programming languages supported by this client");
+DEFINE_ARG(string, compiler, "All compilers supported by this client");
 
 // Returns true if the specified file type is supported by the server
-bool IsSupportedSourceFileType(const string& sourceFileType) {
-    vector<string> supportedLanguages;
-    SplitString(ARG_lang, ',', &supportedLanguages);
-    return find(supportedLanguages.begin(),
-                supportedLanguages.end(),
-                sourceFileType) != supportedLanguages.end();
+bool IsSupportedCompiler(const string& compiler) {
+    vector<string> supportedCompilers;
+    SplitString(ARG_compiler, ',', &supportedCompilers);
+    return find(supportedCompilers.begin(),
+                supportedCompilers.end(),
+                compiler) != supportedCompilers.end();
+}
+
+int ExecJudgeCommand(int sock,
+                     const string& root,
+                     int* problem_id,
+                     int* revision) {
+    uint32_t _problem_id;
+    uint32_t _revision;
+    uint16_t checksum;
+    if (ReadUint32(sock, &_problem_id) == -1 ||
+        ReadUint32(sock, &_revision) == -1 ||
+        ReadUint16(sock, &checksum)) {
+        return -1;
+    }
+    *problem_id = _problem_id;
+    *revision = _revision;
+    LOG(INFO)<<StringPrintf("Problem:%u Revision:%u",
+                            (unsigned int)*problem_id,
+                            (unsigned int)*revision);
+    if (CheckSum(CMD_JUDGE) +
+        CheckSum(_problem_id) + 
+        CheckSum(_revision) != checksum) {
+        LOG(ERROR)<<"Invalid checksum "<<checksum;
+        SendReply(sock, INVALID_INPUT);
+        return -1;
+    }
+    string problem_dir = StringPrintf("%s/prob/%u/%u",
+                                      root.c_str(),
+                                      *problem_id,
+                                      *revision);
+    if (access(problem_dir.c_str(), F_OK) == 0) {
+        SendReply(sock, READY);
+        return 0;
+    } else if (errno != ENOENT) {
+        LOG(SYSCALL_ERROR)<<"Fail to access "<<problem_dir;
+        SendReply(sock, INTERNAL_ERROR);
+        return -1;
+    } else {
+        LOG(ERROR)<<"No such problem";
+        SendReply(sock, NO_SUCH_PROBLEM);
+        return 1;
+    }
 }
 
 int ExecCompileCommand(int sock,
@@ -44,21 +86,21 @@ int ExecCompileCommand(int sock,
                        int* compiler) {
     uint32_t submission_id;
     uint8_t compiler_id;
-    uint32_t source_file_length;
+    uint32_t source_file_size;
     uint16_t checksum;
     if (ReadUint32(sock, &submission_id) == -1 ||
         ReadUint8(sock, &compiler_id) == -1 ||
-        ReadUint32(sock, &source_file_length) == -1 ||
+        ReadUint32(sock, &source_file_size) == -1 ||
         ReadUint16(sock, &checksum) == -1) {
         return -1;
     }
-    LOG(INFO)<<StringPrintf("Compile Id:%u Type:%u",
+    LOG(INFO)<<StringPrintf("Submission:%u Compiler:%u",
                             (unsigned int)submission_id,
-                            compiler);
+                            (unsigned int)compiler_id);
     if (CheckSum(CMD_COMPILE) +
         CheckSum(submission_id) +
         CheckSum(compiler_id) +
-        CheckSum(source_file_length) != checksum) {
+        CheckSum(source_file_size) != checksum) {
         LOG(ERROR)<<"Invalid checksum "<<checksum;
         SendReply(sock, INVALID_INPUT);
         return -1;
@@ -72,18 +114,18 @@ int ExecCompileCommand(int sock,
             break;
         }
     }
-    if (*compiler < 0) {
-        LOG(ERROR)<<"Invalid compiler "<<(int)compiler;
+    if (*compiler < 0 || !IsSupportedCompiler(global::COMPILER_LIST[compiler_id].compiler)) {
+        LOG(ERROR)<<"Invalid compiler "<<(int)compiler_id;
         SendReply(sock, INVALID_INPUT);
         return -1;
     }
-    LOG(INFO)<<"Compiler:"<<*compiler;
+    LOG(INFO)<<"Compiler:"<<global::COMPILER_LIST[*compiler].compiler;
     SendReply(sock, READY);
-    LOG(INFO)<<"Saving source file";
     string source_filename =
         StringPrintf("p.%s",
                      global::COMPILER_LIST[*compiler].source_file_type);
-    if (SaveFile(sock, source_filename.c_str(), source_file_length) == -1) {
+    LOG(INFO)<<"Saving source file "<<source_filename<<". Length:"<<source_file_size;
+    if (SaveFile(sock, source_filename.c_str(), source_file_size) == -1) {
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
@@ -95,37 +137,31 @@ int ExecCompileCommand(int sock,
     return 0;
 }
 
-int ExecJudgeCommand(int sock,
-                     const string& root,
-                     int compiler,
-                     int uid,
-                     int gid) {
-    uint32_t problem_id;
-    uint32_t revision;
+int ExecTestCaseCommand(int sock,
+                        const string& root,
+                        int problem_id,
+                        int revision,
+                        int compiler,
+                        int uid,
+                        int gid) {
     uint8_t testcase;
     uint16_t time_limit;
     uint32_t memory_limit;
     uint16_t output_limit;
     uint16_t checksum;
-    if (ReadUint32(sock, &problem_id) == -1 ||
-        ReadUint32(sock, &revision) == -1 ||
-        ReadUint8(sock, &testcase) == -1 ||
+    if (ReadUint8(sock, &testcase) == -1 ||
         ReadUint16(sock, &time_limit) == -1 ||
         ReadUint32(sock, &memory_limit) == -1 ||
         ReadUint16(sock, &output_limit) == -1 ||
         ReadUint16(sock, &checksum)) {
         return -1;
     }
-    LOG(INFO)<<StringPrintf("P:%u R:%u T:%u TL:%u ML:%u OL:%u",
-                            (unsigned int)problem_id,
-                            (unsigned int)revision,
+    LOG(INFO)<<StringPrintf("Testcase:%u TL:%u ML:%u OL:%u",
                             (unsigned int)testcase,
                             (unsigned int)time_limit,
                             (unsigned int)memory_limit,
                             (unsigned int)output_limit);
-    if (CheckSum(CMD_JUDGE) +
-        CheckSum(problem_id) + 
-        CheckSum(revision) +
+    if (CheckSum(CMD_TESTCASE) +
         CheckSum(testcase) + 
         CheckSum(time_limit) + 
         CheckSum(memory_limit) + 
@@ -135,18 +171,15 @@ int ExecJudgeCommand(int sock,
         return -1;
     }
     string problem_dir = StringPrintf("%s/prob/%u/%u", root.c_str(), problem_id, revision);
-    if (access(problem_dir.c_str(), F_OK) == 0) {
-        SendReply(sock, READY);
-    } else if (errno != ENOENT) {
+    if (access(problem_dir.c_str(), F_OK) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to access "<<problem_dir;
-        SendReply(sock, INTERNAL_ERROR);
+        if (errno != ENOENT) {
+            SendReply(sock, INTERNAL_ERROR);
+        } else {
+            SendReply(sock, INVALID_INPUT);
+        }
         return -1;
-    } else {
-        LOG(ERROR)<<"No such problem";
-        SendReply(sock, NO_SUCH_PROBLEM);
-        return 1;
     }
-
     string input_filename = StringPrintf("%s/%u.in",
                                          problem_dir.c_str(),
                                          (unsigned int)testcase);
@@ -158,6 +191,20 @@ int ExecJudgeCommand(int sock,
         LOG(ERROR)<<"Invalid test case "<<testcase;
         SendReply(sock, INVALID_INPUT);
         return -1;
+    }
+    if (unlink("input") < 0) {
+        if (errno != ENOENT) {
+            LOG(SYSCALL_ERROR)<<"Fail to remove symlink input";
+            SendReply(sock, INTERNAL_ERROR);
+            return -1;
+        }
+    }
+    if (unlink("output") < 0) {
+        if (errno != ENOENT) {
+            LOG(SYSCALL_ERROR)<<"Fail to remove symlink output";
+            SendReply(sock, INTERNAL_ERROR);
+            return -1;
+        }
     }
     if (symlink(input_filename.c_str(), "input") == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create symlink to "<<input_filename;
@@ -171,18 +218,15 @@ int ExecJudgeCommand(int sock,
                        output_limit,
                        uid,
                        gid);
-    if (result == -1) {
-        return -1;
+    if (result) {
+        return result == -1 ? -1 : 0;
     }
     if (symlink(output_filename.c_str(), "output") == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create symlink to "<<output_filename;
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
-    if (DoCheck(sock, uid, special_judge_filename) == -1) {
-        return -1;
-    }
-    return 0;
+    return DoCheck(sock, uid, special_judge_filename);
 }
 
 int CheckData(int sock, const string& root, const string& data_dir) {
@@ -195,6 +239,7 @@ int CheckData(int sock, const string& root, const string& data_dir) {
     int ret = 0;
     vector<int> in, out;
     string judge;
+    int compiler = -1;
     for (;;) {
         struct dirent* entry = readdir(dir);
         if (entry == NULL) {
@@ -229,8 +274,17 @@ int CheckData(int sock, const string& root, const string& data_dir) {
             }
             out.push_back(index);
         } else if (StringStartsWith(entry->d_name, "judge.")) {
-            if (!IsSupportedSourceFileType(entry->d_name + 6)) {
-                LOG(ERROR)<<"Unsupported file type "<<entry->d_name + 6;
+            string source_file_type = entry->d_name + 6;
+            for (int i = 0; i < sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]); ++i) {
+                if (global::COMPILER_LIST[i].source_file_type == source_file_type) {
+                    if (IsSupportedCompiler(global::COMPILER_LIST[i].compiler)) {
+                        compiler = i;
+                    }
+                    break;
+                }
+            }
+            if (compiler < 0) {
+                LOG(ERROR)<<"Unsupported judge source file type "<<source_file_type;
                 ret = -1;
                 break;
             }
@@ -267,7 +321,7 @@ int CheckData(int sock, const string& root, const string& data_dir) {
                           <<out[in.size()]<<".out";
                 ret = -1;
             }
-        } else if (DoCompile(sock, root, 0, data_dir + "/" + judge) == -1) {
+        } else if (DoCompile(sock, root, compiler, data_dir + "/" + judge) == -1) {
             return -1;
         }
     }
@@ -277,8 +331,25 @@ int CheckData(int sock, const string& root, const string& data_dir) {
     return ret;
 }
 
-int SaveData(int sock, const string& root,
-             unsigned int problem_id, unsigned int revision) {
+int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsigned int revision) {
+    uint32_t size;
+    uint16_t checksum;
+    if (ReadUint32(sock, &size) == -1 ||
+        ReadUint16(sock, &checksum) == -1) {
+        return -1;
+    }
+    if (CheckSum(CMD_DATA) + CheckSum(size) != checksum) {
+        LOG(ERROR)<<"Invalid checksum "<<checksum;
+        SendReply(sock, INVALID_INPUT);
+        return -1;
+    }
+
+    if (size > MAX_DATA_FILE_SIZE) {
+        LOG(ERROR)<<"File size too large: "<<size;
+        SendReply(sock, INVALID_INPUT);
+        return -1;
+    }
+
     string problem_dir = StringPrintf("%s/prob/%u", root.c_str(), problem_id);
     string revisionDir = StringPrintf("%s/%u", problem_dir.c_str(), revision);
     string tempDir = StringPrintf("%s.%u.%s",
@@ -309,15 +380,7 @@ int SaveData(int sock, const string& root,
             return -1;
         }
     }
-    LOG(INFO)<<"Saving data file";
-    unsigned long size;
-    if (Readn(sock, &size, 4) < 4) {
-        LOG(ERROR)<<"Fail to read file size";
-        SendReply(sock, INVALID_INPUT);
-        return -1;
-    }
-    size = ntohl(size);
-    LOG(INFO)<<"File size: "<<size;
+    LOG(INFO)<<"Saving data file. Size: "<<size;
     if (SaveFile(sock, tempDir + "/data.zip", size) == -1) {
         SendReply(sock, INTERNAL_ERROR);
         return -1;
@@ -345,8 +408,7 @@ int SaveData(int sock, const string& root,
     return 0;
 }
 
-int JudgeMain(const string& root, const string& queue_address, int queue_port,
-              int uid, int gid) {
+int JudgeMain(const string& root, const string& queue_address, int queue_port, int uid, int gid) {
     string working_root = StringPrintf("%s/working/%u", root.c_str(), getpid());
     int sock = ConnectTo(queue_address, queue_port);
     if (sock < 0) {
@@ -356,12 +418,14 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port,
         if (errno != EEXIST) {
             LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_root;
             SendReply(sock, INTERNAL_ERROR);
+            close(sock);
             return 1;
         }
     }
     if (chdir(working_root.c_str()) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<working_root;
         SendReply(sock, INTERNAL_ERROR);
+        close(sock);
         return 1;
     }
 
@@ -369,48 +433,98 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port,
     InstallHandlers();
 
     int ret = 0;
-    int compiler = -1;
-    string source_filename;
-    string binary_filename;
-    string program_output_filename;
-
+    int problem_id = -1;
+    int revision = -1;
+    int compiler = 0;
+    bool data_ready = false;
     // Loops until SIGTERM or SIGPIPE is received.
     while (!global::terminated) {
         uint8_t command;
-        if (Readn(sock, &command, sizeof(command)) == -1) {
-            ret = -1;
+        if (ReadUint8(sock, &command) == -1) {
+            ret = 1;
             break;
         }
-        if (command == CMD_TYPE) {
-            SendReply(sock, TYPE_JUDGE);
-        } else if (command == CMD_COMPILE) {
-            source_filename.clear();
-            ExecCompileCommand(sock,
-                               root,
-                               working_root,
-                               &compiler);
-        } else if (command == CMD_JUDGE) {
-            if (compiler < 0) {
-                SendReply(sock, INVALID_INPUT);
-            } else {
-                ExecJudgeCommand(sock, root,
-                                 compiler,
-                                 uid,
-                                 gid);
+        if (command == CMD_JUDGE) {
+            int result = ExecJudgeCommand(sock, root, &problem_id, &revision);
+            if (result == -1) {
+                ret = 1;
+                break;
             }
+            if (result == 0) {
+                data_ready = true;
+            } else {
+                data_ready = false;
+            }
+            compiler = -1;
+            // clear all temporary files.
+            system(StringPrintf("rm -f %s/*", working_root.c_str()).c_str());
         } else if (command == CMD_DATA) {
-            uint32_t problem_id;
-            uint32_t revision;
-            if (Readn(sock, &problem_id, sizeof(problem_id)) != -1 &&
-                Readn(sock, &revision, sizeof(revision)) != -1) {
-                SaveData(sock, root, problem_id, revision);
+            if (problem_id < 0) {
+                LOG(ERROR)<<"No problem specified.";
+                SendReply(sock, INVALID_INPUT);
+                ret = 1;
+                break;
+            }
+            if (data_ready) {
+                LOG(ERROR)<<"Data synchronization is not required.";
+                SendReply(sock, INVALID_INPUT);
+                ret = 1;
+                break;
+            }
+            if (ExecDataCommand(sock, root, problem_id, revision) == -1) {
+                ret = 1;
+                break;
+            }
+            data_ready = 1;
+        } else if (command == CMD_COMPILE) {
+            if (compiler >= 0) {
+                LOG(ERROR)<<"Already compiled";
+                SendReply(sock, INVALID_INPUT);
+                ret = 1;
+                break;
+            }
+            if (ExecCompileCommand(sock,
+                                   root,
+                                   working_root,
+                                   &compiler) == -1) {
+                ret = 1;
+                break;
+            }
+        } else if (command == CMD_TESTCASE) {
+            if (problem_id < 0) {
+                LOG(ERROR)<<"No problem specified.";
+                SendReply(sock, INVALID_INPUT);
+                ret = 1;
+                break;
+            }
+            if (data_ready == 0) {
+                LOG(ERROR)<<"Data is not ready";
+                SendReply(sock, INVALID_INPUT);
+                ret = 1;
+                break;
+            }
+            if (compiler < 0) {
+                LOG(ERROR)<<"Program is not compiled";
+                SendReply(sock, INVALID_INPUT);
+                ret = 1;
+                break;
+            }
+            if (ExecTestCaseCommand(sock,
+                                    root,
+                                    problem_id,
+                                    revision,
+                                    compiler,
+                                    uid,
+                                    gid) == -1) {
+                ret = 1;
+                break;
             }
         } else {
-            LOG(ERROR)<<"Invalid command "<<command;
+            LOG(ERROR)<<"Invalid command "<<(int)command;
             SendReply(sock, INVALID_INPUT);
+            ret = 1;
+            break;
         }
-        // clear all temporary files.
-        system(StringPrintf("rm -f %s/*", working_root.c_str()).c_str());
     }
     close(sock);
     system(StringPrintf("rm -rf %s", working_root.c_str()).c_str());

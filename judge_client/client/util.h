@@ -139,11 +139,14 @@ int CreateShellProcess(const char* command, const StartupInfo& process_info);
 ssize_t Readn(int fd, void* buffer, size_t count);
 
 static inline int ReadUint8(int fd, uint8_t* var) {
-    return Readn(fd, var, sizeof(*var));
+    if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
+        return -1;
+    }
+    return 0;
 }
 
 static inline int ReadUint16(int fd, uint16_t* var) {
-    if (Readn(fd, var, sizeof(*var)) == -1) {
+    if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
         return -1;
     }
     *var = ntohs(*var);
@@ -151,7 +154,7 @@ static inline int ReadUint16(int fd, uint16_t* var) {
 }
 
 static inline int ReadUint32(int fd, uint32_t* var) {
-    if (Readn(fd, var, sizeof(*var)) == -1) {
+    if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
         return -1;
     }
     *var = ntohl(*var);
