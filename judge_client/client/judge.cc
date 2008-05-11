@@ -409,21 +409,12 @@ int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsig
 }
 
 int JudgeMain(const string& root, const string& queue_address, int queue_port, int uid, int gid) {
-    string working_root = StringPrintf("%s/working/%u", root.c_str(), getpid());
     int sock = ConnectTo(queue_address, queue_port);
     if (sock < 0) {
         return 1;
     }
-    if (mkdir(working_root.c_str(), 0777) < 0) {
-        if (errno != EEXIST) {
-            LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_root;
-            SendReply(sock, INTERNAL_ERROR);
-            close(sock);
-            return 1;
-        }
-    }
-    if (chdir(working_root.c_str()) < 0) {
-        LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<working_root;
+    string working_root;
+    if (ChangeToWorkingDir(root, &working_root) == -1) {
         SendReply(sock, INTERNAL_ERROR);
         close(sock);
         return 1;
@@ -477,12 +468,6 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port, i
             }
             data_ready = 1;
         } else if (command == CMD_COMPILE) {
-            if (compiler >= 0) {
-                LOG(ERROR)<<"Already compiled";
-                SendReply(sock, INVALID_INPUT);
-                ret = 1;
-                break;
-            }
             if (ExecCompileCommand(sock,
                                    root,
                                    working_root,

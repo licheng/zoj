@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
-#include "main.h"
 
 #include <string>
 
@@ -150,9 +149,14 @@ int main(int argc, char* argv[]) {
         Daemonize();
     }
 
+    if (ChangeToWorkingDir(ARG_root, NULL) < 0) {
+        return 1;
+    }
+
     if (ARG_daemonize || !ARG_logtostderr) {
         Log::SetLogToStderr(false);
     }
+
 
     pid_t pid = fork();
     if (pid < 0) {

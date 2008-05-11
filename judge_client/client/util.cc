@@ -378,3 +378,20 @@ int SaveFile(int sock, const string& output_filename, size_t size) {
     return 0;
 }
 
+int ChangeToWorkingDir(const string& root, string* working_root) {
+    string working_dir = StringPrintf("%s/working/%u", root.c_str(), getpid());
+    if (mkdir(working_dir.c_str(), 0777) < 0) {
+        if (errno != EEXIST) {
+            LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_dir;
+            return -1;
+        }
+    }
+    if (chdir(working_dir.c_str()) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<working_dir;
+        return 1;
+    }
+    if (working_root) {
+        *working_root = working_dir;
+    }
+    return 0;
+}

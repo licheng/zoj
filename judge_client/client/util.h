@@ -215,4 +215,6 @@ int ConnectTo(const string& address, int port);
 
 int SaveFile(int sock, const string& output_filename, size_t size);
 
+int ChangeToWorkingDir(const string& root, string* working_root);
+
 #endif
