@@ -24,14 +24,7 @@
 
 using namespace std;
 
-// Runs the specified program.
-// Returns 0 if execution succeeded, or -1 on error.
-int DoRun(int sock,
-          int compiler,
-          int time_limit,
-          int memory_limit,
-          int output_limit,
-          int uid,
-          int gid);
+// Runs the specified program. Returns 0 if execution succeeded, or -1 on error.
+int DoRun(int sock, int compiler, int time_limit, int memory_limit, int output_limit, int uid, int gid);
 
 #endif

@@ -29,11 +29,7 @@ using namespace std;
 
 class TraceCallback {
     public:
-        TraceCallback():
-            result_(-1),
-            time_consumption_(0),
-            memory_consumption_(0),
-            exited_(false) {
+        TraceCallback(): result_(-1), time_consumption_(0), memory_consumption_(0), exited_(false) {
             TraceCallback::instance_ = this;
         }
 

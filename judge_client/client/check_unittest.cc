@@ -54,90 +54,60 @@ class DoCheckTest: public TestFixture {
 };
 
 TEST_F(DoCheckTest, Accepted) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                            (root_ + "/input").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                            (root_ + "/output").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(),
-                            (root_ + "/p.out").c_str()));
-    ASSERT_EQUAL(0, DoCheck(fd_[1],
-                            0,
-                            ""));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(), "p.out"));
+    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, ""));
     ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[1]);
 }
 
 TEST_F(DoCheckTest, WrongAnswer) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                            (root_ + "/input").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                            (root_ + "/output").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(),
-                            (root_ + "/p.out").c_str()));
-    ASSERT_EQUAL(0, DoCheck(fd_[1],
-                            0,
-                            ""));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(), "p.out"));
+    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, ""));
     ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[1]);
 }
 
 TEST_F(DoCheckTest, PresentationError) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                            (root_ + "/input").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                            (root_ + "/output").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(),
-                            (root_ + "/p.out").c_str()));
-    ASSERT_EQUAL(0, DoCheck(fd_[1],
-                            0,
-                            ""));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(), "p.out"));
+    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, ""));
     ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(PRESENTATION_ERROR, (int)buf_[1]);
 }
 
 TEST_F(DoCheckTest, SpecialJudgeAccepted) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                            (root_ + "/input").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                            (root_ + "/output").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(),
-                            (root_ + "/p.out").c_str()));
-    ASSERT_EQUAL(0, DoCheck(fd_[1],
-                            0,
-                            root_ + "/judge"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(), "p.out"));
+    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, "judge"));
     ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[1]);
 }
 
 TEST_F(DoCheckTest, SpecialJudgeWrongAnswer) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                            (root_ + "/input").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                            (root_ + "/output").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(),
-                            (root_ + "/p.out").c_str()));
-    ASSERT_EQUAL(0, DoCheck(fd_[1],
-                            0,
-                            root_ + "/judge"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(), "p.out"));
+    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, "judge"));
     ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[1]);
 }
 
 TEST_F(DoCheckTest, SpecialJudgePresentationError) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                            (root_ + "/input").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(),
-                            (root_ + "/output").c_str()));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(),
-                            (root_ + "/p.out").c_str()));
-    ASSERT_EQUAL(0, DoCheck(fd_[1],
-                            0,
-                            root_ + "/judge"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(), "p.out"));
+    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, "judge"));
     ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
     ASSERT_EQUAL(JUDGING, (int)buf_[0]);
     ASSERT_EQUAL(PRESENTATION_ERROR, (int)buf_[1]);

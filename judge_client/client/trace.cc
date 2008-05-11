@@ -65,8 +65,7 @@ bool TraceCallback::OnOpen(const string& path, int flags) {
         (flags & O_RDWR) == O_RDWR ||
         (flags & O_CREAT) == O_CREAT ||
         (flags & O_APPEND) == O_APPEND) {
-        LOG(INFO)<<"Opening "<<path<<" with flags 0x"
-                 <<hex<<flags<<" is not allowed";
+        LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
         return false;
     }
     if (path.empty()) {
@@ -74,11 +73,8 @@ bool TraceCallback::OnOpen(const string& path, int flags) {
         return false;
     }
     if (path[0] == '/' || path[0] == '.') {
-        if (!(StringStartsWith(path, "/proc/") ||
-              StringEndsWith(path, ".so") ||
-              StringEndsWith(path, ".a"))) {
-            LOG(INFO)<<"Opening "<<path<<" with flags 0x"
-                     <<hex<<flags<<" is not allowed";
+        if (!(StringStartsWith(path, "/proc/") || StringEndsWith(path, ".so") || StringEndsWith(path, ".a"))) {
+            LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
             return false;
         }
     }
@@ -131,10 +127,7 @@ static void SIGCHLDHandler(int sig, siginfo_t* siginfo, void* context) {
     }
 }
 
-int ReadStringFromTracedProcess(pid_t pid,
-                                int address,
-                                char* buffer,
-                                int max_length) {
+int ReadStringFromTracedProcess(pid_t pid, int address, char* buffer, int max_length) {
     for (int i = 0; i < max_length; i += 4) {
         int data;
         if (kmmon_readmem(pid, address + i, &data) < 0) {
@@ -191,8 +184,7 @@ static void SIGKMMONHandler(int sig, siginfo_t* siginfo, void* context) {
             LOG(ERROR)<<"Fail to read register values from traced process";
             callback->OnError();
             kmmon_kill(pid);
-        } else if (ReadStringFromTracedProcess(
-                    pid, address, buffer, sizeof(buffer)) < 0) {
+        } else if (ReadStringFromTracedProcess(pid, address, buffer, sizeof(buffer)) < 0) {
             LOG(ERROR)<<"Fail to read memory from traced process";
             callback->OnError();
             kmmon_kill(pid);

@@ -48,17 +48,15 @@ class TextFile {
             }
         }
 
-        // Returns the next character in the file. Returns 0 if EOF is reached,
-        // -1 if any error occurs.
+        // Returns the next character in the file. Returns 0 if EOF is reached, -1 if any error occurs.
         int read() {
             if (fd_ < 0) {
                 return -1;
             }
             if (ptr_ - buffer_ >= buffer_size_) {
                 if (buffer_size_ < sizeof(buffer_)) {
-                    // The previous Readn returns less characters than requested,
-                    // which means EOF is reached. It is not necessary to invoke
-                    // it again.
+                    // The previous Readn returns less characters than requested, which means EOF is reached.
+                    // It is not necessary to invoke it again.
                     return 0;
                 }
                 buffer_size_ = Readn(fd_, buffer_, sizeof(buffer_));
@@ -112,14 +110,12 @@ class TextFile {
 // 2. PRESENTATION_ERROR
 //    If these two files are the same after normalization.
 //    The file is normalized by
-//    a) Removing all white spaces at the beginning or end of the file.
-//    b) Reducing consecutive white space characters to a single space(0x20).
-//    See the C library function "isspace" for the definition of white space
-//    characters.
+//      a) Removing all white spaces at the beginning or end of the file.
+//      b) Reducing consecutive white space characters to a single space(0x20).
+//    See the C library function "isspace" for the definition of white space characters.
 // 3. WRONG_ANSWER
 //    Neither ACCEPTED nor PRESENTATION_ERROR
-int CompareTextFiles(const string& output_filename,
-                     const string& program_output_filename) {
+int CompareTextFiles(const string& output_filename, const string& program_output_filename) {
     int ret = ACCEPTED;
     TextFile f1(output_filename), f2(program_output_filename);
     if (f1.fail() || f2.fail()) {
@@ -167,8 +163,7 @@ int CompareTextFiles(const string& output_filename,
     return ret;
 }
 
-int RunSpecialJudgeExe(int uid,
-                       string special_judge_filename) {
+int RunSpecialJudgeExe(int uid, string special_judge_filename) {
     LOG(INFO)<<"Running special judge "<<special_judge_filename;
     char path[PATH_MAX + 1];
     getcwd(path, sizeof(path));
@@ -214,15 +209,12 @@ int RunSpecialJudgeExe(int uid,
     }
 }
 
-int DoCheck(int sock,
-            int special_judge_uid,
-            const string& special_judge_filename) {
+int DoCheck(int sock, int special_judge_uid, const string& special_judge_filename) {
     LOG(INFO)<<"Judging";
     SendReply(sock, JUDGING);
     int result;
     if (access(special_judge_filename.c_str(), F_OK) == 0) {
-        result = RunSpecialJudgeExe(special_judge_uid,
-                                    special_judge_filename);
+        result = RunSpecialJudgeExe(special_judge_uid, special_judge_filename);
     } else {
         result = CompareTextFiles("output", "p.out");
     }

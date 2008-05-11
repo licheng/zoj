@@ -29,17 +29,13 @@
 #include "trace.h"
 #include "util.h"
 
-int DoCompile(int sock,
-              const string& root,
-              int compiler,
-              const string& source_filename) {
+int DoCompile(int sock, const string& root, int compiler, const string& source_filename) {
     LOG(INFO)<<"Compiling";
     SendReply(sock, COMPILING);
-    string command =
-        StringPrintf("%s/script/compile.sh '%s' '%s'",
-                     root.c_str(),
-                     global::COMPILER_LIST[compiler].compiler,
-                     source_filename.c_str());
+    string command = StringPrintf("%s/script/compile.sh '%s' '%s'",
+                                  root.c_str(),
+                                  global::COMPILER_LIST[compiler].compiler,
+                                  source_filename.c_str());
     LOG(INFO)<<"Command: "<<command;
     int fd_pipe[2];
     if (pipe(fd_pipe) < 0) {

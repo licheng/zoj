@@ -28,8 +28,7 @@ LogFile* Log::log_ = NULL;
 bool Log::log_to_stderr_ = true;
 
 Log::Log(const char* filename, int line_number, int level) {
-    static const char* LEVEL_NAME[] =
-            {"ERROR", "DEBUG", "WARNING", "ERROR", "FATAL", "INFO"};
+    static const char* LEVEL_NAME[] = {"ERROR", "DEBUG", "WARNING", "ERROR", "FATAL", "INFO"};
     if ((log_ || log_to_stderr_) && level != RAW) {
         message_stream_<<GetLocalTimeAsString("%Y-%m-%d %H:%M:%S")<<' '
                        <<filename<<':'<<line_number<<' '<<LEVEL_NAME[level]<<' ';
@@ -79,8 +78,7 @@ void DiskLogFile::CreateNewFile() {
     if (fd_ < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
-        syslog(LOG_ERR, "Fail to create file %s: %s",
-               filename_.c_str(), error_message.c_str());
+        syslog(LOG_ERR, "Fail to create file %s: %s", filename_.c_str(), error_message.c_str());
     }
 }
 
@@ -129,9 +127,7 @@ void UnixDomainSocketLogFile::Connect() {
     string client_sock_name = "log.sock";
     unlink(client_sock_name.c_str());
     strcpy(un.sun_path, client_sock_name.c_str());
-    if (bind(sock_, (struct sockaddr*)&un,
-             (int)&((struct sockaddr_un*)0)->sun_path +
-                    client_sock_name.size()) < 0) {
+    if (bind(sock_, (struct sockaddr*)&un, (int)&((struct sockaddr_un*)0)->sun_path + client_sock_name.size()) < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
         syslog(LOG_ERR, "Fail to bind: %s", error_message.c_str());
@@ -147,9 +143,7 @@ void UnixDomainSocketLogFile::Connect() {
     un.sun_family = AF_UNIX; 
     string server_sock_name = root_ + "/log.sock";
     strcpy(un.sun_path, server_sock_name.c_str());
-    if (connect(sock_, (struct sockaddr*)&un,
-                (int)&((struct sockaddr_un*)0)->sun_path +
-                        server_sock_name.size()) < 0) {
+    if (connect(sock_, (struct sockaddr*)&un, (int)&((struct sockaddr_un*)0)->sun_path + server_sock_name.size()) < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
         syslog(LOG_ERR, "Fail to connect: %s", error_message.c_str());

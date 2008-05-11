@@ -33,13 +33,11 @@ class DoCompileTest: public TestFixture {
     virtual void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
-        ASSERT_EQUAL(0, mkdir((root_ + "/script").c_str(), 0700));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(),
-                                (root_ + "/script/compile.sh").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.cc").c_str(),
-                                (root_ + "/ac.cc").c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(),
-                                (root_ + "/ce.cc").c_str()));
+        ASSERT_EQUAL(0, chdir(root_.c_str()));
+        ASSERT_EQUAL(0, mkdir("script", 0700));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.cc").c_str(), "ac.cc"));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(), "ce.cc"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
     }
@@ -60,13 +58,13 @@ class DoCompileTest: public TestFixture {
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, COMPILER_GPP, root_ +  "/ac.cc"));
+    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, COMPILER_GPP, "ac.cc"));
     ASSERT_EQUAL((ssize_t)1, read(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, COMPILER_GPP, root_ + "/ce.cc"));
+    ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce.cc"));
     ASSERT_EQUAL((ssize_t)4, read(fd_[0], buf_, 4));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(COMPILATION_ERROR, (int)buf_[1]);

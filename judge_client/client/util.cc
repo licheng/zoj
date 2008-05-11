@@ -55,12 +55,7 @@ int ReadTimeConsumption(int pid) {
     int utime, stime;
     while (fgetc(fp) != ')');
     fgetc(fp);
-    fscanf(fp,
-           "%*c "
-           "%*d %*d %*d %*d %*d "
-           "%*u %*u %*u %*u %*u "
-           "%d %d",
-           &utime, &stime);
+    fscanf(fp, "%*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %d %d", &utime, &stime);
     fclose(fp);
     static int clktck = 0;
     if (clktck == 0) {
@@ -138,36 +133,31 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
     }
     if (process_info.time_limit) {
         if (SetLimit(RLIMIT_CPU, process_info.time_limit) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set cpu limit to "
-                              <<process_info.time_limit<<'s';
+            LOG(SYSCALL_ERROR)<<"Fail to set cpu limit to "<<process_info.time_limit<<'s';
             raise(SIGKILL);
         }
     }
     if (process_info.memory_limit) {
         if (SetLimit(RLIMIT_DATA, process_info.memory_limit * 1024) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set memory limit to "
-                              <<process_info.memory_limit<<'k';
+            LOG(SYSCALL_ERROR)<<"Fail to set memory limit to "<<process_info.memory_limit<<'k';
             raise(SIGKILL);
         }
     }
     if (process_info.output_limit) {
         if (SetLimit(RLIMIT_FSIZE, process_info.output_limit * 1024) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set output limit to "
-                              <<process_info.output_limit<<'k';
+            LOG(SYSCALL_ERROR)<<"Fail to set output limit to "<<process_info.output_limit<<'k';
             raise(SIGKILL);
         }
     }
     if (process_info.file_limit) {
         if (SetLimit(RLIMIT_NOFILE, process_info.file_limit) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set file limit to "
-                              <<process_info.file_limit;
+            LOG(SYSCALL_ERROR)<<"Fail to set file limit to "<<process_info.file_limit;
             raise(SIGKILL);
         }
     }
     if (process_info.working_dir) {
         if (chdir(process_info.working_dir) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to change working directory to "
-                              <<process_info.working_dir;
+            LOG(SYSCALL_ERROR)<<"Fail to change working directory to "<<process_info.working_dir;
             raise(SIGKILL);
         }
     }
@@ -185,8 +175,7 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
     }
     if (process_info.proc_limit) {
         if (SetLimit(RLIMIT_NPROC, process_info.proc_limit) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set process limit to "
-                              <<process_info.proc_limit;
+            LOG(SYSCALL_ERROR)<<"Fail to set process limit to "<<process_info.proc_limit;
             raise(SIGKILL);
         }
     }
@@ -264,8 +253,7 @@ sighandler_t InstallSignalHandler(int signal, sighandler_t handler, int flags) {
     return InstallSignalHandler(signal, handler, flags, mask);
 }
 
-sighandler_t InstallSignalHandler(
-        int signal, sighandler_t handler, int flags, sigset_t mask) {
+sighandler_t InstallSignalHandler(int signal, sighandler_t handler, int flags, sigset_t mask) {
     struct sigaction act, oact;
     act.sa_handler = handler;
     act.sa_mask = mask;
@@ -348,8 +336,7 @@ int ConnectTo(const string& address, int port) {
 //
 // Return 0 if success, or -1 if any error occurs.
 int SaveFile(int sock, const string& output_filename, size_t size) {
-    int fd = open(output_filename.c_str(),
-                  O_RDWR | O_CREAT | O_TRUNC, 0640);
+    int fd = open(output_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0640);
     if (fd == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create file "<<output_filename;
         return -1;

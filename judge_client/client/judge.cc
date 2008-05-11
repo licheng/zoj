@@ -33,15 +33,10 @@ DEFINE_ARG(string, compiler, "All compilers supported by this client");
 bool IsSupportedCompiler(const string& compiler) {
     vector<string> supportedCompilers;
     SplitString(ARG_compiler, ',', &supportedCompilers);
-    return find(supportedCompilers.begin(),
-                supportedCompilers.end(),
-                compiler) != supportedCompilers.end();
+    return find(supportedCompilers.begin(), supportedCompilers.end(), compiler) != supportedCompilers.end();
 }
 
-int ExecJudgeCommand(int sock,
-                     const string& root,
-                     int* problem_id,
-                     int* revision) {
+int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revision) {
     uint32_t _problem_id;
     uint32_t _revision;
     uint16_t checksum;
@@ -52,20 +47,13 @@ int ExecJudgeCommand(int sock,
     }
     *problem_id = _problem_id;
     *revision = _revision;
-    LOG(INFO)<<StringPrintf("Problem:%u Revision:%u",
-                            (unsigned int)*problem_id,
-                            (unsigned int)*revision);
-    if (CheckSum(CMD_JUDGE) +
-        CheckSum(_problem_id) + 
-        CheckSum(_revision) != checksum) {
+    LOG(INFO)<<StringPrintf("Problem:%u Revision:%u", (unsigned int)*problem_id, (unsigned int)*revision);
+    if (CheckSum(CMD_JUDGE) + CheckSum(_problem_id) + CheckSum(_revision) != checksum) {
         LOG(ERROR)<<"Invalid checksum "<<checksum;
         SendReply(sock, INVALID_INPUT);
         return -1;
     }
-    string problem_dir = StringPrintf("%s/prob/%u/%u",
-                                      root.c_str(),
-                                      *problem_id,
-                                      *revision);
+    string problem_dir = StringPrintf("%s/prob/%u/%u", root.c_str(), *problem_id, *revision);
     if (access(problem_dir.c_str(), F_OK) == 0) {
         SendReply(sock, READY);
         return 0;
@@ -80,10 +68,7 @@ int ExecJudgeCommand(int sock,
     }
 }
 
-int ExecCompileCommand(int sock,
-                       const string& root,
-                       const string& working_root,
-                       int* compiler) {
+int ExecCompileCommand(int sock, const string& root, const string& working_root, int* compiler) {
     uint32_t submission_id;
     uint8_t compiler_id;
     uint32_t source_file_size;
@@ -94,9 +79,7 @@ int ExecCompileCommand(int sock,
         ReadUint16(sock, &checksum) == -1) {
         return -1;
     }
-    LOG(INFO)<<StringPrintf("Submission:%u Compiler:%u",
-                            (unsigned int)submission_id,
-                            (unsigned int)compiler_id);
+    LOG(INFO)<<StringPrintf("Submission:%u Compiler:%u", (unsigned int)submission_id, (unsigned int)compiler_id);
     if (CheckSum(CMD_COMPILE) +
         CheckSum(submission_id) +
         CheckSum(compiler_id) +
@@ -106,8 +89,7 @@ int ExecCompileCommand(int sock,
         return -1;
     }
     *compiler = -1;
-    const int COMPILER_NUM =
-        sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
+    const int COMPILER_NUM = sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
     for (int i = 0; i < COMPILER_NUM; ++i) {
         if (compiler_id == global::COMPILER_LIST[i].id) {
             *compiler = compiler_id;
@@ -121,9 +103,7 @@ int ExecCompileCommand(int sock,
     }
     LOG(INFO)<<"Compiler:"<<global::COMPILER_LIST[*compiler].compiler;
     SendReply(sock, READY);
-    string source_filename =
-        StringPrintf("p.%s",
-                     global::COMPILER_LIST[*compiler].source_file_type);
+    string source_filename = StringPrintf("p.%s", global::COMPILER_LIST[*compiler].source_file_type);
     LOG(INFO)<<"Saving source file "<<source_filename<<". Length:"<<source_file_size;
     if (SaveFile(sock, source_filename.c_str(), source_file_size) == -1) {
         SendReply(sock, INTERNAL_ERROR);
@@ -137,13 +117,7 @@ int ExecCompileCommand(int sock,
     return 0;
 }
 
-int ExecTestCaseCommand(int sock,
-                        const string& root,
-                        int problem_id,
-                        int revision,
-                        int compiler,
-                        int uid,
-                        int gid) {
+int ExecTestCaseCommand(int sock, const string& root, int problem_id, int revision, int compiler, int uid, int gid) {
     uint8_t testcase;
     uint16_t time_limit;
     uint32_t memory_limit;
@@ -180,12 +154,8 @@ int ExecTestCaseCommand(int sock,
         }
         return -1;
     }
-    string input_filename = StringPrintf("%s/%u.in",
-                                         problem_dir.c_str(),
-                                         (unsigned int)testcase);
-    string output_filename = StringPrintf("%s/%u.out",
-                                          problem_dir.c_str(),
-                                          (unsigned int)testcase);
+    string input_filename = StringPrintf("%s/%u.in", problem_dir.c_str(), (unsigned int)testcase);
+    string output_filename = StringPrintf("%s/%u.out", problem_dir.c_str(), (unsigned int)testcase);
     string special_judge_filename = problem_dir + "/judge";
     if (access(input_filename.c_str(), F_OK) == -1) {
         LOG(ERROR)<<"Invalid test case "<<testcase;
@@ -211,13 +181,7 @@ int ExecTestCaseCommand(int sock,
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
-    int result = DoRun(sock,
-                       compiler,
-                       time_limit,
-                       memory_limit,
-                       output_limit,
-                       uid,
-                       gid);
+    int result = DoRun(sock, compiler, time_limit, memory_limit, output_limit, uid, gid);
     if (result) {
         return result == -1 ? -1 : 0;
     }
@@ -251,8 +215,7 @@ int CheckData(int sock, const string& root, const string& data_dir) {
             continue;
         }
         struct stat status;
-        lstat(StringPrintf("%s/%s", data_dir.c_str(), entry->d_name).c_str(),
-              &status);
+        lstat(StringPrintf("%s/%s", data_dir.c_str(), entry->d_name).c_str(), &status);
         if (!S_ISREG(status.st_mode)) {
             LOG(ERROR)<<"Invalid file "<<entry->d_name;
             ret = -1;
@@ -317,8 +280,7 @@ int CheckData(int sock, const string& root, const string& data_dir) {
                 }
             }
             if (out.size() > in.size()) {
-                LOG(ERROR)<<"No "<<out[in.size()]<<".in found for "
-                          <<out[in.size()]<<".out";
+                LOG(ERROR)<<"No "<<out[in.size()]<<".in found for "<<out[in.size()]<<".out";
                 ret = -1;
             }
         } else if (DoCompile(sock, root, compiler, data_dir + "/" + judge) == -1) {
@@ -386,8 +348,7 @@ int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsig
         return -1;
     }
     LOG(INFO)<<"Unzipping data file";
-    string command = StringPrintf("unzip '%s/data.zip' -d '%s'",
-                                  tempDir.c_str(), tempDir.c_str());
+    string command = StringPrintf("unzip '%s/data.zip' -d '%s'", tempDir.c_str(), tempDir.c_str());
     int result = system(command.c_str());
     if (result) {
         LOG(ERROR)<<"Fail to unzip data file. Command: "<<command;
@@ -468,10 +429,7 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port, i
             }
             data_ready = 1;
         } else if (command == CMD_COMPILE) {
-            if (ExecCompileCommand(sock,
-                                   root,
-                                   working_root,
-                                   &compiler) == -1) {
+            if (ExecCompileCommand(sock, root, working_root, &compiler) == -1) {
                 ret = 1;
                 break;
             }
@@ -494,13 +452,7 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port, i
                 ret = 1;
                 break;
             }
-            if (ExecTestCaseCommand(sock,
-                                    root,
-                                    problem_id,
-                                    revision,
-                                    compiler,
-                                    uid,
-                                    gid) == -1) {
+            if (ExecTestCaseCommand(sock, root, problem_id, revision, compiler, uid, gid) == -1) {
                 ret = 1;
                 break;
             }

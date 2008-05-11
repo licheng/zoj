@@ -37,8 +37,7 @@ class DoRunTest: public TestFixture {
         fn_ = root_ + "/output";
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(),
-                                (root_ + "/input").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         InstallHandlers();
@@ -63,13 +62,10 @@ class DoRunTest: public TestFixture {
 };
 
 TEST_F(DoRunTest, Success) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac").c_str(), "p"));
     ASSERT_EQUAL(0, DoRun(fd_[1], COMPILER_GPP, 10, 1000, 1000, 0, 0));
     close(fd_[1]);
-    ASSERT(!system(StringPrintf("diff %s/p.out %s/1.out",
-                                root_.c_str(),
-                                TESTDIR.c_str()).c_str()));
+    ASSERT(!system(StringPrintf("diff p.out %s/1.out", TESTDIR.c_str()).c_str()));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
         if (!size) {
@@ -81,8 +77,7 @@ TEST_F(DoRunTest, Success) {
 }
 
 TEST_F(DoRunTest, TimeLimitExceeded) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 1, 1000, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -97,8 +92,7 @@ TEST_F(DoRunTest, TimeLimitExceeded) {
 }
 
 TEST_F(DoRunTest, MemoryLimitExceeded) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 1, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -113,8 +107,7 @@ TEST_F(DoRunTest, MemoryLimitExceeded) {
 }
 
 TEST_F(DoRunTest, MemoryLimitExceededMMap) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle_mmap").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle_mmap").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 100000, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -129,8 +122,7 @@ TEST_F(DoRunTest, MemoryLimitExceededMMap) {
 }
 
 TEST_F(DoRunTest, OutputLimitExceeded) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ole").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ole").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 1000, 1, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -145,8 +137,7 @@ TEST_F(DoRunTest, OutputLimitExceeded) {
 }
 
 TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/sigsegv").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/sigsegv").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 1000, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -161,8 +152,7 @@ TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
 }
 
 TEST_F(DoRunTest, FloatingPointError) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/fpe").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/fpe").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 1000, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -177,8 +167,7 @@ TEST_F(DoRunTest, FloatingPointError) {
 }
 
 TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_link").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_link").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 1000, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);
@@ -193,8 +182,7 @@ TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
 }
 
 TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionOpen) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_open").c_str(),
-                            (root_ + "/p").c_str()));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_open").c_str(), "p"));
     ASSERT_EQUAL(1, DoRun(fd_[1], COMPILER_GPP, 10, 1000, 1000, 0, 0));
     for (;;) {
         int size = read(fd_[0], buf_, 9);

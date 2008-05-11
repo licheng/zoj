@@ -32,9 +32,7 @@
 #include "trace.h"
 #include "util.h"
 
-int SendRunningMessage(int sock,
-                       uint32_t time_consumption,
-                       uint32_t memory_consumption) {
+int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption) {
     time_consumption = htonl(time_consumption);
     memory_consumption = htonl(memory_consumption);
     uint8_t reply = RUNNING;
@@ -60,9 +58,7 @@ int monitor(int sock,
         struct timespec request, remain;
         request.tv_sec = 1;
         request.tv_nsec = 0;
-        while (result < 0 &&
-               !callback->HasExited() &&
-               nanosleep(&request, &remain) < 0) {
+        while (result < 0 && !callback->HasExited() && nanosleep(&request, &remain) < 0) {
             if (errno != EINTR) {
                 LOG(SYSCALL_ERROR)<<"Fail to sleep";
                 kill(pid, SIGKILL);
@@ -127,21 +123,14 @@ int monitor(int sock,
         if (result == MEMORY_LIMIT_EXCEEDED) {
             memory_consumption = memory_limit + 1;
         }
-        if (SendRunningMessage(sock,
-                               time_consumption,
-                               memory_consumption) == -1) {
+        if (SendRunningMessage(sock, time_consumption, memory_consumption) == -1) {
             result = INTERNAL_ERROR;
         }
     }
     return result;
 }
 
-int RunExe(int sock,
-           int time_limit,
-           int memory_limit,
-           int output_limit,
-           int uid,
-           int gid) {
+int RunExe(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) {
     LOG(INFO)<<"Running";
     const char* commands[] = {"p", "p", NULL};
     StartupInfo info;
@@ -168,21 +157,10 @@ inline int IsNativeExe(int compiler) {
     return compiler != COMPILER_JAVAC;
 }
 
-int DoRun(int sock,
-          int compiler,
-          int time_limit,
-          int memory_limit,
-          int output_limit,
-          int uid,
-          int gid) {
+int DoRun(int sock, int compiler, int time_limit, int memory_limit, int output_limit, int uid, int gid) {
     int result;
     if (IsNativeExe(compiler)) {
-        result = RunExe(sock,
-                        time_limit,
-                        memory_limit,
-                        output_limit,
-                        uid,
-                        gid);
+        result = RunExe(sock, time_limit, memory_limit, output_limit, uid, gid);
     } else {
         return -1;
     }

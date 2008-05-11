@@ -34,16 +34,12 @@ DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
 
 DEFINE_ARG(int, gid, "The uid for executing the program to be judged");
 
-DEFINE_OPTIONAL_ARG(bool, daemonize, true, "If true, the program will be "
-                                           "started as a daemon process");
+DEFINE_OPTIONAL_ARG(bool, daemonize, true, "If true, the program will be started as a daemon process");
 
-DEFINE_ARG(string, queue_address, "The ip address of the queue service to which"
-                                  "this client connects");
+DEFINE_ARG(string, queue_address, "The ip address of the queue service to which this client connects");
 
-DEFINE_ARG(int, queue_port, "The port of the queue service to which this client"
-                            "connects");
+DEFINE_ARG(int, queue_port, "The port of the queue service to which this client connects");
 
-// If true, all logs are written to stderr as well
 DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to stderr as well");
 
 void Daemonize() {
@@ -108,8 +104,7 @@ void SIGPIPEHandler(int sig) {
     global::socket_closed = 1;
 }
 
-int ControlMain(const string& root, const string& queue_address, int queue_port,
-                int uid, int gid);
+int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
 int main(int argc, char* argv[]) {
     if (ParseArguments(argc, argv) < 0) {
@@ -170,8 +165,7 @@ int main(int argc, char* argv[]) {
         }
         delete log_server;
         Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
-        return ControlMain(ARG_root, ARG_queue_address, ARG_queue_port,
-                           ARG_uid, ARG_gid);
+        return ControlMain(ARG_root, ARG_queue_address, ARG_queue_port, ARG_uid, ARG_gid);
     }
     return 0;
 }

@@ -26,18 +26,10 @@
 
 vector<ArgumentInfo*>* info_list;
 
-ArgumentInfo::ArgumentInfo(string type,
-                           string name,
-                           string default_value,
-                           string description,
-                           bool optional,
-                           void* reference)
-    : type_(type),
-      name_(name),
-      default_value_(default_value),
-      description_(description),
-      optional_(optional),
-      reference_(reference) {
+ArgumentInfo::ArgumentInfo(
+        string type, string name, string default_value, string description, bool optional, void* reference)
+        : type_(type), name_(name), default_value_(default_value),
+          description_(description), optional_(optional), reference_(reference) {
     if (info_list == NULL) {
         info_list = new vector<ArgumentInfo*>;
     }
@@ -102,7 +94,7 @@ int ParseArguments(int argc, char* argv[]) {
             string name(argv[i] + 2, p - argv[i] - 2);
             bool found = false;
             for (int j = 0; j < info_list->size(); ++j) {
-                if ((*info_list)[j]->GetName() == name) {
+                if ((*info_list)[j]->name() == name) {
                     if (*p) {
                         if (!(*info_list)[j]->Assign(p + 1)) {
                             cerr<<"Invalid value for argument "<<name<<endl;
@@ -110,7 +102,7 @@ int ParseArguments(int argc, char* argv[]) {
                             return -1;
                         }
                     } else {
-                        if ((*info_list)[j]->GetType() != "bool") {
+                        if ((*info_list)[j]->type() != "bool") {
                             cerr<<"Missing value for argument "<<name<<endl;
                             PrintUsage();
                             return -1;
@@ -131,7 +123,7 @@ int ParseArguments(int argc, char* argv[]) {
     }
     for (int i = 0; i < info_list->size(); ++i) {
         if (!assigned[i] && !(*info_list)[i]->IsOptional()) {
-            cerr<<"Missing argument "<<(*info_list)[i]->GetName()<<endl;
+            cerr<<"Missing argument "<<(*info_list)[i]->name()<<endl;
             PrintUsage();
             return -1;
         }

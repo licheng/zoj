@@ -60,10 +60,7 @@ TEST_F(IsSupportedCompilerTest, ThreeSupported) {
 
 
 
-int ExecJudgeCommand(int sock,
-                     const string& root,
-                     int* problem_id,
-                     int* revision);
+int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revision);
 
 class ExecJudgeCommandTest: public TestFixture {
   protected:
@@ -75,9 +72,7 @@ class ExecJudgeCommandTest: public TestFixture {
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         problem_id_ = 100;
         revision_ = 101;
-        checksum_ = CheckSum(CMD_JUDGE) +
-                    CheckSum(problem_id_) +
-                    CheckSum(revision_);
+        checksum_ = CheckSum(CMD_JUDGE) + CheckSum(problem_id_) + CheckSum(revision_);
     }
 
     virtual void TearDown() {
@@ -157,20 +152,16 @@ TEST_F(ExecJudgeCommandTest, Success) {
 
 
 
-int ExecCompileCommand(int sock,
-                       const string& root,
-                       const string& working_root,
-                       int* compiler);
+int ExecCompileCommand(int sock, const string& root, const string& working_root, int* compiler);
 
 class ExecCompileCommandTest: public TestFixture {
   protected:
     virtual void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
-        ASSERT_EQUAL(0, mkdir((root_ + "/script").c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(),
-                                (root_ + "/script/compile.sh").c_str()));
+        ASSERT_EQUAL(0, mkdir("script", 0700));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         fd_[0] = fd_[1] = temp_fd_ = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         submission_id_ = 1234;
@@ -385,13 +376,7 @@ class ExecTestCaseCommandTest: public TestFixture {
     uint16_t checksum_;
 };
 
-int ExecTestCaseCommand(int sock,
-                        const string& root,
-                        int problem_id,
-                        int revision,
-                        int compiler,
-                        int uid,
-                        int gid);
+int ExecTestCaseCommand(int sock, const string& root, int problem_id, int revision, int compiler, int uid, int gid);
 
 TEST_F(ExecTestCaseCommandTest, ReadCommandFailure) {
     ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
@@ -494,10 +479,9 @@ class CheckDataTest: public TestFixture {
     virtual void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
-        ASSERT_EQUAL(0, mkdir((root_ + "/script").c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(),
-                                (root_ + "/script/compile.sh").c_str()));
+        ASSERT_EQUAL(0, mkdir("script", 0700));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         ASSERT_EQUAL(0, mkdir("data", 0700));
         ASSERT_EQUAL(0, close(open("data/1.in", O_RDWR | O_CREAT)));
         ASSERT_EQUAL(0, close(open("data/2.in", O_RDWR | O_CREAT)));
@@ -670,8 +654,7 @@ class ExecDataCommandTest: public TestFixture {
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         ASSERT_EQUAL(0, mkdir("script", 0700));
         ASSERT_EQUAL(0, mkdir("prob", 0700));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(),
-                                (root_ + "/script/compile.sh").c_str()));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         ARG_compiler = "g++";
@@ -827,18 +810,13 @@ class JudgeMainTest: public TestFixture {
             ASSERT_EQUAL(0, mkdir("working", 0755));
             ASSERT_EQUAL(0, mkdir("script", 0750));
             ASSERT_EQUAL(0, mkdir("prob", 0750));
-            ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(),
-                                    (root_ + "/script/compile.sh").c_str()));
+            ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
             server_sock_ = socket(PF_INET, SOCK_STREAM, 6);
             if (server_sock_ == -1) {
                 FAIL(strerror(errno));
             }
             int option_value = 1;
-            if (setsockopt(server_sock_,
-                           SOL_SOCKET,
-                           SO_REUSEADDR,
-                           &option_value,
-                           sizeof(option_value)) == -1) {
+            if (setsockopt(server_sock_, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value)) == -1) {
                 FAIL(strerror(errno));
             }
             sockaddr_in address;
@@ -855,9 +833,7 @@ class JudgeMainTest: public TestFixture {
                 FAIL(strerror(errno));
             }
             socklen_t len = sizeof(address);
-            if (getsockname(server_sock_,
-                            (struct sockaddr*)&address,
-                            &len) == -1) {
+            if (getsockname(server_sock_, (struct sockaddr*)&address, &len) == -1) {
                 FAIL(strerror(errno));
             }
             port_ = ntohs(address.sin_port);

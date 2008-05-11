@@ -79,8 +79,7 @@ LogServer* LogServer::Create(const string& root) {
     string sock_name = root + "/log.sock";
     unlink(sock_name.c_str());
     strcpy(un.sun_path, sock_name.c_str());
-    if (bind(server_sock, (struct sockaddr*)&un,
-             (int)&((struct sockaddr_un*)0)->sun_path + sock_name.size()) < 0) {
+    if (bind(server_sock, (struct sockaddr*)&un, (int)&((struct sockaddr_un*)0)->sun_path + sock_name.size()) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to bind";
         return NULL;
     }
@@ -99,8 +98,7 @@ LogServer::~LogServer() {
 }
 
 void LogServer::Start() {
-    Log::SetLogFile(new DiskLogFile(root_ + "/log" +
-                GetLocalTimeAsString("%Y-%m-%d-%H-%M-%S") + ".log"));
+    Log::SetLogFile(new DiskLogFile(root_ + "/log" + GetLocalTimeAsString("%Y-%m-%d-%H-%M-%S") + ".log"));
     while (!global::terminated) {
         int nfds = server_sock_;
         fd_set fdset;
@@ -123,8 +121,7 @@ void LogServer::Start() {
         if (FD_ISSET(server_sock_, &fdset)) {
             socklen_t len;
             struct sockaddr_un un;
-            int client_sock =
-                    accept(server_sock_, (struct sockaddr*)&un, &len);
+            int client_sock = accept(server_sock_, (struct sockaddr*)&un, &len);
             if (client_sock < 0) {
                 LOG(SYSCALL_ERROR)<<"Fail to accept";
                 continue;
@@ -133,8 +130,7 @@ void LogServer::Start() {
         } else {
             for (int i = 0; i < clients_.size(); ++i) {
                 string line;
-                if (FD_ISSET(clients_[i]->sock(), &fdset) &&
-                    clients_[i]->ReadLine(&line)) {
+                if (FD_ISSET(clients_[i]->sock(), &fdset) && clients_[i]->ReadLine(&line)) {
                     LOG(RAW)<<line;
                 }
             }

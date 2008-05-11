@@ -24,8 +24,6 @@
 
 using namespace std;
 
-int DoCheck(int sock,
-            int special_judge_uid,
-            const string& special_judge_filename);
+int DoCheck(int sock, int special_judge_uid, const string& special_judge_filename);
 
 #endif

@@ -36,8 +36,7 @@ class LogServer {
         void Start();
 
     private:
-        LogServer(const string& root, int server_sock)
-                : root_(root), server_sock_(server_sock) { }
+        LogServer(const string& root, int server_sock): root_(root), server_sock_(server_sock) { }
         string root_;
         int server_sock_;
         vector<LogClient*> clients_;
