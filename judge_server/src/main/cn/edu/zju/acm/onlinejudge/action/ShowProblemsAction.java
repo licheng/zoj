@@ -61,7 +61,7 @@ public class ShowProblemsAction extends BaseAction {
      * @throws Exception any errors happened
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    		
+    	System.out.println("enter lala");
     	// check contest
     	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblems.do");
     	
@@ -69,10 +69,8 @@ public class ShowProblemsAction extends BaseAction {
     	if (forward != null) {
     		return  forward;
     	}    
-        
-    	AbstractContest contest = context.getContest();
+        AbstractContest contest = context.getContest();
 
-        
         long problemsCount = ContestManager.getInstance().getProblemsCount(contest.getId());
         
         long pageNumber = Utility.parseLong(context.getRequest().getParameter("pageNumber"));
@@ -108,8 +106,8 @@ public class ShowProblemsAction extends BaseAction {
          
         
         
-        if (checkContestAdminPermission(mapping, context, false, true) == null
-        	&& "ture".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
+        if (checkContestAdminPermission(mapping, context, isProblemset, true) == null
+        	&& "true".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
             List<String> checkMessages = new ArrayList<String>();
             for (Object obj : problems) {
                 Problem p = (Problem) obj;
@@ -126,6 +124,8 @@ public class ShowProblemsAction extends BaseAction {
             }
             context.setAttribute("CheckMessages", checkMessages);
         }
+        System.out.println(context.getAttribute("contest"));
+        
         return handleSuccess(mapping, context, "success");                
                   	    	   
     }  
