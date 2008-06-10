@@ -121,6 +121,38 @@ public class UserPersistenceImpl implements UserPersistence {
 				  						   DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
 
 	/**
+	 * The statement to update a user without password.
+	 */
+	private static final String UPDATE_USER_1 = 
+		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=MD5(?), {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, " +
+								"{9}=?, {10}=?, {11}=?, {12}=?, {13}=?, {14}=?, {15}=?, {16}=?, {17}=?, " +
+								"{18}=?, {19}=?, {20}=?, {21}=?, {22}=? WHERE {23}=?",
+							 new Object[] {DatabaseConstants.USER_PROFILE_TABLE, 
+				  						   DatabaseConstants.USER_PROFILE_HANDLE,
+				  						   DatabaseConstants.USER_PROFILE_EMAIL_ADDRESS,
+				  						   DatabaseConstants.USER_PROFILE_FIRST_NAME,
+				  						   DatabaseConstants.USER_PROFILE_LAST_NAME,
+				  						   DatabaseConstants.USER_PROFILE_ADDRESS_LINE1,
+				  						   DatabaseConstants.USER_PROFILE_ADDRESS_LINE2,
+				  						   DatabaseConstants.USER_PROFILE_CITY,
+				  						   DatabaseConstants.USER_PROFILE_STATE,
+				  						   DatabaseConstants.USER_PROFILE_COUNTRY_ID,
+				  						   DatabaseConstants.USER_PROFILE_ZIP_CODE,
+				  						   DatabaseConstants.USER_PROFILE_PHONE_NUMBER,
+				  						   DatabaseConstants.USER_PROFILE_BIRTH_DATE,
+				  						   DatabaseConstants.USER_PROFILE_GENDER,
+				  						   DatabaseConstants.USER_PROFILE_SCHOOL,
+				  						   DatabaseConstants.USER_PROFILE_MAJOR,
+				  						   DatabaseConstants.USER_PROFILE_GRADUATE_STUDENT,
+				  						   DatabaseConstants.USER_PROFILE_GRADUATION_YEAR,
+				  						   DatabaseConstants.USER_PROFILE_STUDENT_NUMBER,
+				  						   DatabaseConstants.USER_PROFILE_CONFIRMED,				  						  				  						   
+				  						   DatabaseConstants.LAST_UPDATE_USER,
+				  						   DatabaseConstants.LAST_UPDATE_DATE,
+				  						   "nickname",            
+				  						   DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
+
+	/**
 	 * The statement to delete a thread.
 	 */
 	private static final String DELETE_USER = 
@@ -384,7 +416,49 @@ public class UserPersistenceImpl implements UserPersistence {
     	if (profile == null) {
     		throw new NullPointerException("profile is null.");
     	}
-    	
+    	if(profile.getPassword() == null || profile.getPassword().trim().length()==0)
+		{
+		Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+        	conn = Database.createConnection();     
+
+        	ps = conn.prepareStatement(UPDATE_USER_1);  
+            ps.setString(1, profile.getHandle());
+            ps.setString(2, profile.getEmail());
+            ps.setString(3, profile.getFirstName());
+            ps.setString(4, profile.getLastName());
+            ps.setString(5, profile.getAddressLine1());
+            ps.setString(6, profile.getAddressLine2());
+            ps.setString(7, profile.getCity());
+            ps.setString(8, profile.getState());
+            ps.setLong(9, profile.getCountry().getId());
+            ps.setString(10, profile.getZipCode());
+            ps.setString(11, profile.getPhoneNumber());
+            ps.setTimestamp(12, new Timestamp(profile.getBirthDate().getTime()));
+            ps.setString(13, "" + profile.getGender());            
+            ps.setString(14, profile.getSchool());
+            ps.setString(15, profile.getMajor());
+            ps.setBoolean(16, profile.isGraduateStudent());
+            ps.setInt(17, profile.getGraduationYear());
+            ps.setString(18, profile.getStudentNumber());            
+            ps.setBoolean(19, profile.isConfirmed());
+            ps.setLong(20, user);            
+            ps.setTimestamp(21, new Timestamp(new Date().getTime()));
+            ps.setString(22, profile.getNickName());
+            ps.setLong(23, profile.getId());
+            
+            ps.executeUpdate();                        
+            
+        } catch (SQLException e) {
+        	throw new PersistenceException("Failed to update user.", e);
+		} finally {
+        	Database.dispose(conn, ps, rs);
+        }   
+		}
+		else
+		{
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -423,7 +497,8 @@ public class UserPersistenceImpl implements UserPersistence {
         	throw new PersistenceException("Failed to update user.", e);
 		} finally {
         	Database.dispose(conn, ps, rs);
-        }   
+        }
+		}
     }
 
     /**

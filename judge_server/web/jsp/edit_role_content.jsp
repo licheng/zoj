@@ -127,9 +127,12 @@ function addPermissionTable(permisisonType, cid, pid, cText, pText) {
                         String pid = roleForm.getContestPermissions()[i];
                         String cText = (String) contestNames.get(Long.valueOf(cid));
                         String pText = PermissionLevel.findById(Long.parseLong(pid)).getDescription();
+						if(cText != null)
+						{
                     %>
                     addPermissionTable('contest', '<%=cid%>', '<%=pid%>', '<%=cText%>', '<%=pText%>');
                     <%
+						}
                     }                    
                     %>
                 </script>            
@@ -172,9 +175,12 @@ function addPermissionTable(permisisonType, cid, pid, cText, pText) {
                         String pid = roleForm.getForumPermissions()[i];
                         String cText = (String) forumNames.get(Long.valueOf(cid));
                         String pText = PermissionLevel.findById(Long.parseLong(pid)).getDescription();
+						if(cText != null)
+						{
                     %>
                     addPermissionTable('forum', '<%=cid%>', '<%=pid%>', '<%=cText%>', '<%=pText%>');
                     <%
+						}
                     }                    
                     %>
                 </script>            
