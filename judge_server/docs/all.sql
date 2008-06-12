@@ -902,7 +902,9 @@ VALUES(17, 'Prepare Compilation', 'Prepare Compilation', false, 1, NOW(), 1, NOW
 INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
 VALUES(18, 'Prepare Execution', 'Prepare Execution', false, 1, NOW(), 1, NOW());
 INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
-VALUES(19, 'Judging', 'Judging', false, 1, NOW(), 1, NOW());
+VALUES(19, 'judging', 'Judging', false, 1, NOW(), 1, NOW());
+INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
+VALUES(20, 'Submission Limit Exceeded', 'Submission Limit Exceeded', false, 1, NOW(), 1, NOW());
 INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
 VALUES(101, 'Aborted', 'Aborted', false, 1, NOW(), 1, NOW());
 

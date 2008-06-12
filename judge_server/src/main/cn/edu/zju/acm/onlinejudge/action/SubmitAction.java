@@ -108,7 +108,6 @@ public class SubmitAction extends BaseAction {
             submissionPersistence.createSubmission(submission, user.getId());
         } else if (source.getBytes().length > problem.getLimit().getSubmissionLimit() * 1024) {
             submission.setJudgeReply(JudgeReply.SUBMISSION_LIMIT_EXCEEDED);
-            submission.setContent("");
             submissionPersistence.createSubmission(submission, user.getId());
         } else {
             submission.setJudgeReply(JudgeReply.QUEUING);
