@@ -133,7 +133,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	 */
 	private static final String GET_CONTEST = 
 		MessageFormat.format("SELECT {0}, {1}, {2}, {3}, {4}, {5}, {12}.{6}, {7}, {8}, {9}, {10}, {11}, {16} " 
-				+ "FROM {12} LEFT JOIN {13} ON ({12}.{6}={13}.{14}) WHERE {15}=1 ",
+				+ "FROM {12} LEFT JOIN {13} ON ({12}.{6}={13}.{14}) WHERE {15}=1",
 				 			 new Object[] {DatabaseConstants.CONTEST_CONTEST_ID, 
 										   DatabaseConstants.CONTEST_TITLE,
 										   DatabaseConstants.CONTEST_DESCRIPTION,
@@ -149,7 +149,8 @@ public class ContestPersistenceImpl implements ContestPersistence {
 				   					       DatabaseConstants.CONTEST_TABLE,
 				   					       DatabaseConstants.LIMITS_TABLE,
 				   					       DatabaseConstants.LIMITS_LIMITS_ID,
-				   					       DatabaseConstants.CONTEST_ACTIVE});
+				   					       DatabaseConstants.CONTEST_ACTIVE,
+                                           DatabaseConstants.CONTEST_CHECK_IP});
 	
 
 	/**
@@ -753,6 +754,8 @@ public class ContestPersistenceImpl implements ContestPersistence {
         	conn = Database.createConnection();
         	String query = GET_CONTEST + " AND " + 
         			DatabaseConstants.CONTEST_PROBLEMSET + "=" + (isProblemset ? 1 : 0) + " ORDER BY start_time DESC";
+
+        	System.out.println(query);
         	ps = conn.prepareStatement(query);               
             rs = ps.executeQuery();
             
