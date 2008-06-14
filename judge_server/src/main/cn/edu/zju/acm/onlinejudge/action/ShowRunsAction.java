@@ -172,13 +172,15 @@ public class ShowRunsAction extends BaseAction {
     private void rejudge(List runs) throws Exception {
         for (Object obj : runs) {
             Submission submission = (Submission) obj;
-            submission.setJudgeReply(JudgeReply.QUEUING);
-            submission.setMemoryConsumption(0);
-            submission.setTimeConsumption(0);
-            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0);
-            JudgeService.getInstance().rejudge(submission);    
+            if(!submission.getJudgeReply().equals(JudgeReply.OUT_OF_CONTEST_TIME))
+            {
+	            submission.setJudgeReply(JudgeReply.QUEUING);
+	            submission.setMemoryConsumption(0);
+	            submission.setTimeConsumption(0);
+	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0);
+	            JudgeService.getInstance().rejudge(submission);  
+            }
         }
-        
     }
 }
     

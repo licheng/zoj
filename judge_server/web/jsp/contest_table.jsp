@@ -72,7 +72,7 @@ function checkProblemFile(pform) {
 }
 
 function checkLocalProblemFile(pform) {
-    if (pform.problemFilePaht.value == '') {
+    if (pform.problemFilePath.value == '') {
         alert('Please enter a zip file path on the server.');
         return false;
     }

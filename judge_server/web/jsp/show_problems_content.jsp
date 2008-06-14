@@ -27,7 +27,12 @@
 
 <logic:present name="oj_security">
 <logic:equal name="oj_security" property="superAdmin" value="true">
-<script language="JavaScript">
+
+</logic:equal>
+</logic:present>
+<% if(admin){
+	%>
+	<script language="JavaScript">
 function deleteProblem(code, problemId) {
     if (!confirm("Are you sure to delete " + code +"?")) {
       return;
@@ -35,8 +40,9 @@ function deleteProblem(code, problemId) {
     location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=" + problemId;
 }
 </script>
-</logic:equal>
-</logic:present>
+	<%
+}
+%>
 
 
 
