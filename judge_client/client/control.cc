@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #include "global.h"
+#include "command_reader.h"
 #include "compile.h"
 #include "logging.h"
 #include "util.h"
@@ -39,86 +41,6 @@ void sigchldHandler(int sig) {
 
 int JudgeMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
-class Reader {
-    public:
-        Reader() {
-            set_sock(-1);
-        }
-
-        int ReadUint8() {
-            if (ReadTo(pbuf_ - buf_ + sizeof(uint8_t)) < 0) {
-                return -1;
-            }
-            int ret = *(uint8_t*)pbuf_;
-            pbuf_ += sizeof(uint8_t);
-            return ret;
-        }
-
-        int ReadUint16() {
-            if (ReadTo(pbuf_ - buf_ + sizeof(uint16_t)) < 0) {
-                return -1;
-            }
-            int ret = ntohs(*(uint16_t*)pbuf_);
-            pbuf_ += sizeof(uint16_t);
-            return ret;
-        }
-
-        void Rewind() {
-            pbuf_ = buf_;
-        }
-
-        void Clear() {
-            buf_size_ = 0;
-            Rewind();
-        }
-
-        bool Eof() {
-            return eof_;
-        }
-
-        void set_sock(int sock) {
-            sock_ = sock;
-            if (sock < 0) {
-                eof_ = true;
-            } else {
-                eof_ = false;
-            }
-            Clear();
-        }
-
-    private:
-        int ReadTo(int offset) {
-            if (sock_ < 0) {
-                return -1;
-            }
-            if (offset > buf_size_) {
-                int count = read(sock_, buf_ + buf_size_, offset - buf_size_);
-                if (count < 0) {
-                    if (errno != EINTR) {
-                        LOG(SYSCALL_ERROR)<<"Fail to read";
-                        eof_ = true;
-                    }
-                    return -1;
-                }
-                if (count == 0) {
-                    LOG(ERROR)<<"EOF";
-                    eof_ = true;
-                    return -1;
-                }
-                buf_size_ += count;
-                if (offset > buf_size_) {
-                    return -1;
-                }
-            }
-            return 0;
-        }
-
-        int sock_;
-        char buf_[32];
-        int buf_size_;
-        char* pbuf_;
-        bool eof_;
-};
 
 int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid) {
     if (ChangeToWorkingDir(root, NULL) < 0) {
@@ -131,10 +53,10 @@ int ControlMain(const string& root, const string& queue_address, int queue_port,
     uint8_t max_jobs = 0;
     int sock = -1;
     current_jobs = 0;
-    Reader reader;
+    CommandReader reader(true);
     // Loops until SIGTERM is received.
     while (!global::terminated) {
-        if (reader.Eof() || global::socket_closed) {
+        if (reader.error() || global::socket_closed) {
             if (sock >= 0) {
                 close(sock);
             }

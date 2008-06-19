@@ -24,12 +24,13 @@
 
 using namespace std;
 
-#define CMD_TYPE 100
 #define CMD_CHANGE_MAX_JOBS 1
-#define CMD_DATA 2
-#define CMD_COMPILE 3
-#define CMD_JUDGE 4
-#define CMD_TESTCASE 5
+#define CMD_REMOVE_PROBLEM 2
+#define CMD_CLEAR_OLD_REVISIONS 3
+#define CMD_DATA 4
+#define CMD_COMPILE 5
+#define CMD_JUDGE 6
+#define CMD_TESTCASE 7
 
 #define TYPE_CONTROL 1
 #define TYPE_DATA 2

@@ -93,24 +93,6 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
     const char* filename[] = {process_info.stdin_filename,
                               process_info.stdout_filename,
                               process_info.stderr_filename};
-    int mode[] = {O_RDONLY, O_RDWR | O_CREAT | O_TRUNC, O_RDWR};
-    int fd[] = {process_info.fd_stdin,
-                process_info.fd_stdout,
-                process_info.fd_stderr};
-    for (int i = 0; i < 3; i++) {
-        if (filename[i]) {
-            fd[i] = open(filename[i], mode[i], 0777);
-            if (fd[i] == -1) {
-                LOG(SYSCALL_ERROR)<<"Fail to open "<<filename[i];
-                for (int j = 0; j < i; j++) {
-                    if (filename[j]) {
-                        close(fd[j]);
-                    }
-                }
-                return -1;
-            }
-        }
-    }
     int pid = fork();
     if (pid < 0) {
         LOG(SYSCALL_ERROR);
@@ -118,7 +100,21 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
     } if (pid > 0) {
         return pid;
     }
-    for (int i = 0; i < 3; i++) {
+    int mode[] = {O_RDONLY, O_RDWR | O_CREAT | O_TRUNC, O_RDWR};
+    int fd[] = {process_info.fd_stdin,
+                process_info.fd_stdout,
+                process_info.fd_stderr};
+    for (int i = 0; i < 3; ++i) {
+        if (filename[i]) {
+            if (fd[i]) {
+                close(fd[i]);
+            }
+            fd[i] = open(filename[i], mode[i], 0777);
+        }
+        if (fd[i] == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to open "<<filename[i];
+            raise(SIGKILL);
+        }
         if (fd[i]) {
             if (dup2(fd[i], i) == -1) {
                 LOG(SYSCALL_ERROR)<<"Fail to dup "<<fd[i]<<" to "<<i;
