@@ -1012,6 +1012,11 @@ TEST_F(JudgeMainTest, InvalidAddress) {
 TEST_F(JudgeMainTest, CannotCreateWorkingDir) {
     ASSERT_EQUAL(0, rmdir("working"));
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
     ASSERT_EQUAL(INTERNAL_ERROR, (int)buf_[0]);
     ASSERT_EQUAL(1, WaitForTermination());
@@ -1019,12 +1024,21 @@ TEST_F(JudgeMainTest, CannotCreateWorkingDir) {
 
 TEST_F(JudgeMainTest, SIGTERM) {
     ASSERT_EQUAL(0, WaitForConnection(true));
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     ASSERT_EQUAL(0, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(0, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, ReadCommandFailure) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    buf_[6] = 0;
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     ASSERT_EQUAL(0, shutdown(client_sock_, SHUT_WR));
     ASSERT_EQUAL(0, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(1, WaitForTermination());
@@ -1032,6 +1046,11 @@ TEST_F(JudgeMainTest, ReadCommandFailure) {
 
 TEST_F(JudgeMainTest, InvalidCommand) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     buf_[0] = 0;
     Writen(client_sock_, buf_, 1);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
@@ -1041,6 +1060,11 @@ TEST_F(JudgeMainTest, InvalidCommand) {
 
 TEST_F(JudgeMainTest, FirstCommandData) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     buf_[0] = CMD_DATA;
     Writen(client_sock_, buf_, 1);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
@@ -1050,6 +1074,11 @@ TEST_F(JudgeMainTest, FirstCommandData) {
 
 TEST_F(JudgeMainTest, FirstCommandTestCase) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     buf_[0] = CMD_TESTCASE;
     Writen(client_sock_, buf_, 1);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
@@ -1059,6 +1088,11 @@ TEST_F(JudgeMainTest, FirstCommandTestCase) {
 
 TEST_F(JudgeMainTest, MultipleData) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     SendJudgeCommand(0, 0);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
@@ -1075,6 +1109,11 @@ TEST_F(JudgeMainTest, MultipleData) {
 
 TEST_F(JudgeMainTest, TestBeforeDataSynchirnized) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     SendJudgeCommand(0, 0);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
@@ -1092,6 +1131,11 @@ TEST_F(JudgeMainTest, TestBeforeDataSynchirnized) {
 
 TEST_F(JudgeMainTest, TestBeforeCompiled) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     SendJudgeCommand(0, 0);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
@@ -1108,6 +1152,11 @@ TEST_F(JudgeMainTest, TestBeforeCompiled) {
 
 TEST_F(JudgeMainTest, UnnecessaryData) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     SendJudgeCommand(0, 0);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
@@ -1127,6 +1176,11 @@ TEST_F(JudgeMainTest, UnnecessaryData) {
 
 TEST_F(JudgeMainTest, Success) {
     ASSERT_EQUAL(0, WaitForConnection());
+    ASSERT_EQUAL(0, ReadUint32(client_sock_, (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)6, *(uint32_t*)buf_);
+    ASSERT_EQUAL(6, Readn(client_sock_, buf_, 6));
+    buf_[6] = 0;
+    ASSERT_EQUAL(string("Judge\n"), string(buf_));
     SendJudgeCommand(0, 0);
     ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
     ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);

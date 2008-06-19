@@ -374,6 +374,7 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port, i
     if (sock < 0) {
         return 1;
     }
+    SendMessage(sock, "Judge\n");
     string working_root;
     if (ChangeToWorkingDir(root, &working_root) == -1) {
         SendReply(sock, INTERNAL_ERROR);

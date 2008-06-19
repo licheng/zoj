@@ -31,15 +31,15 @@ if [ "`which unzip`" == "" ]; then
 fi
 
 if [ "`which gcc`" != "" ]; then
-    supported_source_file_types=$supported_source_file_types,c
+    supported_source_file_types=$supported_source_file_types,gcc
 fi
 
 if [ "`which g++`" != "" ]; then
-    supported_source_file_types=$supported_source_file_types,cc
+    supported_source_file_types=$supported_source_file_types,g++
 fi
 
 if [ "`which fpc`" != "" ]; then
-    supported_source_file_types=$supported_source_file_types,pas
+    supported_source_file_types=$supported_source_file_types,fpc
 fi
 
 # Prepare /prob
@@ -65,6 +65,6 @@ if [ "`lsmod | grep kmmon`" == "" ]; then
 fi
 
 ids=`cat /etc/passwd | grep zoj | awk -F ':' '{print "--uid=" $3, "--gid=" $4}'`
-cmd="./judge_client --lang=\"$supported_source_file_types\" --daemonize --root=. --queue_address=\"$address\" --queue_port=$port $ids"
+cmd="./judged --compiler=\"$supported_source_file_types\" --daemonize --root=. --queue_address=\"$address\" --queue_port=$port $ids --info=`cat /proc/cpuinfo /proc/meminfo`"
 echo $cmd
 eval $cmd

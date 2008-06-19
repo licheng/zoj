@@ -153,6 +153,15 @@ static inline int SendReply(int sock, uint8_t reply) {
     return Writen(sock, &reply, 1);
 }
 
+static inline int SendMessage(int sock, const string& message) {
+    uint32_t len = message.size();
+    len = htonl(len);
+    if (Writen(sock, &len, sizeof(len)) < 0) {
+        return -1;
+    }
+    return Writen(sock, message.c_str(), message.size());
+}
+
 sighandler_t InstallSignalHandler(int signal, sighandler_t handler);
 
 sighandler_t InstallSignalHandler(int signum, sighandler_t handler, int flags);

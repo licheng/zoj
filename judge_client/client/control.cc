@@ -28,6 +28,8 @@
 #include "logging.h"
 #include "util.h"
 
+DEFINE_ARG(string, info, "Information about the host machine which is sent to the judge server");
+
 static uint8_t current_jobs;
 
 void sigchldHandler(int sig) {
@@ -40,7 +42,6 @@ void sigchldHandler(int sig) {
 }
 
 int JudgeMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
-
 
 int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid) {
     if (ChangeToWorkingDir(root, NULL) < 0) {
@@ -65,6 +66,7 @@ int ControlMain(const string& root, const string& queue_address, int queue_port,
                 if (sock >= 0) {
                     global::socket_closed = false;
                     reader.set_sock(sock);
+                    SendMessage(sock, "Control\n" + ARG_info);
                     break;
                 } else if (global::terminated) {
                     return 0;

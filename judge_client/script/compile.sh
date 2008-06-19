@@ -1,18 +1,17 @@
 #!/bin/bash
-if [[ $1 = */* ]]; then
-    cd ${1%/*}
+if [[ $2 = */* ]]; then
+    cd ${2%/*}
 fi
-src=${1##*/}
+src=${2##*/}
 bin=${src%.*}
-err=$bin.err
-case ${src##*.} in
-    c)
+case $1 in
+    gcc)
         gcc -o $bin -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $src >/dev/null
         ;;
-    cc)
+    g++)
         g++ -o $bin -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $src >/dev/null
         ;;
-    pas)
+    fp)
         fpc -o$bin -Fe"/proc/self/fd/2" -Sd -dONLINE_JUDGE -O2 -Op2 $src >/dev/null
         if [ -f $bin ]; then
             exit 0

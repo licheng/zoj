@@ -205,6 +205,11 @@ TEST_F(ControlMainTest, SIGTERM) {
 TEST_F(ControlMainTest, ReadCommandFailure) {
     RunControlMain(false);
     ASSERT_EQUAL(0, WaitForConnection(true));
+    ASSERT_EQUAL(0, ReadUint32(client_socks_[0], (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)8, *(uint32_t*)buf_);
+    ASSERT_EQUAL(8, Readn(client_socks_[0], buf_, 8));
+    buf_[8] = 0;
+    ASSERT_EQUAL(string("Control\n"), string(buf_));
     ASSERT_EQUAL(0, shutdown(client_socks_[0], SHUT_WR));
     ASSERT_EQUAL(0, Readn(client_socks_[0], buf_, 1));
     ASSERT_EQUAL(0, WaitForConnection(true));
@@ -213,6 +218,11 @@ TEST_F(ControlMainTest, ReadCommandFailure) {
 TEST_F(ControlMainTest, InvalidCommand) {
     RunControlMain(false);
     ASSERT_EQUAL(0, WaitForConnection(true));
+    ASSERT_EQUAL(0, ReadUint32(client_socks_[0], (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)8, *(uint32_t*)buf_);
+    ASSERT_EQUAL(8, Readn(client_socks_[0], buf_, 8));
+    buf_[8] = 0;
+    ASSERT_EQUAL(string("Control\n"), string(buf_));
     buf_[0] = 0;
     Writen(client_socks_[0], buf_, 1);
     ASSERT_EQUAL(1, Readn(client_socks_[0], buf_, 2));
@@ -223,6 +233,11 @@ TEST_F(ControlMainTest, InvalidCommand) {
 TEST_F(ControlMainTest, ChangeMaxJobsInvalidCheckSum) {
     RunControlMain(false);
     ASSERT_EQUAL(0, WaitForConnection(true));
+    ASSERT_EQUAL(0, ReadUint32(client_socks_[0], (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)8, *(uint32_t*)buf_);
+    ASSERT_EQUAL(8, Readn(client_socks_[0], buf_, 8));
+    buf_[8] = 0;
+    ASSERT_EQUAL(string("Control\n"), string(buf_));
     SendChangeMaxJobsCommand(1, 0);
     ASSERT_EQUAL(1, Readn(client_socks_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
@@ -232,6 +247,11 @@ TEST_F(ControlMainTest, ChangeMaxJobsInvalidCheckSum) {
 TEST_F(ControlMainTest, ChangeMaxJobsMaxJobsPlusOne) {
     RunControlMain(false);
     ASSERT_EQUAL(0, WaitForConnection(true));
+    ASSERT_EQUAL(0, ReadUint32(client_socks_[0], (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)8, *(uint32_t*)buf_);
+    ASSERT_EQUAL(8, Readn(client_socks_[0], buf_, 8));
+    buf_[8] = 0;
+    ASSERT_EQUAL(string("Control\n"), string(buf_));
     SendChangeMaxJobsCommand(MAX_JOBS + 1);
     ASSERT_EQUAL(1, Readn(client_socks_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
@@ -241,6 +261,11 @@ TEST_F(ControlMainTest, ChangeMaxJobsMaxJobsPlusOne) {
 TEST_F(ControlMainTest, ChangeMaxJobsSuccess) {
     RunControlMain(false);
     ASSERT_EQUAL(0, WaitForConnection(true));
+    ASSERT_EQUAL(0, ReadUint32(client_socks_[0], (uint32_t*)buf_));
+    ASSERT_EQUAL((uint32_t)8, *(uint32_t*)buf_);
+    ASSERT_EQUAL(8, Readn(client_socks_[0], buf_, 8));
+    buf_[8] = 0;
+    ASSERT_EQUAL(string("Control\n"), string(buf_));
     SendChangeMaxJobsCommand(2);
     ASSERT_EQUAL(0, WaitForConnection(false));
     ASSERT_EQUAL(0, WaitForConnection(false));
