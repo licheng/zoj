@@ -66,7 +66,8 @@ int ControlMain(const string& root, const string& queue_address, int queue_port,
                 if (sock >= 0) {
                     global::socket_closed = false;
                     reader.set_sock(sock);
-                    SendMessage(sock, "Control\n" + ARG_info);
+                    Writen(sock, "C", 1);
+                    SendMessage(sock, ARG_info);
                     break;
                 } else if (global::terminated) {
                     return 0;
