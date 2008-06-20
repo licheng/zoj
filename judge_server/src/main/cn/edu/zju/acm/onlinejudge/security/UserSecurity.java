@@ -130,7 +130,8 @@ public class UserSecurity extends AbstractSecurity {
      */
     public boolean canParticipateContest(long contestId) {
     	return superAdmin || 
-    		PermissionLevel.PARTICIPATE.compareTo(getContestPermission().getPermission(contestId)) <= 0;        
+    		PermissionLevel.PARTICIPATE.compareTo(getContestPermission().getPermission(contestId)) <= 0
+    		|| PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getContestPermission().getPermission(contestId)) <= 0;        
     }
 
     /**
@@ -158,6 +159,19 @@ public class UserSecurity extends AbstractSecurity {
     public boolean canViewForum(long forumId) {
     	return superAdmin || PermissionLevel.VIEW.compareTo(getForumPermission().getPermission(forumId)) <= 0;
     }
+    
+    /**
+     * <p>
+     * Get whether the UserSecurity can view the forum.
+     * </p>
+     *
+     * @param forumId the forum id.
+     *
+     * @return whether the UserSecurity can view the forum.
+     */
+    public boolean canViewSource(long contestId) {
+    	return superAdmin || PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getContestPermission().getPermission(contestId)) <= 0;
+    }
 
     /**
      * <p>
@@ -170,7 +184,8 @@ public class UserSecurity extends AbstractSecurity {
      */
     public boolean canParticipateForum(long forumId) {
     	return superAdmin || 
-    		PermissionLevel.PARTICIPATE.compareTo(getForumPermission().getPermission(forumId)) <= 0;        
+    		PermissionLevel.PARTICIPATE.compareTo(getForumPermission().getPermission(forumId)) <= 0
+    		|| PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getForumPermission().getPermission(forumId)) <= 0;        
     }
 
     /**

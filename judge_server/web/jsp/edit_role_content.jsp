@@ -108,7 +108,9 @@ function addPermissionTable(permisisonType, cid, pid, cText, pText) {
                               <option value="<%=PermissionLevel.PARTICIPATE.getId()%>">
                                 <%=PermissionLevel.PARTICIPATE.getDescription()%></option>
                               <option value="<%=PermissionLevel.ADMIN.getId()%>">
-                                <%=PermissionLevel.ADMIN.getDescription()%></option>                              
+                                <%=PermissionLevel.ADMIN.getDescription()%></option>
+                             <option value="<%=PermissionLevel.PARTICIPATECANVIEWSOURCE.getId()%>">
+                                <%=PermissionLevel.PARTICIPATECANVIEWSOURCE.getDescription()%></option>                             
             </select> &nbsp; <input type="button" value=" Add " onclick="addPermission('contest')">                         
             <br>  
             <table id="contestTable">
@@ -156,7 +158,9 @@ function addPermissionTable(permisisonType, cid, pid, cText, pText) {
                               <option value="<%=PermissionLevel.PARTICIPATE.getId()%>">
                                 <%=PermissionLevel.PARTICIPATE.getDescription()%></option>
                               <option value="<%=PermissionLevel.ADMIN.getId()%>">
-                                <%=PermissionLevel.ADMIN.getDescription()%></option>                              
+                                <%=PermissionLevel.ADMIN.getDescription()%></option>  
+                              <option value="<%=PermissionLevel.PARTICIPATECANVIEWSOURCE.getId()%>">
+                                <%=PermissionLevel.PARTICIPATECANVIEWSOURCE.getDescription()%></option>                            
             </select> &nbsp; <input type="button" value=" Add " onclick="addPermission('forum')">                         
             <br>  
             <table id="forumTable">

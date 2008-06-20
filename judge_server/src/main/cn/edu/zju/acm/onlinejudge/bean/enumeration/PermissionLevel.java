@@ -28,6 +28,11 @@ public class PermissionLevel implements Comparable {
      * <p>Represents ADMIN static instance.</p>
      */
     public static final PermissionLevel ADMIN = new PermissionLevel(3, "Admin");
+    
+    /**
+     * <p>Represents ADMIN static instance.</p>
+     */
+    public static final PermissionLevel PARTICIPATECANVIEWSOURCE = new PermissionLevel(4, "ParticipateCanViewSource");
 
     /**
      * <p>Represents the id of PermissionLevel.</p>
@@ -99,6 +104,8 @@ public class PermissionLevel implements Comparable {
             return PARTICIPATE;
         } else if (ADMIN.id == id) {
             return ADMIN;
+        } else if (PARTICIPATECANVIEWSOURCE.id == id) {
+            return ADMIN;
         } else {
             return null;
         }
@@ -117,6 +124,8 @@ public class PermissionLevel implements Comparable {
         } else if (PARTICIPATE.description.equals(name)) {
             return PARTICIPATE;
         } else if (ADMIN.description.equals(name)) {
+            return ADMIN;
+        } else if (PARTICIPATECANVIEWSOURCE.description.equals(name)) {
             return ADMIN;
         } else {
             return null;

@@ -25,6 +25,7 @@
     UserSecurity userSecurity = (UserSecurity) request.getSession().getAttribute("oj_security");                                                
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
+    boolean canViewSource = (userSecurity != null && userSecurity.canViewSource(contest.getId()));
 %>
 
         <logic:messagesPresent property="error">
@@ -197,7 +198,7 @@
                         <td class="runTime">Run Time(ms)</td>
                         <td class="runMemory">Run Memory(KB)</td>
                         <td class="runUserName">User Name</td>
-                        <% if (admin) { %>
+                        <% if (admin || canViewSource) { %>
                             <td class="runAdmin">Admin</td>
                         <% } %>
                     </tr>
@@ -233,7 +234,7 @@
                         <td class="runTime"><%=submission.getTimeConsumption()%></td>
                         <td class="runMemory"><%=submission.getMemoryConsumption()%></td>
                         <td class="runUserName"><font color="db6d00"><%=submission.getUserName()%></font></td>
-                        <% if (admin) { %>
+                        <% if (admin || canViewSource) { %>
                             <td class="runAdmin"><a href="<%=request.getContextPath()%>/showSubmission.do?submissionId=<%=submission.getId()%>" target="_blank">Source</a></td>
                         <% } %>                        
                     </tr>

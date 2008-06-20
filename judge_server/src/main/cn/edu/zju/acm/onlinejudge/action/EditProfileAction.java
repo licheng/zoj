@@ -73,15 +73,9 @@ public class EditProfileAction extends BaseAction {
     	
     	
     	UserProfile newProfile = profileForm.toUserProfile();
-		if(newProfile.getPassword()==null || newProfile.getPassword().trim().length() == 0)
-		{
-			newProfile.setPassword(profile.getPassword());
-		}
     	newProfile.setId(profile.getId());
     	newProfile.setRegDate(profile.getRegDate());
-    	if (newProfile.getPassword() == null || newProfile.getPassword().length() == 0) {
-    		newProfile.setPassword(profile.getPassword());
-    	}
+    	System.out.println("cerror: "+newProfile.getPassword());
     	
     	if (!profile.getHandle().equals(newProfile.getHandle())) {
     		return handleFailure(mapping, context, "handle", "ProfileForm.handle.changed");
