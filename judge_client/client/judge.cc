@@ -37,18 +37,26 @@ bool IsSupportedCompiler(const string& compiler) {
 }
 
 int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revision) {
+    uint32_t submission_id;
     uint32_t _problem_id;
     uint32_t _revision;
     uint16_t checksum;
-    if (ReadUint32(sock, &_problem_id) == -1 ||
+    if (ReadUint32(sock, &submission_id) == -1 ||
+        ReadUint32(sock, &_problem_id) == -1 ||
         ReadUint32(sock, &_revision) == -1 ||
         ReadUint16(sock, &checksum)) {
         return -1;
     }
     *problem_id = _problem_id;
     *revision = _revision;
-    LOG(INFO)<<StringPrintf("Problem:%u Revision:%u", (unsigned int)*problem_id, (unsigned int)*revision);
-    if (CheckSum(CMD_JUDGE) + CheckSum(_problem_id) + CheckSum(_revision) != checksum) {
+    LOG(INFO)<<StringPrintf("Submission:%u Problem:%u Revision:%u",
+                            (unsigned int)submission_id,
+                            (unsigned int)*problem_id,
+                            (unsigned int)*revision);
+    if (CheckSum(CMD_JUDGE) +
+        CheckSum(submission_id) +
+        CheckSum(_problem_id) +
+        CheckSum(_revision) != checksum) {
         LOG(ERROR)<<"Invalid checksum "<<checksum;
         SendReply(sock, INVALID_INPUT);
         return -1;
@@ -69,19 +77,16 @@ int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revisio
 }
 
 int ExecCompileCommand(int sock, const string& root, const string& working_root, int* compiler) {
-    uint32_t submission_id;
     uint8_t compiler_id;
     uint32_t source_file_size;
     uint16_t checksum;
-    if (ReadUint32(sock, &submission_id) == -1 ||
-        ReadUint8(sock, &compiler_id) == -1 ||
+    if (ReadUint8(sock, &compiler_id) == -1 ||
         ReadUint32(sock, &source_file_size) == -1 ||
         ReadUint16(sock, &checksum) == -1) {
         return -1;
     }
-    LOG(INFO)<<StringPrintf("Submission:%u Compiler:%u", (unsigned int)submission_id, (unsigned int)compiler_id);
+    LOG(INFO)<<StringPrintf("Compiler:%u", (unsigned int)compiler_id);
     if (CheckSum(CMD_COMPILE) +
-        CheckSum(submission_id) +
         CheckSum(compiler_id) +
         CheckSum(source_file_size) != checksum) {
         LOG(ERROR)<<"Invalid checksum "<<checksum;

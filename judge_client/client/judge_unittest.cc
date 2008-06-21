@@ -70,9 +70,13 @@ class ExecJudgeCommandTest: public TestFixture {
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
+        submission_id_ = 1234;
         problem_id_ = 100;
         revision_ = 101;
-        checksum_ = CheckSum(CMD_JUDGE) + CheckSum(problem_id_) + CheckSum(revision_);
+        checksum_ = CheckSum(CMD_JUDGE) +
+                    CheckSum(submission_id_) +
+                    CheckSum(problem_id_) +
+                    CheckSum(revision_);
     }
 
     virtual void TearDown() {
@@ -86,9 +90,11 @@ class ExecJudgeCommandTest: public TestFixture {
     }
 
     void SendCommand() {
+        submission_id_ = htonl(submission_id_);
         problem_id_ = htonl(problem_id_);
         revision_ = htonl(revision_);
         checksum_ = htons(checksum_);
+        Writen(fd_[0], &submission_id_, sizeof(submission_id_)); 
         Writen(fd_[0], &problem_id_, sizeof(problem_id_)); 
         Writen(fd_[0], &revision_, sizeof(revision_)); 
         Writen(fd_[0], &checksum_, sizeof(checksum_));
@@ -97,6 +103,7 @@ class ExecJudgeCommandTest: public TestFixture {
     int fd_[2];
     char buf_[32];
     string root_;
+    uint32_t submission_id_;
     uint32_t problem_id_;
     uint32_t revision_;
     uint16_t checksum_;
@@ -164,14 +171,12 @@ class ExecCompileCommandTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         fd_[0] = fd_[1] = temp_fd_ = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
-        submission_id_ = 1234;
         compiler_id_ = COMPILER_GPP;
         source_filename_ = TESTDIR + "/ac.cc";
         struct stat stat; 
         lstat(source_filename_.c_str(), &stat);
         source_file_size_ = stat.st_size;
         checksum_ = CheckSum(CMD_COMPILE) +
-                    CheckSum(submission_id_) +
                     CheckSum(compiler_id_) +
                     CheckSum(source_file_size_);
         ARG_compiler = "g++";
@@ -191,10 +196,8 @@ class ExecCompileCommandTest: public TestFixture {
     }
 
     void SendCommand() {
-        submission_id_ = htonl(submission_id_);
         source_file_size_ = htonl(source_file_size_);
         checksum_ = htons(checksum_);
-        Writen(fd_[0], &submission_id_, sizeof(submission_id_)); 
         Writen(fd_[0], &compiler_id_, sizeof(compiler_id_)); 
         Writen(fd_[0], &source_file_size_, sizeof(source_file_size_));
         Writen(fd_[0], &checksum_, sizeof(checksum_));
@@ -210,7 +213,6 @@ class ExecCompileCommandTest: public TestFixture {
     int temp_fd_;
     char buf_[1024 * 16];
     string root_;
-    uint32_t submission_id_;
     uint8_t compiler_id_;
     uint32_t source_file_size_;
     uint16_t checksum_;
@@ -239,7 +241,6 @@ TEST_F(ExecCompileCommandTest, InvalidCheckSum) {
 TEST_F(ExecCompileCommandTest, InvalidCompiler) {
     compiler_id_ = 255;
     checksum_ = CheckSum(CMD_COMPILE) +
-                CheckSum(submission_id_) +
                 CheckSum(compiler_id_) +
                 CheckSum(source_file_size_);
     SendCommand();
@@ -254,7 +255,6 @@ TEST_F(ExecCompileCommandTest, InvalidCompiler) {
 TEST_F(ExecCompileCommandTest, UnsupportedCompiler) {
     ARG_compiler = "";
     checksum_ = CheckSum(CMD_COMPILE) +
-                CheckSum(submission_id_) +
                 CheckSum(compiler_id_) +
                 CheckSum(source_file_size_);
     SendCommand();
@@ -298,7 +298,6 @@ TEST_F(ExecCompileCommandTest, CompilationError) {
     lstat(source_filename_.c_str(), &stat);
     source_file_size_ = stat.st_size;
     checksum_ = CheckSum(CMD_COMPILE) +
-                CheckSum(submission_id_) +
                 CheckSum(compiler_id_) +
                 CheckSum(source_file_size_);
     SendCommand();
@@ -950,6 +949,7 @@ class JudgeMainTest: public TestFixture {
         void SendJudgeCommand(int problem, int revision) {
             buf_size_ = 0;
             AppendUint8(CMD_JUDGE);
+            AppendUint32(0);
             AppendUint32(problem);
             AppendUint32(revision);
             AppendCheckSum();
@@ -962,7 +962,6 @@ class JudgeMainTest: public TestFixture {
             int source_file_size = stat.st_size;
             buf_size_ = 0;
             AppendUint8(CMD_COMPILE);
-            AppendUint32(0);
             AppendUint8(COMPILER_GPP);
             AppendUint32(source_file_size);
             AppendCheckSum();
