@@ -400,7 +400,12 @@ public abstract class BaseAction extends Action {
     protected ActionForward checkContestAdminPermission(
             ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
         return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.ADMIN);
-    }    
+    }
+    
+    protected ActionForward checkContestViewSourcePermission(
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
+        return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.PARTICIPATECANVIEWSOURCE);
+    }
     
     protected ActionForward checkContestPermission(
             ActionMapping mapping, ContextAdapter context, Boolean isProblemset, 
@@ -428,6 +433,8 @@ public abstract class BaseAction extends Action {
             hasPermisstion = userSecurity.canParticipateContest(contest.getId());
         } else if (level == PermissionLevel.VIEW) {
             hasPermisstion = userSecurity.canViewContest(contest.getId());
+        } else if (level == PermissionLevel.PARTICIPATECANVIEWSOURCE) {
+            hasPermisstion = userSecurity.canViewSource(contest.getId());
         }  
         if (!hasPermisstion) {
             ActionMessages messages = new ActionMessages();       
@@ -465,6 +472,11 @@ public abstract class BaseAction extends Action {
         return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.ADMIN);
     } 
     
+    protected ActionForward checkProblemViewSourecPermission(
+            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
+        return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.PARTICIPATECANVIEWSOURCE);
+    } 
+    
     protected ActionForward checkProblemPermission(ActionMapping mapping, ContextAdapter context, 
     		Boolean isProblemset, PermissionLevel level) throws Exception {
     	
@@ -497,6 +509,8 @@ public abstract class BaseAction extends Action {
             hasPermisstion = userSecurity.canAdminContest(contest.getId());
         } else if (level == PermissionLevel.PARTICIPATE) {
             hasPermisstion = userSecurity.canParticipateContest(contest.getId());
+        } else if (level == PermissionLevel.PARTICIPATECANVIEWSOURCE) {
+            hasPermisstion = userSecurity.canViewSource(contest.getId());
         } else if (level == PermissionLevel.VIEW) {
             hasPermisstion = userSecurity.canViewContest(contest.getId());
         }  

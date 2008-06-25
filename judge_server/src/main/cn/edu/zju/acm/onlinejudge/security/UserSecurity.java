@@ -130,8 +130,7 @@ public class UserSecurity extends AbstractSecurity {
      */
     public boolean canParticipateContest(long contestId) {
     	return superAdmin || 
-    		PermissionLevel.PARTICIPATE.compareTo(getContestPermission().getPermission(contestId)) <= 0
-    		|| PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getContestPermission().getPermission(contestId)) <= 0;        
+    		PermissionLevel.PARTICIPATE.compareTo(getContestPermission().getPermission(contestId)) <= 0;        
     }
 
     /**
@@ -144,7 +143,7 @@ public class UserSecurity extends AbstractSecurity {
      * @return whether the UserSecurity can admin the contest.
      */
     public boolean canAdminContest(long contestId) {
-    	return superAdmin || PermissionLevel.ADMIN.compareTo(getContestPermission().getPermission(contestId)) <= 0;
+    	return superAdmin || PermissionLevel.ADMIN.compareTo(getContestPermission().getPermission(contestId)) == 0;
     }
 
     /**
@@ -170,7 +169,7 @@ public class UserSecurity extends AbstractSecurity {
      * @return whether the UserSecurity can view the forum.
      */
     public boolean canViewSource(long contestId) {
-    	return superAdmin || PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getContestPermission().getPermission(contestId)) <= 0;
+    	return superAdmin || PermissionLevel.ADMIN.compareTo(getContestPermission().getPermission(contestId)) <= 0;
     }
 
     /**
@@ -184,8 +183,7 @@ public class UserSecurity extends AbstractSecurity {
      */
     public boolean canParticipateForum(long forumId) {
     	return superAdmin || 
-    		PermissionLevel.PARTICIPATE.compareTo(getForumPermission().getPermission(forumId)) <= 0
-    		|| PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getForumPermission().getPermission(forumId)) <= 0;        
+    		PermissionLevel.PARTICIPATE.compareTo(getForumPermission().getPermission(forumId)) <= 0;
     }
 
     /**
@@ -198,7 +196,7 @@ public class UserSecurity extends AbstractSecurity {
      * @return whether the UserSecurity can admin the forum.
      */
     public boolean canAdminForum(long forumId) {
-        return superAdmin || PermissionLevel.ADMIN.compareTo(getForumPermission().getPermission(forumId)) <= 0;
+        return superAdmin || PermissionLevel.ADMIN.compareTo(getForumPermission().getPermission(forumId)) == 0;
     }
     
 

@@ -86,7 +86,7 @@ public class ShowSubmissionAction extends BaseAction {
         }
         Problem problem = ContestManager.getInstance().getProblem(submission.getProblemId());
         context.setAttribute("problem", problem);
-        ActionForward forward = checkProblemAdminPermission(mapping, context, null);
+        ActionForward forward = checkProblemViewSourecPermission(mapping, context, null);
         if (forward != null) {
             response.sendError(404);
             return null;

@@ -825,8 +825,8 @@ DELETE FROM permission_level;
 
 INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(1, 'View', 1, NOW(), 1, NOW());
 INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(2, 'Participate', 1, NOW(), 1, NOW());
-INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(3, 'Admin', 1, NOW(), 1, NOW());
-INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(4, 'ParticipateViewSource', 1, NOW(), 1, NOW());
+INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(4, 'Admin', 1, NOW(), 1, NOW());
+INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(3, 'ParticipateViewSource', 1, NOW(), 1, NOW());
 
 DELETE FROM limits;
 

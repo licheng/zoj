@@ -105,7 +105,7 @@ public class PermissionLevel implements Comparable {
         } else if (ADMIN.id == id) {
             return ADMIN;
         } else if (PARTICIPATECANVIEWSOURCE.id == id) {
-            return ADMIN;
+            return PARTICIPATECANVIEWSOURCE;
         } else {
             return null;
         }
@@ -126,7 +126,7 @@ public class PermissionLevel implements Comparable {
         } else if (ADMIN.description.equals(name)) {
             return ADMIN;
         } else if (PARTICIPATECANVIEWSOURCE.description.equals(name)) {
-            return ADMIN;
+            return PARTICIPATECANVIEWSOURCE;
         } else {
             return null;
         }
