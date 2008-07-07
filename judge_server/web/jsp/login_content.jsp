@@ -50,14 +50,12 @@
                             </span>
                       </td>
                   </tr>
-<%--                  
                   <tr>
                       <td align="right"></td>             
                       <td>                                      
-                          <input type="checkbox" name="rememberMe"/>Remember Me
+                          <span><input type="checkbox" name="rememberMe" style="width:20px"/>Remember me</span>
                       </td>
                   </tr>
---%>                  
                   </table>
                   </blockquote>
     <div class="profileButtons">

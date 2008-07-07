@@ -269,6 +269,7 @@ public class ContextAdapter {
         }
         AbstractContest contest = ContestManager.getInstance().getContest(contestId);
         setAttribute("contest", contest);
+        System.out.println(getAttribute("contest"));
         return contest;
     }
     

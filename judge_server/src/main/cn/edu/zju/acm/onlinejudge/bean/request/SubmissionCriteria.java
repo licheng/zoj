@@ -278,6 +278,9 @@ public class SubmissionCriteria {
     	if (!equals(this.languages, that.languages)) {
     		return false;
     	}
+    	if (!equals(this.handle, that.handle)) {
+    		return false;
+    	}
     	return true;
     	
     }

@@ -73,18 +73,18 @@ public class LoginAction extends BaseAction {
     		return handleFailure(mapping, context, errors);
     	}    	     	
     	
-    	/*
     	if (loginForm.isRememberMe()) {
     		 Cookie ch = new Cookie("oj_handle", loginForm.getHandle());
     		 ch.setMaxAge(3600 * 24 * 30);
+    		 ch.setPath("/");
     		 context.getResponse().addCookie(ch);
     		 
     		 Cookie cp = new Cookie("oj_password", loginForm.getPassword());
     		 cp.setMaxAge(3600 * 24 * 30);
+    		 cp.setPath("/");
     		 context.getResponse().addCookie(cp);
     	} 
-    	 */
-    	
+    	  
     	if (forwardPath != null) {    		    		
     		return handleSuccess(new ActionForward(forwardPath, true), context, forwardPath);
     	}
