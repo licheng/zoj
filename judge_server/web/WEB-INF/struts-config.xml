@@ -30,6 +30,7 @@
                    type="cn.edu.zju.acm.onlinejudge.form.LimitForm"/>
         <form-bean name="ResetPasswordForm"
                    type="cn.edu.zju.acm.onlinejudge.form.ResetPasswordForm"/>
+    <form-bean name="editPasswordForm" type="cn.edu.zju.acm.onlinejudge.form.EditPasswordForm" />
                    
     </form-beans>
      
@@ -413,6 +414,9 @@
                 type="org.apache.struts.actions.ForwardAction"
                 validate="false"
                 scope="request" />
+    <action path="/showRankList" type="cn.edu.zju.acm.onlinejudge.action.ShowRankListAction">
+      <forward name="success" path="/show_problemset_ranklist.jsp" />
+    </action>
     </action-mappings>
 
     <controller tempDir="c:/tmp"

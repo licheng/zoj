@@ -73,7 +73,9 @@
                         <td class="ranklistUser">Name</td>
                         <td class="ranklistSolved">Solved</td>
                         <logic:iterate id="problem" name="problems">
-                            <td class="ranklistProblem"><bean:write name="problem" property="code"/></td>
+                            <td class="ranklistProblem">
+                            	<a href="<%=request.getContextPath()+"/showContestProblem.do?problemId="+((Problem)problem.getId() %>"><bean:write name="problem" property="code"/></a>
+                            </td>
                         </logic:iterate>
                         <td class="ranklistPenalty">Penalty</td>
                     </tr>

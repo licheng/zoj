@@ -88,6 +88,7 @@ public class PermissionLevel implements Comparable {
         list.add(VIEW);
         list.add(PARTICIPATE);
         list.add(ADMIN);
+        list.add(PARTICIPATECANVIEWSOURCE);
         return list;
     }
 

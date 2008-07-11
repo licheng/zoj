@@ -45,6 +45,20 @@ public class RankListEntry implements Comparable {
 	public void setUserProfile(UserProfile user) {
 		this.user = user;
 	}
+	
+	public double getACRatio(){
+		if(submitNumber.length==0) {
+			return 0;
+		}
+		else {
+			return (double)solved/(double)submitNumber.length;
+		}
+	}
+	
+	public int getSubmitted(){
+		return submitNumber.length;
+	}
+	
 	public int compareTo(Object obj) {
 		if (!(obj instanceof RankListEntry)) {
 			throw new ClassCastException("obj is not type of RankListEntry");
@@ -56,5 +70,4 @@ public class RankListEntry implements Comparable {
 			return entry.solved - this.solved;
 		}
 	}
-	
 }

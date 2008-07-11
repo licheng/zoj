@@ -75,7 +75,7 @@ public class ShowRankListAction extends BaseAction {
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
     	
     	// check contest
-    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showStatistics.do");
+    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showRankList.do");
     	
     	ActionForward forward = checkContestViewPermission(mapping, context, isProblemset, true);
     	if (forward != null) {
@@ -97,7 +97,7 @@ public class ShowRankListAction extends BaseAction {
     	} 
     	
     	context.setAttribute("RankList", ranklist);
-        return handleSuccess(mapping, context, "success");
+    	return handleSuccess(mapping, context, "success");
                   	    	   
     }         
     
