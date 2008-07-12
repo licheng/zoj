@@ -95,7 +95,14 @@ public class ShowRankListAction extends BaseAction {
     	} else if ("xls".equalsIgnoreCase(export)) {
     		return export(context, contest, problems, ranklist, export);
     	} 
-    	
+    	context.setAttribute("size", ranklist.getEntries().size());
+    	Object from = context.getAttribute("from");
+    	if(from!=null) {
+    		int size = ranklist.getEntries().size();
+    		int lfrom=(int)Utility.parseLong(from.toString(),0,size);
+    		ranklist.setEntries(ranklist.getEntries().subList(lfrom, lfrom+25>size? size: lfrom+25));
+    		context.setAttribute("from", from);
+    	}
     	context.setAttribute("RankList", ranklist);
     	return handleSuccess(mapping, context, "success");
                   	    	   

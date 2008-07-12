@@ -29,7 +29,7 @@
                     <a href="<%=request.getContextPath()%>/showRuns.do?contestId=<bean:write name="contest" property="id"/>">Runs</a>
                 </td></tr>
                 <tr><td class="<%="ProblemsetRankList".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
-                    <a href="<%=request.getContextPath()%>/showRankList.do?contestId=<bean:write name="contest" property="id"/>">Ranklist</a>
+                    <a href="<%=request.getContextPath()%>/showRankList.do?contestId=<bean:write name="contest" property="id"/>&from=0">Ranklist</a>
                 </td></tr>
                 <!--
                 <tr><td class="<%="Clarification".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
