@@ -8,7 +8,8 @@ public class RankListEntry implements Comparable {
 	private final int[] acceptTime;
 	private final int[] submitNumber;
 	private int penalty = 0;
-	private int solved = 0;
+	private long solved = 0;
+	private long submitted=0;
 	public RankListEntry(int problemNumber) {		
 		acceptTime = new int[problemNumber];
 		submitNumber = new int[problemNumber];
@@ -16,7 +17,10 @@ public class RankListEntry implements Comparable {
 			acceptTime[i] = -1;
 		}
 	}
-	public int getSolved() {
+	public void  setSolved(long solved){
+		this.solved=solved;
+	}
+	public long getSolved() {
 		return solved;
 	}
 	public int getPenalty() {
@@ -55,8 +59,12 @@ public class RankListEntry implements Comparable {
 		}
 	}
 	
-	public int getSubmitted(){
-		return submitNumber.length;
+	public void  setSubmitted(long submitted){
+		this.submitted=submitted;
+	}
+	
+	public long getSubmitted(){
+		return submitted;
 	}
 	
 	public int compareTo(Object obj) {
@@ -67,7 +75,7 @@ public class RankListEntry implements Comparable {
 		if (entry.solved == this.solved) {
 			return this.penalty - entry.penalty;
 		} else {
-			return entry.solved - this.solved;
+			return (int)(entry.solved - this.solved);
 		}
 	}
 }

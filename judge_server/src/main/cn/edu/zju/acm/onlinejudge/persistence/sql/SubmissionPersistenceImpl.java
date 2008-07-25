@@ -66,6 +66,29 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.SUBMISSION_ACTIVE});
 	
 	/**
+	 * The statement to create a Submission.
+	 */
+	private static final String INSERT_SUBMISSION2 = 
+		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}," +
+				" {12}, {13}, {14}, {15}) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)", 
+							 new Object[] {DatabaseConstants.SUBMISSION_TABLE, 
+				  						   DatabaseConstants.SUBMISSION_PROBLEM_ID,
+				  						   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
+				  						   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
+				  						   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
+				  						   DatabaseConstants.SUBMISSION_CONTENT,
+				  						   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
+				  						   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
+				  						   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,				  						   
+				  						   DatabaseConstants.SUBMISSION_JUDGE_DATE,
+				  						   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
+				  						   DatabaseConstants.CREATE_USER,
+				  						   DatabaseConstants.CREATE_DATE,
+				  						   DatabaseConstants.LAST_UPDATE_USER,
+				  						   DatabaseConstants.LAST_UPDATE_DATE,				  						   
+				  						   DatabaseConstants.SUBMISSION_ACTIVE});
+	
+	/**
 	 * The statement to update a Submission.
 	 */
 	private static final String UPDATE_SUBMISSION = 
@@ -266,7 +289,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setLong(13, user);
             ps.setTimestamp(14, new Timestamp(new Date().getTime()));
             ps.executeUpdate();                                               
-            submission.setId(Database.getLastId(conn, ps, rs));   
+            submission.setId(Database.getLastId(conn, ps, rs));
                         
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
@@ -732,6 +755,72 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }     	
     }
     
+    public List getProblemsetRankList(long contestId,  long begin, long order, long roleId) throws PersistenceException {
+    	Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+        	conn = Database.createConnection();
+        	int index = 0;
+            String userIdsCon = "";
+            if (roleId >= 0) {
+                // TODO performance issue!!
+                List ids = new ArrayList();
+                String userQuery = "SELECT user_profile_id FROM user_role WHERE role_id=?";
+                ps = conn.prepareStatement(userQuery);
+                ps.setLong(1, roleId);
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+                if (ids.size() == 0) {
+                    return new ArrayList();
+                }
+                userIdsCon = " AND user_profile_id IN " + Database.createNumberValues(ids);                
+            }                        
+            
+            String orderby="";
+            if(order==0)
+            {
+            	orderby=" ORDER BY ac_number DESC, submission_number INSC";
+            }
+            else
+            {
+            	orderby=" ORDER BY submission_number DESC";
+            }
+            
+            String limit=" LIMIT "+begin+", 25";
+            
+        	String query = "SELECT user_profile_id, ac_number, submission_number FROM user_stat " 
+        			+ "WHERE contest_id= " + contestId + userIdsCon + orderby+limit;
+        	ps = conn.prepareStatement(query);
+        	rs = ps.executeQuery();
+        	
+        	Map entries = new HashMap();      
+        	
+        	while (rs.next()) {
+            	long userId = rs.getLong(1);
+            	RankListEntry entry = (RankListEntry) entries.get(new Long(userId));
+            	if (entry == null) {
+            		entry = new RankListEntry(10);
+            		entries.put(new Long(userId), entry);
+            		UserProfile profile = new UserProfile();
+            		profile.setId(userId);
+            		entry.setUserProfile(profile);
+            	}
+            	entry.setSolved(rs.getLong(2));
+            	entry.setSubmitted(rs.getLong(3));
+            } 
+            
+            List entryList = new ArrayList(entries.values());
+                                         
+            return entryList;
+        } catch (SQLException e) {
+        	throw new PersistenceException("Failed to get the rank list", e);
+		} finally {
+        	Database.dispose(conn, ps, rs);
+        }     	
+    }
     
     public Set getSolvedProblems(List problems, long userProfileId) throws PersistenceException {
     	Connection conn = null;

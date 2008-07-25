@@ -92,7 +92,47 @@ public class StatisticsManager {
         return getRankList(contestId, -1);
 
     }
+    
+    public RankList getProblemsetRankList(long contestId, long roleId,long begin,int order) throws PersistenceException {
+        List key = new ArrayList();
+        key.add(contestId);
+        key.add(roleId);
+        key.add(begin);
+        key.add(order);
+        
+        synchronized (ranklistCache) {
+    	    RankList ranklist = (RankList) ranklistCache.get(key);
+    	    if (ranklist == null) {
+            ranklist = new RankList();
+    		        
+            List roles = PersistenceManager.getInstance().getAuthorizationPersistence().getContestRoles(contestId);            
+            ranklist.setRoles(roles);
+            for (Object obj : roles) {
+                RoleSecurity role = (RoleSecurity) obj;
+                if (role.getId() == roleId) {
+                    ranklist.setRole(role);
+                                                
+                    break;                    
+                }
+            }       
+            if (roleId < 0 || ranklist.getRole() != null) {
+                List entries =
+                    PersistenceManager.getInstance().getSubmissionPersistence().getProblemsetRankList(
+                    		contestId,begin,order, roleId);
+        
+                for (Iterator it = entries.iterator(); it.hasNext();) {
+                    RankListEntry entry = (RankListEntry) it.next();
+                    entry.setUserProfile(UserManager.getInstance().getUserProfile(entry.getUserProfile().getId()));
+                }
+                ranklist.setEntries(entries);
+        
+            }
+    		ranklistCache.put(key, ranklist);
+    	    }
+    	    return ranklist;
+    	}
 
+    }
     
     public RankList getRankList(long contestId, long roleId) throws PersistenceException {
         List key = new ArrayList();

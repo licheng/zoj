@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS submission_status;
 DROP TABLE IF EXISTS submission;
+DROP TABLE IF EXISTS user_stat;
 DROP TABLE IF EXISTS problem;
 DROP TABLE IF EXISTS contest;
 
@@ -41,6 +42,15 @@ CREATE TABLE country (
     last_update_date    DATETIME        NOT NULL
 ) ENGINE = InnoDb;
 
+CREATE TABLE user_stat (
+    user_id          BIGINT          NOT NULL,
+    contest_id       BIGINT          NOT NULL,
+
+    ac_number         BIGINT          NOT NULL,
+    submission_number    BIGINT          NOT NULL,
+    PRIMARY KEY(user_id,contest_id)
+) ENGINE = InnoDb;
+
 CREATE TABLE user_profile (
     user_profile_id     BIGINT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
     handle              VARCHAR(16)     NOT NULL,
@@ -49,16 +59,16 @@ CREATE TABLE user_profile (
     email_address       VARCHAR(128)    NOT NULL,
     reg_date            DATETIME        NOT NULL,
 
-    first_name          VARCHAR(32)     NOT NULL,
-    last_name           VARCHAR(32)     NOT NULL,
-    address_line1       VARCHAR(128)    NOT NULL,
+    first_name          VARCHAR(32)     NULL,
+    last_name           VARCHAR(32)     NULL,
+    address_line1       VARCHAR(128)    NULL,
     address_line2       VARCHAR(128)    NULL,
-    city                VARCHAR(32)     NOT NULL,
-    state               VARCHAR(32)     NOT NULL,
-    country_id          BIGINT          NOT NULL,
-    zip_code            VARCHAR(32)     NOT NULL,
-    phone_number        VARCHAR(32)     NOT NULL,
-    birth_date          DATETIME        NOT NULL,
+    city                VARCHAR(32)     NULL,
+    state               VARCHAR(32)     NULL,
+    country_id          BIGINT          NULL,
+    zip_code            VARCHAR(32)     NULL,
+    phone_number        VARCHAR(32)     NULL,
+    birth_date          DATETIME        NULL,
     gender              CHAR(1)         NOT NULL DEFAULT ' ',
 
     school              VARCHAR(128)    NULL,

@@ -85,26 +85,29 @@ public class ShowRankListAction extends BaseAction {
     	List problems = context.getProblems();
     	context.setAttribute("problems", problems);
         long roleId = Utility.parseLong(context.getRequest().getParameter("roleId"));
-        
-    	RankList ranklist = StatisticsManager.getInstance().getRankList(contest.getId(), roleId);
-    	
-    	String export = context.getRequest().getParameter("export");
-    	
-    	if ("txt".equalsIgnoreCase(export)) {
-    		return export(context, contest, problems, ranklist, export);
-    	} else if ("xls".equalsIgnoreCase(export)) {
-    		return export(context, contest, problems, ranklist, export);
-    	} 
-    	context.setAttribute("size", ranklist.getEntries().size());
-    	Object from = context.getAttribute("from");
-    	if(from!=null) {
-    		int size = ranklist.getEntries().size();
-    		int lfrom=(int)Utility.parseLong(from.toString(),0,size);
-    		ranklist.setEntries(ranklist.getEntries().subList(lfrom, lfrom+25>size? size: lfrom+25));
-    		context.setAttribute("from", from);
-    	}
-    	context.setAttribute("RankList", ranklist);
-    	return handleSuccess(mapping, context, "success");
+        if(!isProblemset)
+        {
+	    	RankList ranklist = StatisticsManager.getInstance().getRankList(contest.getId(), roleId);
+	    	
+	    	String export = context.getRequest().getParameter("export");
+	    	
+	    	if ("txt".equalsIgnoreCase(export)) {
+	    		return export(context, contest, problems, ranklist, export);
+	    	} else if ("xls".equalsIgnoreCase(export)) {
+	    		return export(context, contest, problems, ranklist, export);
+	    	}
+	    	context.setAttribute("RankList", ranklist);
+        }
+        else
+        {
+        	Object sorder=context.getRequest().getAttribute("order");
+        	Object sbegin=context.getRequest().getAttribute("from");
+        	int begin=(sbegin==null)? 0 : Integer.parseInt(sbegin.toString());
+        	int order=(sorder==null)? 0 : 1;
+        	RankList ranklist = StatisticsManager.getInstance().getProblemsetRankList(contest.getId(), roleId, begin,order);
+        	context.setAttribute("RankList", ranklist);
+        }
+        return handleSuccess(mapping, context, "success");
                   	    	   
     }         
     

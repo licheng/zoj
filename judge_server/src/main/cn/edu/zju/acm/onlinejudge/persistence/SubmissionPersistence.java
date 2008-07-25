@@ -128,6 +128,8 @@ public interface SubmissionPersistence {
     
     List getRankList(List problems, long contestStartDate, long roleId) throws PersistenceException;
     
+    List getProblemsetRankList(long contestId, long roleId, long begin, long order) throws PersistenceException;
+    
     
     Set getSolvedProblems(List problems, long userProfileId) throws PersistenceException;
     

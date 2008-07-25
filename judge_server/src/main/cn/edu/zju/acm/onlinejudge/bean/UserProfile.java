@@ -127,6 +127,8 @@ public class UserProfile {
      * <p>Represents studentNumber.</p>
      */
     private String studentNumber = null;
+    
+    private String declaration=null;
 
     /**
      * <p>Represents gender.</p>
@@ -564,5 +566,13 @@ public class UserProfile {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+    
+    public String getDeclaration() {
+        return declaration;
+    }
+
+    public void setDeclaration(String declaration) {
+        this.declaration = declaration;
     }
 }

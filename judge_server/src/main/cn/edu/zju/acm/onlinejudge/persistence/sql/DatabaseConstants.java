@@ -815,6 +815,9 @@ public class DatabaseConstants {
      */
     public static final String CONTEST_CHECK_IP = "check_ip";
     
+    public static final String SUBMISSION_USERSTAT_TABLE="UserStat";
+    public static final String SUBMISSION_PROBLEMSTAT_TABLE="ProblemStat";
+    
 	/**
 	 * Private constructor.
 	 */
