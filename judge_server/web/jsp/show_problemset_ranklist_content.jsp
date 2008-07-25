@@ -58,8 +58,8 @@
                     </tr>
                     <%
                     int count = 1;
-                    int lastSolved = -1;
-                    int lastsub = -1;
+                    long lastSolved = -1;
+                    long lastsub = -1;
                     for (int i = 0; i < entries.size(); ++i) {
                          RankListEntry entry = (RankListEntry) entries.get(i);
                          String displayRank = "";                         

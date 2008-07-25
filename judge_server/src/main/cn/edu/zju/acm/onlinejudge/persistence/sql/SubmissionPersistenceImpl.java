@@ -776,13 +776,13 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 if (ids.size() == 0) {
                     return new ArrayList();
                 }
-                userIdsCon = " AND user_profile_id IN " + Database.createNumberValues(ids);                
+                userIdsCon = " AND user_id IN " + Database.createNumberValues(ids);                
             }                        
             
             String orderby="";
             if(order==0)
             {
-            	orderby=" ORDER BY ac_number DESC, submission_number INSC";
+            	orderby=" ORDER BY ac_number DESC, submission_number ASC";
             }
             else
             {
@@ -791,8 +791,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             
             String limit=" LIMIT "+begin+", 25";
             
-        	String query = "SELECT user_profile_id, ac_number, submission_number FROM user_stat " 
-        			+ "WHERE contest_id= " + contestId + userIdsCon + orderby+limit;
+        	String query = "SELECT user_id, ac_number, submission_number FROM user_stat " 
+        			+ "WHERE contest_id=" + contestId + userIdsCon + orderby+limit;
         	ps = conn.prepareStatement(query);
         	rs = ps.executeQuery();
         	
