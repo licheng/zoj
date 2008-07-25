@@ -1,0 +1,25 @@
+DROP TABLE IF EXISTS UserStat;
+DROP TABLE IF EXISTS ProblemStat;
+
+CREATE TABLE UserStat(
+    user_id       BIGINT          NOT NULL,
+    problem_id          BIGINT          NOT NULL,
+    language_id         BIGINT          NOT NULL,
+    judge_reply_id      BIGINT          NOT NULL,
+    user_profile_id     BIGINT          NOT NULL,
+
+    content             LONGTEXT        NULL,
+    time_consumption    INT             NULL,
+    memory_consumption  INT             NULL,
+    submission_date     DATETIME        NULL,
+
+    judge_date          DATETIME        NULL,
+    judge_comment       LONGTEXT        NULL,
+
+    active              TINYINT         NOT NULL DEFAULT 1,
+
+    create_user         BIGINT          NOT NULL,
+    create_date         DATETIME        NOT NULL,
+    last_update_user    BIGINT          NOT NULL,
+    last_update_date    DATETIME        NOT NULL
+) ENGINE = InnoDb;
