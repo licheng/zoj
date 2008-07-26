@@ -216,14 +216,7 @@ public class UserPersistenceImpl implements UserPersistence {
      */
     private static final String LOGIN = 
         GET_USER + " WHERE handle=? AND (password=MD5(?) OR password=ENCRYPT(?, ?))" ;
-    
-    /**
-     * The query to login a user.
-     */
-    private static final String LOGIN_ENCRYPT = 
-        GET_USER + " WHERE handle=? AND (password='' OR password=ENCRYPT(?, ?))" ;
-    
-    
+ 
 	/**
 	 * The query to get a user profile by email.
 	 */
