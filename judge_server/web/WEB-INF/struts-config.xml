@@ -420,6 +420,9 @@
     <action path="/showProblemStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemStatusAction">
       <forward name="success" path="/show_problem_status.jsp" />
     </action>
+    <action path="/showContestProblemStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemStatusAction">
+      <forward name="success" path="/show_contest_problem_status.jsp" />
+    </action>
     </action-mappings>
 
     <controller tempDir="c:/tmp"

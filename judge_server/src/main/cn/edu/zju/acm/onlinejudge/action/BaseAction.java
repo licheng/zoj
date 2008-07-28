@@ -89,7 +89,6 @@ public abstract class BaseAction extends Action {
     		HttpServletRequest request, HttpServletResponse response) {
         ContextAdapter context = null;
         try {
-        	request.getParameter(arg0)
             context = new ContextAdapter(request, response);
             info(makeInfo(ENTER_OP, context.getOperator(), null, request));
 

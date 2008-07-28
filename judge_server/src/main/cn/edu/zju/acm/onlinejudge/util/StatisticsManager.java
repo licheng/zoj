@@ -22,6 +22,8 @@ public class StatisticsManager {
     private static final String TOTAL_NUMBER_KEY = "total_number";
 
     private final Cache contestStatisticsCache;
+    
+    private final Cache problemStatisticsCache;
 
     private final Cache ranklistCache;
 
@@ -45,6 +47,7 @@ public class StatisticsManager {
     private StatisticsManager() throws PersistenceCreationException {
 	// TODO
 	contestStatisticsCache = new Cache(10000, 20);
+	problemStatisticsCache = new Cache(10000, 20);
 	ranklistCache = new Cache(10000, 20);
 	solvedCache = new Cache(10000, 50);
 	submissionCache = new Cache(10000, 50);
@@ -87,6 +90,20 @@ public class StatisticsManager {
 	    return statistics;
 	}
     }
+    
+    public ProblemStatistics getProblemStatistics(long problemId) throws PersistenceCreationException, PersistenceException {
+        List key = new ArrayList();
+        key.add(problemId);
+        	
+    	synchronized (problemStatisticsCache) {
+    		ProblemStatistics statistics = (ProblemStatistics) contestStatisticsCache.get(key);
+    	    if (statistics == null) {
+    		statistics = PersistenceManager.getInstance().getSubmissionPersistence().getProblemStatistics(problemId);
+    		contestStatisticsCache.put(key, statistics);
+    	    }
+    	    return statistics;
+    	}
+        }
 
     public RankList getRankList(long contestId) throws PersistenceException {
         return getRankList(contestId, -1);

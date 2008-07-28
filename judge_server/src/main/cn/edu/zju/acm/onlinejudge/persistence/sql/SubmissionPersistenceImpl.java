@@ -13,6 +13,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
+import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 									   
 
@@ -1201,6 +1202,38 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         } 
 
     }
+
+	@Override
+	public ProblemStatistics getProblemStatistics(long problemId)
+			throws PersistenceException {
+		Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+                    
+        String query = "SELECT judge_reply_id, count, " +
+                       "FROM problem_stat " +
+                       "WHERE problem_id=?";
+        ProblemStatistics pss=new ProblemStatistics(problemId); 
+        try {
+            conn = Database.createConnection();
+            ps = conn.prepareStatement(query);
+            
+            ps.setLong(1, problemId);
+            long judge_reply_id;
+            long count;
+            while (rs.next()) {
+            	judge_reply_id=rs.getLong(1);
+            	count=rs.getLong(2);
+                pss.setCount(judge_reply_id, count);
+            } 
+                                         
+            return pss;
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the QQs", e);
+        } finally {
+            Database.dispose(conn, ps, rs);
+        }
+	}
     
   
 }

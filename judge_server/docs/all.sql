@@ -935,3 +935,46 @@ NOW(), 'M', NULL, NULL, 0, NULL, NULL, 1, 1, 1, 1, NOW(), 1, NOW());
 INSERT INTO user_preference(user_profile_id, plan, problem_paging, submission_paging, status_paging, user_paging, post_paging, thread_paging, create_user, create_date, last_update_user, last_update_date)
 VALUES(1, '', 100, 20, 20, 20, 20, 20, 1, NOW(), 1, NOW());
 
+CREATE TRIGGER submission_ai
+AFTER INSERT
+ON submission FOR EACH ROW
+UPDATE problem_stat SET count=count+1 WHERE problem_id=NEW.problem_id AND judge_reply_id=NEW.judge_reply_id;
+
+DELIMITER |
+CREATE TRIGGER submission_au
+AFTER UPDATE
+ON submission FOR EACH ROW
+BEGIN
+UPDATE problem_stat SET count=count-1 WHERE problem_id=OLD.problem_id AND judge_reply_id=OLD.judge_reply_id;
+UPDATE problem_stat SET count=count+1 WHERE problem_id=NEW.problem_id AND judge_reply_id=NEW.judge_reply_id;
+END;
+|
+DELIMITER |
+CREATE TRIGGER problem_ai
+AFTER INSERT
+ON problem FOR EACH ROW
+BEGIN
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 1);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 2);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 3);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 4);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 5);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 6);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 7);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 8);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 9);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 10);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 11);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 12);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 13);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 14);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 15);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 16);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 17);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 18);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 19);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 20);
+INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 101);
+END;
+|
+

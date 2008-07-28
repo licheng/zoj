@@ -7,6 +7,7 @@ import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
+import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
 
 import java.util.List;
 import java.util.Set;
@@ -123,6 +124,8 @@ public interface SubmissionPersistence {
     List getAllJudgeReplies() throws PersistenceException;
 
     ContestStatistics getContestStatistics(List problems) throws PersistenceException;
+    
+    ProblemStatistics getProblemStatistics(long problemId) throws PersistenceException;
     
     List getRankList(List problems, long contestStartDate) throws PersistenceException;
     
