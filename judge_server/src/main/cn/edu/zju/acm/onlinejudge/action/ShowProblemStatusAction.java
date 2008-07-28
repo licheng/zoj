@@ -39,7 +39,8 @@ public class ShowProblemStatusAction extends BaseAction {
 	 * @return ActionForward
 	 */
 	public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-		long problemId=Long.parseLong(context.getRequest().getAttribute("problemId").toString());
+		System.out.println(context.getRequest().getParameter("problemId"));
+		long problemId=Long.parseLong(context.getRequest().getParameter("problemId").toString());
 		Problem p=PersistenceManager.getInstance().getProblemPersistence().getProblem(problemId);
 		ProblemStatistics statistics = StatisticsManager.getInstance().getProblemStatistics(problemId);
 		context.setAttribute("ProblemStatistics", statistics);

@@ -2,7 +2,7 @@
 <%@ taglib uri="/WEB-INF/struts-tiles.tld" prefix="tiles" %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 
-<bean:define id="pageId" value="Problems" toScope="request" />
+<bean:define id="pageId" value="ShowProblem" toScope="request" />
 <bean:define id="region" value="Problems" toScope="request" />
 
 <tiles:insert definition="problem.default" flush="true" >

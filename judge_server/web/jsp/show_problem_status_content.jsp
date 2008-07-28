@@ -12,9 +12,8 @@
         </div>
         </logic:messagesPresent>
         <logic:messagesNotPresent property="error">
-        <div id="content_title"><bean:write name="contest" property="title"/></div>
         <div id="content_body">
-                <p> <center><font color=blue size="+2"><%=p.getTitle() %></font></center>
+                <center><font color=blue size="+2"><%=p.getTitle() %></font></center>
                 <table class="list">
 
                     <tr class="rowHeader">

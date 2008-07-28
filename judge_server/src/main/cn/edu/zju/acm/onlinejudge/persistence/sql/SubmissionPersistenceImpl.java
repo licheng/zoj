@@ -1210,7 +1210,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         PreparedStatement ps = null;
         ResultSet rs = null;
                     
-        String query = "SELECT judge_reply_id, count, " +
+        String query = "SELECT judge_reply_id, count " +
                        "FROM problem_stat " +
                        "WHERE problem_id=?";
         ProblemStatistics pss=new ProblemStatistics(problemId); 
@@ -1219,6 +1219,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps = conn.prepareStatement(query);
             
             ps.setLong(1, problemId);
+            rs = ps.executeQuery();
             long judge_reply_id;
             long count;
             while (rs.next()) {

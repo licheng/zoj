@@ -46,7 +46,7 @@
             <center>
                 <a href="<%=request.getContextPath() + "/" + submitPath%>?problemId=<bean:write name="problem" property="id"/>"><font color="blue">Submit</font></a>
                 &nbsp;&nbsp;
-                <a href="<%=request.getContextPath() + (isProblemset ? "/showContestProblemStatus.do" : "/showProblemStatus.do")%>?problemId=<bean:write name="problem" property="id"/>"><font color="blue">Status</font></a>
+                <a href="<%=request.getContextPath() + (isProblemset ? "/showProblemStatus.do" : "/showContestProblemStatus.do")%>?problemId=<bean:write name="problem" property="id"/>"><font color="blue">Status</font></a>
                 <%--
                 &nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">Status</font>
                 --%>

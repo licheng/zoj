@@ -2,10 +2,10 @@
 <%@ taglib uri="/WEB-INF/struts-tiles.tld" prefix="tiles" %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 
-<bean:define id="pageId" value="ContestProblemStatistics" toScope="request" />
+<bean:define id="pageId" value="ShowContestProblem" toScope="request" />
 <bean:define id="region" value="Contests" toScope="request" />
 
 <tiles:insert definition="contest.default" flush="true" >
-    <tiles:put name="title" value="ZOJ :: Contest :: Show Problem Statistics" />
+    <tiles:put name="title" value="ZOJ :: Contests :: Show Problem Statistics" />
     <tiles:put name="content" value="/jsp/show_problem_status_content.jsp" />
 </tiles:insert>
