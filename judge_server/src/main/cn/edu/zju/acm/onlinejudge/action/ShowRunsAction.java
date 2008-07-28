@@ -133,7 +133,7 @@ public class ShowRunsAction extends BaseAction {
         if (isRejudge) {
             List allRuns = PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(
                     criteria, 0, Integer.MAX_VALUE);
-            rejudge(allRuns);            
+            rejudge(allRuns, Long.parseLong(serachForm.getContestId()));            
         }
         
         long runsNumber = StatisticsManager.getInstance().getSubmissionsNumber(criteria);
@@ -169,7 +169,7 @@ public class ShowRunsAction extends BaseAction {
                   	    	   
     }         
 
-    private void rejudge(List runs) throws Exception {
+    private void rejudge(List runs, long contestId) throws Exception {
         for (Object obj : runs) {
             Submission submission = (Submission) obj;
             if(!submission.getJudgeReply().equals(JudgeReply.OUT_OF_CONTEST_TIME))
@@ -177,7 +177,7 @@ public class ShowRunsAction extends BaseAction {
 	            submission.setJudgeReply(JudgeReply.QUEUING);
 	            submission.setMemoryConsumption(0);
 	            submission.setTimeConsumption(0);
-	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0);
+	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0, contestId);
 	            JudgeService.getInstance().rejudge(submission);  
             }
         }

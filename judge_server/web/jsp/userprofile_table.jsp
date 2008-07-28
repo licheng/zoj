@@ -127,11 +127,6 @@
                             value="<bean:write name="ProfileForm" property="firstName" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="firstName">
-                            <html:errors property="firstName"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -142,11 +137,6 @@
                             value="<bean:write name="ProfileForm" property="lastName" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="lastName">
-                            <html:errors property="lastName"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -157,12 +147,6 @@
                             value="<bean:write name="ProfileForm" property="birthday" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="birthday">
-                            <html:errors property="birthday"/>
-                        </logic:messagesPresent>
-                        (mm/dd/yyyy)
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -182,11 +166,6 @@
                         <option value=" " <logic:equal name="ProfileForm" property="gender" value=" ">selected</logic:equal> >Why do you ask...</option>
                         </logic:present>
                     </select>
-                    <span class="error">*
-                        <logic:messagesPresent property="gender">
-                            <html:errors property="gender"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -197,11 +176,6 @@
                             value="<bean:write name="ProfileForm" property="addressLine1" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="addressLine1">
-                            <html:errors property="addressLine1"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -222,11 +196,6 @@
                             value="<bean:write name="ProfileForm" property="city" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="city">
-                            <html:errors property="city"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -237,11 +206,6 @@
                             value="<bean:write name="ProfileForm" property="state" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="state">
-                            <html:errors property="state"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -262,12 +226,6 @@
                                 <logic:equal name="Country" property="id" value="<%=selectedCountryId%>">selected</logic:equal> ><bean:write name="Country" property="name" /></option>
                         </logic:iterate>
                     </select>
-
-                    <span class="error">*
-                        <logic:messagesPresent property="country">
-                            <html:errors property="country"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -278,11 +236,6 @@
                             value="<bean:write name="ProfileForm" property="zipCode" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="zipCode">
-                            <html:errors property="zipCode"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -293,11 +246,6 @@
                             value="<bean:write name="ProfileForm" property="phone" />"
                         </logic:present>
                     >
-                    <span class="error">*
-                        <logic:messagesPresent property="phone">
-                            <html:errors property="phone"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -321,11 +269,6 @@
                             value="<bean:write name="ProfileForm" property="graduationYear" />"
                         </logic:present>
                     >
-                    <span class="error">
-                        <logic:messagesPresent property="graduationYear">
-                            <html:errors property="graduationYear"/>
-                        </logic:messagesPresent>
-                    </span>
                 </td>
             </tr>        
             <tr>

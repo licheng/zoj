@@ -51,6 +51,14 @@ CREATE TABLE user_stat (
     PRIMARY KEY(user_id,contest_id)
 ) ENGINE = InnoDb;
 
+CREATE TABLE problem_stat (
+    problem_id          BIGINT          NOT NULL,
+    judge_reply_id       BIGINT          NOT NULL,
+
+    count         BIGINT          NOT NULL DEFAULT 0,
+    PRIMARY KEY(problem_id,judge_reply_id)
+) ENGINE = InnoDb;
+
 CREATE TABLE user_profile (
     user_profile_id     BIGINT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
     handle              VARCHAR(16)     NOT NULL,

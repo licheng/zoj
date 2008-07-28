@@ -82,8 +82,8 @@
                     <%
                     int rank = 0;
                     int count = 1;
-                    int lastSolved = -1;
-                    int lastPen = -1;
+                    long lastSolved = -1;
+                    long lastPen = -1;
                     for (int i = 0; i < entries.size(); ++i) {
                          RankListEntry entry = (RankListEntry) entries.get(i);
                          String displayRank = "";                         

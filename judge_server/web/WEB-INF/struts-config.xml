@@ -417,6 +417,9 @@
     <action path="/showRankList" type="cn.edu.zju.acm.onlinejudge.action.ShowRankListAction">
       <forward name="success" path="/show_problemset_ranklist.jsp" />
     </action>
+    <action path="/showProblemStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemStatusAction">
+      <forward name="success" path="/show_problem_status.jsp" />
+    </action>
     </action-mappings>
 
     <controller tempDir="c:/tmp"

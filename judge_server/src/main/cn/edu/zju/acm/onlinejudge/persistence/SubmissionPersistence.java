@@ -27,7 +27,7 @@ public interface SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    void createSubmission(Submission submission, long user) throws PersistenceException;
+    void createSubmission(Submission submission, long user, long ContestId) throws PersistenceException;
 
     /**
      * <p>Updates the specified submission in persistence layer.</p>
@@ -36,7 +36,7 @@ public interface SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    void updateSubmission(Submission submission, long user) throws PersistenceException;
+    void updateSubmission(Submission submission, long user, long ContestId) throws PersistenceException;
 
     /**
      * <p>Deletes the specified submission in persistence layer.</p>

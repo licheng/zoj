@@ -91,7 +91,7 @@ public class JudgeClientInstance extends Thread {
                     submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
                 }
                 submissionDAO.beginTransaction();
-                submissionDAO.update(submission);
+                submissionDAO.update(submission, problemDAO.getProblem(submission.getProblemId()).getContestId());
                 submissionDAO.commitTransaction();
                 submission.setContent(null);
                 if (submission.getJudgeReply() == JudgeReply.JUDGE_INTERNAL_ERROR) {

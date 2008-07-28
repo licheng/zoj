@@ -263,7 +263,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public void createSubmission(Submission submission, long user) throws PersistenceException {
+    public void createSubmission(Submission submission, long user, long contestId) throws PersistenceException {
     	checkSubmission(submission);
     	
         Connection conn = null;
@@ -290,7 +290,18 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setTimestamp(14, new Timestamp(new Date().getTime()));
             ps.executeUpdate();                                               
             submission.setId(Database.getLastId(conn, ps, rs));
-                        
+            
+            if(submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
+            {
+            	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 1, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1, ac_number=ac_number+1");
+            }
+            else
+            {
+            	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1");
+            }
+            ps.setLong(1, submission.getUserProfileId());
+            ps.setLong(2, contestId);
+            ps.executeUpdate(); 
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			
@@ -305,7 +316,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public void updateSubmission(Submission submission, long user) throws PersistenceException {
+    public void updateSubmission(Submission submission, long user, long contestId) throws PersistenceException {
     	checkSubmission(submission);
     	
         Connection conn = null;
@@ -331,7 +342,13 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setLong(13, submission.getId());
             ps.executeUpdate();                                               
                
-                        
+            if(submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
+            {
+            	ps=conn.prepareStatement("UPDATE user_stat SET ac_number=ac_number+1 WHERE user_id=? AND contest_id=?");
+                ps.setLong(1, submission.getUserProfileId());
+                ps.setLong(2, contestId);
+                ps.executeUpdate(); 
+            }            
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			

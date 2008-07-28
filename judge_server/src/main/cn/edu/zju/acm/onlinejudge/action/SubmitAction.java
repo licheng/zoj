@@ -105,13 +105,13 @@ public class SubmitAction extends BaseAction {
         
         if (contest.getEndTime() != null && new Date().after(contest.getEndTime())) {
             submission.setJudgeReply(JudgeReply.OUT_OF_CONTEST_TIME);
-            submissionPersistence.createSubmission(submission, user.getId());
+            submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
         } else if (source.getBytes().length > problem.getLimit().getSubmissionLimit() * 1024) {
             submission.setJudgeReply(JudgeReply.SUBMISSION_LIMIT_EXCEEDED);
-            submissionPersistence.createSubmission(submission, user.getId());
+            submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
         } else {
             submission.setJudgeReply(JudgeReply.QUEUING);
-            submissionPersistence.createSubmission(submission, user.getId());
+            submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
             JudgeService.getInstance().judge(submission);
         }
         context.setAttribute("submissionId", submission.getId());

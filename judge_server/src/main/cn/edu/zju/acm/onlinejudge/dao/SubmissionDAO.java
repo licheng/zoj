@@ -7,8 +7,8 @@ public interface SubmissionDAO extends GenericDAO {
 
     Submission getSubmission(long id) throws PersistenceException;
 
-    void save(Submission submission) throws PersistenceException;
+    void save(Submission submission, long contestId) throws PersistenceException;
 
-    void update(Submission submission) throws PersistenceException;
+    void update(Submission submission, long contestId) throws PersistenceException;
 
 }
