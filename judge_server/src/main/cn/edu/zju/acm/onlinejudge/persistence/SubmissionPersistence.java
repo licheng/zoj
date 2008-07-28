@@ -8,6 +8,7 @@ import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
+import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 
 import java.util.List;
 import java.util.Set;
@@ -135,6 +136,7 @@ public interface SubmissionPersistence {
     
     
     Set getSolvedProblems(List problems, long userProfileId) throws PersistenceException;
+    RankListEntry getRankListEntry(long contestId, long userId) throws PersistenceException;
     
     
     void changeQQStatus(long pid, long uid, String status) throws PersistenceException;

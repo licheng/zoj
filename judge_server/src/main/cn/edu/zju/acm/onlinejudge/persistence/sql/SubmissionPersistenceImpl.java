@@ -773,6 +773,35 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }     	
     }
     
+    public RankListEntry getRankListEntry(long contestId, long userId) throws PersistenceException
+    {
+    	Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        RankListEntry re=null;
+        try {
+        	conn = Database.createConnection();
+            
+        	String query = "SELECT ac_number, submission_number FROM user_stat " 
+        			+ "WHERE contest_id=? AND user_id=?";
+        	ps = conn.prepareStatement(query);
+        	ps.setLong(1, contestId);
+        	ps.setLong(2, userId);
+        	rs = ps.executeQuery();
+        	if (rs.next()) {
+            	re=new RankListEntry(1);
+            	re.setSolved(rs.getLong(1));
+            	re.setSubmitted(rs.getLong(2));
+            }
+                                         
+            return re;
+        } catch (SQLException e) {
+        	throw new PersistenceException("Failed to get the rank list", e);
+		} finally {
+        	Database.dispose(conn, ps, rs);
+        }     	
+    }
+    
     public List getProblemsetRankList(long contestId,  long begin, long order, long roleId) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;

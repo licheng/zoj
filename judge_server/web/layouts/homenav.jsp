@@ -11,6 +11,9 @@
                     <a href="<%=request.getContextPath()%>/editProfile.do">Edit Profile</a>
                 </td></tr>
 <% } %>                
+				<tr><td class="<%="EditProfile".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                        <a href="<%=request.getContextPath()%>/userStatus.do">User Status</a>
+                </td></tr>
 <%--                
                 <tr><td class="<%="EditPreference".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                         <a href="<%=request.getContextPath()%>/editPreference.do">Edit Preference</a>
