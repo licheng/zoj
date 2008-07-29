@@ -272,7 +272,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         ResultSet rs = null;
         try {
         	conn = Database.createConnection();   
-        			   
+        	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
+        	ps.execute();
             // create the submission
             ps = conn.prepareStatement(INSERT_SUBMISSION);            
             ps.setLong(1, submission.getProblemId());
@@ -303,6 +304,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setLong(1, submission.getUserProfileId());
             ps.setLong(2, contestId);
             ps.executeUpdate(); 
+            ps = conn.prepareStatement("UNLOCK TABLES");	
+        	ps.execute();
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			
@@ -325,7 +328,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         ResultSet rs = null;
         try {
         	conn = Database.createConnection();           	
-					   
+        	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
+        	ps.execute();		   
             // create the submission
             ps = conn.prepareStatement(UPDATE_SUBMISSION);            
             ps.setLong(1, submission.getProblemId());
@@ -349,7 +353,9 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 ps.setLong(1, submission.getUserProfileId());
                 ps.setLong(2, contestId);
                 ps.executeUpdate(); 
-            }            
+            } 
+            ps = conn.prepareStatement("UNLOCK TABLES");	
+        	ps.execute();
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			
