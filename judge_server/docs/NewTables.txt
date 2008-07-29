@@ -12,6 +12,7 @@ UPDATE problem_stat SET count=count-1 WHERE problem_id=OLD.problem_id AND judge_
 UPDATE problem_stat SET count=count+1 WHERE problem_id=NEW.problem_id AND judge_reply_id=NEW.judge_reply_id;
 END;
 |
+DELIMITER ;
 DELIMITER |
 CREATE TRIGGER problem_ai
 AFTER INSERT
@@ -40,3 +41,4 @@ INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 20
 INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 101);
 END;
 |
+DELIMITER ;
