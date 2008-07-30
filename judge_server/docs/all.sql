@@ -958,26 +958,26 @@ CREATE TRIGGER problem_ai
 AFTER INSERT
 ON problem FOR EACH ROW
 BEGIN
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 1);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 2);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 3);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 4);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 5);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 6);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 7);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 8);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 9);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 10);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 11);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 12);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 13);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 14);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 15);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 16);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 17);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 18);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 19);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 20);
-INSERT INTO Problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 101);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 1);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 2);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 3);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 4);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 5);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 6);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 7);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 8);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 9);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 10);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 11);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 12);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 13);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 14);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 15);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 16);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 17);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 18);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 19);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 20);
+INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 101);
 END;
 |
