@@ -15,7 +15,7 @@ import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 
 public class ShowUserStatusAction extends BaseAction {
-	private static long defaultContestId=0;
+	private static long defaultContestId=1;
 	private static AbstractContest contest=null;
 	/** 
 	 * Method execute

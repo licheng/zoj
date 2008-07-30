@@ -2,6 +2,7 @@
 <%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.Features" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.UserProfile" %>
                 <tr><td class="nav_header">
                 <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"><div><a href="<%=request.getContextPath()%>">Home</a></div></img>
                 </td></tr>
@@ -12,7 +13,7 @@
                 </td></tr>
 <% } %>                
 				<tr><td class="<%="EditProfile".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
-                        <a href="<%=request.getContextPath()%>/userStatus.do">User Status</a>
+                        <a href="<%=request.getContextPath()%>/showUserStatus.do?userId=<%=((UserProfile)request.getSession().getAttribute("oj_user")).getId() %>">User Status</a>
                 </td></tr>
 <%--                
                 <tr><td class="<%="EditPreference".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
