@@ -93,12 +93,10 @@ public class ProblemImportAction extends BaseAction {
 	        ActionMessages messages = new ActionMessages();
 	        pack = ProblemManager.importProblem(in, messages);
             //seePackage(pack, messages);
-	        System.out.println("1");
 	        if (messages.size() > 0) {
 	        	return handleFailure(mapping, context, messages);
 	        }
 	        context.setSessionAttribute("ProblemPackage", pack);
-	        System.out.println("1");
 	        return handleSuccess(mapping, context, "preview");
         }
         if (pack == null) {

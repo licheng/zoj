@@ -273,7 +273,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         try {
         	conn = Database.createConnection();   
         	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
-        	ps.execute();
+        	ps.executeUpdate(); 
             // create the submission
             ps = conn.prepareStatement(INSERT_SUBMISSION);            
             ps.setLong(1, submission.getProblemId());
@@ -290,7 +290,10 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setTimestamp(12, new Timestamp(new Date().getTime()));
             ps.setLong(13, user);
             ps.setTimestamp(14, new Timestamp(new Date().getTime()));
-            ps.executeUpdate();                                               
+            ps.executeUpdate();  
+            
+            ps = conn.prepareStatement("UNLOCK TABLES");	
+        	ps.executeUpdate();                                              
             submission.setId(Database.getLastId(conn, ps, rs));
             
             if(submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
@@ -304,8 +307,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setLong(1, submission.getUserProfileId());
             ps.setLong(2, contestId);
             ps.executeUpdate(); 
-            ps = conn.prepareStatement("UNLOCK TABLES");	
-        	ps.execute();
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			
@@ -329,7 +330,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         try {
         	conn = Database.createConnection();           	
         	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
-        	ps.execute();		   
+        	ps.executeUpdate();  	   
             // create the submission
             ps = conn.prepareStatement(UPDATE_SUBMISSION);            
             ps.setLong(1, submission.getProblemId());
@@ -345,8 +346,9 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setLong(11, user);
             ps.setTimestamp(12, new Timestamp(new Date().getTime()));
             ps.setLong(13, submission.getId());
-            ps.executeUpdate();                                               
-               
+            ps.executeUpdate();
+            ps = conn.prepareStatement("UNLOCK TABLES");	
+        	ps.executeUpdate();    
             if(submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
             {
             	ps=conn.prepareStatement("UPDATE user_stat SET ac_number=ac_number+1 WHERE user_id=? AND contest_id=?");
@@ -354,8 +356,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 ps.setLong(2, contestId);
                 ps.executeUpdate(); 
             } 
-            ps = conn.prepareStatement("UNLOCK TABLES");	
-        	ps.execute();
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			
