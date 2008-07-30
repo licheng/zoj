@@ -52,8 +52,8 @@
                         <td class="ranklistRank">Rank</td>
                         <td class="ranklistUser">Name</td>
                         <td class="ranklistUser">Declaration</td>
-                        <td class="ranklistSolved">Solved</td>
-                        <td class="ranklistSolved">Submitted</td>
+                        <td class="ranklistSolved"><a href="<%=request.getContextPath()%>/showRankList.do?contestId=<bean:write name="contest" property="id"/>&from=0&order=AC">Solved<a></td>
+                        <td class="ranklistSolved"><a href="<%=request.getContextPath()%>/showRankList.do?contestId=<bean:write name="contest" property="id"/>&from=0&order=Submit">Submitted</a></td>
                         <td class="ranklistPenalty">AC Ratio</td>
                     </tr>
                     <%

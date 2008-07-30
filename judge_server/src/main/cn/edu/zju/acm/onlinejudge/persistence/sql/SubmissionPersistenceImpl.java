@@ -833,6 +833,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             }                        
             
             String orderby="";
+            
             if(order==0)
             {
             	orderby=" ORDER BY ac_number DESC, submission_number ASC";
@@ -841,31 +842,25 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             {
             	orderby=" ORDER BY submission_number DESC";
             }
-            
             String limit=" LIMIT "+begin+", 25";
             
         	String query = "SELECT user_id, ac_number, submission_number FROM user_stat " 
         			+ "WHERE contest_id=" + contestId + userIdsCon + orderby+limit;
         	ps = conn.prepareStatement(query);
         	rs = ps.executeQuery();
-        	
-        	Map entries = new HashMap();      
-        	
+        	    
+
+            List entryList = new ArrayList();
         	while (rs.next()) {
             	long userId = rs.getLong(1);
-            	RankListEntry entry = (RankListEntry) entries.get(new Long(userId));
-            	if (entry == null) {
-            		entry = new RankListEntry(10);
-            		entries.put(new Long(userId), entry);
-            		UserProfile profile = new UserProfile();
-            		profile.setId(userId);
-            		entry.setUserProfile(profile);
-            	}
-            	entry.setSolved(rs.getLong(2));
+            	RankListEntry entry = new RankListEntry(10);
+        		UserProfile profile = new UserProfile();
+        		profile.setId(userId);
+        		entry.setUserProfile(profile);
+        		entry.setSolved(rs.getLong(2));
             	entry.setSubmitted(rs.getLong(3));
+            	entryList.add(entry);
             } 
-            
-            List entryList = new ArrayList(entries.values());
                                          
             return entryList;
         } catch (SQLException e) {

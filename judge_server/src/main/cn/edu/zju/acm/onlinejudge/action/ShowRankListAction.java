@@ -100,10 +100,11 @@ public class ShowRankListAction extends BaseAction {
         }
         else
         {
-        	Object sorder=context.getRequest().getAttribute("order");
-        	Object sbegin=context.getRequest().getAttribute("from");
+        	Object sorder=context.getRequest().getParameter("order");
+        	Object sbegin=context.getRequest().getParameter("from");
         	int begin=(sbegin==null)? 0 : Integer.parseInt(sbegin.toString());
-        	int order=(sorder==null)? 0 : 1;
+        	int order=(sorder.equals("AC"))? 0 : 1;
+        	System.out.println(order);
         	RankList ranklist = StatisticsManager.getInstance().getProblemsetRankList(contest.getId(), roleId, begin,order);
         	context.setAttribute("RankList", ranklist);
         }
