@@ -55,7 +55,7 @@ public class RankListEntry implements Comparable {
 			return 0;
 		}
 		else {
-			return (double)solved/(double)submitNumber.length;
+			return (double)solved/(double)submitted;;
 		}
 	}
 	
