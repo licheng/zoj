@@ -27,12 +27,12 @@ public class PermissionLevel implements Comparable {
     /**
      * <p>Represents ADMIN static instance.</p>
      */
-    public static final PermissionLevel ADMIN = new PermissionLevel(3, "Admin");
+    public static final PermissionLevel ADMIN = new PermissionLevel(200, "Admin");
     
     /**
      * <p>Represents ADMIN static instance.</p>
      */
-    public static final PermissionLevel PARTICIPATECANVIEWSOURCE = new PermissionLevel(4, "ParticipateCanViewSource");
+    public static final PermissionLevel PARTICIPATECANVIEWSOURCE = new PermissionLevel(3, "ParticipateCanViewSource");
 
     /**
      * <p>Represents the id of PermissionLevel.</p>

@@ -198,8 +198,11 @@
                         <td class="runTime">Run Time(ms)</td>
                         <td class="runMemory">Run Memory(KB)</td>
                         <td class="runUserName">User Name</td>
-                        <% if (admin || canViewSource) { %>
+                        <% if (admin) { %>
                             <td class="runAdmin">Admin</td>
+                        <% } %>
+			<% else if (canViewSource) { %>
+                            <td class="runAdmin">View Source</td>
                         <% } %>
                     </tr>
                     <%

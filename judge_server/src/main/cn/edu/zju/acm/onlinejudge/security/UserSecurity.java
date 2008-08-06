@@ -143,7 +143,7 @@ public class UserSecurity extends AbstractSecurity {
      * @return whether the UserSecurity can admin the contest.
      */
     public boolean canAdminContest(long contestId) {
-    	return superAdmin || PermissionLevel.ADMIN.compareTo(getContestPermission().getPermission(contestId)) == 0;
+    	return superAdmin || PermissionLevel.ADMIN.compareTo(getContestPermission().getPermission(contestId)) <= 0;
     }
 
     /**
@@ -169,7 +169,7 @@ public class UserSecurity extends AbstractSecurity {
      * @return whether the UserSecurity can view the forum.
      */
     public boolean canViewSource(long contestId) {
-    	return superAdmin || PermissionLevel.ADMIN.compareTo(getContestPermission().getPermission(contestId)) <= 0;
+    	return superAdmin || PermissionLevel.PARTICIPATECANVIEWSOURCE.compareTo(getContestPermission().getPermission(contestId)) <= 0;
     }
 
     /**
