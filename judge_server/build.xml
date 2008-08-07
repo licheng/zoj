@@ -133,7 +133,7 @@
 
     <target name="makewar" depends="compile">
         <mkdir dir="${deploydir}" />
-        <war warfile="${warfile}" webxml="${webdir}/web.xml">
+        <war warfile="${warfile}" webxml="${webdir}/WEB-INF/web.xml">
             <fileset dir="${webdir}" />
 
             <classes dir="${build_classdir}" includes="**" />
