@@ -200,8 +200,7 @@
                         <td class="runUserName">User Name</td>
                         <% if (admin) { %>
                             <td class="runAdmin">Admin</td>
-                        <% } %>
-			<% else if (canViewSource) { %>
+                        <% } else if (canViewSource) { %>
                             <td class="runAdmin">View Source</td>
                         <% } %>
                     </tr>
