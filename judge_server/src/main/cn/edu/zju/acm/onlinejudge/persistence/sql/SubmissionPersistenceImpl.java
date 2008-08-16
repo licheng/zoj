@@ -13,6 +13,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
+import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 									   
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.sql.PreparedStatement;
@@ -271,7 +273,15 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-        	conn = Database.createConnection();   
+        	conn = Database.createConnection();  
+        	SubmissionCriteria sc = new SubmissionCriteria();
+        	List list = new LinkedList();
+        	list.add(JudgeReply.ACCEPTED);
+        	sc.setJudgeReplies(list);
+        	sc.setProblemId(submission.getProblemId());
+        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(user).getHandle());
+        	
+        	long acnumber = searchSubmissionNumber(sc);
         	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
         	ps.executeUpdate(); 
             // create the submission
@@ -296,17 +306,25 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	ps.executeUpdate();                                              
             submission.setId(Database.getLastId(conn, ps, rs));
             
-            if(submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
+            if(acnumber==0 && submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
             {
             	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 1, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1, ac_number=ac_number+1");
+
+                ps.setLong(1, submission.getUserProfileId());
+                ps.setLong(2, contestId);
+                ps.executeUpdate(); 
+            }
+            else if(acnumber==0 && !submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
+            {
+            	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1");
+
+                ps.setLong(1, submission.getUserProfileId());
+                ps.setLong(2, contestId);
+                ps.executeUpdate(); 
             }
             else
             {
-            	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1");
             }
-            ps.setLong(1, submission.getUserProfileId());
-            ps.setLong(2, contestId);
-            ps.executeUpdate(); 
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to create submission.", e);
 		} finally {			
@@ -328,7 +346,15 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-        	conn = Database.createConnection();           	
+        	conn = Database.createConnection();    
+        	SubmissionCriteria sc = new SubmissionCriteria();
+        	List list = new LinkedList();
+        	list.add(JudgeReply.ACCEPTED);
+        	sc.setJudgeReplies(list);
+        	sc.setProblemId(submission.getProblemId());
+        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(user).getHandle());
+        	
+        	long acnumber = searchSubmissionNumber(sc);
         	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
         	ps.executeUpdate();  	   
             // create the submission
@@ -349,7 +375,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.executeUpdate();
             ps = conn.prepareStatement("UNLOCK TABLES");	
         	ps.executeUpdate();    
-            if(submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
+            if(acnumber==0 && submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
             {
             	ps=conn.prepareStatement("UPDATE user_stat SET ac_number=ac_number+1 WHERE user_id=? AND contest_id=?");
                 ps.setLong(1, submission.getUserProfileId());
@@ -1233,7 +1259,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 
     }
 
-	@Override
 	public ProblemStatistics getProblemStatistics(long problemId)
 			throws PersistenceException {
 		Connection conn = null;
