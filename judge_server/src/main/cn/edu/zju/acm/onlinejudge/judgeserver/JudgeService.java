@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -20,7 +22,8 @@ public class JudgeService {
 
     static {
         try {
-            instance = new JudgeService(128, Integer.parseInt(ConfigManager.getValue("queue_port")));
+            instance = new JudgeService(128, Integer.parseInt(ConfigManager.getValue("queue_port")), ConfigManager
+                    .getValues("client_ip"));
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -30,7 +33,7 @@ public class JudgeService {
 
     private Logger logger;
 
-    public JudgeService(int cacheCapacity, int port) throws IOException {
+    public JudgeService(int cacheCapacity, int port, final String[] clientHostNameList) throws IOException {
         logger = Logger.getLogger(JudgeService.class.getName());
         if (cacheCapacity < 128) {
             cacheCapacity = 128;
@@ -40,11 +43,21 @@ public class JudgeService {
         logger.info("Listening on port " + port);
         new Thread() {
             public void run() {
+                Set<String> clientHostNameSet = new HashSet<String>();
+                for (String clientHostName : clientHostNameList) {
+                    clientHostNameSet.add(clientHostName);
+                }
                 while (!serverSocket.isClosed()) {
                     try {
                         Socket socket = serverSocket.accept();
-                        logger.info("Connection from " + socket.getInetAddress().getCanonicalHostName() + ":"
+                        logger.info("Connection from " + socket.getInetAddress().getHostAddress() + ":"
                                 + socket.getPort());
+                        if (!socket.getInetAddress().isLoopbackAddress()
+                                && !clientHostNameSet.contains(socket.getInetAddress().getHostAddress())) {
+                            logger.info("Refused");
+                            socket.close();
+                            continue;
+                        }
                         JudgeClient client = new JudgeClient(queue, socket, getClientNumber());
                         synchronized (clients) {
                             for (int i = clients.size() - 1; i >= 0; --i) {
