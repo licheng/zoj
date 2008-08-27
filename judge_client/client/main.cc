@@ -66,11 +66,6 @@ void Daemonize() {
     dup2(fd, 0);
     dup2(fd, 1);
     dup2(fd, 2);
-    
-    // close all other file descriptors
-    for (int i = 3; i < 100; i++) {
-        close(i);
-    }
 }
 
 int Lock() {
@@ -106,6 +101,38 @@ void SIGPIPEHandler(int sig) {
 
 int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
+int CreateServerSocket() {
+    int sock = socket(PF_INET, SOCK_STREAM, 6);
+    if (sock == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to create socket";
+        return -1;
+    }
+    int optionValue = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue)) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to set socket option";
+        close(sock);
+        return -1;
+    }
+    sockaddr_in address;
+    memset(&address, 0, sizeof(address));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = htonl(INADDR_ANY); 
+    address.sin_port = 0;
+    if (bind(sock, (struct sockaddr*)&address, sizeof(address)) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to bind";
+        close(sock);
+        return -1;
+    }
+    if (listen(sock, 32) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to listen";
+        close(sock);
+        return -1;
+    }
+    return sock;
+}
+
+int JudgeMain(const string& root, int sock, int uid, int gid);
+
 int main(int argc, char* argv[]) {
     if (ParseArguments(argc, argv) < 0) {
         return 1;
@@ -135,6 +162,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    int server_sock = CreateServerSocket();
+    if (server_sock < 0) {
+        return 1;
+    }
+
     int fd = -1;
     if (ARG_daemonize) {
         fd = Lock();
@@ -144,20 +176,16 @@ int main(int argc, char* argv[]) {
         Daemonize();
     }
 
-    if (ChangeToWorkingDir(ARG_root, NULL) < 0) {
-        return 1;
-    }
-
     if (ARG_daemonize || !ARG_logtostderr) {
         Log::SetLogToStderr(false);
     }
-
 
     pid_t pid = fork();
     if (pid < 0) {
         return 1;
     }
     if (pid == 0) {
+        close(server_sock);
         log_server->Start();
     } else {
         if (fd >= 0) {
@@ -165,7 +193,26 @@ int main(int argc, char* argv[]) {
         }
         delete log_server;
         Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
-        return ControlMain(ARG_root, ARG_queue_address, ARG_queue_port, ARG_uid, ARG_gid);
+        while (!global::terminated) {
+            sockaddr_in addr;
+            socklen_t len = sizeof(sockaddr_in);
+            int sock = accept(server_sock, (struct sockaddr*)&addr, &len);
+            if (sock == -1) {
+                if (errno != EINTR) {
+                    LOG(SYSCALL_ERROR)<<"Fail to accept";
+                }
+                continue;
+            }
+            LOG(INFO)<<"Received connection from "<<addr.sin_addr.s_addr<<":"<<addr.sin_port;
+            pid_t pid = fork();
+            if (pid < 0) {
+                LOG(SYSCALL_ERROR)<<"Fail to fork";
+                return 1;
+            } else if (pid == 0) {
+                exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
+            }
+            close(sock);
+        }
     }
     return 0;
 }

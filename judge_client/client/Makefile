@@ -14,7 +14,7 @@ UNITTEST_RUNS:=$(patsubst %.cc,%.run,$(UNITTEST_SOURCES))
 all: judged
 
 clean:
-	rm -f $(ALL_OBJS) $(ALL_DEPS) judge_client $(UNITTESTS)
+	rm -f $(ALL_OBJS) $(ALL_DEPS) judged $(UNITTESTS)
 	@make -C testdata clean
 
 rebuild: clean all
@@ -42,7 +42,6 @@ compile_unittest: args.o util.o trace.o logging.o -lkmmon
 run_unittest: args.o util.o trace.o logging.o -lkmmon
 check_unittest: args.o util.o trace.o logging.o -lkmmon
 judge_unittest: args.o util.o trace.o logging.o compile.o run.o check.o -lkmmon
-control_unittest: args.o util.o trace.o logging.o judge.o compile.o run.o check.o command_reader.o -lkmmon
 main_unittest: $(filter-out main.o main_stub.o,$(OBJS)) -lkmmon
 
 testdata:

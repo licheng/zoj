@@ -374,12 +374,7 @@ int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsig
     return 0;
 }
 
-int JudgeMain(const string& root, const string& queue_address, int queue_port, int uid, int gid) {
-    int sock = ConnectTo(queue_address, queue_port);
-    if (sock < 0) {
-        return 1;
-    }
-    Writen(sock, "J", 1);
+int JudgeMain(const string& root, int sock, int uid, int gid) {
     string working_root;
     if (ChangeToWorkingDir(root, &working_root) == -1) {
         SendReply(sock, INTERNAL_ERROR);
@@ -395,7 +390,7 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port, i
     int revision = -1;
     int compiler = 0;
     bool data_ready = false;
-    // Loops until SIGTERM or SIGPIPE is received.
+    // Loops until SIGTERM or SIGPIPE is received, sighandler will set global::terminated to false
     while (!global::terminated) {
         uint8_t command;
         if (ReadUint8(sock, &command) == -1) {
@@ -433,7 +428,7 @@ int JudgeMain(const string& root, const string& queue_address, int queue_port, i
                 ret = 1;
                 break;
             }
-            data_ready = 1;
+            data_ready = true;
         } else if (command == CMD_COMPILE) {
             if (ExecCompileCommand(sock, root, working_root, &compiler) == -1) {
                 ret = 1;

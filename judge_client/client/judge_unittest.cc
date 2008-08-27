@@ -798,8 +798,6 @@ TEST_F(ExecDataCommandTest, Success) {
 
 
 
-int JudgeMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
-
 class JudgeMainTest: public TestFixture {
     protected:
         virtual void SetUp() {
@@ -810,99 +808,24 @@ class JudgeMainTest: public TestFixture {
             ASSERT_EQUAL(0, mkdir("script", 0750));
             ASSERT_EQUAL(0, mkdir("prob", 0750));
             ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
-            server_sock_ = socket(PF_INET, SOCK_STREAM, 6);
-            if (server_sock_ == -1) {
-                FAIL(strerror(errno));
-            }
-            int option_value = 1;
-            if (setsockopt(server_sock_, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value)) == -1) {
-                FAIL(strerror(errno));
-            }
-            sockaddr_in address;
-            memset(&address, 0, sizeof(address));
-            address.sin_family = AF_INET;
-            address.sin_addr.s_addr = htonl(INADDR_ANY);
-            address.sin_port = 0;
-            if (bind(server_sock_,
-                     (struct sockaddr*)&address,
-                     sizeof(address)) == -1) {
-                FAIL(strerror(errno));
-            }
-            if (listen(server_sock_, 32) == -1) {
-                FAIL(strerror(errno));
-            }
-            socklen_t len = sizeof(address);
-            if (getsockname(server_sock_, (struct sockaddr*)&address, &len) == -1) {
-                FAIL(strerror(errno));
-            }
-            port_ = ntohs(address.sin_port);
-            int flags = fcntl(server_sock_, F_GETFL, 0);
-            ASSERT(flags >= 0);
-            ASSERT_EQUAL(0, fcntl(server_sock_, F_SETFL, flags | O_NONBLOCK));
-            client_sock_ = -1;
-            address_ = "127.0.0.1";
+            temp_fd_ = fd_[0] = fd_[1] = -1;
+            ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
             buf_size_ = 0;
+            global::terminated = false;
         }
 
         virtual void TearDown() {
             UninstallHandlers();
-            if (pid_ > 0) {
-                kill(pid_, SIGKILL);
-                waitpid(pid_, NULL, 0);
+            if (fd_[0] >= 0) {
+                close(fd_[0]);
             }
-            if (server_sock_ >= 0) {
-                close(server_sock_);
-            }
-            if (client_sock_ >= 0) {
-                close(client_sock_);
+            if (fd_[1] >= 0) {
+                close(fd_[1]);
             }
             if (temp_fd_ >= 0) {
                 close(temp_fd_);
             }
             system(("rm -rf " + root_).c_str());
-        }
-
-        int WaitForConnection(bool terminate = false) {
-            pid_ = fork();
-            if (pid_ < 0) {
-                FAIL("Fail to fork");
-            }
-            if (pid_ == 0) {
-                close(server_sock_);
-                global::terminated = terminate;
-                exit(JudgeMain(root_, address_, port_, 0, 0));
-            }
-            sockaddr_in address;
-            size_t len = sizeof(address);
-            for (int i = 0; i < 3; ++i) {
-                client_sock_ = accept(server_sock_, (struct sockaddr*)&address, &len);
-                if (client_sock_ >= 0) {
-                    break;
-                }
-                if (errno != EWOULDBLOCK) {
-                    FAIL(strerror(errno));
-                }
-                usleep(500);
-            }
-            if (client_sock_ < 0) {
-                return -1;
-            }
-            close(server_sock_);
-            server_sock_ = -1;
-            struct timeval tv;
-            tv.tv_sec = 5;
-            tv.tv_usec = 0;
-            ASSERT_EQUAL(0, setsockopt(client_sock_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)));
-            ASSERT_EQUAL(0, setsockopt(client_sock_, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)));
-            return 0;
-        }
-
-        int WaitForTermination() {
-            int status;
-            ASSERT_EQUAL(pid_, waitpid(pid_, &status, 0));
-            pid_ = -1;
-            ASSERT(WIFEXITED(status));
-            return WEXITSTATUS(status);
         }
 
         void AppendCheckSum() {
@@ -943,7 +866,7 @@ class JudgeMainTest: public TestFixture {
         }
 
         void SendCommand() {
-            Writen(client_sock_, buf_, buf_size_);
+            Writen(fd_[0], buf_, buf_size_);
         }
 
         void SendJudgeCommand(int problem, int revision) {
@@ -992,214 +915,188 @@ class JudgeMainTest: public TestFixture {
             SendCommand();
         }
 
-        int server_sock_;
-        int client_sock_;
+        int fd_[2];
         int temp_fd_;
         int port_;
-        pid_t pid_;
         string address_;
         string root_;
         char buf_[1024 * 16];
         int buf_size_;
 };
 
-TEST_F(JudgeMainTest, InvalidAddress) {
-    address_ = "invalid";
-    ASSERT_EQUAL(-1, WaitForConnection());
-}
+int JudgeMain(const string& root, int sock, int uid, int gid);
 
 TEST_F(JudgeMainTest, CannotCreateWorkingDir) {
     ASSERT_EQUAL(0, rmdir("working"));
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INTERNAL_ERROR, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, SIGTERM) {
-    ASSERT_EQUAL(0, WaitForConnection(true));
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
-    ASSERT_EQUAL(0, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(0, WaitForTermination());
+    global::terminated = true;
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(0, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(-1, Readn(fd_[0], buf_, 1));
 }
 
 TEST_F(JudgeMainTest, ReadCommandFailure) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
-    ASSERT_EQUAL(0, shutdown(client_sock_, SHUT_WR));
-    ASSERT_EQUAL(0, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(1, WaitForTermination());
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(0, Readn(fd_[0], buf_, 1));
 }
 
 TEST_F(JudgeMainTest, InvalidCommand) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     buf_[0] = 0;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, FirstCommandData) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     buf_[0] = CMD_DATA;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, FirstCommandTestCase) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     buf_[0] = CMD_TESTCASE;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, MultipleData) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
     SendDataCommand(TESTDIR + "/data.zip");
-    ASSERT_EQUAL(2, Readn(client_sock_, buf_, 2));
+    buf_[0] = CMD_DATA;
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
+    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
+    ASSERT_EQUAL(2, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(READY, (int)buf_[1]);
-    buf_[0] = CMD_DATA;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, TestBeforeDataSynchirnized) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
     SendCompileCommand(TESTDIR + "/ac.cc");
-    ASSERT_EQUAL(3, Readn(client_sock_, buf_, 3));
+    buf_[0] = CMD_TESTCASE;
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
+    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
+    ASSERT_EQUAL(3, Readn(fd_[0], buf_, 3));
     ASSERT_EQUAL(READY, (int)buf_[0]);
     ASSERT_EQUAL(COMPILING, (int)buf_[1]);
     ASSERT_EQUAL(READY, (int)buf_[2]);
-    buf_[0] = CMD_TESTCASE;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, TestBeforeCompiled) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
     SendDataCommand(TESTDIR + "/data.zip");
-    ASSERT_EQUAL(2, Readn(client_sock_, buf_, 2));
+    buf_[0] = CMD_TESTCASE;
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
+    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
+    ASSERT_EQUAL(2, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(READY, (int)buf_[1]);
-    buf_[0] = CMD_TESTCASE;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, UnnecessaryData) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
     SendDataCommand(TESTDIR + "/data.zip");
-    ASSERT_EQUAL(2, Readn(client_sock_, buf_, 2));
+    SendJudgeCommand(0, 0);
+    buf_[0] = CMD_DATA;
+    Writen(fd_[0], buf_, 1);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
+    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
+    ASSERT_EQUAL(2, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(READY, (int)buf_[1]);
-    SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
     ASSERT_EQUAL(READY, (int)buf_[0]);
-    buf_[0] = CMD_DATA;
-    Writen(client_sock_, buf_, 1);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 2));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(INVALID_INPUT, (int)buf_[0]);
-    ASSERT_EQUAL(1, WaitForTermination());
 }
 
 TEST_F(JudgeMainTest, Success) {
-    ASSERT_EQUAL(0, WaitForConnection());
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL('J', buf_[0]);
     SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
-    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
     SendDataCommand(TESTDIR + "/data.zip");
-    ASSERT_EQUAL(2, Readn(client_sock_, buf_, 2));
+    SendCompileCommand(TESTDIR + "/ac.cc");
+    SendTestCaseCommand(1, 10, 1000, 1000);
+    SendTestCaseCommand(3, 10, 1000, 1000);
+    SendTestCaseCommand(2, 10, 1000, 1000);
+    SendTestCaseCommand(1, 10, 1000, 1000);
+    SendCompileCommand(TESTDIR + "/wa.cc");
+    SendTestCaseCommand(3, 10, 1000, 1000);
+    SendJudgeCommand(0, 0);
+    SendCompileCommand(TESTDIR + "/wa.cc");
+    SendTestCaseCommand(3, 10, 1000, 1000);
+    ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+    ASSERT_EQUAL(1, JudgeMain(root_, fd_[1], 0, 0));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
+    ASSERT_EQUAL(NO_SUCH_PROBLEM, (int)buf_[0]);
+    ASSERT_EQUAL(2, Readn(fd_[0], buf_, 2));
     ASSERT_EQUAL(COMPILING, (int)buf_[0]);
     ASSERT_EQUAL(READY, (int)buf_[1]);
-    SendCompileCommand(TESTDIR + "/ac.cc");
-    ASSERT_EQUAL(3, Readn(client_sock_, buf_, 3));
+    ASSERT_EQUAL(3, Readn(fd_[0], buf_, 3));
     ASSERT_EQUAL(READY, (int)buf_[0]);
     ASSERT_EQUAL(COMPILING, (int)buf_[1]);
     ASSERT_EQUAL(READY, (int)buf_[2]);
-    SendTestCaseCommand(1, 10, 1000, 1000);
-    ASSERT_EQUAL(11, Readn(client_sock_, buf_, 11));
+    ASSERT_EQUAL(11, Readn(fd_[0], buf_, 11));
     ASSERT_EQUAL(RUNNING, (int)buf_[0]);
     ASSERT_EQUAL(JUDGING, (int)buf_[9]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
-    SendTestCaseCommand(3, 10, 1000, 1000);
-    ASSERT_EQUAL(11, Readn(client_sock_, buf_, 11));
+    ASSERT_EQUAL(11, Readn(fd_[0], buf_, 11));
     ASSERT_EQUAL(RUNNING, (int)buf_[0]);
     ASSERT_EQUAL(JUDGING, (int)buf_[9]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
-    SendTestCaseCommand(2, 10, 1000, 1000);
-    ASSERT_EQUAL(11, Readn(client_sock_, buf_, 11));
+    ASSERT_EQUAL(11, Readn(fd_[0], buf_, 11));
     ASSERT_EQUAL(RUNNING, (int)buf_[0]);
     ASSERT_EQUAL(JUDGING, (int)buf_[9]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
-    SendTestCaseCommand(1, 10, 1000, 1000);
-    ASSERT_EQUAL(11, Readn(client_sock_, buf_, 11));
+    ASSERT_EQUAL(11, Readn(fd_[0], buf_, 11));
     ASSERT_EQUAL(RUNNING, (int)buf_[0]);
     ASSERT_EQUAL(JUDGING, (int)buf_[9]);
     ASSERT_EQUAL(ACCEPTED, (int)buf_[10]);
-    SendCompileCommand(TESTDIR + "/wa.cc");
-    ASSERT_EQUAL(3, Readn(client_sock_, buf_, 3));
+    ASSERT_EQUAL(3, Readn(fd_[0], buf_, 3));
     ASSERT_EQUAL(READY, (int)buf_[0]);
     ASSERT_EQUAL(COMPILING, (int)buf_[1]);
     ASSERT_EQUAL(READY, (int)buf_[2]);
-    SendTestCaseCommand(3, 10, 1000, 1000);
-    ASSERT_EQUAL(11, Readn(client_sock_, buf_, 11));
+    ASSERT_EQUAL(11, Readn(fd_[0], buf_, 11));
     ASSERT_EQUAL(RUNNING, (int)buf_[0]);
     ASSERT_EQUAL(JUDGING, (int)buf_[9]);
     ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[10]);
-    SendJudgeCommand(0, 0);
-    ASSERT_EQUAL(1, Readn(client_sock_, buf_, 1));
+    ASSERT_EQUAL(1, Readn(fd_[0], buf_, 1));
     ASSERT_EQUAL(READY, (int)buf_[0]);
-    SendCompileCommand(TESTDIR + "/wa.cc");
-    ASSERT_EQUAL(3, Readn(client_sock_, buf_, 3));
+    ASSERT_EQUAL(3, Readn(fd_[0], buf_, 3));
     ASSERT_EQUAL(READY, (int)buf_[0]);
     ASSERT_EQUAL(COMPILING, (int)buf_[1]);
     ASSERT_EQUAL(READY, (int)buf_[2]);
-    SendTestCaseCommand(3, 10, 1000, 1000);
-    ASSERT_EQUAL(11, Readn(client_sock_, buf_, 11));
+    ASSERT_EQUAL(11, Readn(fd_[0], buf_, 11));
     ASSERT_EQUAL(RUNNING, (int)buf_[0]);
     ASSERT_EQUAL(JUDGING, (int)buf_[9]);
     ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[10]);
