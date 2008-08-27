@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.zju.acm.onlinejudge.judgeserver.JudgeService;
+import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import javax.management.relation.Role;
 
-import cn.edu.zju.acm.onlinejudge.judgeserver.JudgeService;
+import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.security.RoleSecurity;

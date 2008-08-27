@@ -1,4 +1,4 @@
-package cn.edu.zju.acm.onlinejudge.judgeserver;
+package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

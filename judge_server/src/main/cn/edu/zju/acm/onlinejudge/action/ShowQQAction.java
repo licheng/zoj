@@ -22,7 +22,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.form.SubmissionSearchForm;
-import cn.edu.zju.acm.onlinejudge.judgeserver.JudgeService;
+import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;

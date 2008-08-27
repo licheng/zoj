@@ -1,4 +1,4 @@
-package cn.edu.zju.acm.onlinejudge.judgeserver;
+package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import java.net.InetAddress;
 import java.net.Socket;

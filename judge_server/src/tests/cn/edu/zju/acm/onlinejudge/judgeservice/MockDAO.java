@@ -1,4 +1,4 @@
-package cn.edu.zju.acm.onlinejudge.judgeserver;
+package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import cn.edu.zju.acm.onlinejudge.dao.GenericDAO;
 
