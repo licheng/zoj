@@ -203,13 +203,17 @@ int main(int argc, char* argv[]) {
                 }
                 continue;
             }
-            LOG(INFO)<<"Received connection from "<<addr.sin_addr.s_addr<<":"<<addr.sin_port;
-            pid_t pid = fork();
-            if (pid < 0) {
-                LOG(SYSCALL_ERROR)<<"Fail to fork";
-                return 1;
-            } else if (pid == 0) {
-                exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
+            string address = inet_ntoa(addr.sin_addr);
+            LOG(INFO)<<"Received connection from "<<address<<":"<<addr.sin_port;
+            if (ARG_queue_address != address) {
+                LOG(INFO)<<"Refused";
+            } else {
+                pid_t pid = fork();
+                if (pid < 0) {
+                    LOG(SYSCALL_ERROR)<<"Fail to fork";
+                } else if (pid == 0) {
+                    exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
+                }
             }
             close(sock);
         }
