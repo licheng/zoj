@@ -631,7 +631,7 @@ public class UserPersistenceImpl implements UserPersistence {
                 return populateUserProfile(rs);
             } 
             
-            // try to login with 1.0 password
+            // try to login with zoj1.0 password
             ps = conn.prepareStatement(LOGIN_ZOJ1);               
             ps.setString(1, handle);
             ps.setString(2, password);
@@ -683,6 +683,25 @@ public class UserPersistenceImpl implements UserPersistence {
     }
 
     
+    public void updateLastLoginInfo(long id, Date loginDate, String ip) throws PersistenceException {
+    	Connection conn = null;
+        PreparedStatement ps = null;
+         
+        try {
+            conn = Database.createConnection();
+            String sql = "UPDATE user_profile SET last_login_date=?, last_login_ip=? WHERE user_profile_id=?";
+            ps = conn.prepareStatement(sql);               
+            ps.setTimestamp(1, loginDate == null ? null : new Timestamp(loginDate.getTime()));
+            ps.setString(2, ip);
+            ps.setLong(3, id);
+            ps.executeUpdate();
+            
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to update last login info for user id - " + id);
+        } finally {
+            Database.dispose(conn, ps, null);
+        }  
+    }
     
     /**
      * <p>Gets the user profile with given email in persistence layer.</p>

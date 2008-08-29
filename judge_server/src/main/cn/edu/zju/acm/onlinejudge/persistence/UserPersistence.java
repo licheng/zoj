@@ -6,6 +6,8 @@ package cn.edu.zju.acm.onlinejudge.persistence;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.UserPreference;
 import cn.edu.zju.acm.onlinejudge.bean.request.UserCriteria;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -64,6 +66,8 @@ public interface UserPersistence {
     UserProfile getUserProfileByHandle(String handle) throws PersistenceException;
     
     UserProfile login(String handle, String password) throws PersistenceException;
+    
+    void updateLastLoginInfo(long id, Date loginDate, String ip) throws PersistenceException;
 
     /**
      * <p>Gets the user profile with given email in persistence layer.</p>
