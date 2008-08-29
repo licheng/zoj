@@ -1,9 +1,5 @@
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,56 +10,46 @@ public class JudgeClient extends Thread {
 
     public static final int READ_TIMEOUT = 60000;
 
-    private JudgeQueue queue;
+    private JudgeQueue judgeQueue;
 
-    private Socket socket;
+    private String host;
 
     private int port;
 
     private int maxJobs;
 
-    private List<JudgeClientInstance> activeInstances = new ArrayList<JudgeClientInstance>();
-
-    private List<JudgeClientInstance> inactiveInstances = new ArrayList<JudgeClientInstance>();
+    private List<JudgeClientInstance> instances = new ArrayList<JudgeClientInstance>();
 
     private Logger logger;
 
-    public JudgeClient(JudgeQueue queue, Socket socket, int maxJobs) {
-        this.queue = queue;
-        this.socket = socket;
+    public JudgeClient(String host, int port, JudgeQueue judgeQueue, int maxJobs) {
+        this.host = host;
+        this.port = port;
+        this.judgeQueue = judgeQueue;
         this.maxJobs = maxJobs;
         this.logger = Logger.getLogger(this.getClass().getName());
     }
 
     public void run() {
-        try {
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            for (;;) {
-                this.port = in.readInt();
-                logger.info("Judge client port is " + this.port);
+        while (!this.isInterrupted()) {
+            synchronized (this) {
+                this.logger.info("Set jobs to " + this.maxJobs);
+                while (this.instances.size() < maxJobs) {
+                    JudgeClientInstance instance = new JudgeClientInstance(this, this.host, this.port);
+                    instance.start();
+                    this.instances.add(instance);
+                }
+                while (this.instances.size() > maxJobs) {
+                    this.instances.remove(this.instances.size() - 1).interrupt();
+                }
                 try {
-                    this.adjustInstances();
-                } catch (IOException e) {
-                    if (activeInstances.size() + inactiveInstances.size() == 0) {
-                        break;
-                    }
+                    this.wait();
+                } catch (InterruptedException e) {
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        for (JudgeClientInstance instance : activeInstances) {
-            instance.terminate();
-        }
-        for (JudgeClientInstance instance : inactiveInstances) {
-            instance.terminate();
-        }
-        try {
-            if (!this.socket.isClosed()) {
-                this.socket.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (JudgeClientInstance instance : this.instances) {
+            instance.interrupt();
         }
     }
 
@@ -72,61 +58,25 @@ public class JudgeClient extends Thread {
     }
 
     public void setMaxJobs(int maxJobs) {
-        this.maxJobs = maxJobs;
-        try {
-            this.adjustInstances();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (this.maxJobs != maxJobs) {
+            this.maxJobs = maxJobs;
+            synchronized (this) {
+                this.notify();
+            }
         }
     }
 
     public synchronized List<JudgeClientInstance> getInstances() {
-        return new ArrayList<JudgeClientInstance>(this.activeInstances);
+        return new ArrayList<JudgeClientInstance>(this.instances);
     }
 
-    private synchronized void adjustInstances() throws IOException {
-        for (int i = activeInstances.size() - 1; i >= 0; --i) {
-            if (!activeInstances.get(i).isAlive()) {
-                activeInstances.remove(i);
-            }
-        }
-        for (int i = inactiveInstances.size() - 1; i >= 0; --i) {
-            if (!inactiveInstances.get(i).isAlive()) {
-                activeInstances.remove(i);
-            }
-        }
-        while (activeInstances.size() < maxJobs) {
-            if (inactiveInstances.size() > 0) {
-                JudgeClientInstance instance = inactiveInstances.remove(inactiveInstances.size() - 1);
-                instance.wakeup();
-                activeInstances.add(instance);
-            } else {
-                JudgeClientInstance instance = new JudgeClientInstance(this.queue, new InetSocketAddress(this.socket
-                        .getInetAddress(), this.port));
-                instance.start();
-                activeInstances.add(instance);
-            }
-        }
-        while (activeInstances.size() > maxJobs) {
-            JudgeClientInstance instance = activeInstances.remove(activeInstances.size() - 1);
-            instance.rest();
-            inactiveInstances.add(instance);
+    public synchronized void removeInstance(JudgeClientInstance instance) {
+        if (this.instances.remove(instance)) {
+            this.notify();
         }
     }
 
-    public void terminate() {
-        try {
-            if (!this.socket.isClosed()) {
-                this.socket.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (JudgeClientInstance instance : this.activeInstances) {
-            instance.terminate();
-        }
-        for (JudgeClientInstance instance : this.inactiveInstances) {
-            instance.terminate();
-        }
+    public JudgeQueue getJudgeQueue() {
+        return this.judgeQueue;
     }
 }

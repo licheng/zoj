@@ -65,24 +65,10 @@ public class JudgeReply {
     public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED = new JudgeReply(20, "Submission Limit Exceeded",
             "Submission Limit Exceeded", null, false);
     public final static JudgeReply READY = new JudgeReply(100, "Ready", "Ready", null, false);
-    public final static JudgeReply UNSUPPORTED_SOURCE_FILE_TYPE = new JudgeReply(101, "Unsupported Source File Type",
-            "Unsupported Source File Type", null, false);
-    public final static JudgeReply NO_SUCH_PROBLEM = new JudgeReply(102, "No Such Problem",
+    public final static JudgeReply NO_SUCH_PROBLEM = new JudgeReply(101, "No Such Problem",
             "No Such Problem", null, false);
-    public final static JudgeReply INVALID_TESTCASE = new JudgeReply(103, "Invalid Testcase",
-            "Invalid Testcase", null, false);
-    public final static JudgeReply INVALID_TIME_LIMIT = new JudgeReply(104, "Invalid Time Limit",
-            "Invalid Time Limit", null, false);
-    public final static JudgeReply INVALID_MEMORY_LIMIT = new JudgeReply(105, "Invalid Time Limit",
-            "Invalid Time Limit", null, false);
-    public final static JudgeReply INVALID_OUTPUT_LIMIT = new JudgeReply(106, "Invalid Output Limit",
-            "Invalid Output Limit", null, false);
-    public final static JudgeReply INVALID_DATA_SIZE = new JudgeReply(107, "Invalid Data Size",
-            "Invalid Data Size", null, false);
-    public final static JudgeReply INVALID_DATA = new JudgeReply(108, "Invalid Data",
-            "Invalid Data", null, false);
-    public final static JudgeReply INVALID_SOURCE_FILE_TYPE = new JudgeReply(109, "Invalid Source File Type",
-            "Invalid Source File Type", null, false);
+    public final static JudgeReply INVALID_INPUT = new JudgeReply(102, "Invalid Input",
+            "Invalid Input", null, false);
     /**
      * <p>
      * Represents the id of JudgeReply.

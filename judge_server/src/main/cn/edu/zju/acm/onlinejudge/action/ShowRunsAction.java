@@ -177,8 +177,8 @@ public class ShowRunsAction extends BaseAction {
 	            submission.setJudgeReply(JudgeReply.QUEUING);
 	            submission.setMemoryConsumption(0);
 	            submission.setTimeConsumption(0);
-	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0, contestId);
-	            JudgeService.getInstance().rejudge(submission);  
+	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1, contestId);
+	            JudgeService.getInstance().judge(submission);  
             }
         }
     }
