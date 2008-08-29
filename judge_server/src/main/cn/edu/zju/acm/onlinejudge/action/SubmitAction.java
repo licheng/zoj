@@ -93,6 +93,7 @@ public class SubmitAction extends BaseAction {
         Long lastSubmitDate = (Long) context.getSessionAttribute("last_submit");
         long now = System.currentTimeMillis();
         long submitInterval = Long.parseLong(ConfigManager.getValue("submit_interval"));
+        
         if (lastSubmitDate != null && now - lastSubmitDate < submitInterval) {
         	
         	ActionMessages messages = new ActionMessages();       
@@ -101,8 +102,8 @@ public class SubmitAction extends BaseAction {
             
         	return handleSuccess(mapping, context, "submit");
         }
-        
-        
+        context.setSessionAttribute("last_submit", now);
+
         if (contest.isCheckIp()) {
             forward = checkLastLoginIP(mapping, context, isProblemset);
             if (forward != null) {
