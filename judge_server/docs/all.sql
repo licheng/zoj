@@ -1,15 +1,16 @@
 DROP TABLE IF EXISTS submission_status;
-DROP TABLE IF EXISTS submission;
-DROP TABLE IF EXISTS user_stat;
-DROP TABLE IF EXISTS problem;
-DROP TABLE IF EXISTS contest;
+DROP TABLE IF EXISTS user_contest_ip;
 
-DROP TABLE IF EXISTS user_profile;
+DROP TABLE IF EXISTS contest_reference;
+DROP TABLE IF EXISTS problem_reference;
+DROP TABLE IF EXISTS forum_reference;
+
+DROP TABLE IF EXISTS user_stat;
+
+DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS user_preference;
 DROP TABLE IF EXISTS confirmation;
 
-DROP TABLE IF EXISTS role;
-DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS contest_permission;
 DROP TABLE IF EXISTS forum_permission;
 DROP TABLE IF EXISTS permission_level;
@@ -17,18 +18,21 @@ DROP TABLE IF EXISTS contest_language;
 
 DROP TABLE IF EXISTS limits;
 
-DROP TABLE IF EXISTS forum;
-DROP TABLE IF EXISTS thread;
 DROP TABLE IF EXISTS post;
+DROP TABLE IF EXISTS thread;
+DROP TABLE IF EXISTS forum;
+
+DROP TABLE IF EXISTS problem;
+DROP TABLE IF EXISTS contest;
+DROP TABLE IF EXISTS role;
 
 DROP TABLE IF EXISTS reference;
 DROP TABLE IF EXISTS reference_type;
-DROP TABLE IF EXISTS contest_reference;
-DROP TABLE IF EXISTS problem_reference;
-DROP TABLE IF EXISTS forum_reference;
 DROP TABLE IF EXISTS language;
 DROP TABLE IF EXISTS judge_reply;
 
+DROP TABLE IF EXISTS submission;
+DROP TABLE IF EXISTS user_profile;
 DROP TABLE IF EXISTS country;
 DROP TABLE IF EXISTS configuration;
 
