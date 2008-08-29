@@ -171,7 +171,7 @@ public class UserPersistenceImpl implements UserPersistence {
 	private static final String GET_USER = 
 		MessageFormat.format("SELECT  {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, " +
 								"{10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, " +
-								"{19}, {20}, {21}, {22}, {23} FROM {24}",								 
+								"{19}, {20}, {21}, {22}, {23}, {24}, {25} FROM {26}",								 
 							 new Object[] {DatabaseConstants.USER_PROFILE_USER_PROFILE_ID, 
 							     		   DatabaseConstants.USER_PROFILE_HANDLE,
 							     		   DatabaseConstants.USER_PROFILE_PASSWORD,
@@ -196,6 +196,8 @@ public class UserPersistenceImpl implements UserPersistence {
 							     		   DatabaseConstants.USER_PROFILE_CONFIRMED,				  						  
 							     		   DatabaseConstants.USER_PROFILE_ACTIVE,
                                            "nickname",
+                                           "last_login_date",
+                                           "last_login_ip",
 							     		   DatabaseConstants.USER_PROFILE_TABLE});		
 	
 	
@@ -215,7 +217,14 @@ public class UserPersistenceImpl implements UserPersistence {
      * The query to login a user.
      */
     private static final String LOGIN = 
-        GET_USER + " WHERE handle=? AND (password=MD5(?) OR password=ENCRYPT(?, ?))" ;
+        GET_USER + " WHERE handle=? AND password=MD5(?)" ;
+
+    
+    /**
+     * The query to login a user.
+     */
+    private static final String LOGIN_ZOJ1 = 
+        GET_USER + " WHERE handle=? AND password=ENCRYPT(?, ?)" ;
  
 	/**
 	 * The query to get a user profile by email.
@@ -616,21 +625,60 @@ public class UserPersistenceImpl implements UserPersistence {
             ps = conn.prepareStatement(LOGIN);               
             ps.setString(1, handle);
             ps.setString(2, password);
-            ps.setString(3, password);
-            ps.setString(4, handle.length() > 1 ? handle.substring(0, 2) : handle + handle);
             rs = ps.executeQuery();
                         
             if (rs.next()) {                
                 return populateUserProfile(rs);
-            } else {
-                return null;
             } 
+            
+            // try to login with 1.0 password
+            ps = conn.prepareStatement(LOGIN_ZOJ1);               
+            ps.setString(1, handle);
+            ps.setString(2, password);
+            ps.setString(3, handle.length() > 1 ? handle.substring(0, 2) : handle + handle);
+            
+            if (!rs.next()) {
+            	return null;
+            }
+            
+            UserProfile user = populateUserProfile(rs);
+            
+            // fix user password and email
+            fixUserPassword(conn, user, password);
+            fixUserEmail(conn, user);
+            
+            return user;
             
         } catch (SQLException e) {
             throw new PersistenceException("Failed to login the user" + handle + " " + password, e);
         } finally {
             Database.dispose(conn, ps, rs);
         }  
+    }
+    
+    private void fixUserPassword(Connection conn, UserProfile user, String password) {
+    	try {
+    		String sql = "update user_profile set password=MD5(?) where user_profile_id=?";
+    		PreparedStatement ps = conn.prepareStatement(sql);               
+    		ps.setString(1, password);
+            ps.setLong(2, user.getId());
+            ps.executeUpdate();
+            
+    	} catch (Exception e) {
+    		
+    	}
+    }
+    
+    private void fixUserEmail(Connection conn, UserProfile user) {
+    	try {
+    		String sql = "update user_profile set email_address=old_email where user_profile_id=? and email_address=?";
+    		PreparedStatement ps = conn.prepareStatement(sql);               
+    		ps.setLong(1, user.getId());
+    		ps.setString(2, user.getHandle() + "@magicemailhost.com");
+            ps.executeUpdate();
+    	} catch (Exception e) {
+    		
+    	}
     }
 
     
@@ -1116,6 +1164,8 @@ public class UserPersistenceImpl implements UserPersistence {
 		profile.setConfirmed(rs.getBoolean(DatabaseConstants.USER_PROFILE_CONFIRMED));
 		profile.setActive(rs.getBoolean(DatabaseConstants.USER_PROFILE_ACTIVE));
         profile.setNickName(rs.getString("nickname"));
+        profile.setLastLoginDate(new Date(rs.getTimestamp("last_login_date").getTime()));
+        profile.setLastLoginIP(rs.getString("last_login_ip"));
 		return profile;
     }
 }

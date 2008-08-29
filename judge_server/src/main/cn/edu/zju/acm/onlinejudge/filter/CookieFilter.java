@@ -29,9 +29,8 @@ public class CookieFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 
         throws IOException, ServletException {
     	HttpServletRequest r = (HttpServletRequest) request;
-    		
     	if (r.getAttribute(ContextAdapter.SECURITY_SESSION_KEY) == null) {
-    		
+    	
     		Cookie[] cookies = r.getCookies();
     		String handle = null;
     		String password = null;

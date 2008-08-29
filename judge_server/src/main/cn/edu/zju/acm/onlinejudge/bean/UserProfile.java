@@ -141,6 +141,17 @@ public class UserProfile {
     private boolean active = true;
     
     /**
+     * <p>Represents lastLoginDate.</p>
+     */
+    private Date lastLoginDate = null;
+    
+    /**
+     * <p>Represents lastLoginIP.</p>
+     */
+    private String lastLoginIP = null;
+    
+    
+    /**
      * <p>Empty constructor.</p>
      */
     public UserProfile() {
@@ -575,4 +586,20 @@ public class UserProfile {
     public void setDeclaration(String declaration) {
         this.declaration = declaration;
     }
+
+	public Date getLastLoginDate() {
+		return lastLoginDate;
+	}
+
+	public void setLastLoginDate(Date lastLoginDate) {
+		this.lastLoginDate = lastLoginDate;
+	}
+
+	public String getLastLoginIP() {
+		return lastLoginIP;
+	}
+
+	public void setLastLoginIP(String lastLoginIP) {
+		this.lastLoginIP = lastLoginIP;
+	}
 }

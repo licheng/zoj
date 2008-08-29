@@ -84,7 +84,10 @@ public class LoginAction extends BaseAction {
     		 cp.setPath("/");
     		 context.getResponse().addCookie(cp);
     	} 
-    	  
+    	
+    	
+    	// TODO: record login info;
+    	
     	if (forwardPath != null) {    		    		
     		return handleSuccess(new ActionForward(forwardPath, true), context, forwardPath);
     	}
