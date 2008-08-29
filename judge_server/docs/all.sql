@@ -5,11 +5,14 @@ DROP TABLE IF EXISTS contest_reference;
 DROP TABLE IF EXISTS problem_reference;
 DROP TABLE IF EXISTS forum_reference;
 
+DROP TABLE IF EXISTS problem_stat;
 DROP TABLE IF EXISTS user_stat;
 
 DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS user_preference;
 DROP TABLE IF EXISTS confirmation;
+DROP TABLE IF EXISTS password_confirmation;
+
 
 DROP TABLE IF EXISTS contest_permission;
 DROP TABLE IF EXISTS forum_permission;
@@ -29,6 +32,7 @@ DROP TABLE IF EXISTS judge_reply;
 DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS thread;
 DROP TABLE IF EXISTS forum;
+
 
 DROP TABLE IF EXISTS user_profile;
 DROP TABLE IF EXISTS country;
