@@ -74,7 +74,7 @@ function checkProblemFile(submitForm) {
                         </tr>
                         <tr>
                           <td>&nbsp; </td>
-                          <td height="25"><div align="right"></div></td>
+                          <td height="25"><div align="right"><logic:messagesPresent property="message"><font color='red'><html:errors property="message"/></font></logic:messagesPresent></div></td>
                           <td>&nbsp;</td>
                         </tr>
                         <tr>
