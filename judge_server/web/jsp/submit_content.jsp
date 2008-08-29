@@ -35,13 +35,6 @@ function checkProblemFile(submitForm) {
         alert(message);
         return false;
     }
-    
-    if 
-    
-    if (message != "") {
-        alert(message);
-        return false;
-    }
     return true;
 }
 </script>
