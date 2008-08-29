@@ -1164,7 +1164,8 @@ public class UserPersistenceImpl implements UserPersistence {
 		profile.setConfirmed(rs.getBoolean(DatabaseConstants.USER_PROFILE_CONFIRMED));
 		profile.setActive(rs.getBoolean(DatabaseConstants.USER_PROFILE_ACTIVE));
         profile.setNickName(rs.getString("nickname"));
-        profile.setLastLoginDate(new Date(rs.getTimestamp("last_login_date").getTime()));
+        Timestamp loginDate = rs.getTimestamp("last_login_date");
+        profile.setLastLoginDate(loginDate == null ? null : new Date(loginDate.getTime()));
         profile.setLastLoginIP(rs.getString("last_login_ip"));
 		return profile;
     }
