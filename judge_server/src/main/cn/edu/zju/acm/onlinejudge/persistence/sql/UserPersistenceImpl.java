@@ -636,7 +636,8 @@ public class UserPersistenceImpl implements UserPersistence {
             ps.setString(1, handle);
             ps.setString(2, password);
             ps.setString(3, handle.length() > 1 ? handle.substring(0, 2) : handle + handle);
-            
+            rs = ps.executeQuery();
+
             if (!rs.next()) {
             	return null;
             }
