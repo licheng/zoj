@@ -27,6 +27,7 @@
 #include "args.h"
 #include "compile.h"
 #include "global.h"
+#include "util.h"
 
 class DoCompileTest: public TestFixture {
   protected:
@@ -59,18 +60,24 @@ class DoCompileTest: public TestFixture {
 
 TEST_F(DoCompileTest, Success) {
     ASSERT_EQUAL(0, DoCompile(fd_[1], root_, COMPILER_GPP, "ac.cc"));
-    ASSERT_EQUAL((ssize_t)1, read(fd_[0], buf_, 2));
-    ASSERT_EQUAL(COMPILING, (int)buf_[0]);
+    shutdown(fd_[1], SHUT_WR);
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
 }
 
 TEST_F(DoCompileTest, Failure) {
     ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce.cc"));
-    ASSERT_EQUAL((ssize_t)4, read(fd_[0], buf_, 4));
-    ASSERT_EQUAL(COMPILING, (int)buf_[0]);
-    ASSERT_EQUAL(COMPILATION_ERROR, (int)buf_[1]);
-    int len = ntohs(*(uint16_t*)(buf_ + 2));
-    ASSERT(len);
-    ASSERT_EQUAL((ssize_t)len, read(fd_[0], buf_, len + 1));
+    shutdown(fd_[1], SHUT_WR);
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 
 // TODO add a unittest for invalid chars

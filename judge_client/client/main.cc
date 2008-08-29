@@ -38,7 +38,7 @@ DEFINE_OPTIONAL_ARG(bool, daemonize, true, "If true, the program will be started
 
 DEFINE_ARG(string, queue_address, "The ip address of the queue service to which this client connects");
 
-DEFINE_ARG(int, queue_port, "The port of the queue service to which this client connects");
+DEFINE_OPTIONAL_ARG(int, port, 9537, "The port that this client listens on");
 
 DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to stderr as well");
 
@@ -101,7 +101,7 @@ void SIGPIPEHandler(int sig) {
 
 int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
-int CreateServerSocket() {
+int CreateServerSocket(int port) {
     int sock = socket(PF_INET, SOCK_STREAM, 6);
     if (sock == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create socket";
@@ -117,7 +117,7 @@ int CreateServerSocket() {
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    address.sin_port = 0;
+    address.sin_port = port;
     if (bind(sock, (struct sockaddr*)&address, sizeof(address)) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to bind";
         close(sock);
@@ -128,6 +128,7 @@ int CreateServerSocket() {
         close(sock);
         return -1;
     }
+    LOG(INFO)<<"Listening on port "<<port;
     return sock;
 }
 
@@ -162,7 +163,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int server_sock = CreateServerSocket();
+    int server_sock = CreateServerSocket(ARG_port);
     if (server_sock < 0) {
         return 1;
     }

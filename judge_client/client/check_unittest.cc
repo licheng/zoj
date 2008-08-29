@@ -25,6 +25,7 @@
 #include "check.h"
 #include "global.h"
 #include "trace.h"
+#include "test_util-inl.h"
 
 class DoCheckTest: public TestFixture {
   protected:
@@ -35,6 +36,10 @@ class DoCheckTest: public TestFixture {
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         InstallHandlers();
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+        ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
+        output_ = judge_ = "";
     }
 
     virtual void TearDown() {
@@ -48,67 +53,73 @@ class DoCheckTest: public TestFixture {
         system(("rm -rf " + root_).c_str());
     }
 
+    int Run() {
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/" + output_).c_str(), "p.out"));
+        int ret = DoCheck(fd_[1], 0, judge_);
+        shutdown(fd_[1], SHUT_WR);
+        return ret;
+    }
+
     int fd_[2];
     char buf_[32];
     string root_;
+    string output_;
+    string judge_;
 };
 
 TEST_F(DoCheckTest, Accepted) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(), "p.out"));
-    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, ""));
-    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
-    ASSERT_EQUAL(JUDGING, (int)buf_[0]);
-    ASSERT_EQUAL(ACCEPTED, (int)buf_[1]);
+    output_ = "ac.out";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
 }
 
 TEST_F(DoCheckTest, WrongAnswer) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(), "p.out"));
-    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, ""));
-    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
-    ASSERT_EQUAL(JUDGING, (int)buf_[0]);
-    ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[1]);
+    output_ = "wa.out";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(WRONG_ANSWER, ReadLastUint32(fd_[0]));
 }
 
 TEST_F(DoCheckTest, PresentationError) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(), "p.out"));
-    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, ""));
-    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
-    ASSERT_EQUAL(JUDGING, (int)buf_[0]);
-    ASSERT_EQUAL(PRESENTATION_ERROR, (int)buf_[1]);
+    output_ = "pe.out";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(PRESENTATION_ERROR, ReadLastUint32(fd_[0]));
 }
 
 TEST_F(DoCheckTest, SpecialJudgeAccepted) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.out").c_str(), "p.out"));
-    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, "judge"));
-    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
-    ASSERT_EQUAL(JUDGING, (int)buf_[0]);
-    ASSERT_EQUAL(ACCEPTED, (int)buf_[1]);
+    output_ = "ac.out";
+    judge_ = "judge";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
 }
 
 TEST_F(DoCheckTest, SpecialJudgeWrongAnswer) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.out").c_str(), "p.out"));
-    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, "judge"));
-    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
-    ASSERT_EQUAL(JUDGING, (int)buf_[0]);
-    ASSERT_EQUAL(WRONG_ANSWER, (int)buf_[1]);
+    output_ = "wa.out";
+    judge_ = "judge";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(WRONG_ANSWER, ReadLastUint32(fd_[0]));
 }
 
 TEST_F(DoCheckTest, SpecialJudgePresentationError) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/pe.out").c_str(), "p.out"));
-    ASSERT_EQUAL(0, DoCheck(fd_[1], 0, "judge"));
-    ASSERT_EQUAL((ssize_t)2, read(fd_[0], buf_, 3));
-    ASSERT_EQUAL(JUDGING, (int)buf_[0]);
-    ASSERT_EQUAL(PRESENTATION_ERROR, (int)buf_[1]);
+    output_ = "pe.out";
+    judge_ = "judge";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(PRESENTATION_ERROR, ReadLastUint32(fd_[0]));
 }

@@ -35,7 +35,7 @@
 int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption) {
     time_consumption = htonl(time_consumption);
     memory_consumption = htonl(memory_consumption);
-    uint8_t reply = RUNNING;
+    uint32_t reply = htonl(RUNNING);
     if (Writen(sock, &reply, sizeof(reply)) == -1 ||
         Writen(sock, &time_consumption, sizeof(time_consumption)) == -1 ||
         Writen(sock, &memory_consumption, sizeof(memory_consumption)) == -1) {

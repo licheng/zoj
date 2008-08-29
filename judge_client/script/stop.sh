@@ -1,2 +1,2 @@
 #!/bin/bash
-killall -s SIGTERM judge_client
+killall -s SIGTERM judged

@@ -19,7 +19,7 @@ if [ "$1" == "" ]; then
 fi
 
 address=${1%:*}
-port=${1##*:}
+port=$2
 
 root=`readlink /proc/$$/fd/255`
 root=${root%/*}
@@ -65,6 +65,6 @@ if [ "`lsmod | grep kmmon`" == "" ]; then
 fi
 
 ids=`cat /etc/passwd | grep zoj | awk -F ':' '{print "--uid=" $3, "--gid=" $4}'`
-cmd="./judged --compiler=\"$supported_source_file_types\" --daemonize --root=. --queue_address=\"$address\" --queue_port=$port $ids --info=`cat /proc/cpuinfo /proc/meminfo`"
+cmd="./judged --compiler=\"$supported_source_file_types\" --daemonize --root=. --queue_address=\"$address\" --port=$port $ids"
 echo $cmd
 eval $cmd

@@ -121,21 +121,6 @@ int CreateShellProcess(const char* command, const StartupInfo& process_info);
 // Returns the number of bytes actually read, or -1 if any error occurs.
 ssize_t Readn(int fd, void* buffer, size_t count);
 
-static inline int ReadUint8(int fd, uint8_t* var) {
-    if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
-        return -1;
-    }
-    return 0;
-}
-
-static inline int ReadUint16(int fd, uint16_t* var) {
-    if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
-        return -1;
-    }
-    *var = ntohs(*var);
-    return 0;
-}
-
 static inline int ReadUint32(int fd, uint32_t* var) {
     if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
         return -1;
@@ -149,8 +134,9 @@ static inline int ReadUint32(int fd, uint32_t* var) {
 int Writen(int fd, const void* buffer, size_t count);
 
 // Sends 1 byte code back to the queue services. Return 0 if success, or -1 if any error occurs.
-static inline int SendReply(int sock, uint8_t reply) {
-    return Writen(sock, &reply, 1);
+static inline int SendReply(int sock, uint32_t reply) {
+    reply = htonl(reply);
+    return Writen(sock, &reply, sizeof(reply));
 }
 
 static inline int SendMessage(int sock, const string& message) {

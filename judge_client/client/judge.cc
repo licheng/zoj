@@ -40,11 +40,11 @@ int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revisio
     uint32_t submission_id;
     uint32_t _problem_id;
     uint32_t _revision;
-    uint16_t checksum;
+    uint32_t checksum;
     if (ReadUint32(sock, &submission_id) == -1 ||
         ReadUint32(sock, &_problem_id) == -1 ||
         ReadUint32(sock, &_revision) == -1 ||
-        ReadUint16(sock, &checksum)) {
+        ReadUint32(sock, &checksum)) {
         return -1;
     }
     *problem_id = _problem_id;
@@ -77,12 +77,12 @@ int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revisio
 }
 
 int ExecCompileCommand(int sock, const string& root, const string& working_root, int* compiler) {
-    uint8_t compiler_id;
+    uint32_t compiler_id;
     uint32_t source_file_size;
-    uint16_t checksum;
-    if (ReadUint8(sock, &compiler_id) == -1 ||
+    uint32_t checksum;
+    if (ReadUint32(sock, &compiler_id) == -1 ||
         ReadUint32(sock, &source_file_size) == -1 ||
-        ReadUint16(sock, &checksum) == -1) {
+        ReadUint32(sock, &checksum) == -1) {
         return -1;
     }
     LOG(INFO)<<StringPrintf("Compiler:%u", (unsigned int)compiler_id);
@@ -123,16 +123,16 @@ int ExecCompileCommand(int sock, const string& root, const string& working_root,
 }
 
 int ExecTestCaseCommand(int sock, const string& root, int problem_id, int revision, int compiler, int uid, int gid) {
-    uint8_t testcase;
-    uint16_t time_limit;
+    uint32_t testcase;
+    uint32_t time_limit;
     uint32_t memory_limit;
-    uint16_t output_limit;
-    uint16_t checksum;
-    if (ReadUint8(sock, &testcase) == -1 ||
-        ReadUint16(sock, &time_limit) == -1 ||
+    uint32_t output_limit;
+    uint32_t checksum;
+    if (ReadUint32(sock, &testcase) == -1 ||
+        ReadUint32(sock, &time_limit) == -1 ||
         ReadUint32(sock, &memory_limit) == -1 ||
-        ReadUint16(sock, &output_limit) == -1 ||
-        ReadUint16(sock, &checksum)) {
+        ReadUint32(sock, &output_limit) == -1 ||
+        ReadUint32(sock, &checksum)) {
         return -1;
     }
     LOG(INFO)<<StringPrintf("Testcase:%u TL:%u ML:%u OL:%u",
@@ -300,9 +300,9 @@ int CheckData(int sock, const string& root, const string& data_dir) {
 
 int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsigned int revision) {
     uint32_t size;
-    uint16_t checksum;
+    uint32_t checksum;
     if (ReadUint32(sock, &size) == -1 ||
-        ReadUint16(sock, &checksum) == -1) {
+        ReadUint32(sock, &checksum) == -1) {
         return -1;
     }
     if (CheckSum(CMD_DATA) + CheckSum(size) != checksum) {
@@ -392,8 +392,10 @@ int JudgeMain(const string& root, int sock, int uid, int gid) {
     bool data_ready = false;
     // Loops until SIGTERM or SIGPIPE is received, sighandler will set global::terminated to false
     while (!global::terminated) {
-        uint8_t command;
-        if (ReadUint8(sock, &command) == -1) {
+        uint32_t command;
+        if (ReadUint32(sock, &command) == -1) {
+            LOG(ERROR)<<"Invalid command.";
+            SendReply(sock, INVALID_INPUT);
             ret = 1;
             break;
         }

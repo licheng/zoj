@@ -83,7 +83,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
         } else {
             LOG(INFO)<<"Compilation error";
             SendReply(sock, COMPILATION_ERROR);
-            uint16_t len = htons(count);
+            uint32_t len = htonl(count);
             Writen(sock, &len, sizeof(len));
             for (int i = 0; i < count; ++i) {
                 if (error_message[i] <= 0) {

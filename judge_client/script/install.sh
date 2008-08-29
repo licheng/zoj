@@ -22,7 +22,7 @@ cp script/start.sh "$dir"
 cp script/stop.sh "$dir"
 CreateDir "$dir/script" 755
 cp script/compile.sh "$dir"/script
-cp client/judge_client "$dir"
+cp client/judged "$dir"
 cp kernel_module/kmmon.ko "$dir"
 chmod +x "$dir"/*.sh
 chmod +x "$dir"/script/compile.sh
