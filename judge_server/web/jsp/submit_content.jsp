@@ -90,7 +90,7 @@ function checkProblemFile(submitForm) {
                           <td height="25" valign="top"> <div align="right"> Submit
                               Box &nbsp;&nbsp;</div></td>
                           <td><font color=red>
-                            <textarea name="source" cols="60" rows="20" id="source"><bean:write name="source"/></textarea>
+                            <textarea name="source" cols="60" rows="20" id="source"><logic:present name="source"><bean:write name="source"/></logic:present></textarea>
                             </font></td>
                         </tr>
                       </table>
