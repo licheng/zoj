@@ -93,6 +93,7 @@ CREATE TABLE user_profile (
     super_admin         TINYINT         NOT NULL DEFAULT 0,
 
     last_login_date     DATETIME        NULL,
+    last_login_ip       VARCHAR(256)    NULL,
     
     old_email           VARCHAR(128)    NULL,
     old_password        VARCHAR(32)     NULL,
