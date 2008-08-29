@@ -80,7 +80,7 @@ CREATE TABLE user_profile (
     gender              CHAR(1)         NOT NULL DEFAULT ' ',
 
     school              VARCHAR(128)    NULL,
-    major               VARCHAR(32)     NULL,
+    major               VARCHAR(64)     NULL,
     graduate_student    TINYINT         NULL,
     graduation_year     SMALLINT        NULL,
     student_number      VARCHAR(32)     NULL,
@@ -939,6 +939,10 @@ NOW(), 'M', NULL, NULL, 0, NULL, NULL, 1, 1, 1, 1, NOW(), 1, NOW());
 
 INSERT INTO user_preference(user_profile_id, plan, problem_paging, submission_paging, status_paging, user_paging, post_paging, thread_paging, create_user, create_date, last_update_user, last_update_date)
 VALUES(1, '', 100, 20, 20, 20, 20, 20, 1, NOW(), 1, NOW());
+
+DROP TRIGGER IF EXISTS submission_ai;
+DROP TRIGGER IF EXISTS submission_au;
+DROP TRIGGER IF EXISTS problem_ai;
 
 DELIMITER |
 CREATE TRIGGER submission_ai
