@@ -990,3 +990,5 @@ INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 20
 INSERT INTO problem_stat (problem_id, judge_reply_id) VALUES (NEW.problem_id, 101);
 END;
 |
+
+DELIMITER ;
