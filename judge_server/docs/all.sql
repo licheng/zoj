@@ -16,25 +16,24 @@ DROP TABLE IF EXISTS forum_permission;
 DROP TABLE IF EXISTS permission_level;
 DROP TABLE IF EXISTS contest_language;
 
-DROP TABLE IF EXISTS limits;
+DROP TABLE IF EXISTS role;
+
+DROP TABLE IF EXISTS reference;
+DROP TABLE IF EXISTS reference_type;
+DROP TABLE IF EXISTS submission;
+DROP TABLE IF EXISTS problem;
+DROP TABLE IF EXISTS contest;
+DROP TABLE IF EXISTS language;
+DROP TABLE IF EXISTS judge_reply;
 
 DROP TABLE IF EXISTS post;
 DROP TABLE IF EXISTS thread;
 DROP TABLE IF EXISTS forum;
 
-DROP TABLE IF EXISTS problem;
-DROP TABLE IF EXISTS contest;
-DROP TABLE IF EXISTS role;
-
-DROP TABLE IF EXISTS reference;
-DROP TABLE IF EXISTS reference_type;
-DROP TABLE IF EXISTS language;
-DROP TABLE IF EXISTS judge_reply;
-
-DROP TABLE IF EXISTS submission;
 DROP TABLE IF EXISTS user_profile;
 DROP TABLE IF EXISTS country;
 DROP TABLE IF EXISTS configuration;
+DROP TABLE IF EXISTS limits;
 
 CREATE TABLE country (
     country_id          BIGINT          NOT NULL PRIMARY KEY,
@@ -852,8 +851,8 @@ DELETE FROM permission_level;
 
 INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(1, 'View', 1, NOW(), 1, NOW());
 INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(2, 'Participate', 1, NOW(), 1, NOW());
-INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(4, 'Admin', 1, NOW(), 1, NOW());
 INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(3, 'ParticipateViewSource', 1, NOW(), 1, NOW());
+INSERT INTO permission_level(permission_level_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(4, 'Admin', 1, NOW(), 1, NOW());
 
 DELETE FROM limits;
 
