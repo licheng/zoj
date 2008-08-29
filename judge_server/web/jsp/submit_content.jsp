@@ -21,7 +21,9 @@
 
 %>
 <script language="JavaScript">
+
 function checkProblemFile(submitForm) {
+
     var message = "";
     if (submitForm.languageId.value == '') {
         message = 'Language should be selected.';
@@ -29,6 +31,13 @@ function checkProblemFile(submitForm) {
     if (submitForm.source.value == '') {
         message += '\nSource cannot be empty';
     }
+    if (message != "") {
+        alert(message);
+        return false;
+    }
+    
+    if 
+    
     if (message != "") {
         alert(message);
         return false;
@@ -70,7 +79,6 @@ function checkProblemFile(submitForm) {
                             }
                             %>
 
-
                         </tr>
                         <tr>
                           <td>&nbsp; </td>
@@ -82,7 +90,7 @@ function checkProblemFile(submitForm) {
                           <td height="25" valign="top"> <div align="right"> Submit
                               Box &nbsp;&nbsp;</div></td>
                           <td><font color=red>
-                            <textarea name="source" cols="60" rows="20" id="source"></textarea>
+                            <textarea name="source" cols="60" rows="20" id="source"><bean:write name="source"/></textarea>
                             </font></td>
                         </tr>
                       </table>

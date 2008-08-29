@@ -100,6 +100,8 @@ public class SubmitAction extends BaseAction {
             messages.add("message", new ActionMessage("onlinejudge.submit.interval"));
             this.saveErrors(context.getRequest(), messages);
             
+            context.setAttribute("source", source);
+            
         	return handleSuccess(mapping, context, "submit");
         }
         context.setSessionAttribute("last_submit", now);
