@@ -20,11 +20,12 @@
 #include <string>
 
 #include <errno.h>
+#include <sys/un.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "global.h"
 #include "logging.h"
-#include "log_server.h"
 #include "args.h"
 #include "util.h"
 
@@ -99,6 +100,10 @@ void SIGPIPEHandler(int sig) {
     global::socket_closed = 1;
 }
 
+void SIGCHLDHandler(int sig) {
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
 int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
 int CreateServerSocket(int port) {
@@ -117,7 +122,7 @@ int CreateServerSocket(int port) {
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    address.sin_port = port;
+    address.sin_port = htons(port);
     if (bind(sock, (struct sockaddr*)&address, sizeof(address)) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to bind";
         close(sock);
@@ -131,6 +136,70 @@ int CreateServerSocket(int port) {
     LOG(INFO)<<"Listening on port "<<port;
     return sock;
 }
+
+int CreateUnixDomainServerSocket() {
+    int server_sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (server_sock < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to create socket";
+        return -1;
+    }
+    struct sockaddr_un un;
+    memset(&un, 0, sizeof(un));
+    un.sun_family = AF_UNIX;
+    string sock_name = ARG_root + "/working/log.sock";
+    unlink(sock_name.c_str());
+    strcpy(un.sun_path, sock_name.c_str());
+    if (bind(server_sock, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + sock_name.size()) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to bind";
+        return -1;
+    }
+    if (listen(server_sock, MAX_JOBS + 2) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to listen";
+        return -1;
+    }
+    return server_sock;
+}
+
+
+class JudgeProcess {
+  public:
+    JudgeProcess(int sock) : sock_(sock), pbuf_(buf_) { }
+    ~JudgeProcess() {
+        close(sock_);
+    }
+
+    int sock() { return sock_; }
+
+    int ReadLines(vector<string>* lines) {
+        int count = read(sock_, pbuf_, sizeof(buf_) - (pbuf_ - buf_));
+        if (count < 0) {
+            if (errno != EINTR) {
+                LOG(SYSCALL_ERROR)<<"Fail to read log";
+                return -1;
+            }
+        } else {
+            char* start = buf_;
+            for (char* p = pbuf_; p - pbuf_ < count; ++p) {
+                if (*p == '\n') {
+                    lines->push_back(string(start, p - start));
+                    start = p + 1;
+                }
+            }
+            pbuf_ += count;
+            count = start - buf_;
+            if (count) {
+                memmove(buf_, start, count);
+                pbuf_ -= count;
+            }
+        }
+        return 0;
+    }
+
+  private:
+    int sock_;
+    char buf_[8192];
+    char* pbuf_;
+};
 
 int JudgeMain(const string& root, int sock, int uid, int gid);
 
@@ -157,14 +226,15 @@ int main(int argc, char* argv[]) {
     // prevents SIGPIPE to terminate the processes.
     InstallSignalHandler(SIGPIPE, SIGPIPEHandler);
 
-    LogServer* log_server = LogServer::Create(ARG_root);
-
-    if (log_server == NULL) {
-        return 1;
-    }
+    InstallSignalHandler(SIGCHLD, SIGCHLDHandler);
 
     int server_sock = CreateServerSocket(ARG_port);
     if (server_sock < 0) {
+        return 1;
+    }
+
+    int log_server_sock = CreateUnixDomainServerSocket();
+    if (log_server_sock < 0) {
         return 1;
     }
 
@@ -181,20 +251,53 @@ int main(int argc, char* argv[]) {
         Log::SetLogToStderr(false);
     }
 
-    pid_t pid = fork();
-    if (pid < 0) {
-        return 1;
-    }
-    if (pid == 0) {
-        close(server_sock);
-        log_server->Start();
-    } else {
-        if (fd >= 0) {
-            close(fd);
+    Log::SetLogFile(new DiskLogFile(ARG_root + "/log/"));
+    vector<JudgeProcess*> children;
+
+    while (!global::terminated) {
+        int nfds = max(log_server_sock, server_sock);
+        fd_set fdset;
+        FD_ZERO(&fdset);
+        FD_SET(server_sock, &fdset);
+        FD_SET(log_server_sock, &fdset);
+        for (int i = 0; i < children.size(); ++i) {
+            FD_SET(children[i]->sock(), &fdset);
+            if (children[i]->sock() > nfds) {
+                nfds = children[i]->sock();
+            }
         }
-        delete log_server;
-        Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
-        while (!global::terminated) {
+        int ready = select(nfds + 1, &fdset, NULL, NULL, NULL);
+        if (ready == -1) {
+            if (errno != EINTR) {
+                LOG(SYSCALL_ERROR)<<"Fail to select";
+                sleep(10);
+            }
+            continue;
+        }
+        for (int i = 0; i < children.size(); ++i) {
+            if (FD_ISSET(children[i]->sock(), &fdset)) {
+                vector<string> lines;    
+                if (children[i]->ReadLines(&lines) < 0) {
+                    delete children[i];
+                    children.erase(children.begin() + i);
+                    --i;
+                }
+                for (int j = 0; j < lines.size(); ++j) {
+                    LOG(RAW)<<lines[j];
+                }
+            }
+        }
+        if (FD_ISSET(log_server_sock, &fdset)) {
+            socklen_t len;
+            struct sockaddr_un un;
+            int client_sock = accept(log_server_sock, (struct sockaddr*)&un, &len);
+            if (client_sock < 0) {
+                LOG(SYSCALL_ERROR)<<"Fail to accept";
+            } else {
+                children.push_back(new JudgeProcess(client_sock));
+            }
+        }
+        if (FD_ISSET(server_sock, &fdset)) {
             sockaddr_in addr;
             socklen_t len = sizeof(sockaddr_in);
             int sock = accept(server_sock, (struct sockaddr*)&addr, &len);
@@ -213,11 +316,13 @@ int main(int argc, char* argv[]) {
                 if (pid < 0) {
                     LOG(SYSCALL_ERROR)<<"Fail to fork";
                 } else if (pid == 0) {
+                    Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
                     exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
                 }
             }
             close(sock);
         }
+
     }
     return 0;
 }

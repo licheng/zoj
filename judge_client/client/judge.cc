@@ -97,11 +97,12 @@ int ExecCompileCommand(int sock, const string& root, const string& working_root,
     const int COMPILER_NUM = sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
     for (int i = 0; i < COMPILER_NUM; ++i) {
         if (compiler_id == global::COMPILER_LIST[i].id) {
-            *compiler = compiler_id;
+            *compiler = i;
             break;
         }
     }
-    if (*compiler < 0 || !IsSupportedCompiler(global::COMPILER_LIST[compiler_id].compiler)) {
+    if (*compiler < 0 || !IsSupportedCompiler(global::COMPILER_LIST[*compiler].compiler)) {
+        LOG(DEBUG)<<global::COMPILER_LIST[*compiler].compiler<<' '<<ARG_compiler;
         LOG(ERROR)<<"Invalid compiler "<<(int)compiler_id;
         SendReply(sock, INVALID_INPUT);
         return -1;
@@ -115,10 +116,12 @@ int ExecCompileCommand(int sock, const string& root, const string& working_root,
         return -1;
     }
 
-    if (DoCompile(sock, root, *compiler, source_filename) == -1) {
-        return -1;
+    switch (DoCompile(sock, root, *compiler, source_filename)) {
+        case -1:
+            return -1;
+        case 0:
+            SendReply(sock, READY);
     }
-    SendReply(sock, READY);
     return 0;
 }
 
@@ -347,6 +350,7 @@ int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsig
             return -1;
         }
     }
+    SendReply(sock, READY);
     LOG(INFO)<<"Saving data file. Size: "<<size;
     if (SaveFile(sock, tempDir + "/data.zip", size) == -1) {
         SendReply(sock, INTERNAL_ERROR);
@@ -399,7 +403,9 @@ int JudgeMain(const string& root, int sock, int uid, int gid) {
             ret = 1;
             break;
         }
-        if (command == CMD_JUDGE) {
+        if (command == CMD_PING) {
+            SendReply(sock, READY);
+        } else if (command == CMD_JUDGE) {
             int result = ExecJudgeCommand(sock, root, &problem_id, &revision);
             if (result == -1) {
                 ret = 1;

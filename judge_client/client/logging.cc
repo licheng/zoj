@@ -72,13 +72,15 @@ void DiskLogFile::Write(const string& message) {
 }
 
 void DiskLogFile::CreateNewFile() {
-    fd_ = -1;
     size_ = 0;
-    fd_ = open(filename_.c_str(), O_RDWR | O_CREAT | O_TRUNC);
+    string filename = StringPrintf("%s%s.log",
+                                   log_root_.c_str(),
+                                   GetLocalTimeAsString("%Y-%m-%d-%H-%M-%S").c_str());
+    fd_ = open(filename.c_str(), O_RDWR | O_CREAT, 0600);
     if (fd_ < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
-        syslog(LOG_ERR, "Fail to create file %s: %s", filename_.c_str(), error_message.c_str());
+        syslog(LOG_ERR, "Fail to create file %s: %s", filename.c_str(), error_message.c_str());
     }
 }
 
@@ -93,15 +95,12 @@ void DiskLogFile::Close() {
     }
 }
 
-UnixDomainSocketLogFile::~UnixDomainSocketLogFile() {
-    Close();
+UnixDomainSocketLogFile::UnixDomainSocketLogFile(const string& root)
+    : root_(root), sock_(-1), prefix_(StringPrintf("[%d] ", getpid())) {
 }
 
-void UnixDomainSocketLogFile::Close() {
-    if (sock_ >= 0) {
-        close(sock_);
-        sock_ = -1;
-    }
+UnixDomainSocketLogFile::~UnixDomainSocketLogFile() {
+    Close();
 }
 
 void UnixDomainSocketLogFile::Write(const string& message) {
@@ -109,7 +108,15 @@ void UnixDomainSocketLogFile::Write(const string& message) {
         Connect();
     }
     if (sock_ >= 0) {
+        Writen(sock_, prefix_.c_str(), prefix_.size());
         Writen(sock_, message.c_str(), message.size());
+    }
+}
+
+void UnixDomainSocketLogFile::Close() {
+    if (sock_ >= 0) {
+        close(sock_);
+        sock_ = -1;
     }
 }
 
@@ -124,10 +131,10 @@ void UnixDomainSocketLogFile::Connect() {
     struct sockaddr_un un;
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX; 
-    string client_sock_name = "log.sock";
+    string client_sock_name = StringPrintf("%s/working/%d/log.sock", root_.c_str(), getpid());
     unlink(client_sock_name.c_str());
     strcpy(un.sun_path, client_sock_name.c_str());
-    if (bind(sock_, (struct sockaddr*)&un, (int)&((struct sockaddr_un*)0)->sun_path + client_sock_name.size()) < 0) {
+    if (bind(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path)) < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
         syslog(LOG_ERR, "Fail to bind: %s", error_message.c_str());
@@ -141,12 +148,13 @@ void UnixDomainSocketLogFile::Connect() {
     }
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX; 
-    string server_sock_name = root_ + "/log.sock";
+    string server_sock_name = root_ + "/working/log.sock";
     strcpy(un.sun_path, server_sock_name.c_str());
-    if (connect(sock_, (struct sockaddr*)&un, (int)&((struct sockaddr_un*)0)->sun_path + server_sock_name.size()) < 0) {
+    if (connect(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + server_sock_name.size()) < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
         syslog(LOG_ERR, "Fail to connect: %s", error_message.c_str());
         return;
     }
 }
+

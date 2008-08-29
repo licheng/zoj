@@ -56,6 +56,7 @@ chmod 750 prob/0/*
 
 # Prepare /working
 CreateDir working 750
+rm -rf working/*
 
 # Prepare /log
 CreateDir log 750

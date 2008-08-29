@@ -122,7 +122,7 @@ int CreateShellProcess(const char* command, const StartupInfo& process_info);
 ssize_t Readn(int fd, void* buffer, size_t count);
 
 static inline int ReadUint32(int fd, uint32_t* var) {
-    if (Readn(fd, var, sizeof(*var)) < sizeof(*var)) {
+    if (Readn(fd, var, sizeof(*var)) < (int) sizeof(*var)) {
         return -1;
     }
     *var = ntohl(*var);

@@ -68,7 +68,7 @@ TEST_F(DoCompileTest, Success) {
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(-1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce.cc"));
+    ASSERT_EQUAL(1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce.cc"));
     shutdown(fd_[1], SHUT_WR);
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));

@@ -80,6 +80,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
         if (status >= 126) {
             LOG(INFO)<<"Running compile.sh failed";
             SendReply(sock, INTERNAL_ERROR);
+            return -1;
         } else {
             LOG(INFO)<<"Compilation error";
             SendReply(sock, COMPILATION_ERROR);
@@ -91,8 +92,8 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
                 }
             }
             Writen(sock, error_message, count);
+            return 1;
         }
-        return -1;
     }
     LOG(INFO)<<"Compilation done";
     return 0;

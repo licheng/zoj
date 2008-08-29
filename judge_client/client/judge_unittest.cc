@@ -292,7 +292,7 @@ TEST_F(ExecCompileCommandTest, CompilationError) {
                 CheckSum(source_file_size_);
     SendCommand();
 
-    ASSERT_EQUAL(-1, Run());
+    ASSERT_EQUAL(0, Run());
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
@@ -621,7 +621,7 @@ TEST_F(CheckDataTest, UnmatchedTestcase3) {
 TEST_F(CheckDataTest, JudgeCompilationError) {
     ASSERT_EQUAL(0, link((TESTDIR + "/ce.cc").c_str(), "data/judge.cc"));
 
-    ASSERT_EQUAL(-1, Run());
+    ASSERT_EQUAL(0, Run());
 
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILATION_ERROR, ReadUint32(fd_[0]));
@@ -766,6 +766,7 @@ TEST_F(ExecDataCommandTest, CannotSaveFile) {
 
     ASSERT_EQUAL(-1, Run());
 
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(INTERNAL_ERROR, ReadLastUint32(fd_[0]));
 }
 
@@ -779,6 +780,7 @@ TEST_F(ExecDataCommandTest, CannotUnzip) {
 
     ASSERT_EQUAL(-1, Run());
 
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(INVALID_INPUT, ReadLastUint32(fd_[0]));
 }
 
@@ -792,6 +794,7 @@ TEST_F(ExecDataCommandTest, CheckDataFailure) {
 
     ASSERT_EQUAL(-1, Run());
 
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(INVALID_INPUT, ReadLastUint32(fd_[0]));
 }
 
@@ -800,6 +803,7 @@ TEST_F(ExecDataCommandTest, Success) {
 
     ASSERT_EQUAL(0, Run());
 
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadLastUint32(fd_[0]));
 }
@@ -865,6 +869,12 @@ class JudgeMainTest: public TestFixture {
 
     void SendCommand() {
         Writen(fd_[0], buf_, buf_size_);
+    }
+
+    void SendPingCommand() {
+        buf_size_ = 0;
+        AppendUint32(CMD_PING);
+        SendCommand();
     }
 
     void SendJudgeCommand(int problem, int revision) {
@@ -986,6 +996,7 @@ TEST_F(JudgeMainTest, MultipleData) {
     ASSERT_EQUAL(1, Run());
 
     ASSERT_EQUAL(NO_SUCH_PROBLEM, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(INVALID_INPUT, ReadLastUint32(fd_[0]));
@@ -1013,6 +1024,7 @@ TEST_F(JudgeMainTest, TestBeforeCompiled) {
     ASSERT_EQUAL(1, Run());
 
     ASSERT_EQUAL(NO_SUCH_PROBLEM, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(INVALID_INPUT, ReadLastUint32(fd_[0]));
@@ -1027,70 +1039,87 @@ TEST_F(JudgeMainTest, UnnecessaryData) {
     ASSERT_EQUAL(1, Run());
 
     ASSERT_EQUAL(NO_SUCH_PROBLEM, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(INVALID_INPUT, ReadLastUint32(fd_[0]));
 }
 
+TEST_F(JudgeMainTest, Ping) {
+    SendPingCommand();
+
+    ASSERT_EQUAL(1, Run());
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+}
+
 TEST_F(JudgeMainTest, Success) {
+    SendPingCommand();
     SendJudgeCommand(0, 0);
     SendDataCommand(TESTDIR + "/data.zip");
+    SendPingCommand();
     SendCompileCommand(TESTDIR + "/ac.cc");
     SendTestCaseCommand(1, 10, 1000, 1000);
     SendTestCaseCommand(3, 10, 1000, 1000);
     SendTestCaseCommand(2, 10, 1000, 1000);
+    SendPingCommand();
     SendTestCaseCommand(1, 10, 1000, 1000);
-    SendCompileCommand(TESTDIR + "/wa.cc");
-    SendTestCaseCommand(3, 10, 1000, 1000);
+    SendPingCommand();
+    SendCompileCommand(TESTDIR + "/ce.cc");
     SendJudgeCommand(0, 0);
     SendCompileCommand(TESTDIR + "/wa.cc");
     SendTestCaseCommand(3, 10, 1000, 1000);
 
     ASSERT_EQUAL(1, Run());
 
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
     ASSERT_EQUAL(NO_SUCH_PROBLEM, ReadUint32(fd_[0]));
 
-    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
-    
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
-
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
-
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
-
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    
+    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
+    ReadUint32(fd_[0]);
+    ReadUint32(fd_[0]);
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
 
     ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
     ReadUint32(fd_[0]);
     ReadUint32(fd_[0]);
     ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(WRONG_ANSWER, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
+    ReadUint32(fd_[0]);
+    ReadUint32(fd_[0]);
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
+    ReadUint32(fd_[0]);
+    ReadUint32(fd_[0]);
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILATION_ERROR, ReadUint32(fd_[0]));
+    int len = ReadUint32(fd_[0]);
+    ASSERT_EQUAL(len, Readn(fd_[0], buf_, len));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));

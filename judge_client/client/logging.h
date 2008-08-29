@@ -47,7 +47,11 @@ class LogFile {
 
 class DiskLogFile: public LogFile {
     public:
-        DiskLogFile(const string& filename) : filename_(filename), fd_(-1) { }
+        DiskLogFile(const string& log_root) : log_root_(log_root), fd_(-1), size_(0) {
+            if (log_root.empty() || log_root[log_root.size() - 1] != '/') {
+                log_root_ += '/';
+            }
+        }
         virtual ~DiskLogFile();
 
         virtual void Write(const string& message);
@@ -57,14 +61,14 @@ class DiskLogFile: public LogFile {
     private:
         void CreateNewFile();
 
-        string filename_;
+        string log_root_;
         int fd_;
         int size_;
 };
 
 class UnixDomainSocketLogFile: public LogFile {
     public:
-        UnixDomainSocketLogFile(const string& root) : sock_(-1), root_(root) { }
+        UnixDomainSocketLogFile(const string& root);
         virtual ~UnixDomainSocketLogFile();
 
         virtual void Write(const string& message);
@@ -73,8 +77,10 @@ class UnixDomainSocketLogFile: public LogFile {
 
     private:
         void Connect();
-        int sock_;
+
         string root_;
+        int sock_;
+        string prefix_;
 };
 
 class Log {
