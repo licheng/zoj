@@ -279,7 +279,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	list.add(JudgeReply.ACCEPTED);
         	sc.setJudgeReplies(list);
         	sc.setProblemId(submission.getProblemId());
-        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(user).getHandle());
+        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(submission.getUserProfileId()).getHandle());
         	
         	long acnumber = searchSubmissionNumber(sc);
         	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
@@ -352,7 +352,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	list.add(JudgeReply.ACCEPTED);
         	sc.setJudgeReplies(list);
         	sc.setProblemId(submission.getProblemId());
-        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(user).getHandle());
+        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(submission.getUserProfileId()).getHandle());
         	
         	long acnumber = searchSubmissionNumber(sc);
         	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	

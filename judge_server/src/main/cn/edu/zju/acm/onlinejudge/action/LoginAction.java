@@ -4,8 +4,6 @@
 package cn.edu.zju.acm.onlinejudge.action;
 
 
-import java.util.Date;
-
 import javax.servlet.http.Cookie;
 
 import org.apache.struts.action.ActionForm;
@@ -86,13 +84,7 @@ public class LoginAction extends BaseAction {
     		 cp.setPath("/");
     		 context.getResponse().addCookie(cp);
     	} 
-    	
-    	
-    	
-    	// record login info;
-    	PersistenceManager.getInstance().getUserPersistence().updateLastLoginInfo(
-    			context.getUserProfile().getId(), new Date(), context.getRequest().getRemoteHost());
-    	
+    	  
     	if (forwardPath != null) {    		    		
     		return handleSuccess(new ActionForward(forwardPath, true), context, forwardPath);
     	}

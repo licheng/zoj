@@ -70,7 +70,8 @@ public class ProblemImportAction extends BaseAction {
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
     		
         // check contest
-        boolean isProblemset = context.getRequest().getRequestURI().endsWith("importProblems.do");      
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("importProblems.do");
+                
         ActionForward forward = checkContestAdminPermission(mapping, context, isProblemset, false);
         if (forward != null) {
             return forward;
@@ -79,7 +80,8 @@ public class ProblemImportAction extends BaseAction {
         ProblemPackage pack = (ProblemPackage) context.getSessionAttribute("ProblemPackage");
         context.setSessionAttribute("ProblemPackage", null);
         
-        AbstractContest contest = context.getContest();            
+        AbstractContest contest = context.getContest();        
+        
         InputStream in = null;
         String filePath = context.getRequest().getParameter("problemFilePath");
         FormFile file = ((ProblemImportForm) form).getProblemFile();
@@ -88,17 +90,20 @@ public class ProblemImportAction extends BaseAction {
             in = new FileInputStream(filePath);
         } else if (file != null) {
             in = file.getInputStream();
-        }   
+        }                       
         if (in != null) {
 	        ActionMessages messages = new ActionMessages();
 	        pack = ProblemManager.importProblem(in, messages);
             //seePackage(pack, messages);
+            
 	        if (messages.size() > 0) {
 	        	return handleFailure(mapping, context, messages);
 	        }
 	        context.setSessionAttribute("ProblemPackage", pack);
+	        
 	        return handleSuccess(mapping, context, "preview");
         }
+        
         if (pack == null) {
         	return handleSuccess(mapping, context, "selectcontest");
         }
@@ -127,6 +132,7 @@ public class ProblemImportAction extends BaseAction {
             return handleSuccess(mapping, context, "success");
         }
         
+         
         ActionMessages messages = new ActionMessages();       
         messages.add("message", new ActionMessage("onlinejudge.importProblems.success"));
         this.saveErrors(context.getRequest(), messages);
@@ -263,4 +269,3 @@ public class ProblemImportAction extends BaseAction {
     
 
 }
-    

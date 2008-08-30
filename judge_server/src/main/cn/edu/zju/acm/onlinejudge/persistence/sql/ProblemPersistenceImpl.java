@@ -479,7 +479,8 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
         try {
         	conn = Database.createConnection();  
         	String query = buildSearchQuery(criteria, offset, count);
-        	ps = conn.prepareStatement(query);   
+        	System.out.println(query);
+            ps = conn.prepareStatement(query);   
             rs = ps.executeQuery();
                    
             List problems = new ArrayList();

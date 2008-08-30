@@ -8,6 +8,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.RankListEntry" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problem" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.PersistenceManager" %>
 
 <%
     Set solved=(Set)request.getAttribute("solved");
@@ -24,10 +25,10 @@
 
 <div id="content_body">
         <blockquote>
-        <table class="profileTable">
+        <table class="profileTable" border="1">
         <tr>
         <td>
-        <table>
+        <table border="1">
         <center><font color=blue size="+2"><%=user.getHandle() %></font></center>
         <tr>
         <% String nick=user.getNickName(); %>
@@ -39,11 +40,12 @@
         </table>
         </td>
         <td width=60% align=left rowspan=4>
-        <%for(Object o : solved) { 
-        	Problem p=(Problem)o;
-        %>
-        &nbsp;<a href="/showProblems.do?problemId=<%=p.getId() %>"><font color=blue><%=p.getCode() %></font></a>
-        <%} %>
+        <% for(java.util.Iterator it=solved.iterator();it.hasNext();) {
+            Problem p = PersistenceManager.getInstance().getProblemPersistence().getProblem(Long.parseLong(it.next().toString())); %>
+               &nbsp; <a href="<%=request.getContextPath()%>/showProblem.do?contestId=1&problemId=<%=p.getId()%>"><font color="blue"><%=p.getCode()%></font></a>
+
+        <% } %>
+        </td>
         </tr>
         </table>
         </blockquote>

@@ -6,6 +6,6 @@
 <bean:define id="region" value="Home" toScope="request" />
 
 <tiles:insert definition="home.default" flush="true" >
-    <tiles:put name="title" value="ZOJ :: Home :: Shou User Status" />
+    <tiles:put name="title" value="ZOJ :: Home :: Show User Status" />
     <tiles:put name="content" value="/jsp/show_user_status_content.jsp" />
-</tiles:insert>
+</tiles:insert>  

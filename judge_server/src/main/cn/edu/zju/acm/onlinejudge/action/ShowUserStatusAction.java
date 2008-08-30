@@ -9,13 +9,14 @@ import org.apache.struts.action.ActionMapping;
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
+import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 
 public class ShowUserStatusAction extends BaseAction {
-	private static long defaultContestId=1;
+	private static long defaultContestId=ConfigManager.getDefaultContest();
 	private static AbstractContest contest=null;
 	/** 
 	 * Method execute
@@ -39,7 +40,7 @@ public class ShowUserStatusAction extends BaseAction {
 		context.setAttribute("solved", solved);
 		context.setAttribute("user", user);
 		context.setAttribute("RankListEntry", re);
-		context.setSessionAttribute("contest", contest);
+	
 		return handleSuccess(mapping, context, "success");
 	}
 }
