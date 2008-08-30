@@ -15,6 +15,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
+import cn.edu.zju.acm.onlinejudge.bean.Contest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
@@ -88,8 +89,11 @@ public class ShowProblemsAction extends BaseAction {
         List problems = ContestManager.getInstance().getContestProblems(
                 contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);               
         
-    	ContestStatistics statistics = StatisticsManager.getInstance().getContestStatistics(
+    	ContestStatistics statistics = null;
+    	if (contest instanceof Contest) {
+    		statistics = StatisticsManager.getInstance().getContestStatistics(
                 contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);
+    	}
         
         if (context.getUserProfile() != null && problems.size() > 0) {
         	Set solved = StatisticsManager.getInstance().getSolvedProblems(

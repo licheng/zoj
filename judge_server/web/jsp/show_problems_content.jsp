@@ -114,8 +114,10 @@ function deleteProblem(code, problemId) {
                         <td class="problemId"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getCode()%></font></a></td>
                         <td class="problemTitle"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
                         <%
-                            int ac = statistics.getCount(i, 0);
-                            int total = statistics.getProblemCount(i);
+                            //int ac = statistics.getCount(i, 0);
+                            //int total = statistics.getProblemCount(i);
+                            int ac = 0;
+                            int total = 0;
                             String status = "0.00% (0/0)";
                             if (total > 0) {
                             	int r = ac * 10000 / total;
