@@ -1,7 +1,12 @@
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -9,13 +14,15 @@ import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 
 public class JudgeService {
-    private JudgeQueue judgeQueue = new JudgeQueue();
+    private CachedJudgeQueue queue;
+
+    private ServerSocket serverSocket;
 
     private static JudgeService instance;
 
     static {
         try {
-            instance = new JudgeService(Integer.parseInt(ConfigManager.getValue("queue_port")), ConfigManager
+            instance = new JudgeService(128, Integer.parseInt(ConfigManager.getValue("queue_port")), ConfigManager
                     .getValues("client_ip"));
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
@@ -26,22 +33,47 @@ public class JudgeService {
 
     private Logger logger;
 
-    public JudgeService(int port, final String[] clientAddressList) {
+    public JudgeService(int cacheCapacity, int port, final String[] clientHostNameList) throws IOException {
         logger = Logger.getLogger(JudgeService.class.getName());
-        for (String clientAddress : clientAddressList) {
-            String[] info = clientAddress.split(":");
-            JudgeClient client;
-            try {
-                client = new JudgeClient(info[0], Integer.parseInt(info[1]), this.judgeQueue, getClientNumber());
-            } catch (NumberFormatException e) {
-                logger.error("Invalid address " + clientAddress);
-                continue;
-            }
-            synchronized (clients) {
-                clients.add(client);
-            }
-            client.start();
+        if (cacheCapacity < 128) {
+            cacheCapacity = 128;
         }
+        queue = new CachedJudgeQueue(cacheCapacity);
+        this.serverSocket = new ServerSocket(port);
+        logger.info("Listening on port " + port);
+        new Thread() {
+            public void run() {
+                Set<String> clientHostNameSet = new HashSet<String>();
+                for (String clientHostName : clientHostNameList) {
+                    clientHostNameSet.add(clientHostName);
+                }
+                while (!serverSocket.isClosed()) {
+                    try {
+                        Socket socket = serverSocket.accept();
+                        logger.info("Connection from " + socket.getInetAddress().getHostAddress() + ":"
+                                + socket.getPort());
+                        if (!socket.getInetAddress().isLoopbackAddress()
+                                && !clientHostNameSet.contains(socket.getInetAddress().getHostAddress())) {
+                            logger.info("Refused");
+                            socket.close();
+                            continue;
+                        }
+                        JudgeClient client = new JudgeClient(queue, socket, getClientNumber());
+                        synchronized (clients) {
+                            for (int i = clients.size() - 1; i >= 0; --i) {
+                                if (!clients.get(i).isAlive()) {
+                                    clients.remove(i);
+                                }
+                            }
+                            client.start();
+                            clients.add(client);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
     }
 
     private int getClientNumber() {
@@ -52,8 +84,16 @@ public class JudgeService {
         }
     }
 
-    public void judge(Submission submission) throws Exception {
-        judgeQueue.push(submission);
+    public boolean judge(Submission submission) throws Exception {
+        return queue.push(submission);
+    }
+
+    public void rejudge(Submission submission) throws Exception {
+        queue.pushIgnoreCache(submission);
+    }
+
+    public Submission getSubmission(long id) {
+        return queue.getSubmissionInCache(id);
     }
 
     public static JudgeService getInstance() {
@@ -61,7 +101,7 @@ public class JudgeService {
     }
 
     public List<JudgeClient> getClients() {
-        synchronized (this.clients) {
+        synchronized (clients) {
             for (int i = clients.size() - 1; i >= 0; --i) {
                 if (!clients.get(i).isAlive()) {
                     clients.remove(i);
@@ -71,13 +111,14 @@ public class JudgeService {
         }
     }
 
-    public JudgingList getJudgingList() {
-        return judgeQueue.getJudgingList();
-    }
-
     public void terminate() {
-        for (JudgeClient client : this.clients) {
-            client.interrupt();
+        try {
+            this.serverSocket.close();
+            for (JudgeClient client : this.clients) {
+                client.terminate();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
