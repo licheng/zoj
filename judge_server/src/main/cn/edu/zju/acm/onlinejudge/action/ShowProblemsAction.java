@@ -91,11 +91,13 @@ public class ShowProblemsAction extends BaseAction {
         
     	ContestStatistics statistics = null;
     	if (contest instanceof Contest) {
+    		// TODO ob
     		statistics = StatisticsManager.getInstance().getContestStatistics(
                 contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);
     	}
         
-        if (context.getUserProfile() != null && problems.size() > 0) {
+        if (false && context.getUserProfile() != null && problems.size() > 0) {
+        	// TODO ob
         	Set solved = StatisticsManager.getInstance().getSolvedProblems(
         			contest.getId(), context.getUserProfile().getId());
         	context.setAttribute("solved", solved);
@@ -128,7 +130,6 @@ public class ShowProblemsAction extends BaseAction {
             }
             context.setAttribute("CheckMessages", checkMessages);
         }
-        System.out.println(context.getAttribute("contest"));
         
         return handleSuccess(mapping, context, "success");                
                   	    	   
