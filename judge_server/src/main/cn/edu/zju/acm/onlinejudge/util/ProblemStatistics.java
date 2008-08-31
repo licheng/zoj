@@ -1,5 +1,7 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
+import java.util.List;
+
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 
 public class ProblemStatistics {
@@ -17,6 +19,7 @@ public class ProblemStatistics {
 	};
 	private final long[] statistics;
 	private long total = 0;
+	private List bestruns;
 	
 	public ProblemStatistics(long problemId) {		
 		statistics = new long[JUDGE_REPLIES.length];
@@ -26,6 +29,13 @@ public class ProblemStatistics {
 		return total;
 	}
 	
+	public void setBestRuns(List runs) {
+		this.bestruns=runs;
+	}
+	
+	public List getBestRuns() {
+		return bestruns;
+	}
 	
 	public void setCount(int judgeReplyIndex, long value) {
 		if(judgeReplyIndex==-1)

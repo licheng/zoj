@@ -169,6 +169,32 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 										   DatabaseConstants.SUBMISSION_ACTIVE,
 										   DatabaseConstants.USER_PROFILE_ACTIVE,
 										   DatabaseConstants.PROBLEM_ACTIVE});
+	/**
+	 * The query to get submissions.
+	 */
+	private static final String GET_BEST_SUBMISSIONS = 
+		MessageFormat.format("SELECT * FROM (SELECT {0}, s.{1}, {2}, {3}, s.{4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12} " 
+				+ "FROM {13} s LEFT JOIN {14} u ON s.{4} = u.{4} LEFT JOIN {15} p ON s.{1} = p.{1} "
+				+ "WHERE s.{16}=1 AND u.{17}=1 AND p.{18}=1 AND s.{1}=? AND s.{4}=5 ORDER BY s.{6}, s.{7}) AS temp GROUP BY s.{4} LIMIT 10",
+				 			 new Object[] {DatabaseConstants.SUBMISSION_SUBMISSION_ID, 
+										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
+										   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
+										   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
+										   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
+										   DatabaseConstants.SUBMISSION_CONTENT,
+										   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
+										   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
+										   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
+										   DatabaseConstants.SUBMISSION_JUDGE_DATE,
+										   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
+										   DatabaseConstants.USER_PROFILE_HANDLE,
+										   DatabaseConstants.PROBLEM_CODE,
+										   DatabaseConstants.SUBMISSION_TABLE,
+										   DatabaseConstants.USER_PROFILE_TABLE,
+										   DatabaseConstants.PROBLEM_TABLE,
+										   DatabaseConstants.SUBMISSION_ACTIVE,
+										   DatabaseConstants.USER_PROFILE_ACTIVE,
+										   DatabaseConstants.PROBLEM_ACTIVE});
 	
 	/**
 	 * The query to get submission number.
@@ -1282,6 +1308,24 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             	count=rs.getLong(2);
                 pss.setCount(judge_reply_id, count);
             } 
+            
+            ps = conn.prepareStatement(GET_BEST_SUBMISSIONS);
+            ps.setLong(1, problemId);
+        	rs = ps.executeQuery();
+
+            Map languageMap = new ContestPersistenceImpl().getLanguageMap();
+            Map judgeReplyMap = getJudgeReplyMap();
+            List submissions = new ArrayList();
+            while (rs.next()) {
+                Submission submission = populateSubmission(rs);
+            	long languageId = rs.getLong(DatabaseConstants.SUBMISSION_LANGUAGE_ID);
+            	long judgeReplyId = rs.getLong(DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID);
+            	submission.setLanguage((Language) languageMap.get(new Long(languageId)));
+            	submission.setJudgeReply((JudgeReply) judgeReplyMap.get(new Long(judgeReplyId)));
+            	submissions.add(submission);
+            } 
+                                         
+            pss.setBestRuns(submissions);
                                          
             return pss;
         } catch (SQLException e) {
