@@ -175,7 +175,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 	private static final String GET_BEST_SUBMISSIONS = 
 		MessageFormat.format("SELECT * FROM (SELECT {0}, s.{1}, {2}, {3}, s.{4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12} " 
 				+ "FROM {13} s LEFT JOIN {14} u ON s.{4} = u.{4} LEFT JOIN {15} p ON s.{1} = p.{1} "
-				+ "WHERE s.{16}=1 AND u.{17}=1 AND p.{18}=1 AND s.{1}=? AND s.{4}=5 ORDER BY s.{6}, s.{7}) AS temp GROUP BY s.{4} LIMIT 10",
+				+ "WHERE s.{16}=1 AND u.{17}=1 AND p.{18}=1 AND s.{1}=? AND s.{4}=5 ORDER BY s.{6}, s.{7}) AS temp GROUP BY {4} LIMIT 10",
 				 			 new Object[] {DatabaseConstants.SUBMISSION_SUBMISSION_ID, 
 										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
 										   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
