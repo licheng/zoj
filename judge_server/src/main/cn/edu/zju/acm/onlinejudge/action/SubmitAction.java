@@ -23,6 +23,7 @@ import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
+import cn.edu.zju.acm.onlinejudge.judgeservice.Priority;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
@@ -112,7 +113,7 @@ public class SubmitAction extends BaseAction {
         } else {
             submission.setJudgeReply(JudgeReply.QUEUING);
             submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
-            JudgeService.getInstance().judge(submission);
+            JudgeService.getInstance().judge(submission, Priority.NORMAL);
         }
         context.setAttribute("submissionId", submission.getId());
         return handleSuccess(mapping, context, "success");

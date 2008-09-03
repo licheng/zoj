@@ -83,7 +83,7 @@ public class JudgeClientUnitTest {
 	    mockServer.addReply(MockClient.ACCEPTED);
 	}
 	for (int i = 0; i < submissions.length; i++) {
-	    queue.push(submissions[i]);
+	    queue.add(submissions[i]);
 	}
 	for (int i = 0; i < submissions.length; i++) {
 	    for (;;) {
@@ -104,7 +104,7 @@ public class JudgeClientUnitTest {
 	    mockServer.addReply(MockClient.ACCEPTED);
 	}
 	for (int i = 0; i < submissions.length; i++) {
-	    queue.push(submissions[i]);
+	    queue.add(submissions[i]);
 	}
 	for (int i = 0; i < submissions.length; i++) {
 	    for (;;) {
@@ -129,7 +129,7 @@ public class JudgeClientUnitTest {
 	mockServer.addReply(MockClient.ACCEPTED);
 	mockServer.addReply(MockClient.ACCEPTED);
 	for (int i = 0; i < submissions.length; i++) {
-	    queue.push(submissions[i]);
+	    queue.add(submissions[i]);
 	}
 	for (int i = 0; i < submissions.length; i++) {
 	    for (;;) {

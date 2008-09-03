@@ -1,132 +1,224 @@
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
+import cn.edu.zju.acm.onlinejudge.util.Utility;
+
 public class JudgeClient extends Thread {
     public static final int CONNECTION_TIMEOUT = 30000;
 
     public static final int READ_TIMEOUT = 60000;
 
-    private JudgeQueue queue;
+    public static final int HEART_BEAT_INTERVAL = 30000;
 
-    private Socket socket;
+    private String host;
+
+    private List<Language> supportedLanguages = new ArrayList<Language>();
 
     private int port;
 
-    private int maxJobs;
+    private List<JudgeClientInstance> judgeThreads = new ArrayList<JudgeClientInstance>();
 
-    private List<JudgeClientInstance> activeInstances = new ArrayList<JudgeClientInstance>();
+    private JudgeClientErrorHandlingStrategy errorHandlingStrategy = new JudgeClientErrorHandlingStrategy(this);
 
-    private List<JudgeClientInstance> inactiveInstances = new ArrayList<JudgeClientInstance>();
+    private Logger logger = Logger.getLogger(JudgeClient.class);
 
-    private Logger logger;
 
-    public JudgeClient(JudgeQueue queue, Socket socket, int maxJobs) {
-        this.queue = queue;
+
+    private int defaultNumberOfJudgeThreads;
+
+    private DataInputStream in;
+
+    private DataOutputStream out;
+
+    private Socket socket;
+
+    private boolean initialized;
+
+    private JudgeService service;
+
+    private SubmissionFilter submissionFilter = null;
+
+    private int[] pingCounter = new int[] { 0 };
+
+    private Object pingBarrier = new Object();
+
+    public JudgeClient(JudgeService service, Socket socket, int defaultNumberOfJudgeThreads) throws IOException {
+        this.service = service;
+        this.host = socket.getInetAddress().getHostAddress();
         this.socket = socket;
-        this.maxJobs = maxJobs;
-        this.logger = Logger.getLogger(this.getClass().getName());
+        socket.setKeepAlive(true);
+        socket.setSoTimeout(JudgeClient.READ_TIMEOUT);
+        this.defaultNumberOfJudgeThreads = defaultNumberOfJudgeThreads;
+        this.in = new DataInputStream(socket.getInputStream());
+        this.out = new DataOutputStream(socket.getOutputStream());
+        this.initialized = false;
+    }
+
+    public List<JudgeClientInstance> getJudgeThreads() {
+        synchronized (this.judgeThreads) {
+            return new ArrayList<JudgeClientInstance>(this.judgeThreads);
+        }
     }
 
     public void run() {
         try {
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+            this.logger.info("Start to get information");
+            try {
+                this.sendInfoCommand();
+                this.port = this.in.readInt();
+                this.logger.info("port=" + this.port);
+                this.supportedLanguages.clear();
+                int n = this.in.readInt();
+                if (n < 0 || n > LanguageManager.getNumberOfLanguages()) {
+                    logger.error("Invalid number of supported languages:" + n);
+                    return;
+                }
+                for (int i = 0; i < n; ++i) {
+                    int id = this.in.readInt();
+                    Language language = LanguageManager.getLanguage(id);
+                    if (language == null) {
+                        logger.error("Invalid language id:" + id);
+                        return;
+                    }
+                    this.supportedLanguages.add(language);
+                    this.logger.info("Supported language:" + language.getName());
+                }
+                this.initialized = true;
+                for (int i = 0; i < this.defaultNumberOfJudgeThreads; ++i) {
+                    this.addJudgeThread();
+                }
+            } catch (IOException e) {
+                this.logger.error("Fail to get information", e);
+                return;
+            }
             for (;;) {
-                this.port = in.readInt();
-                logger.info("Judge client port is " + this.port);
-                try {
-                    this.adjustInstances();
-                } catch (IOException e) {
-                    if (activeInstances.size() + inactiveInstances.size() == 0) {
-                        break;
+                synchronized (this.pingCounter) {
+                    if (this.pingCounter[0] == 0) {
+                        this.pingCounter.wait(JudgeClient.HEART_BEAT_INTERVAL);
                     }
                 }
+                try {
+                    if (this.sendPingCommand() != JudgeReply.READY.getId()) {
+                        break;
+                    }
+                    synchronized (this.pingBarrier) {
+                        this.pingCounter[0] = 0;
+                        this.pingBarrier.notifyAll();
+                    }
+                } catch (IOException e) {
+                    this.logger.error("Send ping command failure", e);
+                    break;
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (JudgeClientInstance instance : activeInstances) {
-            instance.terminate();
-        }
-        for (JudgeClientInstance instance : inactiveInstances) {
-            instance.terminate();
-        }
-        try {
-            if (!this.socket.isClosed()) {
-                this.socket.close();
+        } catch (InterruptedException e) {
+            this.logger.info("Interrupted");
+        } finally {
+            synchronized (this.pingBarrier) {
+                this.pingCounter[0] = 0;
+                Utility.closeSocket(this.socket);
+                this.pingBarrier.notifyAll();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            for (JudgeClientInstance judgeThread : this.judgeThreads) {
+                judgeThread.interrupt();
+            }
         }
     }
 
-    public int getMaxJobs() {
-        return this.maxJobs;
-    }
-
-    public void setMaxJobs(int maxJobs) {
-        this.maxJobs = maxJobs;
-        try {
-            this.adjustInstances();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void interrupt() {
+        super.interrupt();
+        synchronized (this.judgeThreads) {
+            for (JudgeClientInstance judgeThread : this.judgeThreads) {
+                judgeThread.interrupt();
+            }
+            this.judgeThreads.clear();
         }
     }
 
-    public synchronized List<JudgeClientInstance> getInstances() {
-        return new ArrayList<JudgeClientInstance>(this.activeInstances);
+    public boolean isInitialized() {
+        return this.initialized;
     }
 
-    private synchronized void adjustInstances() throws IOException {
-        for (int i = activeInstances.size() - 1; i >= 0; --i) {
-            if (!activeInstances.get(i).isAlive()) {
-                activeInstances.remove(i);
+    public String getHost() {
+        return this.host;
+    }
+
+    public int getPort() {
+        return this.port;
+    }
+
+    public List<Language> getSupportedLanguages() {
+        return this.supportedLanguages;
+    }
+
+    public SubmissionFilter getSubmissionFilter() {
+        return this.submissionFilter;
+    }
+
+    public void setSubmissionFilter(SubmissionFilter submissionFilter) {       
+        this.submissionFilter = submissionFilter;
+    }
+
+    public JudgeClientErrorHandlingStrategy getErrorHandlingStrategy() {
+        return this.errorHandlingStrategy;
+    }
+
+    public JudgeClientInstance addJudgeThread() {
+        synchronized (this.judgeThreads) {
+            JudgeClientInstance judgeThread = new JudgeClientInstance(this.service, this);
+            judgeThread.start();
+            this.judgeThreads.add(judgeThread);
+            return judgeThread;
+        }
+    }
+
+    public void removeJudgeThread(int index) {
+        synchronized (this.judgeThreads) {
+            this.judgeThreads.remove(index).interrupt();
+        }
+    }
+
+    public void removeDeadThreads() {
+        synchronized (this.judgeThreads) {
+            for (int i = this.judgeThreads.size() - 1; i >= 0; --i) {
+                if (!this.judgeThreads.get(i).isAlive()) {
+                    this.judgeThreads.remove(i);
+                }
             }
         }
-        for (int i = inactiveInstances.size() - 1; i >= 0; --i) {
-            if (!inactiveInstances.get(i).isAlive()) {
-                activeInstances.remove(i);
-            }
-        }
-        while (activeInstances.size() < maxJobs) {
-            if (inactiveInstances.size() > 0) {
-                JudgeClientInstance instance = inactiveInstances.remove(inactiveInstances.size() - 1);
-                instance.wakeup();
-                activeInstances.add(instance);
+    }
+
+    boolean ping() throws InterruptedException {
+        synchronized (this.pingBarrier) {
+            if (this.socket.isClosed()) {
+                return false;
             } else {
-                JudgeClientInstance instance = new JudgeClientInstance(this.queue, new InetSocketAddress(this.socket
-                        .getInetAddress(), this.port));
-                instance.start();
-                activeInstances.add(instance);
+                synchronized (this.pingCounter) {
+                    ++this.pingCounter[0];
+                    this.pingCounter.notify();
+                }
+                this.pingBarrier.wait();
+                return !this.socket.isClosed();
             }
         }
-        while (activeInstances.size() > maxJobs) {
-            JudgeClientInstance instance = activeInstances.remove(activeInstances.size() - 1);
-            instance.rest();
-            inactiveInstances.add(instance);
-        }
+
     }
 
-    public void terminate() {
-        try {
-            if (!this.socket.isClosed()) {
-                this.socket.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (JudgeClientInstance instance : this.activeInstances) {
-            instance.terminate();
-        }
-        for (JudgeClientInstance instance : this.inactiveInstances) {
-            instance.terminate();
-        }
+    private void sendInfoCommand() throws IOException {
+        this.out.write(JudgeClientCommandsFactory.createInfoCommand());
+    }
+
+    private int sendPingCommand() throws IOException {
+        this.out.write(JudgeClientCommandsFactory.createPingCommand());
+        return this.in.readInt();
     }
 }

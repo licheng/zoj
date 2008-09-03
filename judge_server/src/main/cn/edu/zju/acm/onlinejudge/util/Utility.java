@@ -1,5 +1,7 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,6 +10,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.log4j.Logger;
+
 
 public class Utility {
     
@@ -15,6 +19,8 @@ public class Utility {
     private static DateFormat formatUrl = new SimpleDateFormat(
     	"'http://www.timeanddate.com/worldclock/fixedtime.html?" +
     	"month='M'&day='d'&year='yyyy'&hour='HH'&min='mm'&sec='ss'&p1=33'");
+    
+    private static Logger logger = Logger.getLogger(Utility.class);
     
     private Utility() {
       
@@ -140,5 +146,14 @@ public class Utility {
         }
         return ret;
     }
-        
+    
+    public static void closeSocket(Socket socket) {
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            logger.error("Fail to close socket", e);
+        }
+    }        
 }

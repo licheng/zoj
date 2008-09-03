@@ -23,6 +23,7 @@ import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.form.SubmissionSearchForm;
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
+import cn.edu.zju.acm.onlinejudge.judgeservice.Priority;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
@@ -177,8 +178,8 @@ public class ShowRunsAction extends BaseAction {
 	            submission.setJudgeReply(JudgeReply.QUEUING);
 	            submission.setMemoryConsumption(0);
 	            submission.setTimeConsumption(0);
-	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 0, contestId);
-	            JudgeService.getInstance().rejudge(submission);  
+	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1, contestId);
+	            JudgeService.getInstance().judge(submission, Priority.LOW);  
             }
         }
     }

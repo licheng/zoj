@@ -16,27 +16,31 @@ public class LanguageManager {
     private static LanguageDAO languageDAO = DAOFactory.getLanguageDAO();
 
     static {
-	try {
-	    reload();
-	} catch (PersistenceException e) {
-	    throw new ExceptionInInitializerError(e);
-	}
+        try {
+            reload();
+        } catch (PersistenceException e) {
+            throw new ExceptionInInitializerError(e);
+        }
     }
 
     synchronized public static Language getLanguage(long languageId) {
-	return languageMap.get(languageId);
+        return languageMap.get(languageId);
     }
 
     synchronized public static Language getLanguageByExtension(String extension) {
-	return languageExtensionMap.get(extension);
+        return languageExtensionMap.get(extension);
+    }
+    
+    synchronized public static int getNumberOfLanguages() {
+        return languageMap.size();
     }
 
     synchronized public static void reload() throws PersistenceException {
-	languageMap.clear();
-	languageExtensionMap.clear();
-	for (Language language : languageDAO.getAllLanguages()) {
-	    languageMap.put(language.getId(), language);
-	    languageExtensionMap.put(language.getOptions(), language);
-	}
+        languageMap.clear();
+        languageExtensionMap.clear();
+        for (Language language : languageDAO.getAllLanguages()) {
+            languageMap.put(language.getId(), language);
+            languageExtensionMap.put(language.getOptions(), language);
+        }
     }
 }

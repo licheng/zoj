@@ -20,6 +20,20 @@ public class JudgeClientCommandsFactory {
             out.writeInt(CMD_PING);
             out.flush();
         } catch (IOException e) {
+            // Impossible
+            e.printStackTrace();
+        }
+        return buf.toByteArray();
+    }
+
+    public static byte[] createInfoCommand() {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(buf);
+        try {
+            out.writeInt(CMD_INFO);
+            out.flush();
+        } catch (IOException e) {
+            // Impossible
             e.printStackTrace();
         }
         return buf.toByteArray();
@@ -69,6 +83,7 @@ public class JudgeClientCommandsFactory {
                 this.appendInt(this.checksum);
                 this.out.flush();
             } catch (IOException e) {
+                // Impossible
                 e.printStackTrace();
             }
             return buf.toByteArray();
@@ -83,6 +98,7 @@ public class JudgeClientCommandsFactory {
                 this.checksum += this.getCheckSum(value);
                 out.writeInt(value);
             } catch (IOException e) {
+                // Impossible
                 e.printStackTrace();
             }
         }

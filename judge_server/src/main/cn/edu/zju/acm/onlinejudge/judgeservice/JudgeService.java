@@ -11,19 +11,18 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 
 public class JudgeService {
-    private CachedJudgeQueue queue;
-
     private ServerSocket serverSocket;
 
     private static JudgeService instance;
 
     static {
         try {
-            instance = new JudgeService(128, Integer.parseInt(ConfigManager.getValue("queue_port")), ConfigManager
-                    .getValues("client_ip"));
+            instance = new JudgeService(Integer.parseInt(ConfigManager.getValue("queue_port")), ConfigManager
+                    .getValues("client_ip"), Integer.parseInt(ConfigManager.getValue("client_max_job")));
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -33,92 +32,98 @@ public class JudgeService {
 
     private Logger logger;
 
-    public JudgeService(int cacheCapacity, int port, final String[] clientHostNameList) throws IOException {
-        logger = Logger.getLogger(JudgeService.class.getName());
-        if (cacheCapacity < 128) {
-            cacheCapacity = 128;
-        }
-        queue = new CachedJudgeQueue(cacheCapacity);
+    private JudgingQueue judgingQueue = new JudgingQueue();
+
+    private CandidateQueue candidateQueue = new CandidateQueue();
+
+    private SubmissionFilter submissionFilter = new SubmissionFilter();
+
+    public JudgeService(int port, final String[] clientHostNameList, final int defaultClientJobs) throws IOException {
+        this.logger = Logger.getLogger(JudgeService.class);
         this.serverSocket = new ServerSocket(port);
-        logger.info("Listening on port " + port);
+        this.logger.info("Listening on port " + port);
         new Thread() {
             public void run() {
+                Logger logger = Logger.getLogger(JudgeService.class.getName() + ".Thread");
                 Set<String> clientHostNameSet = new HashSet<String>();
                 for (String clientHostName : clientHostNameList) {
                     clientHostNameSet.add(clientHostName);
                 }
                 while (!serverSocket.isClosed()) {
                     try {
-                        Socket socket = serverSocket.accept();
-                        logger.info("Connection from " + socket.getInetAddress().getHostAddress() + ":"
-                                + socket.getPort());
-                        if (!socket.getInetAddress().isLoopbackAddress()
-                                && !clientHostNameSet.contains(socket.getInetAddress().getHostAddress())) {
+                        Socket socket = JudgeService.this.serverSocket.accept();
+                        logger.info("Connection from " + socket.getInetAddress().getHostAddress() + ":" +
+                                socket.getPort());
+                        if (!socket.getInetAddress().isLoopbackAddress() &&
+                                !clientHostNameSet.contains(socket.getInetAddress().getHostAddress())) {
                             logger.info("Refused");
                             socket.close();
                             continue;
                         }
-                        JudgeClient client = new JudgeClient(queue, socket, getClientNumber());
-                        synchronized (clients) {
-                            for (int i = clients.size() - 1; i >= 0; --i) {
-                                if (!clients.get(i).isAlive()) {
-                                    clients.remove(i);
-                                }
-                            }
-                            client.start();
-                            clients.add(client);
+                        JudgeClient client = new JudgeClient(JudgeService.this, socket, defaultClientJobs);
+                        client.start();
+                        synchronized (JudgeService.this.clients) {
+                            JudgeService.this.clients.add(client);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e);
                     }
                 }
+
+
             }
         }.start();
+
+
     }
 
-    private int getClientNumber() {
-        try {
-            return Integer.parseInt(ConfigManager.getValue("client_max_job"));
-        } catch (Exception e) {
-            return 1;
-        }
-    }
 
-    public boolean judge(Submission submission) throws Exception {
-        return queue.push(submission);
-    }
 
-    public void rejudge(Submission submission) throws Exception {
-        queue.pushIgnoreCache(submission);
-    }
 
-    public Submission getSubmission(long id) {
-        return queue.getSubmissionInCache(id);
-    }
 
     public static JudgeService getInstance() {
-        return instance;
+        return JudgeService.instance;
     }
 
     public List<JudgeClient> getClients() {
-        synchronized (clients) {
-            for (int i = clients.size() - 1; i >= 0; --i) {
-                if (!clients.get(i).isAlive()) {
-                    clients.remove(i);
-                }
-            }
-            return new ArrayList<JudgeClient>(clients);
+        synchronized (this.clients) {
+            return new ArrayList<JudgeClient>(this.clients);
         }
     }
 
-    public void terminate() {
-        try {
-            this.serverSocket.close();
-            for (JudgeClient client : this.clients) {
-                client.terminate();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public JudgingList getJudgingList() {
+        return this.judgingQueue.clone();
+    }
+
+    public JudgeQueue createJudgeQueue(SubmissionFilter serviceFilter, SubmissionFilter clientFilter,
+            SubmissionFilter threadFilter) {
+        return new JudgeQueueImpl(this.candidateQueue, serviceFilter, clientFilter, threadFilter);
+
+
+
+
+
+
+    }
+
+    public SubmissionFilter getSubmissionFilter() {
+        return this.submissionFilter;
+    }
+
+    public void setSubmissionFilter(SubmissionFilter submissionFilter) {
+        this.submissionFilter = submissionFilter;
+    }
+
+    public void judge(Submission submission, int priority) {
+        submission.setJudgeReply(JudgeReply.QUEUING);
+        this.candidateQueue.add(submission, priority);
+    }
+
+    void judgeStart(Submission submission) {
+        this.judgingQueue.push(submission);
+    }
+
+    void judgeDone(Submission submission) {
+        this.judgingQueue.tryPop();
     }
 }

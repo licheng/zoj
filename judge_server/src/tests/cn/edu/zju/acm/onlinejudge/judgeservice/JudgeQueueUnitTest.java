@@ -41,7 +41,7 @@ public class JudgeQueueUnitTest {
             public void run() {
                 setName("fail");
                 try {
-                    queue.poll();
+                    queue.removeFirst();
                 } catch (InterruptedException e) {
                     setName("pass");
                     return;
@@ -59,47 +59,47 @@ public class JudgeQueueUnitTest {
 
     @Test(timeout = 1000)
     public void testPushAndPoll() throws Exception {
-        queue.push(submissions[0]);
-        queue.push(submissions[1]);
-        queue.push(submissions[2]);
-        assertEquals((long) 0, queue.poll().getId());
-        assertEquals((long) 1, queue.poll().getId());
-        assertEquals((long) 2, queue.poll().getId());
+        queue.add(submissions[0]);
+        queue.add(submissions[1]);
+        queue.add(submissions[2]);
+        assertEquals((long) 0, queue.removeFirst().getId());
+        assertEquals((long) 1, queue.removeFirst().getId());
+        assertEquals((long) 2, queue.removeFirst().getId());
     }
 
     @Test(timeout = 1000)
     public void testRejudge() throws Exception {
-        queue.push(submissions[0]);
-        queue.push(submissions[1]);
-        queue.push(submissions[2]);
-        Submission submission = queue.poll();
-        queue.rejudge(queue.poll());
-        queue.rejudge(submission);
-        assertEquals((long) 1, queue.poll().getId());
-        assertEquals((long) 0, queue.poll().getId());
-        assertEquals((long) 2, queue.poll().getId());
+        queue.add(submissions[0]);
+        queue.add(submissions[1]);
+        queue.add(submissions[2]);
+        Submission submission = queue.removeFirst();
+        queue.addFirst(queue.removeFirst());
+        queue.addFirst(submission);
+        assertEquals((long) 1, queue.removeFirst().getId());
+        assertEquals((long) 0, queue.removeFirst().getId());
+        assertEquals((long) 2, queue.removeFirst().getId());
     }
 
     @Test(timeout = 1000)
     public void testMix() throws Exception {
-        queue.push(submissions[0]);
-        queue.push(submissions[1]);
-        assertEquals((long) 0, queue.poll().getId());
-        assertEquals((long) 1, queue.poll().getId());
-        queue.rejudge(submissions[1]);
-        queue.push(submissions[2]);
-        queue.push(submissions[3]);
-        queue.push(submissions[4]);
-        queue.push(submissions[5]);
-        assertEquals((long) 1, queue.poll().getId());
-        assertEquals((long) 2, queue.poll().getId());
-        assertEquals((long) 3, queue.poll().getId());
-        queue.rejudge(submissions[2]);
-        queue.rejudge(submissions[1]);
-        assertEquals((long) 2, queue.poll().getId());
-        assertEquals((long) 1, queue.poll().getId());
-        assertEquals((long) 4, queue.poll().getId());
-        assertEquals((long) 5, queue.poll().getId());
+        queue.add(submissions[0]);
+        queue.add(submissions[1]);
+        assertEquals((long) 0, queue.removeFirst().getId());
+        assertEquals((long) 1, queue.removeFirst().getId());
+        queue.addFirst(submissions[1]);
+        queue.add(submissions[2]);
+        queue.add(submissions[3]);
+        queue.add(submissions[4]);
+        queue.add(submissions[5]);
+        assertEquals((long) 1, queue.removeFirst().getId());
+        assertEquals((long) 2, queue.removeFirst().getId());
+        assertEquals((long) 3, queue.removeFirst().getId());
+        queue.addFirst(submissions[2]);
+        queue.addFirst(submissions[1]);
+        assertEquals((long) 2, queue.removeFirst().getId());
+        assertEquals((long) 1, queue.removeFirst().getId());
+        assertEquals((long) 4, queue.removeFirst().getId());
+        assertEquals((long) 5, queue.removeFirst().getId());
     }
 
     @Test
@@ -111,10 +111,10 @@ public class JudgeQueueUnitTest {
             char[] content = new char[1024 * 128];
             Arrays.fill(content, (char) i);
             submission.setContent(new String(content));
-            queue.push(submission);
+            queue.add(submission);
         }
         for (int i = 0; i < 1000; i++) {
-            Submission submission = queue.poll();
+            Submission submission = queue.removeFirst();
             assertEquals((long) i, submission.getId());
         }
     }
@@ -142,13 +142,13 @@ public class JudgeQueueUnitTest {
                 public void run() {
                     try {
                         for (int i = 0;; i++) {
-                            Submission submission = queue.poll();
+                            Submission submission = queue.removeFirst();
                             int id = (int) submission.getId();
                             // System.out.println("poll " + k + " " + id);
                             cnt[id]++;
                             assertEquals(submissions[id], submission);
                             if (id % consumer.length == k) {
-                                queue.rejudge(submission);
+                                queue.addFirst(submission);
                             } else {
                                 submission.setJudgeReply(JudgeReply.ACCEPTED);
                             }
@@ -169,7 +169,7 @@ public class JudgeQueueUnitTest {
                         synchronized (JudgeQueueUnitTest.this) {
                             int id = idGenerator[0]++;
                             submissions[id].setJudgeReply(JudgeReply.QUEUING);
-                            queue.push(submissions[id]);
+                            queue.add(submissions[id]);
                         }
                         Thread.yield();
                     }
