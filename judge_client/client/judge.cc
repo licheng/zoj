@@ -31,9 +31,9 @@ DEFINE_ARG(string, compiler, "All compilers supported by this client");
 
 // Returns true if the specified file type is supported by the server
 bool IsSupportedCompiler(const string& compiler) {
-    vector<string> supportedCompilers;
-    SplitString(ARG_compiler, ',', &supportedCompilers);
-    return find(supportedCompilers.begin(), supportedCompilers.end(), compiler) != supportedCompilers.end();
+    vector<string> supported_compilers;
+    SplitString(ARG_compiler, ',', &supported_compilers);
+    return find(supported_compilers.begin(), supported_compilers.end(), compiler) != supported_compilers.end();
 }
 
 int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revision) {
@@ -94,15 +94,13 @@ int ExecCompileCommand(int sock, const string& root, const string& working_root,
         return -1;
     }
     *compiler = -1;
-    const int COMPILER_NUM = sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
-    for (int i = 0; i < COMPILER_NUM; ++i) {
+    for (int i = 0; i < global::COMPILER_NUM; ++i) {
         if (compiler_id == global::COMPILER_LIST[i].id) {
             *compiler = i;
             break;
         }
     }
     if (*compiler < 0 || !IsSupportedCompiler(global::COMPILER_LIST[*compiler].compiler)) {
-        LOG(DEBUG)<<global::COMPILER_LIST[*compiler].compiler<<' '<<ARG_compiler;
         LOG(ERROR)<<"Invalid compiler "<<(int)compiler_id;
         SendReply(sock, INVALID_INPUT);
         return -1;

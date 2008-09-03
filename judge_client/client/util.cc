@@ -302,7 +302,7 @@ string GetLocalTimeAsString(const char* format) {
     return buf;
 }
 
-int ConnectTo(const string& address, int port) {
+int ConnectTo(const string& address, int port, int timeout) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create socket";
@@ -314,6 +314,19 @@ int ConnectTo(const string& address, int port) {
     servaddr.sin_port = htons(port);
     if (inet_pton(AF_INET, address.c_str(), &servaddr.sin_addr) <= 0) {
         LOG(SYSCALL_ERROR)<<"Invalid address "<<address;
+        close(sock);
+        return -1;
+    }
+    struct timeval tv;
+    tv.tv_sec = timeout / 1000;
+    tv.tv_usec = timeout % 1000 * 1000;
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to set receive timeout";
+        close(sock);
+        return -1;
+    }
+    if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to set send timeout";
         close(sock);
         return -1;
     }

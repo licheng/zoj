@@ -23,9 +23,10 @@ namespace global {
     int terminated;
     int socket_closed;
     CompilerInfo COMPILER_LIST[4] = {
-        {COMPILER_GPP, "g++", "cc"},
-        {COMPILER_FREE_PASCAL, "fp", "pas"},
-        {COMPILER_GCC, "gcc", "c"},
-        {COMPILER_JAVAC, "javac", "java"}
+        {1, "gcc", "c"},
+        {2, "g++", "cc"},
+        {3, "fp", "pas"},
+        {4, "javac", "java"}
     };
+    const int COMPILER_NUM = sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
 }

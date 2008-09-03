@@ -184,7 +184,7 @@ static inline int CheckSum(int value) {
     return (value & 0xff) + ((value >> 8) & 0xff) + ((value >> 16) & 0xff) + ((value >> 24) & 0xff);
 }
 
-int ConnectTo(const string& address, int port);
+int ConnectTo(const string& address, int port, int timeout);
 
 int SaveFile(int sock, const string& output_filename, size_t size);
 

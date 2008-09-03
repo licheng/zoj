@@ -58,10 +58,10 @@ using namespace std;
 #define MAX_LOG_FILE_SIZE 262144 // 256KB
 #define MAX_DATA_FILE_SIZE 16 * 1024 * 1024 // 16MB
 
-#define COMPILER_GPP 0
+#define COMPILER_GCC 0
+#define COMPILER_GPP 1
 #define COMPILER_FREE_PASCAL 2
-#define COMPILER_GCC 3
-#define COMPILER_JAVAC 4
+#define COMPILER_JAVAC 3
 
 struct CompilerInfo {
     int id;
@@ -73,6 +73,7 @@ namespace global {
     extern int terminated;
     extern int socket_closed;
     extern CompilerInfo COMPILER_LIST[4];
+    extern const int COMPILER_NUM;
 }
 
 #endif

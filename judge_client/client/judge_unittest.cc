@@ -166,7 +166,7 @@ class ExecCompileCommandTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         fd_[0] = fd_[1] = temp_fd_ = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
-        compiler_id_ = COMPILER_GPP;
+        compiler_id_ = global::COMPILER_LIST[COMPILER_GPP].id;
         source_filename_ = TESTDIR + "/ac.cc";
         struct stat stat; 
         lstat(source_filename_.c_str(), &stat);
@@ -191,6 +191,7 @@ class ExecCompileCommandTest: public TestFixture {
     }
 
     void SendCommand() {
+        compiler_id_ = htonl(compiler_id_);
         source_file_size_ = htonl(source_file_size_);
         checksum_ = htonl(checksum_);
         Writen(fd_[0], &compiler_id_, sizeof(compiler_id_)); 
@@ -893,7 +894,7 @@ class JudgeMainTest: public TestFixture {
         int source_file_size = stat.st_size;
         buf_size_ = 0;
         AppendUint32(CMD_COMPILE);
-        AppendUint32(COMPILER_GPP);
+        AppendUint32(global::COMPILER_LIST[COMPILER_GPP].id);
         AppendUint32(source_file_size);
         AppendCheckSum();
         AppendFile(source_filename, source_file_size);

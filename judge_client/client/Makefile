@@ -42,6 +42,7 @@ compile_unittest: args.o util.o trace.o logging.o -lkmmon
 run_unittest: args.o util.o trace.o logging.o -lkmmon
 check_unittest: args.o util.o trace.o logging.o -lkmmon
 judge_unittest: args.o util.o trace.o logging.o compile.o run.o check.o -lkmmon
+control_unittest: args.o util.o trace.o logging.o compile.o run.o check.o -lkmmon
 main_unittest: $(filter-out main.o main_stub.o,$(OBJS)) -lkmmon
 
 testdata:

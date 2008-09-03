@@ -39,9 +39,11 @@ DEFINE_OPTIONAL_ARG(bool, daemonize, true, "If true, the program will be started
 
 DEFINE_ARG(string, queue_address, "The ip address of the queue service to which this client connects");
 
-DEFINE_OPTIONAL_ARG(int, port, 9537, "The port that this client listens on");
+DEFINE_ARG(int, queue_port, "The port of the queue service to which this client connects");
 
 DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to stderr as well");
+
+DEFINE_OPTIONAL_ARG(int, max_judge_process, 5, "The maximal number of judge processes");
 
 void Daemonize() {
     umask(0);
@@ -92,21 +94,9 @@ int Lock() {
     return fd;
 }
 
-void SIGTERMHandler(int sig) {
-    global::terminated = 1;
-}
-
-void SIGPIPEHandler(int sig) {
-    global::socket_closed = 1;
-}
-
-void SIGCHLDHandler(int sig) {
-    while (waitpid(-1, NULL, WNOHANG) > 0);
-}
-
 int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
-int CreateServerSocket(int port) {
+int CreateServerSocket(int* port) {
     int sock = socket(PF_INET, SOCK_STREAM, 6);
     if (sock == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to create socket";
@@ -122,7 +112,7 @@ int CreateServerSocket(int port) {
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    address.sin_port = htons(port);
+    address.sin_port = 0;
     if (bind(sock, (struct sockaddr*)&address, sizeof(address)) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to bind";
         close(sock);
@@ -133,7 +123,14 @@ int CreateServerSocket(int port) {
         close(sock);
         return -1;
     }
-    LOG(INFO)<<"Listening on port "<<port;
+    socklen_t len = sizeof(address);
+    if (getsockname(sock, (struct sockaddr*)&address, &len) == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to get socket port";
+        close(sock);
+        return -1;
+    }
+    *port = ntohs(address.sin_port);
+    LOG(INFO)<<"Listening on port "<<*port;
     return sock;
 }
 
@@ -177,6 +174,8 @@ class JudgeProcess {
                 LOG(SYSCALL_ERROR)<<"Fail to read log";
                 return -1;
             }
+        } else if (count == 0) {
+            return -1;
         } else {
             char* start = buf_;
             for (char* p = pbuf_; p - pbuf_ < count; ++p) {
@@ -201,6 +200,19 @@ class JudgeProcess {
     char* pbuf_;
 };
 
+void SIGTERMHandler(int sig) {
+    global::terminated = 1;
+}
+
+void SIGPIPEHandler(int sig) {
+    global::socket_closed = 1;
+}
+
+void SIGCHLDHandler(int sig) {
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+int ControlMain(const string& root, const string& queue_address, int queueu_port, int port);
 int JudgeMain(const string& root, int sock, int uid, int gid);
 
 int main(int argc, char* argv[]) {
@@ -228,7 +240,8 @@ int main(int argc, char* argv[]) {
 
     InstallSignalHandler(SIGCHLD, SIGCHLDHandler);
 
-    int server_sock = CreateServerSocket(ARG_port);
+    int port;
+    int server_sock = CreateServerSocket(&port);
     if (server_sock < 0) {
         return 1;
     }
@@ -251,22 +264,38 @@ int main(int argc, char* argv[]) {
         Log::SetLogToStderr(false);
     }
 
+    pid_t pid = fork();
+    if (pid < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to fork";
+        return 1;
+    } else if (pid == 0) {
+        if (fd >= 0) {
+            close(fd);
+        }
+        close(server_sock);
+        close(log_server_sock);
+        Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
+        exit(ControlMain(ARG_root, ARG_queue_address, ARG_queue_port, port));
+    }
+
     Log::SetLogFile(new DiskLogFile(ARG_root + "/log/"));
     vector<JudgeProcess*> children;
-
     while (!global::terminated) {
         int nfds = max(log_server_sock, server_sock);
-        fd_set fdset;
-        FD_ZERO(&fdset);
-        FD_SET(server_sock, &fdset);
-        FD_SET(log_server_sock, &fdset);
+        fd_set read_fdset;
+        fd_set except_fdset;
+        FD_ZERO(&read_fdset);
+        FD_ZERO(&except_fdset);
+        FD_SET(server_sock, &read_fdset);
+        FD_SET(log_server_sock, &read_fdset);
         for (int i = 0; i < children.size(); ++i) {
-            FD_SET(children[i]->sock(), &fdset);
+            FD_SET(children[i]->sock(), &read_fdset);
+            FD_SET(children[i]->sock(), &except_fdset);
             if (children[i]->sock() > nfds) {
                 nfds = children[i]->sock();
             }
         }
-        int ready = select(nfds + 1, &fdset, NULL, NULL, NULL);
+        int ready = select(nfds + 1, &read_fdset, NULL, &except_fdset, NULL);
         if (ready == -1) {
             if (errno != EINTR) {
                 LOG(SYSCALL_ERROR)<<"Fail to select";
@@ -275,7 +304,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
         for (int i = 0; i < children.size(); ++i) {
-            if (FD_ISSET(children[i]->sock(), &fdset)) {
+            if (FD_ISSET(children[i]->sock(), &read_fdset)) {
                 vector<string> lines;    
                 if (children[i]->ReadLines(&lines) < 0) {
                     delete children[i];
@@ -285,9 +314,13 @@ int main(int argc, char* argv[]) {
                 for (int j = 0; j < lines.size(); ++j) {
                     LOG(RAW)<<lines[j];
                 }
+            } else if (FD_ISSET(children[i]->sock(), &except_fdset)) {
+                delete children[i];
+                children.erase(children.begin() + i);
+                --i;
             }
         }
-        if (FD_ISSET(log_server_sock, &fdset)) {
+        if (FD_ISSET(log_server_sock, &read_fdset)) {
             socklen_t len;
             struct sockaddr_un un;
             int client_sock = accept(log_server_sock, (struct sockaddr*)&un, &len);
@@ -297,7 +330,7 @@ int main(int argc, char* argv[]) {
                 children.push_back(new JudgeProcess(client_sock));
             }
         }
-        if (FD_ISSET(server_sock, &fdset)) {
+        if (FD_ISSET(server_sock, &read_fdset)) {
             sockaddr_in addr;
             socklen_t len = sizeof(sockaddr_in);
             int sock = accept(server_sock, (struct sockaddr*)&addr, &len);
@@ -305,6 +338,11 @@ int main(int argc, char* argv[]) {
                 if (errno != EINTR) {
                     LOG(SYSCALL_ERROR)<<"Fail to accept";
                 }
+                continue;
+            }
+            if (children.size() >= ARG_max_judge_process) {
+                LOG(ERROR)<<"Max judge process exceeded";
+                close(sock);
                 continue;
             }
             string address = inet_ntoa(addr.sin_addr);
@@ -316,6 +354,11 @@ int main(int argc, char* argv[]) {
                 if (pid < 0) {
                     LOG(SYSCALL_ERROR)<<"Fail to fork";
                 } else if (pid == 0) {
+                    if (fd >= 0) {
+                        close(fd);
+                    }
+                    close(server_sock);
+                    close(log_server_sock);
                     Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
                     exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
                 }
