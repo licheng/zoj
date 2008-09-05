@@ -606,7 +606,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     			return null;
     		}
     		List<Long> judgeRepliesIds = new ArrayList<Long>();
-    		boolean easy = true;
+    		boolean easy = false;
     		for (JudgeReply judgeReply : criteria.getJudgeReplies()) {
     			judgeRepliesIds.add(judgeReply.getId());
     			if (easyJudgeReply.contains(judgeReply)) {
