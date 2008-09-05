@@ -11,10 +11,12 @@ class SubmissionDAOImpl extends AbstractDAO implements SubmissionDAO {
     }
 
     public void save(Submission submission, long contestId) throws PersistenceException {
-	PersistenceManager.getInstance().getSubmissionPersistence().createSubmission(submission, 1, contestId);
+    	submission.setContestId(contestId);
+    	PersistenceManager.getInstance().getSubmissionPersistence().createSubmission(submission, 1);
     }
 
     public void update(Submission submission, long contestId) throws PersistenceException {
-	PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1, contestId);
+    	submission.setContestId(contestId);
+    	PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1);
     }
 }

@@ -8,7 +8,9 @@ import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
+import cn.edu.zju.acm.onlinejudge.util.ProblemsetRankList;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
+import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
 
 import java.util.List;
 import java.util.Set;
@@ -29,7 +31,7 @@ public interface SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    void createSubmission(Submission submission, long user, long ContestId) throws PersistenceException;
+    void createSubmission(Submission submission, long user) throws PersistenceException;
 
     /**
      * <p>Updates the specified submission in persistence layer.</p>
@@ -38,7 +40,7 @@ public interface SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    void updateSubmission(Submission submission, long user, long ContestId) throws PersistenceException;
+    void updateSubmission(Submission submission, long user) throws PersistenceException;
 
     /**
      * <p>Deletes the specified submission in persistence layer.</p>
@@ -59,26 +61,15 @@ public interface SubmissionPersistence {
     Submission getSubmission(long id) throws PersistenceException;
 
     /**
-     * <p>Returns the number of all submissions according with the given criteria in persistence layer.</p>
-     *
-     * @return the number of all submissions according with the given criteria
-     * @param criteria the submission search criteria
-     * @param offset the offset of the start position to search
-     * @param count the maximum number of submissions in returned list
-     * @throws PersistenceException wrapping a persistence implementation specific exception
-     */
-    long searchSubmissionNumber(SubmissionCriteria criteria) throws PersistenceException;
-
-    /**
-     * <p>Searchs all submissions according with the given criteria in persistence layer.</p>
+     * <p>Searches all submissions according with the given criteria in persistence layer.</p>
      *
      * @return a list of submissions according with the given criteria
      * @param criteria the submission search criteria
-     * @param offset the offset of the start position to search
+     * @param lastId the last id
      * @param count the maximum number of submissions in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List searchSubmissions(SubmissionCriteria criteria, int offset, int count) throws PersistenceException;
+    List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count) throws PersistenceException;
 
     /**
      * <p>Creates the specified judge reply in persistence layer.</p>
@@ -126,16 +117,17 @@ public interface SubmissionPersistence {
 
     ContestStatistics getContestStatistics(List problems) throws PersistenceException;
     
-    ProblemStatistics getProblemStatistics(long problemId) throws PersistenceException;
+    ProblemStatistics getProblemStatistics(long problemId, String orderBy, int count) throws PersistenceException;
     
     List getRankList(List problems, long contestStartDate) throws PersistenceException;
     
     List getRankList(List problems, long contestStartDate, long roleId) throws PersistenceException;
     
-    List getProblemsetRankList(long contestId, long roleId, long begin, long order) throws PersistenceException;
+    ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count) throws PersistenceException;
     
     
-    Set getSolvedProblems(List problems, long userProfileId) throws PersistenceException;
+    UserStatistics getUserStatistics(long contestId, long userId) throws PersistenceException;
+    
     RankListEntry getRankListEntry(long contestId, long userId) throws PersistenceException;
     
     

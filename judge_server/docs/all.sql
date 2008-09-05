@@ -52,8 +52,7 @@ CREATE TABLE country (
 CREATE TABLE user_stat (
     user_id          BIGINT          NOT NULL,
     contest_id       BIGINT          NOT NULL,
-
-    ac_number         BIGINT          NOT NULL,
+	ac_number         BIGINT          NOT NULL,
     submission_number    BIGINT          NOT NULL,
     PRIMARY KEY(user_id,contest_id)
 ) ENGINE = InnoDb;
@@ -250,6 +249,9 @@ CREATE TABLE submission (
     judge_reply_id      BIGINT          NOT NULL,
     user_profile_id     BIGINT          NOT NULL,
 
+    contest_id          BIGINT          NOT NULL,
+    contest_order       BIGINT          NOT NULL DEFAULT -1,
+
     content             LONGTEXT        NULL,
     time_consumption    INT             NULL,
     memory_consumption  INT             NULL,
@@ -265,10 +267,6 @@ CREATE TABLE submission (
     last_update_user    BIGINT          NOT NULL,
     last_update_date    DATETIME        NOT NULL
 ) ENGINE = InnoDb;
-
-
-
-
 
 CREATE TABLE judge_reply (
     judge_reply_id      BIGINT          NOT NULL PRIMARY KEY,
@@ -410,7 +408,7 @@ CREATE UNIQUE INDEX unique_confirmation
 CREATE UNIQUE INDEX unique_language
         ON language (name);
 
-CREATE INDEX index_problem_code
+CREATE UNIQUE INDEX index_problem_code
         ON problem (contest_id, code);
 
 CREATE INDEX index_problem_title
@@ -419,11 +417,14 @@ CREATE INDEX index_problem_title
 CREATE UNIQUE INDEX unique_reply
         ON judge_reply (name);
 
-CREATE INDEX index_submission_user
-        ON submission (user_profile_id, problem_id, judge_reply_id);
+CREATE INDEX index_submission_contest_order 
+        ON submission (contest_id, contest_order);
 
-CREATE INDEX index_submission_problem
-        ON submission (problem_id, language_id, judge_reply_id);
+CREATE INDEX index_submission_user_reply_contest
+        ON submission (user_profile_id, judge_reply_id, contest_id);
+
+CREATE INDEX index_submission_problem_reply
+        ON submission (problem_id, judge_reply_id);
 
 CREATE INDEX index_contest_reference
         ON contest_reference (contest_id);
@@ -433,8 +434,6 @@ CREATE INDEX index_problem_reference
 
 CREATE INDEX index_forum_reference
         ON forum_reference (post_id);
-
-
 
 ALTER TABLE user_profile
     ADD CONSTRAINT fk_user_country FOREIGN KEY (country_id)
@@ -521,6 +520,11 @@ ALTER TABLE problem
         REFERENCES limits (limits_id)
             ON DELETE RESTRICT;
 
+ALTER TABLE submission
+    ADD CONSTRAINT fk_submission_contest FOREIGN KEY (contest_id)
+        REFERENCES contest (contest_id)
+            ON DELETE RESTRICT;
+            
 ALTER TABLE submission
     ADD CONSTRAINT fk_submission_problem FOREIGN KEY (problem_id)
         REFERENCES problem (problem_id)

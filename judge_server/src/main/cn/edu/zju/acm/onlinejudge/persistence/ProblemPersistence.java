@@ -63,9 +63,9 @@ public interface ProblemPersistence {
      * @param count the maximum number of problems in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException;
+    List<Problem> searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException;
 
-	List searchProblems(ProblemCriteria criteria) throws PersistenceException;
+	List<Problem> searchProblems(ProblemCriteria criteria) throws PersistenceException;
     
     int getProblemsCount(long contestId) throws PersistenceException;
 

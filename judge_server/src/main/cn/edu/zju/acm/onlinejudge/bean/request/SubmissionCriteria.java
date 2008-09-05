@@ -4,8 +4,10 @@
 package cn.edu.zju.acm.onlinejudge.bean.request;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 
 
 /**
@@ -30,6 +32,11 @@ public class SubmissionCriteria {
      * <p>Represents problemCode.</p>
      */
     private String problemCode;
+    
+    /**
+     * 
+     */
+    private Long userId;
     
     /**
      * <p>Represents handle.</p>
@@ -59,12 +66,12 @@ public class SubmissionCriteria {
     /**
      * <p>Represents judgeReplies.</p>
      */
-    private List judgeReplies;
+    private List<JudgeReply> judgeReplies;
 
     /**
      * <p>Represents languages.</p>
      */
-    private List languages;
+    private List<Language> languages;
 
     /**
      * SubmissionCriteria.
@@ -187,28 +194,28 @@ public class SubmissionCriteria {
     /**
      * @param judgeReplies The judgeReplies to set.
      */
-    public void setJudgeReplies(List judgeReplies) {
+    public void setJudgeReplies(List<JudgeReply> judgeReplies) {
         this.judgeReplies = judgeReplies;
     }
 
     /**
      * @return Returns the judgeReplies.
      */
-    public List getJudgeReplies() {
+    public List<JudgeReply> getJudgeReplies() {
         return judgeReplies;
     }
 
     /**
      * @param languages The languages to set.
      */
-    public void setLanguages(List languages) {
+    public void setLanguages(List<Language> languages) {
         this.languages = languages;
     }
 
     /**
      * @return Returns the languages.
      */
-    public List getLanguages() {
+    public List<Language> getLanguages() {
         return languages;
     }
     
@@ -224,6 +231,7 @@ public class SubmissionCriteria {
     	hash = cal(timeEnd, hash);
     	hash = cal(judgeReplies, hash);
     	hash = cal(languages, hash);
+    	hash = cal(userId, hash);
     	/*
     	if (judgeReplies != null) {
     		for (Iterator it = judgeReplies.iterator(); it.hasNext();) {
@@ -278,6 +286,9 @@ public class SubmissionCriteria {
     	if (!equals(this.languages, that.languages)) {
     		return false;
     	}
+    	if (!equals(this.userId, that.userId)) {
+    		return false;
+    	}
     	if (!equals(this.handle, that.handle)) {
     		return false;
     	}
@@ -290,4 +301,12 @@ public class SubmissionCriteria {
     	} 
     	return o1.equals(o2);
     }
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 }

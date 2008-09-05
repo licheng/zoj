@@ -27,6 +27,7 @@ import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
+import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
 /**
@@ -62,7 +63,6 @@ public class ShowProblemsAction extends BaseAction {
      * @throws Exception any errors happened
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	System.out.println("enter lala");
     	// check contest
     	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblems.do");
     	
@@ -86,32 +86,30 @@ public class ShowProblemsAction extends BaseAction {
         if (problemsCount > 0) {
             totalPages = (problemsCount - 1) / problemsPerPage + 1;
         }
-        List problems = ContestManager.getInstance().getContestProblems(
+        
+        List<Problem> problems = ContestManager.getInstance().getContestProblems(
                 contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);               
         
-    	ContestStatistics statistics = null;
-    	if (contest instanceof Contest) {
-    		// TODO ob
-    		statistics = StatisticsManager.getInstance().getContestStatistics(
-                contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);
-    	}
-        
-        if (false && context.getUserProfile() != null && problems.size() > 0) {
-        	// TODO ob
-        	Set solved = StatisticsManager.getInstance().getSolvedProblems(
+    	ContestStatistics contestStatistics = null;
+    	contestStatistics = StatisticsManager.getInstance().getContestStatistics(
+            contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);
+    	
+    	UserStatistics userStatistics = null;
+        if (context.getUserProfile() != null && problems.size() > 0) {
+        	userStatistics = StatisticsManager.getInstance().getUserStatistics(
         			contest.getId(), context.getUserProfile().getId());
-        	context.setAttribute("solved", solved);
-        } else {
-        	context.setAttribute("solved", new HashSet());
-        }
+        } 
         
 	    context.setAttribute("problems", problems);
-	    context.setAttribute("ContestStatistics", statistics);
-        context.setAttribute("totalPages", new Long(totalPages));
+	    context.setAttribute("ContestStatistics", contestStatistics);
+	    context.setAttribute("UserStatistics", userStatistics);
+	    context.setAttribute("totalPages", new Long(totalPages));
         context.setAttribute("currentPage", new Long(pageNumber));                 
-         
-        
-        
+        System.out.println(problems.size());
+        System.out.println(contestStatistics);
+        System.out.println(userStatistics);
+        System.out.println(pageNumber);
+        System.out.println(totalPages);
         if (checkContestAdminPermission(mapping, context, isProblemset, true) == null
         	&& "true".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
             List<String> checkMessages = new ArrayList<String>();

@@ -275,7 +275,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
 	/**
 	 * The languages cache.
 	 */
-	private static List allLanguages = null;
+	private static List<Language> allLanguages = null;
     
     
     /**
@@ -924,41 +924,41 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @return a list of Language instances containing all languages in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getAllLanguages() throws PersistenceException {
+    public List<Language> getAllLanguages() throws PersistenceException {
     	synchronized (this.getClass()) {
     		if (allLanguages != null) {
-    			return new ArrayList(allLanguages);
+    			return new ArrayList<Language>(allLanguages);
     		}
-    	}
     	
-    	Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-            	
-        try {
-        	conn = Database.createConnection();
-        	ps = conn.prepareStatement(GET_ALL_LANGUAGES);   
-            rs = ps.executeQuery();
-                
-            List languages = new ArrayList();
-            
-            while (rs.next()) {
-            	Language language = new Language(rs.getLong(DatabaseConstants.LANGUAGE_LANGUAGE_ID),
-            									 rs.getString(DatabaseConstants.LANGUAGE_NAME),
-            									 rs.getString(DatabaseConstants.LANGUAGE_DESCRIPTION),
-            									 rs.getString(DatabaseConstants.LANGUAGE_COMPILER),
-            									 rs.getString(DatabaseConstants.LANGUAGE_OPTIONS));
-            	languages.add(language);
-            }
-        	
-            allLanguages = new ArrayList(languages);
-            return languages;  	            
-        } catch (SQLException e) {
-        	throw new PersistenceException("Failed to get all languages", e);
-		} finally {
-        	Database.dispose(conn, ps, rs);
-        }   
-		
+    	
+	    	Connection conn = null;
+	        PreparedStatement ps = null;
+	        ResultSet rs = null;
+	            	
+	        try {
+	        	conn = Database.createConnection();
+	        	ps = conn.prepareStatement(GET_ALL_LANGUAGES);   
+	            rs = ps.executeQuery();
+	                
+	            List<Language> languages = new ArrayList<Language>();
+	            
+	            while (rs.next()) {
+	            	Language language = new Language(rs.getLong(DatabaseConstants.LANGUAGE_LANGUAGE_ID),
+	            									 rs.getString(DatabaseConstants.LANGUAGE_NAME),
+	            									 rs.getString(DatabaseConstants.LANGUAGE_DESCRIPTION),
+	            									 rs.getString(DatabaseConstants.LANGUAGE_COMPILER),
+	            									 rs.getString(DatabaseConstants.LANGUAGE_OPTIONS));
+	            	languages.add(language);
+	            }
+	        	
+	            allLanguages = new ArrayList<Language>(languages);
+	            return languages;  	            
+	        } catch (SQLException e) {
+	        	throw new PersistenceException("Failed to get all languages", e);
+			} finally {
+	        	Database.dispose(conn, ps, rs);
+	        }   
+    	}
     }
     
     /**
@@ -966,12 +966,11 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @return a Language Map
      * @throws PersistenceException
      */
-    Map getLanguageMap() throws PersistenceException {
-    	List languages = getAllLanguages(); 
-        Map languageMap = new HashMap();
-        for (Iterator it = languages.iterator(); it.hasNext();) {
-        	Language language = (Language) it.next();
-        	languageMap.put(new Long(language.getId()), language);        	
+    Map<Long, Language> getLanguageMap() throws PersistenceException {
+    	List<Language> languages = getAllLanguages(); 
+        Map<Long, Language> languageMap = new HashMap<Long, Language>();
+        for (Language language : languages) {
+        	languageMap.put(language.getId(), language);        	
         }
         return languageMap;
     	

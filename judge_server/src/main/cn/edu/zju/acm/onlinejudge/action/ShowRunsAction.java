@@ -5,6 +5,7 @@ package cn.edu.zju.acm.onlinejudge.action;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -43,9 +44,9 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  */
 public class ShowRunsAction extends BaseAction {
     
-	private final List judgeReplies;
+	private final List<JudgeReply> judgeReplies;
 	
-	private final List adminJudgeReplies;
+	private final List<JudgeReply> adminJudgeReplies;
 	
     /**
      * <p>
@@ -53,22 +54,21 @@ public class ShowRunsAction extends BaseAction {
      * </p>
      */
     public ShowRunsAction() {
-    	judgeReplies = new ArrayList();
+    	judgeReplies = new ArrayList<JudgeReply>();
     	judgeReplies.add(JudgeReply.ACCEPTED);
     	judgeReplies.add(JudgeReply.PRESENTATION_ERROR);    	
     	judgeReplies.add(JudgeReply.WRONG_ANSWER);
-    	judgeReplies.add(JudgeReply.RUNTIME_ERROR);    	
-        judgeReplies.add(JudgeReply.FLOATING_POINT_ERROR);
-        judgeReplies.add(JudgeReply.SEGMENTATION_FAULT);
     	judgeReplies.add(JudgeReply.TIME_LIMIT_EXCEEDED);
     	judgeReplies.add(JudgeReply.MEMORY_LIMIT_EXCEEDED);
-    	judgeReplies.add(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
+    	judgeReplies.add(JudgeReply.SEGMENTATION_FAULT);
+    	judgeReplies.add(JudgeReply.FLOATING_POINT_ERROR);
     	judgeReplies.add(JudgeReply.COMPILATION_ERROR); 
+    	judgeReplies.add(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
     	
-    	adminJudgeReplies = new ArrayList(judgeReplies);
+    	adminJudgeReplies = new ArrayList<JudgeReply>(judgeReplies);
+    	adminJudgeReplies.add(JudgeReply.RUNTIME_ERROR);
     	adminJudgeReplies.add(JudgeReply.QUEUING);
     	adminJudgeReplies.add(JudgeReply.JUDGE_INTERNAL_ERROR);
-    	
     }
 
     
@@ -97,8 +97,7 @@ public class ShowRunsAction extends BaseAction {
     	context.setAttribute("judgeReplies", context.isAdmin() ? adminJudgeReplies : judgeReplies);
     	
     	
-        context.setAttribute("totalSubmissions", new Long(0));
-    	// check contest
+        // check contest
     	boolean isRejudge = "true".equalsIgnoreCase(context.getRequest().getParameter("rejudge"));
         
     	if (isRejudge) {
@@ -113,72 +112,82 @@ public class ShowRunsAction extends BaseAction {
     	SubmissionSearchForm serachForm = (SubmissionSearchForm) form;
     	ActionMessages errors = serachForm.check();
     	if (errors.size() > 0) {
-    		
-    		context.setAttribute("runs", new ArrayList());
-            context.setAttribute("pageNumber", new Long(0));
-            context.setAttribute("totalPages", new Long(0));
-            context.setAttribute("startIndex", new Long(0));
-            context.setAttribute("totalSubmissions", new Long(0));
-    		return handleFailure(mapping, context, errors);
+    	
+    		// TODO
+    		context.setAttribute("runs", new ArrayList<Submission>());
+            return handleFailure(mapping, context, errors);
     	}
     	
-    	long pageNumber = Utility.parseLong(serachForm.getPageNumber());
-    	if (pageNumber < 1) {
-    		pageNumber = Long.MAX_VALUE;    		
-    	}
-    	int runsPerPage = 20;
+    	long lastId = Utility.parseLong(serachForm.getLastId());
+    	long firstId = -1;
+    	if (lastId < 0) {
+    		lastId = Long.MAX_VALUE;
+    		firstId = Utility.parseLong(serachForm.getFirstId());
+    	} 
     	
-    	
+    	int RUNS_PER_PAGE = 15;
+
     	SubmissionCriteria criteria = serachForm.toSubmissionCriteria();   
         
         if (isRejudge) {
+        	int maxN = 100;
             List allRuns = PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(
-                    criteria, 0, Integer.MAX_VALUE);
-            rejudge(allRuns, Long.parseLong(serachForm.getContestId()));            
+                    criteria, -1, Long.MAX_VALUE, maxN + 1);
+            if (allRuns.size() > maxN) {
+            	// TODO
+            }
+            rejudge(allRuns);
+            // TODO
         }
         
-        long runsNumber = StatisticsManager.getInstance().getSubmissionsNumber(criteria);
-        if (runsNumber == 0) {
-            context.setAttribute("runs", new ArrayList());
-            context.setAttribute("pageNumber", new Long(0));
-            context.setAttribute("totalPages", new Long(0));
-            context.setAttribute("startIndex", new Long(0));
-            context.setAttribute("totalSubmissions", new Long(0));
-            return handleSuccess(mapping, context, "success");
-        } 
-        long totalPages = (runsNumber - 1) / runsPerPage + 1;
-        if (pageNumber > totalPages) {
-        	pageNumber = totalPages;
-        }
-        long startIndex;
-        if (pageNumber == totalPages) {
-        	startIndex = runsNumber;
-        } else {
-        	startIndex = pageNumber * 20;
-        }
-        List runs = StatisticsManager.getInstance().getSubmissions(criteria, (int) (runsNumber - startIndex), runsPerPage);
+        List<Submission> runs = StatisticsManager.getInstance().getSubmissions(criteria, firstId, lastId, RUNS_PER_PAGE + 1);
         
+        long newLastId = -1;
+        long newFirstId = -1;
+        long nextId = -1;
+        long startId = -1;
+        if (runs.size() > 0) {
+        	startId = runs.get(0).getContestOrder();
+        }
+        if (runs.size() > RUNS_PER_PAGE) {
+        	nextId = runs.get(runs.size() - 2).getContestOrder();
+        	runs = runs.subList(0, runs.size() - 1);
+        }
+        if (firstId > -1) {
+        	runs = new ArrayList(runs);
+    		Collections.reverse(runs);
+    	}
         
+        if (runs.size() > 0) {
+        	if (lastId == Long.MAX_VALUE && firstId == -1) {
+        		newLastId = nextId;
+        	} else if (firstId == -1) {
+        		newLastId = nextId;
+        		newFirstId = startId;
+        	} else {
+        		newFirstId = nextId;
+        		newLastId = startId;
+        	}
+        }
         context.setAttribute("runs", runs);
-        context.setAttribute("pageNumber", new Long(pageNumber));
-        context.setAttribute("totalPages", new Long(totalPages));
-        context.setAttribute("startIndex", new Long(startIndex));
-        context.setAttribute("totalSubmissions", new Long(runsNumber));
+        if (newFirstId > -1) {
+        	context.setAttribute("firstId", newFirstId);
+        }
+        if (newLastId > -1) {
+        	context.setAttribute("lastId", newLastId);
+        }
         
-
         return handleSuccess(mapping, context, "success");
                   	    	   
     }         
 
-    private void rejudge(List runs, long contestId) throws Exception {
-        for (Object obj : runs) {
-            Submission submission = (Submission) obj;
-            if(!submission.getJudgeReply().equals(JudgeReply.OUT_OF_CONTEST_TIME))
-            {
+    private void rejudge(List<Submission> runs) throws Exception {
+        for (Submission submission : runs) {
+            if(!submission.getJudgeReply().equals(JudgeReply.OUT_OF_CONTEST_TIME)) {
 	            submission.setJudgeReply(JudgeReply.QUEUING);
 	            submission.setMemoryConsumption(0);
 	            submission.setTimeConsumption(0);
-	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1, contestId);
+	            PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1);
 	            JudgeService.getInstance().judge(submission, Priority.LOW);  
             }
         }

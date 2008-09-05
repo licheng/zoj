@@ -1,12 +1,8 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Properties;
 
 public class ConfigManager {
@@ -51,8 +47,12 @@ public class ConfigManager {
         return getValue("image_path");
     }
     
-    public static int getDefaultContest() {
-        return Integer.parseInt(getValue("default_contest"));
+    public static long getDefaultProblemSetId() {
+    	String id = getValue("default_problem_set_id");
+    	if (id == null) {
+    		return 1;
+    	}
+    	return Long.parseLong(id);
     }
     
     public static EmailTemplate getEmailTemplate(String name) throws ConfigurationException, IOException {

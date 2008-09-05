@@ -46,8 +46,10 @@ public class JudgeService {
             public void run() {
                 Logger logger = Logger.getLogger(JudgeService.class.getName() + ".Thread");
                 Set<String> clientHostNameSet = new HashSet<String>();
-                for (String clientHostName : clientHostNameList) {
-                    clientHostNameSet.add(clientHostName);
+                if (clientHostNameList != null) {
+                	for (String clientHostName : clientHostNameList) {
+                		clientHostNameSet.add(clientHostName);
+                	}
                 }
                 while (!serverSocket.isClosed()) {
                     try {

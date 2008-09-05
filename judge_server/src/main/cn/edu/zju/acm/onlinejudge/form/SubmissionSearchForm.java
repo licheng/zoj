@@ -73,15 +73,15 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
     private String timeEnd;
     
     /**
-     * <p>Represents totalPages.</p>
+     * <p>Represents lastId.</p>
      */
-    private String totalPages;
-    
-    /**
-     * <p>Represents currentPage.</p>
-     */
-    private String pageNumber;
+    private String lastId;
 
+    /**
+     * <p>Represents firstId.</p>
+     */
+    private String firstId;
+    
     /**
      * <p>Represents judgeReplies.</p>
      */
@@ -237,36 +237,8 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
     public String[] getLanguageIds() {
         return languageIds;
     }
-
+   
     /**
-     * @param totalPages The totalPages to set.
-     */
-    public void setTotalPages(String totalPages) {
-        this.totalPages = totalPages;
-    }
-
-    /**
-     * @return Returns the totalPages.
-     */
-    public String getTotalPages() {
-        return totalPages;
-    }
-    
-    /**
-     * @param pageNumber The pageNumber to set.
-     */
-    public void setPageNumber(String pageNumber) {
-        this.pageNumber = pageNumber;
-    }
-
-    /**
-     * @return Returns the pageNumber.
-     */
-    public String getPageNumber() {
-        return pageNumber;
-    }
-    
-	 /**
      * Validates the form.
      *
      * @param mapping the action mapping.
@@ -374,7 +346,6 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
     		criteria.setLanguages(languages);
     	}
     	if (judgeReplyIds != null && judgeReplyIds.length > 0) {
-    		SubmissionPersistence persistence = PersistenceManager.getInstance().getSubmissionPersistence();
     		List judgeReplies = new ArrayList();
     		for (int i = 0; i < judgeReplyIds.length; ++i) {
     			judgeReplies.add(JudgeReply.findById(Long.parseLong(judgeReplyIds[i])));
@@ -383,6 +354,22 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
     	}    	    	    	
     	return criteria;
     }
+
+	public String getLastId() {
+		return lastId;
+	}
+
+	public void setLastId(String lastId) {
+		this.lastId = lastId;
+	}
+
+	public String getFirstId() {
+		return firstId;
+	}
+
+	public void setFirstId(String firstId) {
+		this.firstId = firstId;
+	}
     
     
 }

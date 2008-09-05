@@ -269,7 +269,7 @@ public class ContextAdapter {
         }
         AbstractContest contest = ContestManager.getInstance().getContest(contestId);
         setAttribute("contest", contest);
-        System.out.println(getAttribute("contest"));
+        
         return contest;
     }
     
@@ -291,8 +291,9 @@ public class ContextAdapter {
         if (problemId < 0) {
             return null;
         }
-        
-        return ContestManager.getInstance().getProblem(problemId);
+        Problem problem = ContestManager.getInstance().getProblem(problemId);
+        setAttribute("problem", problem);
+        return problem;
     }
     
     public List getProblems() throws PersistenceException {

@@ -165,19 +165,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 				  						   DatabaseConstants.LIMITS_MEMORY_LIMIT,
 				  						   DatabaseConstants.LIMITS_OUTPUT_LIMIT,
 				  						   DatabaseConstants.LIMITS_SUBMISSION_LIMIT});
-	
-	/**
-	 * The statement to update a Limit.
-	 */
-	private static final String UPDATE_LIMIT = 
-		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=? WHERE {5}=?", 
-							 new Object[] {DatabaseConstants.LIMITS_TABLE, 
-				   						   DatabaseConstants.LIMITS_TIME_LIMIT,
-										   DatabaseConstants.LIMITS_MEMORY_LIMIT,
-										   DatabaseConstants.LIMITS_OUTPUT_LIMIT,
-										   DatabaseConstants.LIMITS_SUBMISSION_LIMIT,
-										   DatabaseConstants.LIMITS_LIMITS_ID});
-	
+
 	/**
 	 * The query to get a limit.
 	 */
@@ -457,13 +445,13 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
     }
     
     
-    public List searchProblems(ProblemCriteria criteria) throws PersistenceException{
+    public List<Problem> searchProblems(ProblemCriteria criteria) throws PersistenceException{
     	return searchProblems(criteria, 0, Integer.MAX_VALUE);
     }
     
     
     /**
-     * <p>Searchs all problems according with the given criteria in persistence layer.</p>
+     * <p>Searches all problems according with the given criteria in persistence layer.</p>
      *
      * @return a list of problems according with the given criteria
      * @param criteria the problem search criteria
@@ -471,7 +459,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
      * @param count the maximum number of problems in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException{
+    public List<Problem> searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException{
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -479,11 +467,10 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
         try {
         	conn = Database.createConnection();  
         	String query = buildSearchQuery(criteria, offset, count);
-        	System.out.println(query);
-            ps = conn.prepareStatement(query);   
+        	ps = conn.prepareStatement(query);   
             rs = ps.executeQuery();
-                   
-            List problems = new ArrayList();
+            
+            List<Problem> problems = new ArrayList<Problem>();
             while (rs.next()) {
             	
 	            Problem problem = populateProblem(rs);
@@ -535,7 +522,6 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                 
     	sb.append(" ORDER BY " + DatabaseConstants.PROBLEM_CODE);
         sb.append(" LIMIT " + offset + "," + count);
-    	//System.out.println(sb.toString());
     	return sb.toString();
     	
     }

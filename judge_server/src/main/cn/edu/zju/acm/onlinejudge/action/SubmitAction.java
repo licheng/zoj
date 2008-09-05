@@ -95,6 +95,7 @@ public class SubmitAction extends BaseAction {
         }
         UserProfile user = context.getUserProfile();
         Submission submission = new Submission();
+        submission.setContestId(contest.getId());
         submission.setLanguage(language);
         submission.setProblemId(problem.getId());
         submission.setUserProfileId(user.getId());        
@@ -104,15 +105,18 @@ public class SubmitAction extends BaseAction {
         submission.setSubmitDate(new Date());
         SubmissionPersistence submissionPersistence = PersistenceManager.getInstance().getSubmissionPersistence();
         
+        
+        
         if (contest.getEndTime() != null && new Date().after(contest.getEndTime())) {
             submission.setJudgeReply(JudgeReply.OUT_OF_CONTEST_TIME);
-            submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
+            submissionPersistence.createSubmission(submission, user.getId());
         } else if (source.getBytes().length > problem.getLimit().getSubmissionLimit() * 1024) {
+        	submission.setContent(source.substring(0, problem.getLimit().getSubmissionLimit() * 1024));
             submission.setJudgeReply(JudgeReply.SUBMISSION_LIMIT_EXCEEDED);
-            submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
+            submissionPersistence.createSubmission(submission, user.getId());
         } else {
-            submission.setJudgeReply(JudgeReply.QUEUING);
-            submissionPersistence.createSubmission(submission, user.getId(), contest.getId());
+        	submission.setJudgeReply(JudgeReply.QUEUING);
+            submissionPersistence.createSubmission(submission, user.getId());
             JudgeService.getInstance().judge(submission, Priority.NORMAL);
         }
         context.setAttribute("submissionId", submission.getId());

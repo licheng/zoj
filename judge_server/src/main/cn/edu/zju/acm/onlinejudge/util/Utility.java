@@ -125,6 +125,17 @@ public class Utility {
         return sb.toString();
     }
     
+    public static int parseInt(String value) {
+    	if (value == null) {
+    		return -1;
+    	}
+    	try {
+    		return Integer.parseInt(value);    		
+    	} catch (Exception e) {
+    		return -1;
+    	}
+    }
+    
     public static long parseLong(String value) {
     	if (value == null) {
     		return -1;

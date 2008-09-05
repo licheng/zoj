@@ -5,23 +5,20 @@
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.*" %>
-<%@ page import="cn.edu.zju.acm.onlinejudge.bean.Contest" %>
-<%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problem" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.UserProfile" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.AbstractContest" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.security.RoleSecurity" %>
 
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.RankListEntry" %>
-<%@ page import="cn.edu.zju.acm.onlinejudge.util.RankList" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.ProblemsetRankList" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.Utility" %>
 
 <%
-        Object srank=request.getAttribute("from");
-        int rank = (srank==null)? 0:Integer.parseInt(srank.toString());
-		RankList ranklist = (RankList) request.getAttribute("RankList");
-        List entries = ranklist.getEntries();
-        List problems = (List) request.getAttribute("problems");
-    	List roles = ranklist.getRoles();
-    	RoleSecurity role = ranklist.getRole();
+    
+    AbstractContest contest = (AbstractContest) request.getAttribute("contest");
+    String userStatusPath = request.getContextPath() + "/showUserStatus.do";    
+    String ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
+      
 %>
         <logic:messagesPresent property="error">
         <div class="internalError">
@@ -29,72 +26,78 @@
         </div>
         </logic:messagesPresent>
         <logic:messagesNotPresent property="error">
+         <div id="content_title">
+            <bean:write name="contest" property="title"/>
+        </div>
         <div id="content_body">
-				<br/>                
-                <%
-				if (roles != null && roles.size() > 1) {
-				%>
-	                <a href="<%=request.getContextPath()%>/showContestRankList.do?contestId=<bean:write name="contest" property="id"/>">All</a>	                
-					<%
-					for (int i = 0; i < roles.size(); ++i) {
-						RoleSecurity r = (RoleSecurity) roles.get(i);
-					%>
-		            <a href="<%=request.getContextPath()%>/showContestRankList.do?contestId=<bean:write name="contest" property="id"/>&roleId=<%=r.getId()%>"><%=r.getDescription()%></a>
-					<%
-					}
-					%>
-				<%
-				}
-				%>
-				<br/>
-                <table class="list">
-                    <tr class="rowHeader">
-                        <td class="ranklistRank">Rank</td>
-                        <td class="ranklistUser">Name</td>
-                        <td class="ranklistUser">Declaration</td>
-                        <td class="ranklistSolved"><a href="<%=request.getContextPath()%>/showRankList.do?contestId=<bean:write name="contest" property="id"/>&from=0&order=AC">Solved<a></td>
-                        <td class="ranklistSolved"><a href="<%=request.getContextPath()%>/showRankList.do?contestId=<bean:write name="contest" property="id"/>&from=0&order=Submit">Submitted</a></td>
-                        <td class="ranklistPenalty">AC Ratio</td>
+                <div align="center" style="width:400px">
+                <logic:present name="previousFrom">
+                <a href="<%=ranklistPath + request.getAttribute("previousFrom")%>">&lt;&lt;Previous</a>
+                </logic:present>
+                <logic:notPresent name="previousFrom">
+                <font color="#777777">&lt;&lt;Previous</font>
+                </logic:notPresent>
+                &nbsp;&nbsp;
+                <logic:present name="nextFrom">
+                <a href="<%=ranklistPath + request.getAttribute("nextFrom")%>">Next&gt;&gt;</a>
+                </logic:present>
+                <logic:notPresent name="nextFrom">
+                <font color="#777777">Next&gt;&gt;</font>
+                </logic:notPresent>
+                </div>        
+                <table class="problemsetList">
+                    <tr class="rowHeader" >
+                        <td class="problemsetRanklistRank">Rank</td>
+                        <td class="problemsetRanklistUser">Name</td>
+                        <td class="problemsetRanklistSolved">Solved</td>
+                        <td class="problemsetRanklistSubmitted">Submitted</td>
+                        <td class="problemsetRanklistACRatio">AC Ratio</td>
                     </tr>
                     <%
+                    ProblemsetRankList ranklist = (ProblemsetRankList) request.getAttribute("RankList");
+                    int[] solved = ranklist.getSolved();
+                    int[] total = ranklist.getTotal();
+                    UserProfile[] users = ranklist.getUsers();
+                    int rank = ranklist.getOffset();
                     int count = 1;
-                    long lastSolved = -1;
-                    long lastsub = -1;
-                    for (int i = 0; i < entries.size(); ++i) {
-                         RankListEntry entry = (RankListEntry) entries.get(i);
-                         String displayRank = "";                         
-                         if (!entry.getUserProfile().getNickName().endsWith("***")) {
-	                         if (entry.getSubmitted() == lastsub && entry.getSolved() == lastSolved) {
-	                      		count++;
-	                         } else {
-	                         	rank += count;
-	                         	count = 1;
-	                         }
-	                         displayRank = "" + rank;
-	                         
- 	                         lastSolved = entry.getSolved();
-    	                     lastsub = entry.getPenalty(); 
-                         }
+                    for (int i = 0; i < solved.length; ++i) {
+                    	if (i == 0 || solved[i] != solved[i - 1] || total[i] != total[i - 1]) {
+                    		rank += count;
+                    		count = 1;
+                    	} else {
+                    		count++;
+                    	}
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
-                        <td class="ranklistRank"><%=displayRank%></td>
-                        <td class="ranklistUser"><font color="db6d00"><%=
-                        	entry.getUserProfile().getNickName() == null ||
-                        	entry.getUserProfile().getNickName().length() == 0
-                        	?  entry.getUserProfile().getHandle() : entry.getUserProfile().getNickName()
-                        %></font></td>
-                        <% String declaration=entry.getUserProfile().getDeclaration();
-                          if(declaration==null)declaration=""; %>
-                        <td class="ranklistUser"><%=declaration %></td>
-                        <td class="ranklistSolved"><%=entry.getSolved()%></td>
-                        <td class="ranklistSolved"><%=entry.getSubmitted()%></td>
-                        <td class="ranklistPenalty"><%=(new DecimalFormat("0.##")).format(entry.getACRatio()*100)+"%"%></td>
+                        <td class="problemsetRanklistRank"><%=rank%></td>
+                        <td class="problemsetRanklistUser"><a href="<%=userStatusPath%>?contestId=<%=contest.getId()%>&userId=<%=users[i].getId()%>"><font color="db6d00"><%=
+                        	users[i].getNickName() == null || users[i].getNickName().length() == 0
+                        	  ? users[i].getHandle() : users[i].getNickName()
+                        %></font></a></td>
+                        <td class="problemsetRanklistSolved"><%=solved[i]%></td>
+                        <td class="problemsetRanklistSubmitted"><%=total[i]%></td>
+                        <td class="problemsetRanklistACRatio"><%=(new DecimalFormat("0.##")).format(100.0 * solved[i] / total[i])+"%"%></td>
                     </tr>
                     <%
                     }
                     %>
                 </table>
-
+                <div align="center" style="width:400px">
+                <logic:present name="previousFrom">
+                <a href="<%=ranklistPath + request.getAttribute("previousFrom")%>">&lt;&lt;Previous</a>
+                </logic:present>
+                <logic:notPresent name="previousFrom">
+                <font color="#777777">&lt;&lt;Previous</font>
+                </logic:notPresent>
+                &nbsp;&nbsp;
+                <logic:present name="nextFrom">
+                <a href="<%=ranklistPath + request.getAttribute("nextFrom")%>">Next&gt;&gt;</a>
+                </logic:present>
+                <logic:notPresent name="nextFrom">
+                <font color="#777777">Next&gt;&gt;</font>
+                </logic:notPresent>
+                </div>
+                
         </div>
         </logic:messagesNotPresent>
 

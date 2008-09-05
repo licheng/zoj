@@ -724,6 +724,50 @@ A:hover		{ COLOR: red; TEXT-DECORATION: none }
     width: 60px;
 }
 
+.problemsetList
+{
+    width: 400px;
+    border: 1px;
+    border-collapse: separate;
+}
+
+.problemsetRanklistRank
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+.problemsetRanklistUser
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 120px;
+}
+
+
+.problemsetRanklistSolved
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+.problemsetRanklistSubmitted
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+.problemsetRanklistACRatio
+{
+    padding: 0 8 0 8;
+    text-align: center;
+    width: 60px;
+}
+
+
 .bigProblemTitle
 {
     font-size: 24px;

@@ -15,7 +15,7 @@ public class ContestStatistics {
 		JudgeReply.WRONG_ANSWER,
 		JudgeReply.PRESENTATION_ERROR,
 		JudgeReply.RUNTIME_ERROR,
-        JudgeReply.FLOATING_POINT_ERROR,
+		JudgeReply.FLOATING_POINT_ERROR,
         JudgeReply.SEGMENTATION_FAULT,
         JudgeReply.TIME_LIMIT_EXCEEDED,
         JudgeReply.MEMORY_LIMIT_EXCEEDED,

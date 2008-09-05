@@ -34,6 +34,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
 import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
+import cn.edu.zju.acm.onlinejudge.util.ProblemsetRankList;
 import cn.edu.zju.acm.onlinejudge.util.RankList;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
@@ -82,11 +83,11 @@ public class ShowRankListAction extends BaseAction {
     		return forward;
     	}    	
     	AbstractContest contest = context.getContest();
-    	List problems = context.getProblems();
-    	context.setAttribute("problems", problems);
-        long roleId = Utility.parseLong(context.getRequest().getParameter("roleId"));
-        if(!isProblemset)
-        {
+    	if (!isProblemset) {
+    		List problems = context.getProblems();
+        	context.setAttribute("problems", problems);
+            long roleId = Utility.parseLong(context.getRequest().getParameter("roleId"));
+            
 	    	RankList ranklist = StatisticsManager.getInstance().getRankList(contest.getId(), roleId);
 	    	
 	    	String export = context.getRequest().getParameter("export");
@@ -98,14 +99,21 @@ public class ShowRankListAction extends BaseAction {
 	    	}
 	    	context.setAttribute("RankList", ranklist);
         }
-        else
-        {
-        	Object sorder=context.getRequest().getParameter("order");
-        	Object sbegin=context.getRequest().getParameter("from");
-        	int begin=(sbegin==null)? 0 : Integer.parseInt(sbegin.toString());
-        	int order=(sorder.equals("AC"))? 0 : 1;
-        	System.out.println(order);
-        	RankList ranklist = StatisticsManager.getInstance().getProblemsetRankList(contest.getId(), roleId, begin,order);
+        else {
+        	int from  = Utility.parseInt(context.getRequest().getParameter("from"));
+        	if (from < 0) {
+        		from = 0;
+        	}
+        	int count = 30;
+        	
+        	ProblemsetRankList ranklist = StatisticsManager.getInstance().getProblemsetRankList(contest.getId(), from, count);
+        	if (from > 0) {
+        		context.setAttribute("previousFrom", from - count > 0 ? from - count : 0);
+        	}
+        	if (ranklist.getSolved().length == count) {
+        		context.setAttribute("nextFrom", from + count);
+        	}
+        	
         	context.setAttribute("RankList", ranklist);
         }
         return handleSuccess(mapping, context, "success");

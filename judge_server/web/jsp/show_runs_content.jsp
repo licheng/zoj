@@ -26,27 +26,35 @@
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
     boolean canViewSource = (userSecurity != null && userSecurity.canViewSource(contest.getId()));
+    String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";
 %>
-
         <logic:messagesPresent property="error">
         <div class="internalError">
             <html:errors property="error"/>
         </div>
         </logic:messagesPresent>
         <logic:messagesNotPresent property="error">
-        <div id="content_title"><bean:write name="contest" property="title"/></div>
+        <div id="content_title">
+          <div id="export">
+            <span id="searchRunsLink">
+                <a href="JavaScript: showSearch(true);">Search</a>
+            </span>
+            <span id="hideSearchRunsLink">
+                <a href="JavaScript: showSearch(false);">Hide Search Form</a>
+            </span>
+          </div>
+          &nbsp;<bean:write name="contest" property="title"/>
+        </div>
         <div id="content_body">
-            <form name="SubmissionSearchForm" method="GET" action="<%=actionPath%>">
+            <form id="SubmissionSearchForm" name="SubmissionSearchForm" method="GET" action="<%=actionPath%>">
             <input type="hidden" name="contestId" value="<bean:write name="contest" property="id"/>">
             <input type="hidden" name="search" value="<bean:write name="SubmissionSearchForm" property="search"/>">
-                <div id="searchRunsLink">
-                <a href="JavaScript: showSearch(true);">Search</a>
-                </div>
+            <input type="hidden" name="firstId" value="-1">
+            <input type="hidden" name="lastId" value="-1">
                 <div id="searchRunsParameter">
-                    <a href="JavaScript: showSearch(false);">Hide Search Form</a>
                     <table id="searchTable" >
                         <tr>
-                            <td width="115">Problem ID<br>
+                            <td width="115">Problem Code<br>
                                 <input name="problemCode" type="text" size="10"
                                     value="<bean:write name="SubmissionSearchForm" property="problemCode" />"
                                 ><br>
@@ -86,39 +94,14 @@
                                 </logic:messagesPresent>
                                 <br>
                             </td>
-                            <td width="220">Submit Time From<br>
-                                <input name="timeStart" type="text" size="24"
-                                    value="<bean:write name="SubmissionSearchForm" property="timeStart" />"
-                                ><br>
-                                <span class="error">yyyy-mm-dd HH:MM:SS
-                                <logic:messagesPresent property="timeStart">
-
-                                    <html:errors property="timeStart"/>
-                                </logic:messagesPresent><br>
-                                </span>
-                                To<br>
-                                <input name="timeEnd" type="text" size="24"
-                                    value="<bean:write name="SubmissionSearchForm" property="timeEnd" />"
-                                ><br>
-                                <span class="error">yyyy-mm-dd HH:MM:SS
-                                <logic:messagesPresent property="timeEnd">
-
-                                    <html:errors property="timeEnd"/>
-                                </logic:messagesPresent>
-                                </span>
-                                <br>
-                            </td>
                             <td width="80">Languages<br>
                             <%
-                                
                                 SubmissionSearchForm searchForm = (SubmissionSearchForm) request.getAttribute("SubmissionSearchForm");
-
                                 List languages = contest.getLanguages();
                                 Set selectedIds = new HashSet();
                                 if (searchForm.getLanguageIds() != null) {
                                     selectedIds.addAll(Arrays.asList(searchForm.getLanguageIds()));
                                 }
-
                             %>
                             <select name="languageIds" width="60" size="6" multiple >
                             <%
@@ -165,29 +148,29 @@
                     <input id="serachButton" type="submit" value="Search"/>
                 </div>
 
-                <%
-                    long pageNumber = ((Long) request.getAttribute("pageNumber")).longValue();
-                    long totalPages = ((Long) request.getAttribute("totalPages")).longValue();
-                %>
-                <%
-                    if (totalPages > 0) {
-                %>
-                <%
-                    if (totalPages > 1) {
-                %>
-                <div class="pageFooter">
-                      <a href="JavaScript: goPage(<%=totalPages%>,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">&lt;&lt;First</a>
-                      &nbsp;&nbsp;
-                      <a href="JavaScript: goPage(<%=pageNumber+1%>,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">&lt;Previous</a>
-                      &nbsp;&nbsp;
-                      <a href="JavaScript: goPage(<%=pageNumber-1%>,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">Next&gt;</a>
-                      &nbsp;&nbsp;
-                      <a href="JavaScript: goPage(1,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">Last&gt;&gt;</a>
-                      &nbsp;&nbsp; <font color='red'>Total: <bean:write name="totalSubmissions"/></font> 
+                <logic:empty name="runs">
+                <div>
+                <br/>
+                <font size='3' color='red'>No submission available.</font>
+                <br/>
                 </div>
-                <%
-                    }
-                %>
+                </logic:empty>
+                <logic:notEmpty name="runs">
+                <div>
+                <logic:present name="firstId">
+                <a href="JavaScript: goPrevious(<%=request.getAttribute("firstId")%>);">&lt;&lt;Previous</a>
+                </logic:present>
+                <logic:notPresent name="firstId">
+                <font color="#777777">&lt;&lt;Previous</font>
+                </logic:notPresent>
+                <logic:present name="lastId">
+                <a href="JavaScript: goNext(<%=request.getAttribute("lastId")%>);">Next&gt;&gt;</a>
+                </logic:present>
+                <logic:notPresent name="lastId">
+                <font color="#777777">Next&gt;&gt;</font>
+                </logic:notPresent>
+                
+                </div>
                 <table class="list">
                     <tr class="rowHeader">
                         <td class="runId">Run ID</td>
@@ -213,7 +196,7 @@
                          Submission submission = (Submission) runs.get(i);
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
-                        <td class="runId"><%=submission.getId()%></td>
+                        <td class="runId"><%=submission.getContestOrder()%></td>
                         <td class="runSubmitTime"><%=Utility.toTimestamp(submission.getSubmitDate())%></td>
                         <td class="runJudgeStatus">
                             <span class="<%=JudgeReply.ACCEPTED.equals(submission.getJudgeReply()) ? "judgeReplyAC" : "judgeReplyOther"%>">
@@ -233,7 +216,7 @@
                         <td class="runLanguage"><%=submission.getLanguage()%></td>
                         <td class="runTime"><%=submission.getTimeConsumption()%></td>
                         <td class="runMemory"><%=submission.getMemoryConsumption()%></td>
-                        <td class="runUserName"><font color="db6d00"><%=submission.getUserName()%></font></td>
+                        <td class="runUserName"><a href="<%=userStatusPath + submission.getUserProfileId() %>"><font color="db6d00"><%=submission.getUserName()%></font></a></td>
                         <% if (admin || canViewSource) { %>
                             <td class="runAdmin"><a href="<%=request.getContextPath()%>/showSubmission.do?submissionId=<%=submission.getId()%>" target="_blank">Source</a></td>
                         <% } %>                        
@@ -242,26 +225,20 @@
                     }
                     %>
                 </table>
-                <%
-                    if (totalPages > 1) {
-                %>
-                <div class="pageFooter">
-                      <a href="JavaScript: goPage(<%=totalPages%>,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">&lt;&lt;First</a>
-                      &nbsp;&nbsp;
-                      <a href="JavaScript: goPage(<%=pageNumber+1%>,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">&lt;Previous</a>
-                      &nbsp;&nbsp;
-                      <a href="JavaScript: goPage(<%=pageNumber-1%>,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">Next&gt;</a>
-                      &nbsp;&nbsp;
-                      <a href="JavaScript: goPage(1,<%=totalPages%>,<%=pageNumber%>,document.SubmissionSearchForm);">Last&gt;&gt;</a>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Page <input id="pageNumber" name="pageNumber" value="<bean:write name="pageNumber"/>"/> of <span id="totalPages"><bean:write name="totalPages"/> </span>Pages
-                      <input id="pageButton" type="button" onclick="JavaScript: SubmissionSearchForm.submit();return false;" value="Go!"/>
+                <div>
+                <logic:present name="firstId">
+                <a href="JavaScript: goPrevious(<%=request.getAttribute("firstId")%>);">&lt;&lt;Previous</a>
+                </logic:present>
+                <logic:notPresent name="firstId">
+                <font color="#777777">&lt;&lt;Previous</font>
+                </logic:notPresent>
+                <logic:present name="lastId">
+                <a href="JavaScript: goNext(<%=request.getAttribute("lastId")%>);">Next&gt;&gt;</a>
+                </logic:present>
+                <logic:notPresent name="lastId">
+                <font color="#777777">Next&gt;&gt;</font>
+                </logic:notPresent>
                 </div>
-                
-                
-                <%
-                    }
-                %>
-                
                 <%
                 if (admin) {
                 %>
@@ -272,17 +249,7 @@
                 <%
                 }
                 %> 
-                                                
-                
-                <%
-                    } else {
-                %>
-                    <p>
-                    <font size="4" color="red">No Submission Found.</font>
-                    </p>
-                <%
-                    }
-                %>
+                </logic:notEmpty>
             </form>
         </div>
 
@@ -295,7 +262,7 @@
 if (admin) {
 %>
 function rejudge() {
-    if (!confirm("<bean:write name="totalSubmissions"/> submissions are selected. Are you sure to rejudge them?")) {
+    if (!confirm("Are you sure to rejudge them?")) {
       return;
     }
     document.SubmissionSearchForm.method = 'POST';
@@ -305,22 +272,29 @@ function rejudge() {
 <% 
 }
 %>
-function goPage(n, total, now, table) {
-    if (n == now || n < 1 || n > total) {
-        return;
-    }
-    table.pageNumber.value = n;
-    table.submit();
+
+
+function goPrevious(id) {
+    var form = document.getElementById('SubmissionSearchForm');
+    form.firstId.value = id;
+    form.submit();
+}
+function goNext(id) {
+    var form = document.getElementById('SubmissionSearchForm');
+    form.lastId.value = id;
+    form.submit();
 }
 
 function showSearch(show) {
     if (show) {
         document.getElementById("searchRunsLink").style.display="none";
+        document.getElementById("hideSearchRunsLink").style.display="block";
         document.getElementById("searchRunsParameter").style.display="block";
         document.SubmissionSearchForm.search.value="true";
 
     } else {
         document.getElementById("searchRunsLink").style.display="block";
+        document.getElementById("hideSearchRunsLink").style.display="none";
         document.getElementById("searchRunsParameter").style.display="none";
         document.SubmissionSearchForm.search.value="false";
     }

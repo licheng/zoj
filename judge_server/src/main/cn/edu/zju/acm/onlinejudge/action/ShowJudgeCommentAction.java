@@ -100,7 +100,7 @@ public class ShowJudgeCommentAction extends BaseAction {
                                 
         response.setContentType("text/plain");   
         response.getOutputStream().write(
-                (submission.getContent() == null ? "" : submission.getJudgeComment()).getBytes());                          
+                (submission.getJudgeComment() == null ? "" : submission.getJudgeComment()).getBytes());                          
         response.getOutputStream().close();
                 
         return null;

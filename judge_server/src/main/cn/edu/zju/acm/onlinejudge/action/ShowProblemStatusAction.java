@@ -12,10 +12,12 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
+import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
+import cn.edu.zju.acm.onlinejudge.util.Utility;
 
 /** 
  * MyEclipse Struts
@@ -39,12 +41,24 @@ public class ShowProblemStatusAction extends BaseAction {
 	 * @return ActionForward
 	 */
 	public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-		System.out.println(context.getRequest().getParameter("problemId"));
-		long problemId=Long.parseLong(context.getRequest().getParameter("problemId").toString());
-		Problem p=PersistenceManager.getInstance().getProblemPersistence().getProblem(problemId);
-		ProblemStatistics statistics = StatisticsManager.getInstance().getProblemStatistics(problemId);
-		context.setAttribute("ProblemStatistics", statistics);
-		context.setAttribute("Problem", p);
+		
+		
+    	// check contest
+    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblemStatus.do");
+    	
+    	ActionForward forward = checkProblemViewPermission(mapping, context, isProblemset);
+    	if (forward != null) {
+    		return forward;
+    	}    	    	
+    	
+    	Problem problem = context.getProblem();
+    	String orderBy = context.getRequest().getParameter("orderBy");
+    	if (problem != null) {
+    		ProblemStatistics statistics = StatisticsManager.getInstance().getProblemStatistics(problem.getId(), orderBy, 20);
+    		context.setAttribute("ProblemStatistics", statistics);
+    		
+    	}
+		
 		return handleSuccess(mapping, context, "success");
 	}
 }

@@ -10,7 +10,7 @@ package cn.edu.zju.acm.onlinejudge.bean;
  *
  * @version 2.0
  */
-public class Problem {
+public class Problem implements Comparable {
 
     /**
      * <p>Represents id.</p>
@@ -260,4 +260,19 @@ public class Problem {
     public void setColor(String color) {
         this.color = color;
     }
+    
+    public boolean equals(Object obj) {
+    	Problem that = (Problem) obj;
+    	return this.id == that.id;
+    }
+    
+    public int hashCode() {
+    	return (int) id;
+    }
+
+	public int compareTo(Object obj) {
+		Problem that = (Problem) obj;
+		
+		return this.id == that.id ? 0 : (this.id > that.id ? 1 : -1);
+	}
 }

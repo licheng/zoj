@@ -5,17 +5,21 @@
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.UserProfile" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="cn.edu.zju.acm.onlinejudge.util.RankListEntry" %>
+<%@ page import="java.util.Iterator" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.UserStatistics" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problem" %>
-<%@ page import="cn.edu.zju.acm.onlinejudge.util.PersistenceManager" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problemset" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.AbstractContest" %>
 
 <%
-    Set solved=(Set)request.getAttribute("solved");
-    UserProfile user=(UserProfile)request.getAttribute("user");
-    RankListEntry re=(RankListEntry)request.getAttribute("RankListEntry");
+    AbstractContest contest = (AbstractContest) request.getAttribute("contest");
+    boolean isProblemset = contest instanceof Problemset;
+    String problemPath = request.getContextPath() + (isProblemset ? "/showProblem.do" : "/showContestProblem.do") + "?problemId=";
+    String contestPath = request.getContextPath() + (isProblemset ? "/showProblems.do" : "/showContestProblems.do") + "?contestId=";
+    UserStatistics statistics = (UserStatistics) request.getAttribute("UserStatistics");
+    UserProfile user = (UserProfile) request.getAttribute("user");
+    
 %>
-
 
     <logic:messagesPresent property="error">
     <div class="internalError">
@@ -23,30 +27,47 @@
     </div>
     </logic:messagesPresent>
 
-<div id="content_body">
-        <blockquote>
-        <table class="profileTable" border="1">
-        <tr>
-        <td>
-        <table border="1">
-        <center><font color=blue size="+2"><%=user.getHandle() %></font></center>
-        <tr>
-        <% String nick=user.getNickName(); %>
-        <td>Nick Name</td><td><%=(nick==null)? user.getHandle() : nick %><td></tr>
-        <tr><td>E-mail</td><td><%=user.getEmail() %></td></tr>
-        <tr><td>Plan</td><td><%=user.getDeclaration() %></td><tr>
-        <tr><td>Total Submit</td><td><%=re.getSubmitted() %></td><tr>
-        <tr><td>Total Solved</td><td><%=re.getSolved() %></td><tr>
-        </table>
-        </td>
-        <td width=60% align=left rowspan=4>
-        <% for(java.util.Iterator it=solved.iterator();it.hasNext();) {
-            Problem p = PersistenceManager.getInstance().getProblemPersistence().getProblem(Long.parseLong(it.next().toString())); %>
-               &nbsp; <a href="<%=request.getContextPath()%>/showProblem.do?contestId=1&problemId=<%=p.getId()%>"><font color="blue"><%=p.getCode()%></font></a>
-
-        <% } %>
-        </td>
-        </tr>
-        </table>
+<logic:messagesPresent property="error">
+        <div class="internalError">
+            <html:errors property="error"/>
+        </div>
+        </logic:messagesPresent>
+<logic:messagesNotPresent property="error">
+        <div id="content_title">User Statistics
+        <logic:present name="contest"> 
+        - <a href="<%=contestPath + contest.getId()%>"><bean:write name="contest" property="title"/></a>
+        </logic:present>
+        </div>
+        <div id="content_body">
+        <br/>
+	    <blockquote>
+        <logic:notPresent name="user">
+	        <font color="red" size="5">No such user.</font>
+	    </logic:notPresent>
+	    <logic:present name="user">
+        <logic:notPresent name="contest">
+            <font color="red" size="5">No such contest.</font>
+        </logic:notPresent>
+        <logic:present name="contest">
+        <div>
+        <font color="db6d00" size="5"><bean:write name="user" property="handle"/></font>
+        <logic:notEmpty name="user" property="nickName"><font size="4">(<bean:write name="user" property="handle"/>)</font></logic:notEmpty>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font size="3">AC Ratio:</font> <font color="red" size="4"><%=statistics.getSolved().size()%>/<%=statistics.getTotal()%> </font><br/>
+        </div>
+        <br/>
+        <div>
+        Solved Problems:<br/>
+        <% 
+            if (statistics.getSolved() != null) {
+                for (Iterator it = statistics.getSolved().iterator(); it.hasNext();) {
+                    Problem problem = (Problem) it.next();
+        %>
+               <a href="<%=problemPath + problem.getId()%>"><%=problem.getCode()%></a>
+        <% }} %>
+        </div>
+        </logic:present>
+        </logic:present>
         </blockquote>
-</div>
+        </div>
+</logic:messagesNotPresent>

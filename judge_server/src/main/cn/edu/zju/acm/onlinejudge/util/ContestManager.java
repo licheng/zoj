@@ -127,25 +127,25 @@ public class ContestManager {
     	}
     }
     
-    public List getContestProblems(long contestId, int offset, int count) throws PersistenceException {
+    public List<Problem> getContestProblems(long contestId, int offset, int count) throws PersistenceException {
         ProblemCriteria criteria = new ProblemCriteria();
         criteria.setContestId(new Long(contestId));    
         return searchProblems(criteria, offset, count);                
     }
     
-    public List getContestProblems(long contestId) throws PersistenceException {
+    public List<Problem> getContestProblems(long contestId) throws PersistenceException {
     	ProblemCriteria criteria = new ProblemCriteria();
         criteria.setContestId(new Long(contestId));    
         return searchProblems(criteria, 0, Integer.MAX_VALUE);                
     }
     
-    public List searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException {
-    	List key = new ArrayList();
+    public List<Problem> searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException {
+    	List<Object> key = new ArrayList<Object>();
     	key.add(criteria);
     	key.add(new Integer(offset));
     	key.add(new Integer(count));
     	synchronized (contestProblemsCache) {
-	    	List problems = (List) contestProblemsCache.get(key);
+	    	List<Problem> problems = (List<Problem>) contestProblemsCache.get(key);
 	    	if (problems == null) {    		
 	    		ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
 	    		problems = problemPersistence.searchProblems(criteria, offset, count);

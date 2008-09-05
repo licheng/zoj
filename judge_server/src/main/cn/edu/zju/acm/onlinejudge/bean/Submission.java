@@ -17,6 +17,9 @@ import java.util.Date;
  */
 public class Submission {
 
+	private long contestId = -1;
+	private long contestOrder = -1;
+	
     /**
      * <p>Represents id.</p>
      */
@@ -328,6 +331,8 @@ public class Submission {
         this.judgeComment = judgeComment;
     }
 
+    
+    
     public boolean isFinished() {
         return finished;
     }
@@ -335,5 +340,21 @@ public class Submission {
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
+
+	public long getContestId() {
+		return contestId;
+	}
+
+	public void setContestId(long contestId) {
+		this.contestId = contestId;
+	}
+
+	public long getContestOrder() {
+		return contestOrder;
+	}
+
+	public void setContestOrder(long contestOrder) {
+		this.contestOrder = contestOrder;
+	}
 
 }

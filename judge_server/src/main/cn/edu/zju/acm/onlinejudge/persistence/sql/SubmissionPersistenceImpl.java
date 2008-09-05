@@ -13,21 +13,23 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
-import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
+import cn.edu.zju.acm.onlinejudge.util.ProblemsetRankList;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
+import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
 									   
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,7 +52,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 	 */
 	private static final String INSERT_SUBMISSION = 
 		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}," +
-				" {12}, {13}, {14}, {15}) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)", 
+				" {12}, {13}, {14}, {15}, {16}, {17}) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)", 
 							 new Object[] {DatabaseConstants.SUBMISSION_TABLE, 
 				  						   DatabaseConstants.SUBMISSION_PROBLEM_ID,
 				  						   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
@@ -65,32 +67,11 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.CREATE_USER,
 				  						   DatabaseConstants.CREATE_DATE,
 				  						   DatabaseConstants.LAST_UPDATE_USER,
-				  						   DatabaseConstants.LAST_UPDATE_DATE,				  						   
+				  						   DatabaseConstants.LAST_UPDATE_DATE,		
+ 				  						   "contest_id",
+				  						   "contest_order",
 				  						   DatabaseConstants.SUBMISSION_ACTIVE});
-	
-	/**
-	 * The statement to create a Submission.
-	 */
-	private static final String INSERT_SUBMISSION2 = 
-		MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}," +
-				" {12}, {13}, {14}, {15}) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)", 
-							 new Object[] {DatabaseConstants.SUBMISSION_TABLE, 
-				  						   DatabaseConstants.SUBMISSION_PROBLEM_ID,
-				  						   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
-				  						   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
-				  						   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
-				  						   DatabaseConstants.SUBMISSION_CONTENT,
-				  						   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
-				  						   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
-				  						   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,				  						   
-				  						   DatabaseConstants.SUBMISSION_JUDGE_DATE,
-				  						   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
-				  						   DatabaseConstants.CREATE_USER,
-				  						   DatabaseConstants.CREATE_DATE,
-				  						   DatabaseConstants.LAST_UPDATE_USER,
-				  						   DatabaseConstants.LAST_UPDATE_DATE,				  						   
-				  						   DatabaseConstants.SUBMISSION_ACTIVE});
-	
+
 	/**
 	 * The statement to update a Submission.
 	 */
@@ -102,7 +83,27 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
 				  						   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
 				  						   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
+				  						   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
+				  						   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
+				  						   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
+				  						   DatabaseConstants.SUBMISSION_JUDGE_DATE,
+				  						   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
+				  						   DatabaseConstants.LAST_UPDATE_USER,
+				  						   DatabaseConstants.LAST_UPDATE_DATE,
 				  						   DatabaseConstants.SUBMISSION_CONTENT,
+				  						   DatabaseConstants.SUBMISSION_SUBMISSION_ID}); 
+	
+	/**
+	 * The statement to update a Submission.
+	 */
+	private static final String UPDATE_SUBMISSION_WITHOUT_CONTENT = 
+		MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, "
+				+ "{9}=?, {10}=?, {11}=? WHERE {12}=?", 
+							 new Object[] {DatabaseConstants.SUBMISSION_TABLE,  
+										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
+				  						   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
+				  						   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
+				  						   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
 				  						   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
 				  						   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
 				  						   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
@@ -123,93 +124,31 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 				  						   DatabaseConstants.LAST_UPDATE_DATE,
 				  						   DatabaseConstants.SUBMISSION_SUBMISSION_ID}); 
 	
-	/**
-	 * The query to get a submission.
-	 */
+	
+	private static final String GET_SUBMISSION_PREFIX = 
+		"SELECT s.submission_id,s.problem_id,s.language_id,s.judge_reply_id,s.user_profile_id,s.time_consumption," +
+		"s.memory_consumption,s.submission_date,s.judge_date,s.judge_comment,s.contest_id,s.contest_order,u.handle,p.code";
+	
+	private static final String GET_SUBMISSION_WITH_CONTENT_PREFIX = GET_SUBMISSION_PREFIX + ",s.content";
+	
+	private static final String GET_SUBMISSION_FROM_PART =
+		" FROM submission s FORCE_INDEX " +
+		"LEFT JOIN user_profile u ON s.user_profile_id = u.user_profile_id " +
+		"LEFT JOIN problem p ON s.problem_id = p.problem_id " +
+		"WHERE s.active=1 AND u.active=1 AND p.active=1 ";
+	
 	private static final String GET_SUBMISSION = 
-		MessageFormat.format("SELECT {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10} " 
-				+ "FROM {11} WHERE {12}=1 AND {0}=?",
-				 			 new Object[] {DatabaseConstants.SUBMISSION_SUBMISSION_ID, 
-										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
-										   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
-										   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
-										   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
-										   DatabaseConstants.SUBMISSION_CONTENT,
-										   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
-										   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
-										   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
-										   DatabaseConstants.SUBMISSION_JUDGE_DATE,
-										   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
-										   DatabaseConstants.SUBMISSION_TABLE,
-				   					       DatabaseConstants.SUBMISSION_ACTIVE});
-	
-	/**
-	 * The query to get submissions.
-	 */
+		GET_SUBMISSION_WITH_CONTENT_PREFIX + GET_SUBMISSION_FROM_PART + " AND s.submission_id=?";
+
 	private static final String GET_SUBMISSIONS = 
-		MessageFormat.format("SELECT {0}, s.{1}, {2}, {3}, s.{4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12} " 
-				+ "FROM {13} s LEFT JOIN {14} u ON s.{4} = u.{4} LEFT JOIN {15} p ON s.{1} = p.{1} "
-				+ "WHERE s.{16}=1 AND u.{17}=1 AND p.{18}=1 ",
-				 			 new Object[] {DatabaseConstants.SUBMISSION_SUBMISSION_ID, 
-										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
-										   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
-										   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
-										   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
-										   DatabaseConstants.SUBMISSION_CONTENT,
-										   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
-										   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
-										   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
-										   DatabaseConstants.SUBMISSION_JUDGE_DATE,
-										   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
-										   DatabaseConstants.USER_PROFILE_HANDLE,
-										   DatabaseConstants.PROBLEM_CODE,
-										   DatabaseConstants.SUBMISSION_TABLE,
-										   DatabaseConstants.USER_PROFILE_TABLE,
-										   DatabaseConstants.PROBLEM_TABLE,
-										   DatabaseConstants.SUBMISSION_ACTIVE,
-										   DatabaseConstants.USER_PROFILE_ACTIVE,
-										   DatabaseConstants.PROBLEM_ACTIVE});
+		GET_SUBMISSION_PREFIX + GET_SUBMISSION_FROM_PART;
+				 			 
 	/**
 	 * The query to get submissions.
 	 */
-	private static final String GET_BEST_SUBMISSIONS = 
-		MessageFormat.format("SELECT * FROM (SELECT {0}, s.{1}, {2}, {3}, s.{4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12} " 
-				+ "FROM {13} s LEFT JOIN {14} u ON s.{4} = u.{4} LEFT JOIN {15} p ON s.{1} = p.{1} "
-				+ "WHERE s.{16}=1 AND u.{17}=1 AND p.{18}=1 AND s.{1}=? AND s.{4}=5 ORDER BY s.{6}, s.{7}) AS temp GROUP BY {4} LIMIT 10",
-				 			 new Object[] {DatabaseConstants.SUBMISSION_SUBMISSION_ID, 
-										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
-										   DatabaseConstants.SUBMISSION_LANGUAGE_ID,
-										   DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID,
-										   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
-										   DatabaseConstants.SUBMISSION_CONTENT,
-										   DatabaseConstants.SUBMISSION_TIME_CONSUMPTION,				  						   
-										   DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION,
-										   DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
-										   DatabaseConstants.SUBMISSION_JUDGE_DATE,
-										   DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
-										   DatabaseConstants.USER_PROFILE_HANDLE,
-										   DatabaseConstants.PROBLEM_CODE,
-										   DatabaseConstants.SUBMISSION_TABLE,
-										   DatabaseConstants.USER_PROFILE_TABLE,
-										   DatabaseConstants.PROBLEM_TABLE,
-										   DatabaseConstants.SUBMISSION_ACTIVE,
-										   DatabaseConstants.USER_PROFILE_ACTIVE,
-										   DatabaseConstants.PROBLEM_ACTIVE});
-	
-	/**
-	 * The query to get submission number.
-	 */
-	private static final String GET_SUBMISSION_NUMBER = 
-		MessageFormat.format("SELECT COUNT(*) FROM {0} s LEFT JOIN {1} u ON s.{2} = u.{2} LEFT JOIN {3} p ON s.{4} = p.{4} WHERE s.{5}=1 AND u.{6}=1 AND p.{7}=1 ",
-				 			 new Object[] {DatabaseConstants.SUBMISSION_TABLE,
-										   DatabaseConstants.USER_PROFILE_TABLE,
-										   DatabaseConstants.SUBMISSION_USER_PROFILE_ID,
-										   DatabaseConstants.PROBLEM_TABLE,
-										   DatabaseConstants.SUBMISSION_PROBLEM_ID,
-				   					       DatabaseConstants.SUBMISSION_ACTIVE,
-				   					       DatabaseConstants.USER_PROFILE_ACTIVE,
-										   DatabaseConstants.PROBLEM_ACTIVE});
-	
+	private static final String GET_SUBMISSIONS_WITH_CONTENT = 
+		GET_SUBMISSION_WITH_CONTENT_PREFIX + GET_SUBMISSION_FROM_PART;
+		
 	/**
 	 * The statement to create a judge_reply.
 	 */
@@ -283,7 +222,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 	/**
 	 * The JudgeReplies cache.
 	 */
-	private static List allJudgeReplies = null;
+	private static List<JudgeReply> allJudgeReplies = null;
 	
     /**
      * <p>Creates the specified submission in persistence layer.</p>
@@ -292,25 +231,27 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public void createSubmission(Submission submission, long user, long contestId) throws PersistenceException {
+    public void createSubmission(Submission submission, long user) throws PersistenceException {
     	checkSubmission(submission);
     	
-        Connection conn = null;
+    	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
         	conn = Database.createConnection();  
-        	SubmissionCriteria sc = new SubmissionCriteria();
-        	List list = new LinkedList();
-        	list.add(JudgeReply.ACCEPTED);
-        	sc.setJudgeReplies(list);
-        	sc.setProblemId(submission.getProblemId());
-        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(submission.getUserProfileId()).getHandle());
+        	conn.setAutoCommit(false);
         	
-        	long acnumber = searchSubmissionNumber(sc);
-        	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
-        	ps.executeUpdate(); 
-            // create the submission
+        	String sql = "select max(contest_order) from submission where contest_id=" + submission.getContestId();
+        	ps = conn.prepareStatement(sql);
+        	rs = ps.executeQuery();
+        	String maxOrder = null;
+        	if (rs.next()) {
+        		maxOrder = rs.getString(1);
+        	}
+        	long count = maxOrder == null ? 0 : Long.parseLong(maxOrder) + 1;
+        	submission.setContestOrder(count);
+        	
+        	// create the submission
             ps = conn.prepareStatement(INSERT_SUBMISSION);            
             ps.setLong(1, submission.getProblemId());
             ps.setLong(2, submission.getLanguage().getId());
@@ -326,36 +267,21 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setTimestamp(12, new Timestamp(new Date().getTime()));
             ps.setLong(13, user);
             ps.setTimestamp(14, new Timestamp(new Date().getTime()));
+            ps.setLong(15, submission.getContestId());
+            ps.setLong(16, submission.getContestOrder());
             ps.executeUpdate();  
             
-            ps = conn.prepareStatement("UNLOCK TABLES");	
-        	ps.executeUpdate();                                              
             submission.setId(Database.getLastId(conn, ps, rs));
-            
-            if(acnumber==0 && submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
-            {
-            	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 1, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1, ac_number=ac_number+1");
-
-                ps.setLong(1, submission.getUserProfileId());
-                ps.setLong(2, contestId);
-                ps.executeUpdate(); 
-            }
-            else if(acnumber==0 && !submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
-            {
-            	ps=conn.prepareStatement("INSERT INTO user_stat (user_id, contest_id, ac_number, submission_number) VALUES (?, ?, 0, 1) ON DUPLICATE KEY UPDATE submission_number=submission_number+1");
-
-                ps.setLong(1, submission.getUserProfileId());
-                ps.setLong(2, contestId);
-                ps.executeUpdate(); 
-            }
-            else
-            {
-            }
-        } catch (SQLException e) {
-        	throw new PersistenceException("Failed to create submission.", e);
-		} finally {			
-        	Database.dispose(conn, ps, rs);
-        }   
+            conn.commit();
+        } catch (PersistenceException pe) {
+        	Database.rollback(conn);
+        	throw pe;
+		} catch (SQLException e) {
+			Database.rollback(conn);
+        	throw new PersistenceException("Failed to insert submission.", e);
+		} finally {
+			Database.dispose(conn, ps, null);
+        }
     }
 
     /**
@@ -365,54 +291,48 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public void updateSubmission(Submission submission, long user, long contestId) throws PersistenceException {
+    public void updateSubmission(Submission submission, long user) throws PersistenceException {
     	checkSubmission(submission);
     	
         Connection conn = null;
         PreparedStatement ps = null;
-        ResultSet rs = null;
         try {
         	conn = Database.createConnection();    
-        	SubmissionCriteria sc = new SubmissionCriteria();
-        	List list = new LinkedList();
-        	list.add(JudgeReply.ACCEPTED);
-        	sc.setJudgeReplies(list);
-        	sc.setProblemId(submission.getProblemId());
-        	sc.setHandle(PersistenceManager.getInstance().getUserPersistence().getUserProfile(submission.getUserProfileId()).getHandle());
-        	
-        	long acnumber = searchSubmissionNumber(sc);
-        	ps = conn.prepareStatement("LOCK TABLES submission WRITE, problem_stat WRITE, mysql.proc READ");	
-        	ps.executeUpdate();  	   
-            // create the submission
-            ps = conn.prepareStatement(UPDATE_SUBMISSION);            
+        	conn.setAutoCommit(false);
+        	// update the submission
+            ps = conn.prepareStatement(submission.getContent() == null ? UPDATE_SUBMISSION_WITHOUT_CONTENT : UPDATE_SUBMISSION);            
             ps.setLong(1, submission.getProblemId());
             ps.setLong(2, submission.getLanguage().getId());
             ps.setLong(3, submission.getJudgeReply().getId());
             ps.setLong(4, submission.getUserProfileId());
-            ps.setString(5, submission.getContent());
-            ps.setString(10, submission.getJudgeComment());
-            ps.setInt(6, submission.getTimeConsumption());
-            ps.setInt(7, submission.getMemoryConsumption());
-            ps.setTimestamp(8, Database.toTimestamp(submission.getSubmitDate()));
-            ps.setTimestamp(9, Database.toTimestamp(submission.getJudgeDate()));            	
-            ps.setLong(11, user);
-            ps.setTimestamp(12, new Timestamp(new Date().getTime()));
-            ps.setLong(13, submission.getId());
+            ps.setInt(5, submission.getTimeConsumption());
+            ps.setInt(6, submission.getMemoryConsumption());
+            ps.setTimestamp(7, Database.toTimestamp(submission.getSubmitDate()));
+            ps.setTimestamp(8, Database.toTimestamp(submission.getJudgeDate()));            	
+            ps.setString(9, submission.getJudgeComment());
+            ps.setLong(10, user);
+            ps.setTimestamp(11, new Timestamp(new Date().getTime()));
+            if (submission.getContent() == null) {
+            	ps.setLong(12, submission.getId());
+            } else {
+            	ps.setString(12, submission.getContent());
+            	ps.setLong(13, submission.getId());
+            }
+            
             ps.executeUpdate();
-            ps = conn.prepareStatement("UNLOCK TABLES");	
-        	ps.executeUpdate();    
-            if(acnumber==0 && submission.getJudgeReply().equals(JudgeReply.ACCEPTED))
-            {
-            	ps=conn.prepareStatement("UPDATE user_stat SET ac_number=ac_number+1 WHERE user_id=? AND contest_id=?");
-                ps.setLong(1, submission.getUserProfileId());
-                ps.setLong(2, contestId);
-                ps.executeUpdate(); 
-            } 
-        } catch (SQLException e) {
-        	throw new PersistenceException("Failed to create submission.", e);
-		} finally {			
-        	Database.dispose(conn, ps, rs);
-        }   
+            
+            // TODO(ob): update the user statistics if no tiger?
+            
+            conn.commit();
+        } catch (PersistenceException pe) {
+        	Database.rollback(conn);
+        	throw pe;
+		} catch (SQLException e) {
+			Database.rollback(conn);
+        	throw new PersistenceException("Failed to update submission.", e);
+		} finally {
+			Database.dispose(conn, ps, null);
+        }
     }
 
     /**
@@ -455,33 +375,22 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-            	
+            	   
         try {
         	conn = Database.createConnection();
         	ps = conn.prepareStatement(GET_SUBMISSION);   
         	ps.setLong(1, id);            
             rs = ps.executeQuery();
              
-            Submission submission = null;
                         
-            if (rs.next()) {
-            	submission = populateSubmissionWithoutDetail(rs);
-            } else {
+            if (!rs.next()) {
             	return null;
-            }    
+            }
             
-            // set language
-            long languageId = rs.getLong(DatabaseConstants.SUBMISSION_LANGUAGE_ID);            
-            Language language = 
-            	(Language) new ContestPersistenceImpl().getLanguageMap().get(new Long(languageId));
-            submission.setLanguage(language);
+            Map<Long, Language> languageMap = new ContestPersistenceImpl().getLanguageMap();
+            Map<Long, JudgeReply> judgeReplyMap = getJudgeReplyMap();
             
-            // set judge reply
-            long judgeReplyId = rs.getLong(DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID);
-            JudgeReply judgeReply = 
-            	(JudgeReply) getJudgeReplyMap().get(new Long(judgeReplyId));
-            submission.setJudgeReply(judgeReply);                        	
-            
+            Submission submission = populateSubmission(rs, true, languageMap, judgeReplyMap);
             return submission;
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to get the submission with id " + id, e);
@@ -497,94 +406,69 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @return an ExtendedSubmission instance
      * @throws SQLException
      */
-    private Submission populateSubmission(ResultSet rs) throws SQLException {
+    private Submission populateSubmission(ResultSet rs, boolean hasContent, 
+    		Map<Long, Language> languageMap, Map<Long, JudgeReply> judgeReplyMap) throws SQLException {
         Submission submission = new Submission();
         
     	submission.setId(rs.getLong(DatabaseConstants.SUBMISSION_SUBMISSION_ID));
     	submission.setProblemId(rs.getLong(DatabaseConstants.SUBMISSION_PROBLEM_ID));
     	submission.setUserProfileId(rs.getLong(DatabaseConstants.SUBMISSION_USER_PROFILE_ID));
-    	submission.setContent(rs.getString(DatabaseConstants.SUBMISSION_CONTENT));
     	submission.setJudgeComment(rs.getString(DatabaseConstants.SUBMISSION_JUDGE_COMMENT));
     	submission.setJudgeDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_JUDGE_DATE));
+    	submission.setJudgeDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_SUBMISSION_DATE));
     	submission.setSubmitDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_SUBMISSION_DATE));
     	submission.setMemoryConsumption(rs.getInt(DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION));
     	submission.setTimeConsumption(rs.getInt(DatabaseConstants.SUBMISSION_TIME_CONSUMPTION));
         submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_HANDLE));
     	submission.setProblemCode(rs.getString(DatabaseConstants.PROBLEM_CODE));
+    	submission.setContestId(rs.getLong("contest_id"));
+    	submission.setContestOrder(rs.getLong("contest_order"));
+    	
+    	if (hasContent) {
+    		submission.setContent(rs.getString("content"));
+    	}
+    	
+        // set language
+        long languageId = rs.getLong(DatabaseConstants.SUBMISSION_LANGUAGE_ID);            
+        Language language = languageMap.get(languageId);
+        submission.setLanguage(language);
+        
+        // set judge reply
+        long judgeReplyId = rs.getLong(DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID);
+        JudgeReply judgeReply = judgeReplyMap.get(judgeReplyId);
+        submission.setJudgeReply(judgeReply);                        	
+    	
     	return submission;
     }
     
     /**
-     * Populates an ExtendedSubmission with given ResultSet.
-     * 
-     * @param rs
-     * @return an ExtendedSubmission instance
-     * @throws SQLException
-     */
-    private Submission populateSubmissionWithoutDetail(ResultSet rs) throws SQLException {
-        Submission submission = new Submission();
-        
-        submission.setId(rs.getLong(DatabaseConstants.SUBMISSION_SUBMISSION_ID));
-        submission.setProblemId(rs.getLong(DatabaseConstants.SUBMISSION_PROBLEM_ID));
-        submission.setUserProfileId(rs.getLong(DatabaseConstants.SUBMISSION_USER_PROFILE_ID));
-        submission.setContent(rs.getString(DatabaseConstants.SUBMISSION_CONTENT));
-        submission.setJudgeComment(rs.getString(DatabaseConstants.SUBMISSION_JUDGE_COMMENT));
-        submission.setJudgeDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_JUDGE_DATE));
-        submission.setSubmitDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_SUBMISSION_DATE));
-        submission.setMemoryConsumption(rs.getInt(DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION));
-        submission.setTimeConsumption(rs.getInt(DatabaseConstants.SUBMISSION_TIME_CONSUMPTION));
-        return submission;
-    }
-
-    /**
-     * <p>Returns the number of all submissions according with the given criteria in persistence layer.</p>
-     *
-     * @return the number of all submissions according with the given criteria
-     * @param criteria the submission search criteria
-     * @param offset the offset of the start position to search
-     * @param count the maximum number of submissions in returned list
-     * @throws PersistenceException wrapping a persistence implementation specific exception
-     */
-    public long searchSubmissionNumber(SubmissionCriteria criteria) throws PersistenceException {
-    	if (criteria == null) {
-    		throw new NullPointerException("criteria is null");
-    	}
-    	Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-                    
-        try {
-        	conn = Database.createConnection();
-        	ps = buildQuery(GET_SUBMISSION_NUMBER, criteria, 0, Integer.MAX_VALUE, conn, ps, rs);        	
-        	if (ps == null) {
-        		return 0;
-        	}
-        	rs = ps.executeQuery();
-        	rs.next();
-        	return rs.getLong(1);
-        } catch (SQLException e) {
-        	throw new PersistenceException("Failed to get the submissions number", e);
-		} finally {
-        	Database.dispose(conn, ps, rs);
-        } 
-
-    }
-    
-
-    /**
-     * <p>Searchs all submissions according with the given criteria in persistence layer.</p>
+     * <p>Searches all submissions according with the given criteria in persistence layer.</p>
      *
      * @return a list of submissions according with the given criteria
      * @param criteria the submission search criteria
-     * @param offset the offset of the start position to search
+     * @param lastId the last id
      * @param count the maximum number of submissions in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List searchSubmissions(SubmissionCriteria criteria, int offset, int count) throws PersistenceException {
+    public List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count) 
+        throws PersistenceException {
+    	return searchSubmissions(criteria, firstId, lastId, count, false);
+    }
+    /**
+     * <p>Searches all submissions according with the given criteria in persistence layer.</p>
+     *
+     * @return a list of submissions according with the given criteria
+     * @param criteria the submission search criteria
+     * @param lastId the last id
+     * @param count the maximum number of submissions in returned list
+     * @throws PersistenceException wrapping a persistence implementation specific exception
+     */
+    public List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count, boolean hasContent) 
+        throws PersistenceException {
     	if (criteria == null) {
     		throw new NullPointerException("criteria is null");
     	}
-    	if (offset < 0) {
+    	if (lastId < 0) {
     		throw new IllegalArgumentException("offset is negative"); 
     	}
     	if (count < 0) {
@@ -595,25 +479,45 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         PreparedStatement ps = null;
         ResultSet rs = null;
             
-        Map languageMap = new ContestPersistenceImpl().getLanguageMap();
-        Map judgeReplyMap = getJudgeReplyMap();
+        Map<Long, Language> languageMap = new ContestPersistenceImpl().getLanguageMap();
+        Map<Long, JudgeReply> judgeReplyMap = getJudgeReplyMap();
         
         try {
         	conn = Database.createConnection();
-        	ps = buildQuery(GET_SUBMISSIONS, criteria, offset, count, conn, ps, rs);
-        	
-        	if (ps == null) {
-        		return new ArrayList();
+        	if (criteria.getUserId() == null && criteria.getHandle() != null) {
+        		String sql = "select user_profile_id from user_profile where handle=? AND active=1";
+        		ps = conn.prepareStatement(sql);
+        		ps.setString(1, criteria.getHandle());
+        		rs = ps.executeQuery();
+        		if (!rs.next()) {
+        			return new ArrayList<Submission>();
+        		}
+        		long userId = rs.getLong(1);
+        		criteria.setUserId(userId);
         	}
+        	if (criteria.getProblemId() == null && criteria.getProblemCode() != null) {
+        		String sql = "select problem_id from problem where code=? AND contest_id=? AND active=1";
+        		ps = conn.prepareStatement(sql);
+        		ps.setString(1, criteria.getProblemCode());
+        		ps.setLong(2, criteria.getContestId());
+        		rs = ps.executeQuery();
+        		if (!rs.next()) {
+        			return new ArrayList<Submission>();
+        		}
+        		long problemId = rs.getLong(1);
+        		criteria.setProblemId(problemId);
+        	}
+        	ps = buildQuery(hasContent ? GET_SUBMISSIONS_WITH_CONTENT : GET_SUBMISSIONS, criteria, firstId, lastId, count, conn, ps, rs);
+
+        	if (ps == null) {
+        		return new ArrayList<Submission>();
+        	}
+        	
         	rs = ps.executeQuery();
              
-            List submissions = new ArrayList();
+            List<Submission> submissions = new ArrayList<Submission>();
             while (rs.next()) {
-                Submission submission = populateSubmission(rs);
-            	long languageId = rs.getLong(DatabaseConstants.SUBMISSION_LANGUAGE_ID);
-            	long judgeReplyId = rs.getLong(DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID);
-            	submission.setLanguage((Language) languageMap.get(new Long(languageId)));
-            	submission.setJudgeReply((JudgeReply) judgeReplyMap.get(new Long(judgeReplyId)));
+                Submission submission = populateSubmission(rs, false, languageMap, judgeReplyMap);
             	submissions.add(submission);
             } 
                                          
@@ -630,7 +534,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * Build search query.
      * 
      * @param criteria
-     * @param offset
+     * @param lastId
      * @param count
      * @param conn
      * @param ps
@@ -638,82 +542,108 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @return search query.
      * @throws SQLException 
      */
-    private PreparedStatement buildQuery(String perfix, SubmissionCriteria criteria, int offset, int count,
+    private PreparedStatement buildQuery(String perfix, SubmissionCriteria criteria, long firstId, long lastId, int count,
     		Connection conn, PreparedStatement ps, ResultSet rs) throws SQLException {
+    	
+    	//String userIndex = "index_submission_user";
+    	//String problemIndex = "index_submission_problem";
+    	String userIndex = "index_submission_user_reply_contest";
+    	String problemIndex = "index_submission_problem_reply";
+    	
+    	String judgeReplyIndex = "fk_submission_reply";
+    	String defaultIndex = "index_submission_contest_order";
+    	
+    	Set<String> easyProblems = new HashSet<String>(
+    			Arrays.asList(new String[] {"2060","1180","1067","1292","1295","1951","1025","2095","2105","1008","1005","1152","1240","2107",
+    			"1037","1205","1113","1045","1489","1241","1101","1049","1057","1003","1151","1048","1002","1115","1001"}));
+    	Set<JudgeReply> easyJudgeReply = new HashSet<JudgeReply>(Arrays.asList(new JudgeReply[] {
+    			JudgeReply.ACCEPTED,
+    			JudgeReply.WRONG_ANSWER,
+    			JudgeReply.TIME_LIMIT_EXCEEDED,
+    			JudgeReply.MEMORY_LIMIT_EXCEEDED,
+    			JudgeReply.SEGMENTATION_FAULT,
+    			JudgeReply.COMPILATION_ERROR,
+    			JudgeReply.PRESENTATION_ERROR}));
+    	
+    	/*
+    	 * INDEX optimization
+    	 * If user id presents, use fk_submission_user
+    	 * If problem id presents and submission number < 5000, use fk_submission_problem;
+    	 * If judge_reply_id presents and none of id is 4,5,6,7,12,13 or 16, use fk_submission_reply when 
+    	 * otherwise use index_submission_contest_order;
+    	 */
+    	String order = firstId == -1 ? "DESC" : "ASC";
+    	if (criteria.getIdStart() != null && firstId < criteria.getIdStart() - 1) {
+    		firstId = criteria.getIdStart() - 1;
+    	}
+    	
+    	if (criteria.getIdEnd() != null && lastId > (criteria.getIdEnd() + 1)) {
+    		lastId = criteria.getIdEnd() + 1;
+    	}
+    	
     	
     	StringBuffer query = new StringBuffer();
     	query.append(perfix);
+    	query.append(" AND s.contest_id=" + criteria.getContestId());
+    	query.append(" AND contest_order BETWEEN " +  (firstId+1) + " and " + (lastId-1));
+    	
+    	String index = null;
+    	
+    	if (criteria.getUserId() != null) {
+    		query.append(" AND s.user_profile_id=" + criteria.getUserId());
+    		index = userIndex;
+    	}
+    	
+    	if (criteria.getProblemId() != null) {
+    		query.append(" AND s.problem_id=" + criteria.getProblemId());
+    		if (index == null && !easyProblems.contains(criteria.getProblemCode())) {
+    			index = problemIndex;
+    		}
+    	}
+
+    	if (criteria.getJudgeReplies() != null) {
+    		if (criteria.getJudgeReplies().size() == 0) {
+    			return null;
+    		}
+    		List<Long> judgeRepliesIds = new ArrayList<Long>();
+    		boolean easy = true;
+    		for (JudgeReply judgeReply : criteria.getJudgeReplies()) {
+    			judgeRepliesIds.add(judgeReply.getId());
+    			if (easyJudgeReply.contains(judgeReply)) {
+    				easy = true;
+    			}
+    		}
+    		query.append(" AND s.judge_reply_id IN " 
+    				+ Database.createNumberValues(judgeRepliesIds));
+    		if (index == null && !easy) {
+    			index = judgeReplyIndex;
+    		}
+    	}
     	
     	if (criteria.getLanguages() != null) {
     		if (criteria.getLanguages().size() == 0) {
     			return null;
     		}
-    		List languageIds = new ArrayList();
-    		for (Iterator it = criteria.getLanguages().iterator(); it.hasNext();) {
-    			Language language = (Language) it.next();
-    			languageIds.add(new Long(language.getId()));
+    		List<Long> languageIds = new ArrayList<Long>();
+    		for (Language language : criteria.getLanguages()) {
+    			languageIds.add(language.getId());
     		}
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_LANGUAGE_ID + " IN " 
+    		query.append(" AND s.language_id IN " 
     				+ Database.createNumberValues(languageIds));
     	}
     	
-    	if (criteria.getJudgeReplies() != null) {
-    		if (criteria.getJudgeReplies().size() == 0) {
-    			return null;
-    		}
-    		List judgeRepliesIds = new ArrayList();
-    		for (Iterator it = criteria.getJudgeReplies().iterator(); it.hasNext();) {
-    			JudgeReply judgeReply = (JudgeReply) it.next();
-    			judgeRepliesIds.add(new Long(judgeReply.getId()));
-    		}
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID + " IN " 
-    				+ Database.createNumberValues(judgeRepliesIds));
+    	query.append(" ORDER BY contest_order " + order);
+    	query.append(" LIMIT " + count);
+    	
+    	if (index == null) {
+    		index = defaultIndex;
     	}
     	
-    	if (criteria.getContestId() != null) {
-    		query.append(" AND p." + DatabaseConstants.PROBLEM_CONTEST_ID + "=" + criteria.getContestId());
-    	}
+    	String queryString = query.toString().replace("FORCE_INDEX", "USE INDEX (" + index +")");
+    	System.out.println(queryString);
     	
-    	if (criteria.getHandle() != null && criteria.getHandle().trim().length() > 0) {
-    		query.append(" AND u." + DatabaseConstants.USER_PROFILE_HANDLE + "='" + criteria.getHandle() + "'");		
-    	}
+    	ps = conn.prepareStatement(queryString);
     	
-    	if (criteria.getProblemId() != null) {
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_PROBLEM_ID + "=" + criteria.getProblemId());
-    	}
-    	
-    	if (criteria.getProblemCode() != null) {
-    		query.append(" AND p." + DatabaseConstants.PROBLEM_CODE + "='" + criteria.getProblemCode() + "'");
-    	}
-    	
-    	if (criteria.getIdStart() != null) {
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_SUBMISSION_ID + ">=" + criteria.getIdStart());
-    	}
-    	
-    	if (criteria.getIdEnd() != null) {
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_SUBMISSION_ID + "<=" + criteria.getIdEnd());
-    	}
-    	
-    	if (criteria.getTimeStart() != null) {
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_SUBMISSION_DATE + ">=?");
-    	}    	    	    	
-    	if (criteria.getTimeEnd() != null) {
-    		query.append(" AND s." + DatabaseConstants.SUBMISSION_SUBMISSION_DATE + "<=?");
-    	}
-
-    	query.append(" ORDER BY " + DatabaseConstants.SUBMISSION_SUBMISSION_ID + " DESC");
-    	query.append(" LIMIT " + offset + "," + count);
-    	System.out.println(query);
-    	ps = conn.prepareStatement(query.toString());
-    	
-    	int index = 1;
-    	if (criteria.getTimeStart() != null) {
-    		ps.setTimestamp(index, Database.toTimestamp(criteria.getTimeStart()));
-    		index++;
-    	}    	    	    	
-    	if (criteria.getTimeEnd() != null) {
-    		ps.setTimestamp(index, Database.toTimestamp(criteria.getTimeEnd()));    		
-    	}
 		return ps;
 	}   
 
@@ -736,11 +666,15 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	String inProblemIds = Database.createNumberValues(problemIds);
         	String query = "SELECT problem_id, judge_reply_id, count(*) FROM submission " +
         			"WHERE problem_id IN " + inProblemIds + " GROUP BY problem_id, judge_reply_id";
+        	/*
+        	String query = "SELECT problem_id, judge_reply_id, count FROM problem_statistics " +
+				"WHERE problem_id IN " + inProblemIds;
+        	*/
+        	
         	ps = conn.prepareStatement(query);
         	rs = ps.executeQuery();        	        	
         	
-        	rs = ps.executeQuery();                        
-            while (rs.next()) {
+        	while (rs.next()) {
             	long problemId = rs.getLong(1);
             	long judgeReplyId = rs.getLong(2);
             	int value = rs.getInt(3);            	
@@ -754,9 +688,11 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	Database.dispose(conn, ps, rs);
         }     	
     }
+    
     public List getRankList(List problems, long contestStartDate) throws PersistenceException {
         return getRankList(problems, contestStartDate, -1);
     }
+    
     public List getRankList(List problems, long contestStartDate, long roleId) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
@@ -831,8 +767,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }     	
     }
     
-    public RankListEntry getRankListEntry(long contestId, long userId) throws PersistenceException
-    {
+    public RankListEntry getRankListEntry(long contestId, long userId) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -860,61 +795,50 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }     	
     }
     
-    public List getProblemsetRankList(long contestId,  long begin, long order, long roleId) throws PersistenceException {
+    public ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
         	conn = Database.createConnection();
-        	int index = 0;
-            String userIdsCon = "";
-            if (roleId >= 0) {
-                // TODO performance issue!!
-                List ids = new ArrayList();
-                String userQuery = "SELECT user_profile_id FROM user_role WHERE role_id=?";
-                ps = conn.prepareStatement(userQuery);
-                ps.setLong(1, roleId);
-                rs = ps.executeQuery();
-                while (rs.next()) {
-                    ids.add(rs.getInt(1));
-                }
-                if (ids.size() == 0) {
-                    return new ArrayList();
-                }
-                userIdsCon = " AND user_id IN " + Database.createNumberValues(ids);                
-            }                        
+            String sql = "SELECT u.user_profile_id, u.handle, up.plan, ua.solved, ua.tiebreak " +
+            		"FROM user_ac ua " +
+            		"LEFT JOIN user_profile u ON ua.user_profile_id = u.user_profile_id " +
+            		"LEFT JOIN user_preference up ON ua.user_profile_id = up.user_profile_id " +
+            		"WHERE contest_id=? ORDER BY ua.solved DESC, ua.tiebreak ASC " +
+            		"LIMIT " + offset + "," + count;
             
-            String orderby="";
+            ps = conn.prepareStatement(sql);
+            ps.setLong(1, contestId);
             
-            if(order==0)
-            {
-            	orderby=" ORDER BY ac_number DESC, submission_number ASC";
+            rs = ps.executeQuery();
+            int index = 0;
+            List<UserProfile> users = new ArrayList<UserProfile>();
+            List<Integer> solved = new ArrayList<Integer>();
+            List<Integer> total = new ArrayList<Integer>();
+            
+            while (rs.next()) {
+                UserProfile user = new UserProfile();
+                user.setId(rs.getLong(1));
+                user.setHandle(rs.getString(2));
+                user.setDeclaration(rs.getString(3));
+                users.add(user);
+                solved.add(rs.getInt(4));
+                total.add(rs.getInt(5));
             }
-            else
-            {
-            	orderby=" ORDER BY submission_number DESC";
-            }
-            String limit=" LIMIT "+begin+", 25";
             
-        	String query = "SELECT user_id, ac_number, submission_number FROM user_stat " 
-        			+ "WHERE contest_id=" + contestId + userIdsCon + orderby+limit;
-        	ps = conn.prepareStatement(query);
-        	rs = ps.executeQuery();
-        	    
-
-            List entryList = new ArrayList();
-        	while (rs.next()) {
-            	long userId = rs.getLong(1);
-            	RankListEntry entry = new RankListEntry(10);
-        		UserProfile profile = new UserProfile();
-        		profile.setId(userId);
-        		entry.setUserProfile(profile);
-        		entry.setSolved(rs.getLong(2));
-            	entry.setSubmitted(rs.getLong(3));
-            	entryList.add(entry);
-            } 
-                                         
-            return entryList;
+            int[] solvedArray = new int[solved.size()];
+            int[] totalArray = new int[solved.size()];
+            for (int i = 0; i < solvedArray.length; ++i) {
+            	solvedArray[i] = solved.get(i);
+            	totalArray[i] = total.get(i);
+            }
+            
+            ProblemsetRankList r = new ProblemsetRankList(offset, count);
+            r.setUsers(users.toArray(new UserProfile[0]));
+            r.setSolved(solvedArray);
+            r.setTotal(totalArray);
+            return r;
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to get the rank list", e);
 		} finally {
@@ -922,36 +846,54 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }     	
     }
     
-    public Set getSolvedProblems(List problems, long userProfileId) throws PersistenceException {
+    public UserStatistics getUserStatistics(long contestId, long userId) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;                        
         
         try {
-        	conn = Database.createConnection();
-        	List problemIds = new ArrayList();
-        	int index = 0;
-        	for (Iterator it = problems.iterator(); it.hasNext();) {
-        		Problem problem = (Problem) it.next();
-        		problemIds.add(new Long(problem.getId()));  
-        		index++;
-        	}
-        	String inProblemIds = Database.createNumberValues(problemIds);
-        	String query = "SELECT DISTINCT problem_id FROM submission " 
-        			+ "WHERE problem_id IN " + inProblemIds + " AND judge_reply_id=5 AND user_profile_id=" + userProfileId;
-        	System.out.println(query);
-        	ps = conn.prepareStatement(query);
+        	UserStatistics statistics = new UserStatistics(userId, contestId);
         	
+        	
+        	conn = Database.createConnection();
+        	String sql = "SELECT DISTINCT p.problem_id, p.code, p.title " +
+        			GET_SUBMISSION_FROM_PART + " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";
+        	sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_user_reply_contest)");
+        	
+        	System.out.println(sql);
+        	ps = conn.prepareStatement(sql);
+        	ps.setLong(1, userId);
+        	ps.setLong(2, JudgeReply.ACCEPTED.getId());
+        	ps.setLong(3, contestId);
         	rs = ps.executeQuery();
-        	Set solved = new HashSet();
-            while (rs.next()) {
-            	solved.add(new Long(rs.getLong(1)));            	
+        	
+        	List<Problem> solved = new ArrayList<Problem>();
+        	while (rs.next()) {
+        		Problem p = new Problem();
+        		p.setContestId(contestId);
+        		p.setId(rs.getLong("problem_id"));
+        		p.setCode(rs.getString("code"));
+        		p.setTitle(rs.getString("title"));
+        		solved.add(p);
             } 
-            
-                                         
-            return solved;
+        	statistics.setSolved(new TreeSet<Problem>(solved));
+        	
+        	//sql = "SELECT judge_reply_id, count FROM user_statistics WHERE user_profile_id=? AND contest_id=?";
+        	sql = "SELECT judge_reply_id, count(*) FROM submission WHERE contest_id=? AND user_profile_id=? GROUP BY judge_reply_id";
+        	ps = conn.prepareStatement(sql);
+        	ps.setLong(1, contestId);
+        	ps.setLong(2, userId);
+        	rs = ps.executeQuery();
+        	
+        	while (rs.next()) {
+        		long jid = rs.getLong(1);
+        		int count = rs.getInt(2);
+        		statistics.setCount(jid, count);
+            } 
+        	
+        	return statistics;
         } catch (SQLException e) {
-        	throw new PersistenceException("Failed to get the solved problems", e);
+        	throw new PersistenceException("Failed to get the user statistics", e);
 		} finally {
         	Database.dispose(conn, ps, rs);
         }     	
@@ -1063,12 +1005,13 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             
             conn.commit();        
         } catch (PersistenceException pe) {
+        	Database.rollback(conn);
         	throw pe;
 		} catch (SQLException e) {
+			Database.rollback(conn);
         	throw new PersistenceException("Failed to delete judgeReply.", e);
 		} finally {
-			Database.rollback(conn);
-        	Database.dispose(conn, ps, null);
+			Database.dispose(conn, ps, null);
         }   
     }
 
@@ -1115,10 +1058,10 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @return a list of JudgeReply instances containing all judge replies in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getAllJudgeReplies() throws PersistenceException {
+    public List<JudgeReply> getAllJudgeReplies() throws PersistenceException {
     	synchronized (this.getClass()) {
     		if (allJudgeReplies != null) {
-    			return new ArrayList(allJudgeReplies);
+    			return new ArrayList<JudgeReply>(allJudgeReplies);
     		}
     	}
     	
@@ -1131,7 +1074,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	ps = conn.prepareStatement(GET_ALL_JUDGE_REPLIES);   
             rs = ps.executeQuery();
                 
-            List judgeReplies = new ArrayList();
+            List<JudgeReply> judgeReplies = new ArrayList<JudgeReply>();
             
             while (rs.next()) {
             	JudgeReply judgeReply = new JudgeReply(rs.getLong(DatabaseConstants.JUDGE_REPLY_JUDGE_REPLY_ID),
@@ -1142,7 +1085,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             	judgeReplies.add(judgeReply);
             }
         	
-            allJudgeReplies = new ArrayList(judgeReplies);
+            allJudgeReplies = new ArrayList<JudgeReply>(judgeReplies);
             return judgeReplies;     	            
         } catch (SQLException e) {
         	throw new PersistenceException("Failed to get all judgeReplies", e);
@@ -1174,12 +1117,11 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @return a Language Map
      * @throws PersistenceException
      */
-    Map getJudgeReplyMap() throws PersistenceException {
-    	List judgeReplies = getAllJudgeReplies(); 
-        Map judgeReplyMap = new HashMap();
-        for (Iterator it = judgeReplies.iterator(); it.hasNext();) {
-        	JudgeReply reply = (JudgeReply) it.next();
-        	judgeReplyMap.put(new Long(reply.getId()), reply);        	
+    Map<Long, JudgeReply> getJudgeReplyMap() throws PersistenceException {
+    	List<JudgeReply> judgeReplies = getAllJudgeReplies(); 
+        Map<Long, JudgeReply> judgeReplyMap = new HashMap<Long, JudgeReply>();
+        for (JudgeReply reply : judgeReplies) {
+        	judgeReplyMap.put(reply.getId(), reply);        	
         }
         return judgeReplyMap;    	
     }
@@ -1233,7 +1175,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         
     }
     
-    public List searchQQs(long contestId) throws PersistenceException {
+    public List<QQ> searchQQs(long contestId) throws PersistenceException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -1256,7 +1198,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setString(3, QQ.QQ_FINISHED);
             rs = ps.executeQuery();
              
-            List qqs = new ArrayList();
+            List<QQ> qqs = new ArrayList<QQ>();
             while (rs.next()) {
                 QQ qq = new QQ();
                 qq.setCode(rs.getString("code"));
@@ -1285,56 +1227,65 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 
     }
 
-	public ProblemStatistics getProblemStatistics(long problemId)
-			throws PersistenceException {
+	public ProblemStatistics getProblemStatistics(long problemId, String orderBy, int count) throws PersistenceException {
 		Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-                    
-        String query = "SELECT judge_reply_id, count " +
-                       "FROM problem_stat " +
-                       "WHERE problem_id=?";
-        ProblemStatistics pss=new ProblemStatistics(problemId); 
+        String ob = null;
+        ProblemStatistics ret = null;
+        
+        if ("time".equals(orderBy)) {
+        	ob = "s.time_consumption,submission_date ASC";
+        	ret = new ProblemStatistics(problemId, "time");
+        } else if ("memory".equals(orderBy)) {
+        	ob = "s.memory_consumption,submission_date ASC";
+        	ret = new ProblemStatistics(problemId, "memory");
+        } else {
+        	ob = "s.submission_date ASC";
+        	ret = new ProblemStatistics(problemId, "date");
+        }
+          
+        Map<Long, Language> languageMap = new ContestPersistenceImpl().getLanguageMap();
+        Map<Long, JudgeReply> judgeReplyMap = getJudgeReplyMap();
+        
         try {
             conn = Database.createConnection();
-            ps = conn.prepareStatement(query);
+            //String sql = "SELECT judge_reply_id, count FROM problem_statistics WHERE problem_id=?";
+            String sql = "SELECT judge_reply_id, count(*) FROM submission WHERE problem_id=? GROUP BY judge_reply_id";
+            ps = conn.prepareStatement(sql);
             
             ps.setLong(1, problemId);
             rs = ps.executeQuery();
-            long judge_reply_id;
-            long count;
+            
             while (rs.next()) {
-            	judge_reply_id=rs.getLong(1);
-            	count=rs.getLong(2);
-                pss.setCount(judge_reply_id, count);
+            	long jid = rs.getLong(1);
+            	int c = rs.getInt(2);
+                ret.setCount(jid, c);
             } 
             
-            ps = conn.prepareStatement(GET_BEST_SUBMISSIONS);
+            sql = GET_SUBMISSIONS + " AND s.problem_id=? AND s.judge_reply_id=? ORDER BY " + ob + " LIMIT " + count;
+            sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_problem_reply)");
+            System.out.println(sql);
+            ps = conn.prepareStatement(sql);
             ps.setLong(1, problemId);
-        	rs = ps.executeQuery();
-
-            Map languageMap = new ContestPersistenceImpl().getLanguageMap();
-            Map judgeReplyMap = getJudgeReplyMap();
-            List submissions = new ArrayList();
+            ps.setLong(2, JudgeReply.ACCEPTED.getId());
+            rs = ps.executeQuery();
+            
+            List<Submission> submissions = new ArrayList<Submission>();
             while (rs.next()) {
-                Submission submission = populateSubmission(rs);
-            	long languageId = rs.getLong(DatabaseConstants.SUBMISSION_LANGUAGE_ID);
-            	long judgeReplyId = rs.getLong(DatabaseConstants.SUBMISSION_JUDGE_REPLY_ID);
-            	submission.setLanguage((Language) languageMap.get(new Long(languageId)));
-            	submission.setJudgeReply((JudgeReply) judgeReplyMap.get(new Long(judgeReplyId)));
+                Submission submission = populateSubmission(rs, false, languageMap, judgeReplyMap);
             	submissions.add(submission);
             } 
+            
+            ret.setBestRuns(submissions);
                                          
-            pss.setBestRuns(submissions);
-                                         
-            return pss;
+            return ret;
         } catch (SQLException e) {
             throw new PersistenceException("Failed to get the QQs", e);
         } finally {
             Database.dispose(conn, ps, rs);
         }
 	}
-    
   
 }
 

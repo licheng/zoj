@@ -19,6 +19,7 @@
         List problems = (List) request.getAttribute("problems");
     	List roles = ranklist.getRoles();
     	RoleSecurity role = ranklist.getRole();
+    	 
 %>
         <logic:messagesPresent property="error">
         <div class="internalError">

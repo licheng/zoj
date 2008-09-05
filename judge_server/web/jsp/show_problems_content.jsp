@@ -6,12 +6,13 @@
 <%@ page import="java.util.List" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Contest" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problem" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.ContestStatistics" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.UserStatistics" %>
 <%@ page import="java.text.MessageFormat" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.security.UserSecurity" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.AbstractContest" %>
-
 
 <%
     boolean isProblemset =  "Problems".equals(request.getAttribute("region"));    
@@ -19,32 +20,26 @@
     String actionPath = request.getContextPath() + "/show" 
         + (isProblemset ? "Problems" : "ContestProblems") + ".do";
     String problemLink = request.getContextPath() + "/show" + actionName + ".do";
+    String runsLink = request.getContextPath() + "/show" + (isProblemset ? "Runs" : "ContestRuns") + ".do";
     String showProblemsAction = isProblemset ? "showProblems.do" : "showContestProblems.do";
     UserSecurity userSecurity = (UserSecurity) request.getSession().getAttribute("oj_security");
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
 %>
-
-<logic:present name="oj_security">
-<logic:equal name="oj_security" property="superAdmin" value="true">
-
-</logic:equal>
-</logic:present>
-<% if(admin){
-	%>
-	<script language="JavaScript">
+<% 
+if(admin){
+%>
+<script language="JavaScript">
 function deleteProblem(code, problemId) {
-    if (!confirm("Are you sure to delete " + code +"?")) {
-      return;
-    }
-    location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=" + problemId;
+if (!confirm("Are you sure to delete " + code +"?")) {
+    return;
+}
+location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=" + problemId;
 }
 </script>
-	<%
+<%
 }
 %>
-
-
 
         <logic:messagesPresent property="error">
         <div class="internalError">
@@ -75,8 +70,8 @@ function deleteProblem(code, problemId) {
                 %>
                 <table class="list">
                     <%
-                    Set solved = (Set) request.getAttribute("solved");
                     List problems = (List) request.getAttribute("problems");
+                    UserStatistics userStatistics = (UserStatistics) request.getAttribute("UserStatistics");
                     ContestStatistics statistics = (ContestStatistics) request.getAttribute("ContestStatistics");
                     
                     boolean showColor = false;
@@ -90,13 +85,15 @@ function deleteProblem(code, problemId) {
                     %>
                     
                     <tr class="rowHeader">
-                    	<% if (showColor) { %>
+                        <% if (showColor) { %>
                         <td class="problemColor">Color</td>
-                      	<% } %>
-                        <td class="problemSolved">Solved</td>                        
+                        <% } %>
+                        <% if (userStatistics != null) { %>
+                        <td class="problemSolved">Solved</td>
+                        <% } %>                 
                         <td class="problemId">ID</td>
                         <td class="problemTitle">Title</td>
-                        <td class="problemStatus">Status</td>
+                        <td class="problemStatus">Ratio (AC/All)</td>
                         <% if (admin) { %>
                             <td class="problemAdmin">Admin</td>
                         <% } %>                     
@@ -106,25 +103,31 @@ function deleteProblem(code, problemId) {
                          Problem problem = (Problem) problems.get(i);
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
-                    	<% if (showColor) { %>
+                        <% if (showColor) { %>
                         <td class="problemColor" bgcolor="<%=problem.getColor() == null || problem.getColor().trim().length() == 0 ? "white" : problem.getColor()%>" > </td>
-                      	<% } %>
-                    
-                        <td class="problemSolved"><%=solved.contains(new Long(problem.getId())) ? "Yes" : ""%></td>
+                        <% } %>
+                        <% if (userStatistics != null) { %>
+                        <td class="problemSolved"><font color="red"><%=userStatistics.getSolved().contains(problem) ? "Yes" : ""%></font></td>
+                        <% } %>     
                         <td class="problemId"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getCode()%></font></a></td>
                         <td class="problemTitle"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
                         <%
-                            //int ac = statistics.getCount(i, 0);
-                            //int total = statistics.getProblemCount(i);
-                            int ac = 0;
-                            int total = 0;
-                            String status = "0.00% (0/0)";
+                            int ac = statistics.getCount(i, 0);
+                            int total = statistics.getProblemCount(i);
+                            String ratio = "0.00%";
+                            String acLink = "0";
+                            String totalLink = "0";
+                            
                             if (total > 0) {
-                            	int r = ac * 10000 / total;
-                            	status = MessageFormat.format("{0}.{1}% ({2})", new Object[] {"" + r/100, "" + r%100/10 + r%10, ac + "/" + total});
+                                int r = ac * 10000 / total;
+                                ratio = r/100 + "." + r%100/10 + r%10 + "%";
+                                if (ac > 0) {
+                                    acLink = "<a href='" + runsLink + "?contestId=" + problem.getContestId() + "&problemCode=" + problem.getCode() + "&judgeReplyIds=" + JudgeReply.ACCEPTED.getId() + "'>" + ac + "</a>";
+                                }
+                                totalLink = "<a href='" + runsLink + "?contestId=" + problem.getContestId() + "&problemCode=" + problem.getCode() + "'>" + total + "</a>";
                             }
                         %>
-                        <td class="problemStatus"><%=status%></td>
+                        <td class="problemStatus"><%=ratio%> (<%=acLink%>/<%=totalLink%>)</td>
                         <% if (admin) { %>
                         <td class="problemAdmin">
                             <a href="<%=request.getContextPath()%>/edit<%=actionName%>.do?problemId=<%=problem.getId()%>"><font color="red">Edit</font></a>
@@ -136,8 +139,6 @@ function deleteProblem(code, problemId) {
                     <%
                     }
                     %>
-
-                    
                 </table>
                 <% if (admin) { %>
                 <blockquote>

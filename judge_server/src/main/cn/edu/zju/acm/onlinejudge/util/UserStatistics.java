@@ -1,30 +1,31 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import cn.edu.zju.acm.onlinejudge.bean.Submission;
+import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 
-public class ProblemStatistics {
+public class UserStatistics {
 	Map<Long, Integer> counts = new HashMap<Long, Integer>();
-	private final long problemId;
-	private final String orderBy;
+	private final long userId;
+	private final long contestId;
 	private int total = 0;
-	private List<Submission> bestRuns = null;
+	private Set<Problem> solved = null;
 	
-	public ProblemStatistics(long problemId, String orderBy) {
-		this.problemId = problemId;
-		this.orderBy = orderBy;
+	
+	public UserStatistics(long userId, long contestId) {
+		this.userId = userId;
+		this.contestId = contestId;
 	}
 	
-	public long getProblemId() {
-		return problemId;
+	public long getUserId() {
+		return userId;
 	}
 	
-	public String getOrderBy() {
-		return orderBy;
+	public long getContestId() {
+		return contestId;
 	}
 	
 	public int getTotal() {
@@ -65,12 +66,24 @@ public class ProblemStatistics {
 		total += value;
 	}
 
-	public List<Submission> getBestRuns() {
-		return bestRuns;
+	public boolean isSolved(Problem p) {
+		if (solved == null) {
+			return false;
+		}
+		return solved.contains(p);
 	}
-
-	public void setBestRuns(List<Submission> bestRuns) {
-		this.bestRuns = bestRuns;
+	public boolean isSolved(long id) {
+		Problem p = new Problem();
+		p.setId(id);
+		return isSolved(p);
 	}
 	
+	public Set<Problem> getSolved() {
+		return solved;
+	}
+
+	public void setSolved(Set<Problem> s) {
+		this.solved = s;
+	}
+		
 }
