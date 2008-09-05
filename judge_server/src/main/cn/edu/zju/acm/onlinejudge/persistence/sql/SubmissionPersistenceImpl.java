@@ -601,6 +601,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     		}
     	}
 
+    	String inCondition = null;
     	if (criteria.getJudgeReplies() != null) {
     		if (criteria.getJudgeReplies().size() == 0) {
     			return null;
@@ -613,14 +614,24 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     				easy = true;
     			}
     		}
-    		query.append(" AND s.judge_reply_id IN " 
-    				+ Database.createNumberValues(judgeRepliesIds));
+    		inCondition = " AND s.judge_reply_id IN " + Database.createNumberValues(judgeRepliesIds); 
+    		query.append(inCondition);
     		if (index == null && !easy) {
     			if (criteria.getProblemId() != null) {
     				index = problemIndex;
     			} else {
     				index = judgeReplyIndex;
     			}
+    		}
+    	}
+    	if (index == null && criteria.getJudgeReplies() != null && criteria.getProblemId() != null) {
+    		String sql = "SELECT count(*) from submission s where problem_id=" + criteria.getProblemId() + inCondition;
+    		ps = conn.prepareStatement(sql);
+    		rs = ps.executeQuery();
+    		rs.next();
+    		long cnt = rs.getLong(1);
+    		if (cnt < 10000) {
+    			index = problemIndex;
     		}
     	}
     	
