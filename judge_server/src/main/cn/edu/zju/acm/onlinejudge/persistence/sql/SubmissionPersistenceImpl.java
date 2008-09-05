@@ -616,7 +616,11 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     		query.append(" AND s.judge_reply_id IN " 
     				+ Database.createNumberValues(judgeRepliesIds));
     		if (index == null && !easy) {
-    			index = judgeReplyIndex;
+    			if (criteria.getProblemId() != null) {
+    				index = problemIndex;
+    			} else {
+    				index = judgeReplyIndex;
+    			}
     		}
     	}
     	
