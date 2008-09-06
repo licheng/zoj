@@ -24,7 +24,7 @@ public class JudgeClientUnitTest {
 
     private static MockClient mockServer;
 
-    private JudgeQueue queue;
+    private SubmissionQueueReader queue;
 
     private JudgeClient judgeClient;
 
@@ -57,7 +57,7 @@ public class JudgeClientUnitTest {
     @Before
     public void setUp() throws Exception {
 	mockServer = new MockClient(true);
-	queue = new JudgeQueue();
+	queue = new SubmissionQueueReader();
 	judgeClient = new JudgeClient(queue, new Socket(InetAddress.getLocalHost(), mockServer.getPort()), 3);
 	judgeClient.start();
 	submissions = new Submission[10];

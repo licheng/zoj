@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
+import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.SubmissionFilter;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
 public class JudgeClient extends Thread {
@@ -26,7 +27,7 @@ public class JudgeClient extends Thread {
 
     private int port;
 
-    private List<JudgeClientInstance> judgeThreads = new ArrayList<JudgeClientInstance>();
+    private List<JudgeClientJudgeThread> judgeThreads = new ArrayList<JudgeClientJudgeThread>();
 
     private JudgeClientErrorHandlingStrategy errorHandlingStrategy = new JudgeClientErrorHandlingStrategy(this);
 
@@ -64,9 +65,9 @@ public class JudgeClient extends Thread {
         this.initialized = false;
     }
 
-    public List<JudgeClientInstance> getJudgeThreads() {
+    public List<JudgeClientJudgeThread> getJudgeThreads() {
         synchronized (this.judgeThreads) {
-            return new ArrayList<JudgeClientInstance>(this.judgeThreads);
+            return new ArrayList<JudgeClientJudgeThread>(this.judgeThreads);
         }
     }
 
@@ -128,7 +129,7 @@ public class JudgeClient extends Thread {
                 Utility.closeSocket(this.socket);
                 this.pingBarrier.notifyAll();
             }
-            for (JudgeClientInstance judgeThread : this.judgeThreads) {
+            for (JudgeClientJudgeThread judgeThread : this.judgeThreads) {
                 judgeThread.interrupt();
             }
         }
@@ -137,10 +138,9 @@ public class JudgeClient extends Thread {
     public void interrupt() {
         super.interrupt();
         synchronized (this.judgeThreads) {
-            for (JudgeClientInstance judgeThread : this.judgeThreads) {
+            for (JudgeClientJudgeThread judgeThread : this.judgeThreads) {
                 judgeThread.interrupt();
             }
-            this.judgeThreads.clear();
         }
     }
 
@@ -159,12 +159,16 @@ public class JudgeClient extends Thread {
     public List<Language> getSupportedLanguages() {
         return this.supportedLanguages;
     }
+    
+    public JudgeService getService() {
+        return this.service;
+    }
 
     public SubmissionFilter getSubmissionFilter() {
         return this.submissionFilter;
     }
 
-    public void setSubmissionFilter(SubmissionFilter submissionFilter) {       
+    void setSubmissionFilter(SubmissionFilter submissionFilter) {       
         this.submissionFilter = submissionFilter;
     }
 
@@ -172,9 +176,9 @@ public class JudgeClient extends Thread {
         return this.errorHandlingStrategy;
     }
 
-    public JudgeClientInstance addJudgeThread() {
+    public JudgeClientJudgeThread addJudgeThread() {
         synchronized (this.judgeThreads) {
-            JudgeClientInstance judgeThread = new JudgeClientInstance(this.service, this);
+            JudgeClientJudgeThread judgeThread = new JudgeClientJudgeThread(this);
             judgeThread.start();
             this.judgeThreads.add(judgeThread);
             return judgeThread;
@@ -184,16 +188,6 @@ public class JudgeClient extends Thread {
     public void removeJudgeThread(int index) {
         synchronized (this.judgeThreads) {
             this.judgeThreads.remove(index).interrupt();
-        }
-    }
-
-    public void removeDeadThreads() {
-        synchronized (this.judgeThreads) {
-            for (int i = this.judgeThreads.size() - 1; i >= 0; --i) {
-                if (!this.judgeThreads.get(i).isAlive()) {
-                    this.judgeThreads.remove(i);
-                }
-            }
         }
     }
 

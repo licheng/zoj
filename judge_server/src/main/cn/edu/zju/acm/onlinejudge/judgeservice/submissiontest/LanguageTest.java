@@ -20,4 +20,17 @@ public class LanguageTest implements Test {
     public boolean test(Submission submission, int priority) {
         return supportedLanguageIds.contains(submission.getLanguage().getId());
     }
+
+    @Override
+    public int hashCode() {
+        return supportedLanguageIds.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LanguageTest) {
+            return this.supportedLanguageIds.equals(((LanguageTest) obj).supportedLanguageIds);
+        }
+        return false;
+    }
 }

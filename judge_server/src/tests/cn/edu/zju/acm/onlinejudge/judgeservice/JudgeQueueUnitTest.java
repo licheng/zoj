@@ -15,7 +15,7 @@ import cn.xuchuan.util.ReflectionUtil;
 import static org.junit.Assert.*;
 
 public class JudgeQueueUnitTest {
-    private JudgeQueue queue;
+    private SubmissionQueueReader queue;
 
     private Submission[] submissions = new Submission[10];
 
@@ -28,7 +28,7 @@ public class JudgeQueueUnitTest {
 
     @Before
     public void setUp() {
-        queue = new JudgeQueue();
+        queue = new SubmissionQueueReader();
         for (int i = 0; i < submissions.length; i++) {
             submissions[i] = new Submission();
             submissions[i].setId(i);

@@ -9,4 +9,17 @@ public abstract class CompoundTest implements Test {
     public void add(Test test) {
         this.tests.add(test);
     }
+
+    @Override
+    public int hashCode() {
+        return tests.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CompoundTest) {
+            return this.tests.equals(((CompoundTest) obj).tests);
+        }
+        return false;
+    }
 }

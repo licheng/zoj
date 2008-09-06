@@ -21,11 +21,11 @@ import cn.xuchuan.util.ReflectionUtil;
 import static org.junit.Assert.*;
 
 public class JudgeClientInstanceUnitTest {
-    private JudgeClientInstance instance;
+    private JudgeClientJudgeThread instance;
 
     private Submission submission;
 
-    private JudgeQueue queue;
+    private SubmissionQueueReader queue;
 
     private static MockClient server;
 
@@ -59,14 +59,14 @@ public class JudgeClientInstanceUnitTest {
     @Before
     public void setUp() throws Exception {
         // server = new MockClient();
-        queue = new JudgeQueue();
+        queue = new SubmissionQueueReader();
         submission = new Submission();
         submission.setId(0);
         submission.setLanguage(LanguageManager.getLanguage(0));
         submission.setProblemId(0);
         submission.setContent("test");
         DAOFactory.getSubmissionDAO().update(submission);
-        instance = new JudgeClientInstance(queue, new InetSocketAddress(InetAddress.getByName("192.168.37.130"), 2191));
+        instance = new JudgeClientJudgeThread(queue, new InetSocketAddress(InetAddress.getByName("192.168.37.130"), 2191));
         instance.start();
     }
 

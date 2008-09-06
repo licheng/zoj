@@ -15,4 +15,17 @@ public class NegationTest implements Test {
         return !this.test.test(submission, priority);
     }
 
+    @Override
+    public int hashCode() {
+        return test.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof NegationTest) {
+            return this.test.equals(((NegationTest) obj).test);
+        }
+        return false;
+    }
+
 }

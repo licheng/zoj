@@ -2,26 +2,26 @@ package cn.edu.zju.acm.onlinejudge.judgeservice.submissiontest;
 
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
 
-public class PriorityTest {
-    private int priority;
+public class ProblemTest {
+    private int problemId;
 
-    public PriorityTest(int priority) {
-        this.priority = priority;
+    public ProblemTest(int problemId) {
+        this.problemId = problemId;
     }
 
     public boolean test(Submission submission, int priority) {
-        return this.priority == priority;
+        return this.problemId == submission.getProblemId();
     }
 
     @Override
     public int hashCode() {
-        return this.priority;
+        return this.problemId;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof PriorityTest) {
-            return this.priority == ((PriorityTest) obj).priority;
+        if (obj instanceof ProblemTest) {
+            return this.problemId == ((ProblemTest) obj).problemId;
         }
         return false;
     }

@@ -37,7 +37,7 @@ public class JudgeClientErrorHandlingStrategy {
         this.serverErrorCount.set(0);
     }
 
-    public Action onJudgeError(JudgeClientInstance judgeThread, Exception error) throws InterruptedException {
+    public Action onJudgeError(JudgeClientJudgeThread judgeThread, Exception error) throws InterruptedException {
         this.logger.error("Judge error", error);
         if (error != null || error instanceof InterruptedException) {
             return Action.STOP;

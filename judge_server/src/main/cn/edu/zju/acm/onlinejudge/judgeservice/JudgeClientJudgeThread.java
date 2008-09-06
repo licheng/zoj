@@ -26,13 +26,16 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
 import cn.edu.zju.acm.onlinejudge.dao.DAOFactory;
 import cn.edu.zju.acm.onlinejudge.dao.ProblemDAO;
 import cn.edu.zju.acm.onlinejudge.dao.SubmissionDAO;
+import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.CompoundSubmissionFilter;
+import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.SimpleSubmissionFilter;
+import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.SubmissionFilter;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissiontest.LanguageTest;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissiontest.NegationTest;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
 // TODO: add limit checks here
-public class JudgeClientInstance extends Thread {
+public class JudgeClientJudgeThread extends Thread {
     public static enum Status {
         CONNECTING, WAITING, RUNNING, ERROR, STOPEED
     }
@@ -45,8 +48,6 @@ public class JudgeClientInstance extends Thread {
 
     private SubmissionDAO submissionDAO = DAOFactory.getSubmissionDAO();
 
-
-
     private Socket socket;
 
     private InetSocketAddress address;
@@ -57,28 +58,18 @@ public class JudgeClientInstance extends Thread {
 
     private Submission submission = null;
 
-    private JudgeQueue judgeQueue = null;
+    private SubmissionQueueReader submissionQueueReader = null;
 
     private Status status = Status.CONNECTING;
-
-    private JudgeService service;
 
     private JudgeClient client;
 
     private SubmissionFilter submissionFilter = null;
 
-    private SubmissionFilter clientFilter = null;
-
-    private SubmissionFilter serviceFilter = null;
-
-    public JudgeClientInstance(JudgeService service, JudgeClient client) {
-        this.service = service;
+    public JudgeClientJudgeThread(JudgeClient client) {
         this.client = client;
         this.address = new InetSocketAddress(client.getHost(), client.getPort());
         this.logger = Logger.getLogger(JudgeService.class.getName());
-        this.submissionFilter = new SubmissionFilter();
-        this.submissionFilter.add(new NegationTest(new LanguageTest(this.client.getSupportedLanguages())),
-                Priority.DENY);
     }
 
     public Status getStatus() {
@@ -93,11 +84,19 @@ public class JudgeClientInstance extends Thread {
         return this.submission;
     }
 
+    public SubmissionFilter getSubmissionFilter() {
+        return this.submissionFilter;
+    }
+
     public void setSubmissionFilter(SubmissionFilter submissionFilter) {
-        submissionFilter.addFirst(new NegationTest(new LanguageTest(this.client.getSupportedLanguages())),
-                Priority.DENY);
         this.submissionFilter = submissionFilter;
-        this.judgeQueue = null;
+    }
+
+    public synchronized void resetQueue() {
+        if (this.submissionQueueReader != null) {
+            this.submissionQueueReader.close();
+        }
+        this.submissionQueueReader = null;
     }
 
     @Override
@@ -105,6 +104,7 @@ public class JudgeClientInstance extends Thread {
         this.logger.info("interrrupted");
         super.interrupt();
         Utility.closeSocket(this.socket);
+        this.resetQueue();
     }
 
     @Override
@@ -116,7 +116,7 @@ public class JudgeClientInstance extends Thread {
                 this.status = Status.ERROR;
                 this.error = e;
                 if (this.submission != null) {
-                    this.service.judge(this.submission, Priority.HIGH);
+                    this.client.getService().judge(this.submission, Priority.HIGH);
                 }
                 try {
                     if (this.client.getErrorHandlingStrategy().onJudgeError(this, e) == JudgeClientErrorHandlingStrategy.Action.STOP) {
@@ -124,6 +124,9 @@ public class JudgeClientInstance extends Thread {
                     }
                 } catch (InterruptedException e1) {
                 }
+            } catch (Error e) {
+                this.resetQueue();
+                throw e;
             }
         }
         this.status = Status.STOPEED;
@@ -142,20 +145,21 @@ public class JudgeClientInstance extends Thread {
         this.out = new DataOutputStream(socket.getOutputStream());
         this.status = Status.RUNNING;
         try {
-
             while (!this.isInterrupted()) {
-
                 try {
                     this.status = Status.WAITING;
-                    if (this.serviceFilter != this.service.getSubmissionFilter() ||
-                            this.clientFilter != this.client.getSubmissionFilter() || this.judgeQueue == null) {
-                        this.serviceFilter = this.service.getSubmissionFilter();
-                        this.clientFilter = this.client.getSubmissionFilter();
-                        this.judgeQueue = this.service.createJudgeQueue(this.serviceFilter, this.clientFilter,
-                                this.submissionFilter);
+                    if (this.submissionQueueReader == null) {
+                        CompoundSubmissionFilter submissionFilter = new CompoundSubmissionFilter();
+                        submissionFilter.add(new SimpleSubmissionFilter(new NegationTest(new LanguageTest(this.client
+                                .getSupportedLanguages())), Priority.DENY));
+                        submissionFilter.add(this.submissionFilter);
+                        submissionFilter.add(this.client.getSubmissionFilter());
+                        submissionFilter.add(this.client.getService().getSubmissionFilter());
+                        this.submissionQueueReader =
+                                this.client.getService().getSubmissionQueue().getReader(submissionFilter);
                     }
-                    this.submission = this.judgeQueue.poll();
-                    this.service.judgeStart(submission);
+                    this.submission = this.submissionQueueReader.poll();
+                    this.client.getService().judgeStart(submission);
                     this.status = Status.RUNNING;
                     try {
                         this.judge(this.submission);
@@ -165,32 +169,19 @@ public class JudgeClientInstance extends Thread {
                     }
                     this.commitSubmission();
                     this.submission.setContent(null);
-                    // IMPORTANT: to avoid rejudging this one when queue.poll throws a PersistenceException
+                    // IMPORTANT: set to null here to avoid rejudging this one when queue.poll throws a
+                    // PersistenceException
                     this.submission = null;
                     this.client.getErrorHandlingStrategy().onJudgeSuccess();
                 } catch (PersistenceException e) {
                     throw new JudgeServerErrorException(e);
                 } finally {
-                    this.service.judgeDone(submission);
+                    this.client.getService().judgeDone(submission);
                 }
 
-
-
-
-
-
-
-
             }
-
-
         } finally {
             Utility.closeSocket(this.socket);
-
-
-
-
-
 
         }
     }
@@ -214,7 +205,10 @@ public class JudgeClientInstance extends Thread {
         if (reply != JudgeReply.READY.getId()) {
             throw new JudgeClientErrorException();
         }
-        reply = this.sendCompileCommand(submission.getId(), submission.getLanguage(), submission.getContent());
+        String content = submission.getContent();
+        if (content == null) {
+        }
+        reply = this.sendCompileCommand(submission.getId(), submission.getLanguage(), content);
 
         if (reply != JudgeReply.COMPILING.getId()) {
             throw new JudgeClientErrorException();
@@ -284,18 +278,6 @@ public class JudgeClientInstance extends Thread {
         this.sendCommand(JudgeClientCommandsFactory.createJudgeCommand(problemId, problemRevision, submissionId));
         return this.readJudgeReply();
 
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     private void zipProblemData(File outputFile, Problem problem) throws PersistenceException,
@@ -304,10 +286,10 @@ public class JudgeClientInstance extends Thread {
         try {
             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(outputFile));
             try {
-                List<Reference> inputFiles = DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
-                        ReferenceType.INPUT);
-                List<Reference> outputFiles = DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
-                        ReferenceType.OUTPUT);
+                List<Reference> inputFiles =
+                        DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(), ReferenceType.INPUT);
+                List<Reference> outputFiles =
+                        DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(), ReferenceType.OUTPUT);
                 if (inputFiles.size() != outputFiles.size() && inputFiles.size() > 0 && outputFiles.size() > 0) {
                     throw new ProblemDataErrorException("Unequal number of inputs and outputs for problem " +
                             problem.getId());
@@ -326,8 +308,9 @@ public class JudgeClientInstance extends Thread {
                 }
                 Reference specialJudge = null;
                 if (problem.isChecker()) {
-                    List<Reference> specialJudges = DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
-                            ReferenceType.CHECKER_SOURCE);
+                    List<Reference> specialJudges =
+                            DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
+                                    ReferenceType.CHECKER_SOURCE);
                     if (specialJudges.size() == 0) {
                         throw new ProblemDataErrorException("Can not find special judge for problem " + problem.getId());
                     }
