@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.management.relation.Role;
 
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
-import cn.edu.zju.acm.onlinejudge.judgeservice.JudgingList;
+import cn.edu.zju.acm.onlinejudge.judgeservice.JudgingView;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.security.RoleSecurity;
@@ -198,15 +198,15 @@ public class StatisticsManager {
 		key.add(new Long(firstId));
 		key.add(new Long(lastId));
 		key.add(new Integer(count));
-        JudgingList judgingList;
+        JudgingView judgingList;
         List submissions;
         synchronized (submissionCache) {
             Object[] pair = (Object[]) submissionCache.get(key);
             if (pair != null) {
-                judgingList = (JudgingList) pair[0];
+                judgingList = (JudgingView) pair[0];
                 submissions = (List) pair[1];
             } else {
-                judgingList = JudgeService.getInstance().getJudgingList();
+                judgingList = JudgeService.getInstance().getJudgingView();
                 submissions = PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(criteria,
                 		firstId, lastId, count);
                 pair = new Object[] {judgingList, submissions};

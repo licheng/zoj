@@ -1,3 +1,22 @@
+/*
+ * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ *
+ * This file is part of ZOJ.
+ *
+ * ZOJ is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ZOJ is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * 
  */
@@ -8,64 +27,49 @@ import java.util.Map;
 
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
 
-class JudgingQueue implements JudgingList, Cloneable {
-    private JudgingQueue.JudgingQueueNode head = new JudgingQueueNode(null);
+class JudgingQueue {
+    private JudgingQueue.JudgingQueueNode head = new JudgingQueueNode();
     private JudgingQueue.JudgingQueueNode tail = head;
 
-    public synchronized void push(Submission submission) {
-        JudgingQueue.JudgingQueueNode node = new JudgingQueueNode(submission);
-        this.tail.setNext(node);
-        this.tail = node;
+    public void push(Submission submission) {
+        if (submission == null) {
+            throw new NullPointerException("submission should not be null");
+        }
+        JudgingQueue.JudgingQueueNode node = new JudgingQueueNode();
+        synchronized (this) {
+            this.tail.next = node;
+            // Should be put after setting next, otherwise tryPop & getSubmissionMap will fail.
+            this.tail.submission = submission;
+            this.tail = node;
+        }
     }
 
-    public synchronized void tryPop() {
-        while (this.head != tail &&
-                (this.head.getSubmission() == null || this.head.getSubmission().getContent() == null)) {
+    public void tryPop() {
+        while (this.head.submission != null && this.head.submission.getContent() == null) {
             this.head = this.head.next;
         }
     }
 
-    @Override
-    public Map<Long, Submission> getSubmissionMap() {
-        HashMap<Long, Submission> submissionMap = new HashMap<Long, Submission>();
-        JudgingQueue.JudgingQueueNode p = head;
-        while (p != null) {
-            Submission submission = p.getSubmission();
-            if (submission != null) {
-                submissionMap.put(submission.getId(), submission);
-            }
-            p = p.getNext();
-        }
-        return submissionMap;
-    }
+    public JudgingView getJudingView() {
+        return new JudgingView() {
+            JudgingQueue.JudgingQueueNode head = JudgingQueue.this.head;
 
-    @Override
-    public synchronized JudgingList clone() {
-        try {
-            return (JudgingList) super.clone();
-        } catch (CloneNotSupportedException e) {
-            return null;
-        }
+            @Override
+            public Map<Long, Submission> getSubmissionMap() {
+                HashMap<Long, Submission> submissionMap = new HashMap<Long, Submission>();
+                JudgingQueue.JudgingQueueNode p = this.head;
+                while (p.submission != null) {
+                    Submission submission = p.submission;
+                    submissionMap.put(submission.getId(), submission);
+                    p = p.next;
+                }
+                return submissionMap;
+            }
+        };
     }
 
     private static class JudgingQueueNode {
-        private Submission submission;
-        private JudgingQueue.JudgingQueueNode next = null;
-
-        public JudgingQueueNode(Submission submission) {
-            this.submission = submission;
-        }
-
-        public Submission getSubmission() {
-            return submission;
-        }
-
-        public JudgingQueue.JudgingQueueNode getNext() {
-            return next;
-        }
-
-        public void setNext(JudgingQueue.JudgingQueueNode next) {
-            this.next = next;
-        }
+        Submission submission = null;
+        JudgingQueue.JudgingQueueNode next = null;
     }
 }

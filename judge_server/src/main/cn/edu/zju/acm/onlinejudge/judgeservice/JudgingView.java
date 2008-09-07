@@ -17,16 +17,12 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * 
- */
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
-import cn.edu.zju.acm.onlinejudge.bean.Submission;
-import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
+import java.util.Map;
 
-public interface SubmissionQueueReader {
-    public Submission poll() throws InterruptedException, PersistenceException;
-    
-    public void close();
+import cn.edu.zju.acm.onlinejudge.bean.Submission;
+
+public interface JudgingView {
+    public Map<Long, Submission> getSubmissionMap();
 }
