@@ -70,6 +70,8 @@ public interface SubmissionPersistence {
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
     List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count) throws PersistenceException;
+    
+    List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count, boolean withContent) throws PersistenceException;
 
     /**
      * <p>Creates the specified judge reply in persistence layer.</p>

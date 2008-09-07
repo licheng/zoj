@@ -132,7 +132,7 @@ public class ShowRunsAction extends BaseAction {
         if (isRejudge) {
         	int maxN = 100;
             List allRuns = PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(
-                    criteria, -1, Long.MAX_VALUE, maxN + 1);
+                    criteria, -1, Long.MAX_VALUE, maxN + 1, true);
             if (allRuns.size() > maxN) {
             	// TODO
             }

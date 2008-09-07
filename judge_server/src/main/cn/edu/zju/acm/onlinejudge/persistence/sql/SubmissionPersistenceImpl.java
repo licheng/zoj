@@ -378,7 +378,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             	   
         try {
         	conn = Database.createConnection();
-        	ps = conn.prepareStatement(GET_SUBMISSION);   
+        	ps = conn.prepareStatement(GET_SUBMISSION.replace("FORCE_INDEX", ""));  
+        	
         	ps.setLong(1, id);            
             rs = ps.executeQuery();
              
@@ -406,7 +407,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @return an ExtendedSubmission instance
      * @throws SQLException
      */
-    private Submission populateSubmission(ResultSet rs, boolean hasContent, 
+    private Submission populateSubmission(ResultSet rs, boolean withContent, 
     		Map<Long, Language> languageMap, Map<Long, JudgeReply> judgeReplyMap) throws SQLException {
         Submission submission = new Submission();
         
@@ -424,7 +425,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     	submission.setContestId(rs.getLong("contest_id"));
     	submission.setContestOrder(rs.getLong("contest_order"));
     	
-    	if (hasContent) {
+    	if (withContent) {
     		submission.setContent(rs.getString("content"));
     	}
     	
@@ -463,7 +464,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
      * @param count the maximum number of submissions in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count, boolean hasContent) 
+    public List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count, boolean withContent) 
         throws PersistenceException {
     	if (criteria == null) {
     		throw new NullPointerException("criteria is null");
@@ -507,7 +508,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         		long problemId = rs.getLong(1);
         		criteria.setProblemId(problemId);
         	}
-        	ps = buildQuery(hasContent ? GET_SUBMISSIONS_WITH_CONTENT : GET_SUBMISSIONS, criteria, firstId, lastId, count, conn, ps, rs);
+        	ps = buildQuery(withContent ? GET_SUBMISSIONS_WITH_CONTENT : GET_SUBMISSIONS, criteria, firstId, lastId, count, conn, ps, rs);
 
         	if (ps == null) {
         		return new ArrayList<Submission>();
@@ -517,7 +518,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
              
             List<Submission> submissions = new ArrayList<Submission>();
             while (rs.next()) {
-                Submission submission = populateSubmission(rs, false, languageMap, judgeReplyMap);
+                Submission submission = populateSubmission(rs, withContent, languageMap, judgeReplyMap);
             	submissions.add(submission);
             } 
                                          
