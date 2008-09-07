@@ -51,7 +51,7 @@
         <logic:present name="contest">
         <div>
         <font color="db6d00" size="5"><bean:write name="user" property="handle"/></font>
-        <logic:notEmpty name="user" property="nickName"><font size="4">(<bean:write name="user" property="handle"/>)</font></logic:notEmpty>
+        <logic:notEmpty name="user" property="nickName"><font size="4">(<bean:write name="user" property="nickName"/>)</font></logic:notEmpty>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <font size="3">AC Ratio:</font> <font color="red" size="4"><%=statistics.getSolved().size()%>/<%=statistics.getTotal()%> </font><br/>
         </div>

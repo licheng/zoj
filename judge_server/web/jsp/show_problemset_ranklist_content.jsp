@@ -16,7 +16,7 @@
 <%
     
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
-    String userStatusPath = request.getContextPath() + "/showUserStatus.do";    
+    String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";    
     String ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
       
 %>
@@ -70,7 +70,7 @@
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
                         <td class="problemsetRanklistRank"><%=rank%></td>
-                        <td class="problemsetRanklistUser"><a href="<%=userStatusPath%>?contestId=<%=contest.getId()%>&userId=<%=users[i].getId()%>"><font color="db6d00"><%=
+                        <td class="problemsetRanklistUser"><a href="<%=userStatusPath + users[i].getId()%>"><font color="db6d00"><%=
                         	users[i].getNickName() == null || users[i].getNickName().length() == 0
                         	  ? users[i].getHandle() : users[i].getNickName()
                         %></font></a></td>

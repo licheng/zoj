@@ -32,12 +32,12 @@
             </div>
             <table id="main">
                 <tr>
-                <td width="169" height="100%">
-                    <table id="leftnav" cellspacing="1">
-                       <tiles:insert attribute="leftnav"/>
+                <td width="169" height="100%" style="vertical-align:top">
+                    <table id="leftnav" cellspacing="1" height="100%">
+                       <tiles:insert attribute="leftnav"/>
                     </table>
                 </td>
-                <td id="content">
+                <td id="content" style="vertical-align:top">
                     <tiles:insert attribute="content"/>
                 </td>
                 </tr>

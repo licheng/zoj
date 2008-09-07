@@ -27,12 +27,13 @@ public class PermissionLevel implements Comparable {
     /**
      * <p>Represents ADMIN static instance.</p>
      */
-    public static final PermissionLevel ADMIN = new PermissionLevel(200, "Admin");
-    
+    public static final PermissionLevel PARTICIPATECANVIEWSOURCE = new PermissionLevel(3, "ParticipateCanViewSource");
+
     /**
      * <p>Represents ADMIN static instance.</p>
      */
-    public static final PermissionLevel PARTICIPATECANVIEWSOURCE = new PermissionLevel(3, "ParticipateCanViewSource");
+    public static final PermissionLevel ADMIN = new PermissionLevel(4, "Admin");
+    
 
     /**
      * <p>Represents the id of PermissionLevel.</p>
@@ -84,11 +85,11 @@ public class PermissionLevel implements Comparable {
      * @return the list which consists of all permission levels.
      */
     public static List getPermissionLevels() {
-        List list = new ArrayList(3);
+        List list = new ArrayList(4);
         list.add(VIEW);
         list.add(PARTICIPATE);
-        list.add(ADMIN);
         list.add(PARTICIPATECANVIEWSOURCE);
+        list.add(ADMIN);
         return list;
     }
 

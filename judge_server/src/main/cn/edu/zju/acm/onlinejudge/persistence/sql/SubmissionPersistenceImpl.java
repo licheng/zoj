@@ -816,7 +816,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         ResultSet rs = null;
         try {
         	conn = Database.createConnection();
-            String sql = "SELECT u.user_profile_id, u.handle, up.plan, ua.solved, ua.tiebreak " +
+            String sql = "SELECT u.user_profile_id, u.handle, u.nickname, up.plan, ua.solved, ua.tiebreak " +
             		"FROM user_ac ua " +
             		"LEFT JOIN user_profile u ON ua.user_profile_id = u.user_profile_id " +
             		"LEFT JOIN user_preference up ON ua.user_profile_id = up.user_profile_id " +
@@ -836,10 +836,11 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 UserProfile user = new UserProfile();
                 user.setId(rs.getLong(1));
                 user.setHandle(rs.getString(2));
-                user.setDeclaration(rs.getString(3));
+                user.setNickName(rs.getString(3));
+                user.setDeclaration(rs.getString(4));
                 users.add(user);
-                solved.add(rs.getInt(4));
-                total.add(rs.getInt(5));
+                solved.add(rs.getInt(5));
+                total.add(rs.getInt(6));
             }
             
             int[] solvedArray = new int[solved.size()];
@@ -1250,13 +1251,13 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         ProblemStatistics ret = null;
         
         if ("time".equals(orderBy)) {
-        	ob = "s.time_consumption,submission_date ASC";
+        	ob = "s.time_consumption ASC,memory_consumption ASC,s.submission_date ASC";
         	ret = new ProblemStatistics(problemId, "time");
         } else if ("memory".equals(orderBy)) {
-        	ob = "s.memory_consumption,submission_date ASC";
+        	ob = "s.memory_consumption ASC,s.time_consumption ASC,submission_date ASC";
         	ret = new ProblemStatistics(problemId, "memory");
         } else {
-        	ob = "s.submission_date ASC";
+        	ob = "s.submission_date ASC,s.time_consumption ASC,memory_consumption ASC";
         	ret = new ProblemStatistics(problemId, "date");
         }
           

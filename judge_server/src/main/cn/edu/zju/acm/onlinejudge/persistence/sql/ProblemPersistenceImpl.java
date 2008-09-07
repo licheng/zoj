@@ -223,8 +223,6 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
             }      
             
             // create the problem
-            ps = conn.prepareStatement("LOCK TABLES problem WRITE, problem_stat WRITE, mysql.proc READ");
-            ps.execute();
             ps = conn.prepareStatement(INSERT_PROBLEM);            
             ps.setLong(1, problem.getContestId());
             ps.setString(2, problem.getTitle());
@@ -245,8 +243,6 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
             
             ps.executeUpdate();                                               
             problem.setId(Database.getLastId(conn, ps, rs));  
-            ps = conn.prepareStatement("UNLOCK TABLES");
-            ps.execute();
             
             conn.commit();
         } catch (SQLException e) {

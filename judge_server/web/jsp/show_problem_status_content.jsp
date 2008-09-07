@@ -67,10 +67,10 @@
                     List runs = statistics.getBestRuns();
                     if (runs != null && runs.size() > 0) {
                 %>
-                <div>Top Submssions by <font color="blue"><%="time".equals(orderBy) ? "Run Time" : ("time".equals(orderBy) ? "Run Memory" : "Submit Time")%></font>
+                <div>Top Submssions by <font color="blue"><%="time".equals(orderBy) ? "Run Time" : ("memory".equals(orderBy) ? "Run Memory" : "Submit Time")%></font>
                 <table class="list">
                     <tr class="rowHeader">
-                        <td class="runSubmitTime"><a href="<%=problemStatusPath%>">Submit Time</a></td>
+                        <td class="runSubmitTime"><a href="<%=problemStatusPath%>&orderBy=date">Submit Time</a></td>
                         <td class="runLanguage">Language</td>
                         <td class="runTime"><a href="<%=problemStatusPath%>&orderBy=time">Run Time(ms)</a></td>
                         <td class="runMemory"><a href="<%=problemStatusPath%>&orderBy=memory">Run Memory(KB)</a></td>

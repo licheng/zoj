@@ -53,6 +53,9 @@ public class ShowProblemStatusAction extends BaseAction {
     	
     	Problem problem = context.getProblem();
     	String orderBy = context.getRequest().getParameter("orderBy");
+    	if (!"date".equals(orderBy) && !"memory".equals(orderBy)) {
+    		orderBy = "time";
+    	}
     	if (problem != null) {
     		ProblemStatistics statistics = StatisticsManager.getInstance().getProblemStatistics(problem.getId(), orderBy, 20);
     		context.setAttribute("ProblemStatistics", statistics);

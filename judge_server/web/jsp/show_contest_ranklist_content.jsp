@@ -19,6 +19,8 @@
         List problems = (List) request.getAttribute("problems");
     	List roles = ranklist.getRoles();
     	RoleSecurity role = ranklist.getRole();
+    	AbstractContest contest = (AbstractContest) request.getAttribute("contest");
+        String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";    
     	 
 %>
         <logic:messagesPresent property="error">
@@ -37,7 +39,7 @@
         </div>
         <div id="content_body">
                 <%
-                    AbstractContest contest = (AbstractContest) request.getAttribute("contest");
+                    
                     String status;
                     long time = System.currentTimeMillis() - contest.getStartTime().getTime();
                     if (time < 0) {
@@ -103,11 +105,11 @@
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
                         <td class="ranklistRank"><%=displayRank%></td>
-                        <td class="ranklistUser"><font color="db6d00"><%=
+                        <td class="ranklistUser"><a href="<%=userStatusPath + entry.getUserProfile().getId()%>"><font color="db6d00"><%=
                         	entry.getUserProfile().getNickName() == null ||
                         	entry.getUserProfile().getNickName().length() == 0
                         	?  entry.getUserProfile().getHandle() : entry.getUserProfile().getNickName()
-                        %></font></td>
+                        %></font></a></td>
                         <td class="ranklistSolved"><%=entry.getSolved()%></td>
                         <%
                         for (int j = 0; j < problems.size(); ++j) {
