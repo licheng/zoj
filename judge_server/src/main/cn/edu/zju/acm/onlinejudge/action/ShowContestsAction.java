@@ -50,8 +50,8 @@ public class ShowContestsAction extends BaseAction {
      *
      * @param mapping action mapping
      * @param form action form
-     * @param request http sevelet request
-     * @param response http sevelet response
+     * @param request http servlet request
+     * @param response http servlet response
      *
      * @return action forward instance
      *

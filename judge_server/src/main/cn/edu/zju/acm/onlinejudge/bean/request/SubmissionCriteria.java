@@ -232,17 +232,6 @@ public class SubmissionCriteria {
     	hash = cal(judgeReplies, hash);
     	hash = cal(languages, hash);
     	hash = cal(userId, hash);
-    	/*
-    	if (judgeReplies != null) {
-    		for (Iterator it = judgeReplies.iterator(); it.hasNext();) {
-    			hash = cal(it.next(), hash);
-    		}
-    	}
-    	if (judgeReplies != null) {
-    		for (Iterator it = languages.iterator(); it.hasNext();) {
-    			hash = cal(it.next(), hash);
-    		}
-    	}*/
         
     	return hash;    	
     }

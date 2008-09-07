@@ -9,10 +9,13 @@
                 %>
 
                 <tr><td class="nav_header">
-                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"><div><a href="<%=request.getContextPath()%>/systemParameters.do">Configue System</a></div></img>
+                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"/><div><a href="<%=request.getContextPath()%>/systemParameters.do">Configure System</a></div>
                 </td></tr>
 
                 <logic:equal name="menuId" value="ConfigueSystem">
+                <tr><td class="<%="ShowDashBoard".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/showDashboard.do">Dashboard</a>
+                </td></tr>
                 <tr><td class="<%="SystemParameters".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/systemParameters.do">System Parameters</a>
                 </td></tr>
@@ -41,7 +44,7 @@
                 </logic:equal>
 
                 <tr><td class="nav_header">
-                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"><div><a href="<%=request.getContextPath()%>/manageUsers.do">Manage Users</a></div></img>
+                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"/><div><a href="<%=request.getContextPath()%>/manageUsers.do">Manage Users</a></div>
                 </td></tr>
 
                 <logic:equal name="menuId" value="ManageUsers">
@@ -51,7 +54,7 @@
                 </logic:equal>
 
                 <tr><td class="nav_header">
-                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"><div><a href="<%=request.getContextPath()%>/manageContests.do">Manage Contests</a></div></img>
+                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"/><div><a href="<%=request.getContextPath()%>/manageContests.do">Manage Contests</a></div>
                 </td></tr>
 
                 <logic:equal name="menuId" value="ManageContests">
@@ -61,7 +64,7 @@
                 </logic:equal>
 
                 <tr><td class="nav_header">
-                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"><div><a href="<%=request.getContextPath()%>/manageForums.do">Manage Forums</a></div></img>
+                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"/><div><a href="<%=request.getContextPath()%>/manageForums.do">Manage Forums</a></div>
                 </td></tr>
 
                 <logic:equal name="menuId" value="ManageForums">

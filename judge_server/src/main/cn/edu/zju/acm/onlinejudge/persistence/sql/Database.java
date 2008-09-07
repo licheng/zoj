@@ -29,7 +29,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
  * @version 2.0
  * @author ZOJDEV
  */
-class Database {
+public class Database {
 	
 	/**
 	 * The query to get last id.

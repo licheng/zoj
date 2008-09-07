@@ -78,14 +78,14 @@ CREATE TRIGGER submission_insert
 AFTER INSERT ON submission
 FOR EACH ROW BEGIN
 	IF (NEW.judge_reply_id = 5) THEN 
-        CALL update_user_ac(NEW.user_profile_id, NEW.contest_id, NEW.problem_id, NEW.judge_reply_id, NEW.submission_id);    
+        CALL update_user_ac(NEW.user_profile_id, NEW.contest_id, NEW.problem_id, NEW.submission_id);    
     END IF;
 END|
 CREATE TRIGGER submission_update
 AFTER UPDATE ON submission
 FOR EACH ROW BEGIN
     IF (NEW.active != OLD.active OR NEW.judge_reply_id=5 OR OLD.judge_reply_id=5) THEN
-        CALL update_user_ac(NEW.user_profile_id, NEW.contest_id, NEW.problem_id, NEW.judge_reply_id, NEW.submission_id);    
+        CALL update_user_ac(NEW.user_profile_id, NEW.contest_id, NEW.problem_id, NEW.submission_id);    
     END IF;
 END|
 delimiter ;

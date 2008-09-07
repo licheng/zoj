@@ -29,6 +29,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
+import cn.edu.zju.acm.onlinejudge.util.PerformanceManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
 
@@ -87,7 +88,11 @@ public abstract class BaseAction extends Action {
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form, 
     		HttpServletRequest request, HttpServletResponse response) {
+    	UserProfile user = (UserProfile) request.getSession().getAttribute(ContextAdapter.USER_PROFILE_SESSION_KEY);
+    	long actionId = PerformanceManager.getInstance().actionStart(this, request, user);
+    	
         ContextAdapter context = null;
+        ActionForward forward = null;
         try {
             context = new ContextAdapter(request, response);
             info(makeInfo(ENTER_OP, context.getOperator(), null, request));
@@ -104,11 +109,15 @@ public abstract class BaseAction extends Action {
             } 
             */           
 
-            return execute(mapping, form, context);
+            forward = execute(mapping, form, context);
         } catch (Exception e) {  
         	error(e);
-            return handleFailure(mapping, context, GENERIC_ERROR_RESOURCE_KEY);
+        	forward = handleFailure(mapping, context, GENERIC_ERROR_RESOURCE_KEY);
         }
+        
+        PerformanceManager.getInstance().actionEnd(actionId);
+        return forward;
+        
     }
 
     /**

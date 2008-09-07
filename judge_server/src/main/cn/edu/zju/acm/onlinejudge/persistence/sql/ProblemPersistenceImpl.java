@@ -69,9 +69,6 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
 				  						   DatabaseConstants.CONTEST_ACTIVE,
 				  						   DatabaseConstants.PROBLEM_COLOR});
 	
-	
-	
-	
 	/**
 	 * The statement to update a Problem.
 	 */

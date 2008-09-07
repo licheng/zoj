@@ -9,9 +9,7 @@
 
     <form-beans>
         <form-bean name="LoginForm"
-                   type="cn.edu.zju.acm.onlinejudge.form.LoginForm">         
-        </form-bean>
-            
+                   type="cn.edu.zju.acm.onlinejudge.form.LoginForm"/>         
         <form-bean name="ProfileForm"
                    type="cn.edu.zju.acm.onlinejudge.form.ProfileForm"/>
         <form-bean name="ContestForm"
@@ -22,6 +20,8 @@
                    type="cn.edu.zju.acm.onlinejudge.form.ProblemImportForm"/>
         <form-bean name="SubmissionSearchForm"
                    type="cn.edu.zju.acm.onlinejudge.form.SubmissionSearchForm"/>
+        <form-bean name="LogSearchForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.LogSearchForm"/>
         <form-bean name="UserSearchForm"
                    type="cn.edu.zju.acm.onlinejudge.form.UserSearchForm"/>
         <form-bean name="RoleForm"
@@ -138,6 +138,12 @@
         </action>
         
         <!-- Administration -->
+        <action path="/showDashboard" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowDashboardAction"
+            validate="false" name="LogSearchForm" scope="request" input="/show_dashboard.jsp">
+            <forward name="success" path="/show_dashboard.jsp" redirect="false"/>
+            <forward name="failure" path="/show_dashboard.jsp" redirect="false"/>
+        </action>
+        
         <action path="/manageContests" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.CreateContestAction"
                 validate="true" name="ContestForm" scope="request" input="/manage_contests.jsp">
             <forward name="success" path="/contest_message.jsp" redirect="false"/>
