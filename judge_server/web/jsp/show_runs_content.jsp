@@ -27,6 +27,8 @@
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
     boolean canViewSource = (userSecurity != null && userSecurity.canViewSource(contest.getId()));
     String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";
+    SubmissionSearchForm searchForm = (SubmissionSearchForm) request.getAttribute("SubmissionSearchForm");
+    
 %>
         <logic:messagesPresent property="error">
         <div class="internalError">
@@ -36,10 +38,10 @@
         <logic:messagesNotPresent property="error">
         <div id="content_title">
           <div id="export">
-            <span id="searchRunsLink">
+            <span id="searchRunsLink" style="display:<%=searchForm.isSearch() ? "none" : "block"%>">
                 <a href="JavaScript: showSearch(true);">Search</a>
             </span>
-            <span id="hideSearchRunsLink">
+            <span id="hideSearchRunsLink" style="display:<%=searchForm.isSearch() ? "block" : "none"%>">
                 <a href="JavaScript: showSearch(false);">Hide Search Form</a>
             </span>
           </div>
@@ -51,7 +53,7 @@
             <input type="hidden" name="search" value="<bean:write name="SubmissionSearchForm" property="search"/>">
             <input type="hidden" name="firstId" value="-1">
             <input type="hidden" name="lastId" value="-1">
-                <div id="searchRunsParameter">
+                <div id="searchRunsParameter" style="display:<%=searchForm.isSearch() ? "block" : "none"%>">
                     <table id="searchTable" >
                         <tr>
                             <td width="115">Problem Code<br>
@@ -96,7 +98,7 @@
                             </td>
                             <td width="80">Languages<br>
                             <%
-                                SubmissionSearchForm searchForm = (SubmissionSearchForm) request.getAttribute("SubmissionSearchForm");
+                                
                                 List languages = contest.getLanguages();
                                 Set selectedIds = new HashSet();
                                 if (searchForm.getLanguageIds() != null) {
