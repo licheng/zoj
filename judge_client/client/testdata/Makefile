@@ -1,4 +1,4 @@
-CC_SOURCES:=$(filter-out ce.cc,$(wildcard *.cc))
+CC_SOURCES:=$(filter-out ce.cc ce_long_error.cc,$(wildcard *.cc))
 CC_BINARIES:=$(patsubst %.cc,%,$(CC_SOURCES))
 
 .PHONY: all clean

@@ -31,78 +31,73 @@
 #include "trace.h"
 #include "util.h"
 
-class TextFile {
-    public:
-        TextFile(const string& filename) : filename_(filename) {
-            fd_ = open(filename.c_str(), O_RDONLY);
-            if (fd_ < 0) {
-                LOG(SYSCALL_ERROR)<<"Fail to open "<<filename;
-            }
-            buffer_size_ = sizeof(buffer_);
-            ptr_ = buffer_ + buffer_size_;
+TextFile::TextFile(const string& filename) : filename_(filename) {
+    fd_ = open(filename.c_str(), O_RDONLY);
+    if (fd_ < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to open "<<filename;
+    }
+    buffer_size_ = sizeof(buffer_);
+    ptr_ = buffer_ + buffer_size_;
+}
+
+TextFile::~TextFile() {
+    if (fd_ >= 0) {
+        close(fd_);
+    }
+}
+
+int TextFile::Read() {
+    if (fd_ < 0) {
+        return -1;
+    }
+    int ret = Next();
+    if (ret > 0) {
+        ++ptr_;
+    }
+    if (ret != '\r') {
+        return ret;
+    }
+
+    // Treat \r\n as \n
+    int t = Next();
+    if (t == '\n') {
+        ++ptr_;
+    }
+    return '\n';
+}
+
+
+int TextFile::SkipWhiteSpaces() {
+    int ret;
+    do {
+        ret = Read();
+    } while (ret > 0 && isspace(ret) && ret != '\n');
+    return ret;
+}
+
+int TextFile::Fail() {
+    return fd_ < 0;
+}
+
+int TextFile::Next() {
+    if (ptr_ - buffer_ >= buffer_size_) {
+        if (buffer_size_ < sizeof(buffer_)) {
+            // The previous Readn returns less characters than requested, which means EOF is reached.
+            // It is not necessary to invoke it again.
+            return 0;
         }
-
-        ~TextFile() {
-            if (fd_ >= 0) {
-                close(fd_);
-            }
+        buffer_size_ = Readn(fd_, buffer_, sizeof(buffer_));
+        if ((int)buffer_size_ < 0) {
+            LOG(SYSCALL_ERROR)<<"Fail to read from "<<filename_;
+            return -1;
         }
-
-        // Returns the next character in the file. Returns 0 if EOF is reached, -1 if any error occurs.
-        int read() {
-            if (fd_ < 0) {
-                return -1;
-            }
-            if (ptr_ - buffer_ >= buffer_size_) {
-                if (buffer_size_ < sizeof(buffer_)) {
-                    // The previous Readn returns less characters than requested, which means EOF is reached.
-                    // It is not necessary to invoke it again.
-                    return 0;
-                }
-                buffer_size_ = Readn(fd_, buffer_, sizeof(buffer_));
-                if ((int)buffer_size_ < 0) {
-                    LOG(SYSCALL_ERROR)<<"Fail to read from "<<filename_;
-                    return -1;
-                }
-                if (buffer_size_ == 0) {
-                    return 0;
-                }
-                ptr_ = buffer_;
-            }
-            return *ptr_++;
+        if (buffer_size_ == 0) {
+            return 0;
         }
-
-        // Returns the next non-white-space character. Returns 0 if EOF is
-        // reached, -1 if any error occurs.
-        int SkipWhiteSpaces() {
-            int ret;
-            do {
-                ret = read();
-            } while (ret > 0 && isspace(ret));
-            return ret;
-        }
-
-        // Returns true if fail to open the file
-        int fail() {
-            return fd_ < 0;
-        }
-
-    private:
-        // the file descriptor
-        int fd_; 
-
-        // A internal buffer used to store unread characters
-        unsigned char buffer_[1024];
-        
-        // The number of available characters in the buffer
-        size_t buffer_size_;
-
-        // A pointer pointing to the next available character in the buffer
-        unsigned char* ptr_;
-
-        // the filename associated with this instance
-        const string filename_;
-};
+        ptr_ = buffer_;
+    }
+    return *ptr_;
+}
 
 // This function compares two text files and returns
 // 1. ACCEPTED
@@ -110,57 +105,71 @@ class TextFile {
 // 2. PRESENTATION_ERROR
 //    If these two files are the same after normalization.
 //    The file is normalized by
-//      a) Removing all white spaces at the beginning or end of the file.
-//      b) Reducing consecutive white space characters to a single space(0x20).
+//      a) Removing all white spaces at the beginning or ending of lines
+//      b) Removing all blank lines
+//      c) Replacing all consecutive white space characters by a single space(0x20).
 //    See the C library function "isspace" for the definition of white space characters.
 // 3. WRONG_ANSWER
 //    Neither ACCEPTED nor PRESENTATION_ERROR
 int CompareTextFiles(const string& output_filename, const string& program_output_filename) {
     int ret = ACCEPTED;
     TextFile f1(output_filename), f2(program_output_filename);
-    if (f1.fail() || f2.fail()) {
+    if (f1.Fail() || f2.Fail()) {
         return INTERNAL_ERROR;
     }
-    int c1 = f1.read();
-    int c2 = f2.read();
-    while (c1 > 0 && c2 > 0) { // neither EOF is reached
-        if (c1 == c2) {
-            c1 = f1.read();
-            c2 = f2.read();
-        } else if (!isspace(c1) && !isspace(c2)) {
-            return WRONG_ANSWER;
-        } else {
+    for (;;) {
+        // Find the first non-space character at the beginning of line.
+        // Blank lines are skipped.
+        int c1 = f1.Read();
+        int c2 = f2.Read();
+        while (isspace(c1) || isspace(c2)) {
+            if (c1 != c2) {
+                ret = PRESENTATION_ERROR;
+            }
             if (isspace(c1)) {
-                c1 = f1.SkipWhiteSpaces();
+                c1 = f1.Read();
             }
             if (isspace(c2)) {
-                c2 = f2.SkipWhiteSpaces();
+                c2 = f2.Read();
             }
-            while (c1 > 0 && c2 > 0) {
+        }
+        // Compare the current line.
+        for (;;) {
+            // Read until 2 files return a space or 0 together.
+            while (!isspace(c1) && c1 || !isspace(c2) && c2) {
+                if (c1 < 0 || c2 < 0) {
+                    return INTERNAL_ERROR;
+                }
                 if (c1 != c2) {
+                    // Consecutive non-space characters should be all exactly the same
                     return WRONG_ANSWER;
                 }
-                c1 = f1.SkipWhiteSpaces();
-                c2 = f2.SkipWhiteSpaces();
+                c1 = f1.Read();
+                c2 = f2.Read();
             }
-            ret = PRESENTATION_ERROR;
+            // Find the next non-space character or \n.
+            while (isspace(c1) && c1 != '\n' || isspace(c2) && c2 != '\n') {
+                if (c1 != c2) {
+                    ret = PRESENTATION_ERROR;
+                }
+                if (isspace(c1) && c1 != '\n') {
+                    c1 = f1.Read();
+                }
+                if (isspace(c2) && c2 != '\n') {
+                    c2 = f2.Read();
+                }
+            }
+            if (c1 < 0 || c2 < 0) {
+                return INTERNAL_ERROR;
+            }
+            if (!c1 && !c2) {
+                return ret;
+            }
+            if ((c1 == '\n' || !c1) && (c2 == '\n' || !c2)) {
+                break;
+            }
         }
     }
-    if (isspace(c1)) {
-        c1 = f1.SkipWhiteSpaces();
-        ret = PRESENTATION_ERROR;
-    }
-    if (isspace(c2)) {
-        c2 = f2.SkipWhiteSpaces();
-        ret = PRESENTATION_ERROR;
-    }
-    if (c1 < 0 || c2 < 0) {
-        return INTERNAL_ERROR;
-    }
-    if (c1 > 0 || c2 > 0) {
-        return WRONG_ANSWER;
-    }
-    return ret;
 }
 
 int RunSpecialJudgeExe(int uid, string special_judge_filename) {

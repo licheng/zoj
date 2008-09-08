@@ -24,6 +24,44 @@
 
 using namespace std;
 
+class TextFile {
+  public:
+    TextFile(const string& filename);
+    ~TextFile();
+
+    // Returns the next character in the file. Returns 0 if EOF is reached, -1 if any error occurs.
+    int Read();
+
+    // Returns the next non-white-space character. Returns 0 if EOF is
+    // reached, -1 if any error occurs.
+    int SkipWhiteSpaces();
+
+    // Returns true if fail to open the file
+    int Fail();
+
+  private:
+    // Returns the next character in the file, but do not forward the pointer.
+    // Returns 0 if EOF is reached, -1 if any error occurs.
+    int Next();
+
+    // the file descriptor
+    int fd_; 
+
+    // A internal buffer used to store unread characters
+    unsigned char buffer_[1024];
+    
+    // The number of available characters in the buffer
+    size_t buffer_size_;
+
+    // A pointer pointing to the next available character in the buffer
+    unsigned char* ptr_;
+
+    // the filename associated with this instance
+    const string filename_;
+};
+
+int CompareTextFiles(const string& output_filename, const string& program_output_filename);
+
 int DoCheck(int sock, int special_judge_uid, const string& special_judge_filename);
 
 #endif

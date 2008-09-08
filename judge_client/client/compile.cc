@@ -55,7 +55,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
-    static signed char error_message[16384];
+    static signed char error_message[4096];
     int count = Readn(fd_pipe[0], error_message, sizeof(error_message));
     close(fd_pipe[0]);
     if (count < 0) {

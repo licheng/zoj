@@ -39,6 +39,7 @@ class DoCompileTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.cc").c_str(), "ac.cc"));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(), "ce.cc"));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_long_error.cc").c_str(), "ce_long_error.cc"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
     }
@@ -77,6 +78,19 @@ TEST_F(DoCompileTest, Failure) {
     ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
+}
+
+TEST_F(DoCompileTest, TooLongErrorMessage) {
+    ASSERT_EQUAL(1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce_long_error.cc"));
+    shutdown(fd_[1], SHUT_WR);
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(4096, (int)t);
     ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 

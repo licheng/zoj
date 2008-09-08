@@ -27,6 +27,265 @@
 #include "trace.h"
 #include "test_util-inl.h"
 
+class TextFileTest : public TestFixture {
+  protected:
+    virtual void SetUp() {
+        filename_ = tmpnam(NULL);
+        make_file_ = 1;
+    }
+
+    virtual void TearDown() {
+        delete file_;
+        system(("rm -f " + filename_).c_str());
+    }
+
+    void MakeFile(const string& content) {
+        if (make_file_) {
+            int fd = open(filename_.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
+            ASSERT(fd >= 0);
+            Writen(fd, content.c_str(), content.size());
+            close(fd);
+        }
+        file_ = new TextFile(filename_);
+    }
+
+    int make_file_;
+    string filename_;
+    TextFile* file_;
+};
+
+TEST_F(TextFileTest, Read) {
+    MakeFile("abcd");
+    ASSERT_EQUAL((int)'a', file_->Read());
+    ASSERT_EQUAL((int)'b', file_->Read());
+    ASSERT_EQUAL((int)'c', file_->Read());
+}
+
+TEST_F(TextFileTest, ReadFailure) {
+    make_file_ = 0;
+    MakeFile("");
+    ASSERT_EQUAL(-1, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadEOF) {
+    MakeFile("");
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCR) {
+    MakeFile("\ra");
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL((int)'a', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCREOF) {
+    MakeFile("\r");
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCRLF) {
+    MakeFile("\r\n");
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCRCRLF) {
+    MakeFile("\r\r\n");
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCRLFLF) {
+    MakeFile("\r\n\n");
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCROnBufferBorder) {
+    char buf[1025];
+    memset(buf, 'a', sizeof(buf));
+    buf[1023] = '\r';
+    buf[1024] = 0;
+    MakeFile(buf);
+    for (int i = 0; i < 1023; ++i) {
+        ASSERT_EQUAL((int)'a', file_->Read());
+    }
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadCRLFOnBufferBorder) {
+    char buf[1026];
+    memset(buf, 'a', sizeof(buf));
+    buf[1023] = '\r';
+    buf[1024] = '\n';
+    buf[1025] = 0;
+    MakeFile(buf);
+    for (int i = 0; i < 1023; ++i) {
+        ASSERT_EQUAL((int)'a', file_->Read());
+    }
+    ASSERT_EQUAL((int)'\n', file_->Read());
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+TEST_F(TextFileTest, ReadHuge) {
+    char buf[4097];
+    for (int i = 0; i < 4096; ++i) {
+        buf[i] = ' ' + i % 90;
+    }
+    buf[4096] = 0;
+    MakeFile(buf);
+    for (int i = 0; i < 4096; ++i) {
+        ASSERT_EQUAL(' ' + i % 90, file_->Read());
+    }
+    ASSERT_EQUAL(0, file_->Read());
+}
+
+class CompareTextFilesTest : public TestFixture {
+  protected:
+    virtual void SetUp() {
+        filename_[0] = filename_[1] = "";
+        const char* content[] = {"a ab abc\r",
+                                 "  aa  \n",
+                                 "  \r\n",
+                                 "\r\n",
+                                 " aaa   bbb c  \n",
+                                 "a"};
+        for (int i = 0; i < sizeof(content) / sizeof(content[0]); ++i) {
+            lines_[0].push_back(content[i]);
+        }
+        lines_[1] = lines_[0];
+    }
+
+    virtual void TearDown() {
+        system(("rm -f " + filename_[0] + " " + filename_[1]).c_str());
+    }
+
+    int Run() {
+        if (filename_[0].empty()) {
+            filename_[0] = MakeFile(lines_[0]);
+        }
+        if (filename_[1].empty()) {
+            filename_[1] = MakeFile(lines_[1]);
+        }
+        return CompareTextFiles(filename_[0], filename_[1]);
+    }
+
+    string MakeFile(const vector<string>& lines) {
+        string filename = tmpnam(NULL);
+        int fd = open(filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
+        ASSERT(fd >= 0);
+        string content;
+        for (int i = 0; i < lines.size(); ++i) {
+            content += lines[i];
+        }
+        Writen(fd, content.c_str(), content.size());
+        close(fd);
+        return filename;
+    }
+
+    string filename_[2];
+    vector<string> lines_[2];
+};
+
+TEST_F(CompareTextFilesTest, InvalidFilename1) {
+    filename_[0] = filename_[1] = "/invalid";
+    ASSERT_EQUAL(INTERNAL_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, InvalidFilename2) {
+    filename_[0] = "/invalid";
+    ASSERT_EQUAL(INTERNAL_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, InvalidFilename3) {
+    filename_[1] = "invalid";
+    ASSERT_EQUAL(INTERNAL_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, Accepted) {
+    ASSERT_EQUAL(ACCEPTED, Run());
+}
+
+TEST_F(CompareTextFilesTest, AcceptedIgnoreEndingNewLine) {
+    lines_[1].back() += '\n';
+    ASSERT_EQUAL(ACCEPTED, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerMissingLine) {
+    lines_[1].erase(lines_[1].begin() + 1);
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerExtraLine) {
+    lines_[1].insert(lines_[1].begin() + 3, "a\n");
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerExtraLineAtTheEnd) {
+    lines_[1].push_back("\na");
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerExtraField) {
+    lines_[1][1] = "  aa b  \n";
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerLongerField) {
+    lines_[1][1] = "  aab  \n";
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerShorterField) {
+    lines_[1][1] = "  a  \n";
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, WrongAnswerLineSplit) {
+    lines_[1][0] = "a ab \n";
+    lines_[1].insert(lines_[1].begin() + 1, "abc\r");
+    ASSERT_EQUAL(WRONG_ANSWER, Run());
+}
+
+TEST_F(CompareTextFilesTest, PresentationErrorExtraBlankLine) {
+    lines_[1].insert(lines_[1].begin() + 3, " \t  \n");
+    ASSERT_EQUAL(PRESENTATION_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, PresentationErrorExtraBlankLineAtTheEnd) {
+    lines_[1].push_back("\n\n\n");
+    ASSERT_EQUAL(PRESENTATION_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, PresentationErrorMissingBlankLine) {
+    lines_[1].erase(lines_[1].begin() + 3);
+    ASSERT_EQUAL(PRESENTATION_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, PresentationErrorExtraSpace) {
+    lines_[1].back() += " ";
+    ASSERT_EQUAL(PRESENTATION_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, PresentationErrorMissingSpace) {
+    lines_[1][4] = " aaa  bbb c  \n";
+    ASSERT_EQUAL(PRESENTATION_ERROR, Run());
+}
+
+TEST_F(CompareTextFilesTest, PresentationErrorNormalized) {
+    lines_[1].clear();
+    lines_[1].push_back("a ab abc\n");
+    lines_[1].push_back("aa\n");
+    lines_[1].push_back("aaa bbb c\n");
+    lines_[1].push_back("a\n");
+    ASSERT_EQUAL(PRESENTATION_ERROR, Run());
+}
+
 class DoCheckTest: public TestFixture {
   protected:
     virtual void SetUp() {
