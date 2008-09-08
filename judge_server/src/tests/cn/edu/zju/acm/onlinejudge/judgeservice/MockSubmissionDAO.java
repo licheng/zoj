@@ -18,12 +18,12 @@ public class MockSubmissionDAO extends MockDAO implements SubmissionDAO {
         return cloneSubmission(submissionMap.get(id));
     }
 
-    public void save(Submission submission) throws PersistenceException {
+    public void save(Submission submission, long contestId) throws PersistenceException {
         submission.setId(id.getAndIncrement());
-        update(submission);
+        update(submission, contestId);
     }
 
-    public void update(Submission submission) throws PersistenceException {
+    public void update(Submission submission, long contestId) throws PersistenceException {
         submissionMap.put(submission.getId(), cloneSubmission(submission));
     }
 

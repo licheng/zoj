@@ -400,6 +400,35 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }   
     }
     
+
+    @Override
+    public String getSubmissionSource(long id) throws PersistenceException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+                   
+        try {
+            conn = Database.createConnection();
+            ps = conn.prepareStatement("SELECT content FROM submission WHERE submission_id=?");   
+            ps.setLong(1, id);
+            rs = ps.executeQuery();
+                        
+            if (!rs.next()) {
+                throw new PersistenceException("Submission id " + id + " not found");
+            }
+            String content = rs.getString("content");
+            if (content == null) {
+                return "";
+            } else {
+                return content;
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the submission with id " + id, e);
+        } finally {
+            Database.dispose(conn, ps, rs);
+        }
+    }
+    
     /**
      * Populates an ExtendedSubmission with given ResultSet.
      * 
@@ -1302,8 +1331,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         } finally {
             Database.dispose(conn, ps, rs);
         }
-	}
-  
+	} 
 }
 
 

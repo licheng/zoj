@@ -76,7 +76,15 @@ public class PersistenceManager {
 	/**
 	 * PersistenceManager.
 	 */
-	private static PersistenceManager instance = null; 
+	private static PersistenceManager instance; 
+	
+	static {
+	    try {
+            instance = new PersistenceManager();
+        } catch (PersistenceCreationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+	}
 	
     /**
      * <p>Constructor of SQLPersistenceLocator class.</p>
@@ -100,14 +108,7 @@ public class PersistenceManager {
      * @return the singleton instance.
      * @throws PersistenceCreationException if any exceptions occurs while creating the persistence
      */
-    public static PersistenceManager getInstance() throws PersistenceCreationException {
-    	if (instance == null) {
-    		synchronized (PersistenceManager.class) {
-    			if (instance == null) {
-    				instance = new PersistenceManager();
-    			}
-    		}
-    	}
+    public static PersistenceManager getInstance() {
     	return instance;
     }
     

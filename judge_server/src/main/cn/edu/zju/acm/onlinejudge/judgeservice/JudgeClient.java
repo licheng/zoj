@@ -1,20 +1,16 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
- *
+ * 
  * This file is part of ZOJ.
- *
- * ZOJ is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * ZOJ is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
 package cn.edu.zju.acm.onlinejudge.judgeservice;
@@ -25,6 +21,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
@@ -48,11 +45,7 @@ public class JudgeClient extends Thread {
 
     private List<JudgeClientJudgeThread> judgeThreads = new ArrayList<JudgeClientJudgeThread>();
 
-    private JudgeClientErrorHandlingStrategy errorHandlingStrategy = new JudgeClientErrorHandlingStrategy(this);
-
     private Logger logger = Logger.getLogger(JudgeClient.class);
-
-
 
     private int defaultNumberOfJudgeThreads;
 
@@ -178,7 +171,7 @@ public class JudgeClient extends Thread {
     public List<Language> getSupportedLanguages() {
         return this.supportedLanguages;
     }
-    
+
     public JudgeService getService() {
         return this.service;
     }
@@ -187,12 +180,8 @@ public class JudgeClient extends Thread {
         return this.submissionFilter;
     }
 
-    void setSubmissionFilter(SubmissionFilter submissionFilter) {       
+    void setSubmissionFilter(SubmissionFilter submissionFilter) {
         this.submissionFilter = submissionFilter;
-    }
-
-    public JudgeClientErrorHandlingStrategy getErrorHandlingStrategy() {
-        return this.errorHandlingStrategy;
     }
 
     public JudgeClientJudgeThread addJudgeThread() {

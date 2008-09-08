@@ -1,20 +1,16 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
- *
+ * 
  * This file is part of ZOJ.
- *
- * ZOJ is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * ZOJ is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -116,7 +112,9 @@ class SubmissionQueue {
             }
         }
 
-        public synchronized Submission poll() throws InterruptedException, PersistenceException {
+        @Override
+        public synchronized Submission poll(JudgeClientJudgeThread judgeThread) throws InterruptedException,
+                PersistenceException {
             for (;;) {
                 while (this.head.next != null) {
                     if (!this.head.claimed) {
@@ -141,8 +139,8 @@ class SubmissionQueue {
                 for (int i = this.candidatesLists.size() - 1; i >= 0; --i) {
                     LinkedList<Candidate> candidatesList = this.candidatesLists.get(i);
                     while (candidatesList.size() > 0) {
-                        --this.size;
                         Candidate candidate = candidatesList.removeFirst();
+                        --this.size;
                         if (candidate.tryClaim()) {
                             return candidate.getSubmission();
                         }
@@ -151,6 +149,7 @@ class SubmissionQueue {
             }
         }
 
+        @Override
         public void close() {
             synchronized (SubmissionQueue.this.readerMap) {
                 if (--this.referenceCount == 0) {

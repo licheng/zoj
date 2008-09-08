@@ -1,20 +1,16 @@
 /*
  * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
- *
+ * 
  * This file is part of ZOJ.
- *
- * ZOJ is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * ZOJ is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
 package cn.edu.zju.acm.onlinejudge.judgeservice;
@@ -44,6 +40,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
 import cn.edu.zju.acm.onlinejudge.dao.DAOFactory;
 import cn.edu.zju.acm.onlinejudge.dao.ProblemDAO;
+import cn.edu.zju.acm.onlinejudge.dao.ReferenceDAO;
 import cn.edu.zju.acm.onlinejudge.dao.SubmissionDAO;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.CompoundSubmissionFilter;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.SimpleSubmissionFilter;
@@ -62,6 +59,8 @@ public class JudgeClientJudgeThread extends Thread {
     private DataInputStream in;
 
     private DataOutputStream out;
+
+    private ReferenceDAO referenceDAO = DAOFactory.getReferenceDAO();
 
     private ProblemDAO problemDAO = DAOFactory.getProblemDAO();
 
@@ -103,6 +102,10 @@ public class JudgeClientJudgeThread extends Thread {
         return this.submission;
     }
 
+    public JudgeClient getClient() {
+        return this.client;
+    }
+
     public SubmissionFilter getSubmissionFilter() {
         return this.submissionFilter;
     }
@@ -128,31 +131,32 @@ public class JudgeClientJudgeThread extends Thread {
 
     @Override
     public void run() {
-        while (!this.isInterrupted()) {
-            try {
-                this.process();
-            } catch (Exception e) {
-                this.status = Status.ERROR;
-                this.error = e;
-                if (this.submission != null) {
-                    this.client.getService().judge(this.submission, Priority.HIGH);
-                }
+        try {
+            while (!this.isInterrupted()) {
                 try {
-                    if (this.client.getErrorHandlingStrategy().onJudgeError(this, e) == JudgeClientErrorHandlingStrategy.Action.STOP) {
+                    this.process();
+                } catch (IOException e) {
+                    this.status = Status.ERROR;
+                    this.error = e;
+                    this.client.getService().judge(submission, Priority.HIGH);
+                    this.resetQueue();
+                    if (!this.client.ping()) {
                         break;
                     }
-                } catch (InterruptedException e1) {
+                } catch (InterruptedException e) {
+                    throw e;
+                } catch (Exception e) {
+                    this.logger.error(e);
                 }
-            } catch (Error e) {
-                this.resetQueue();
-                throw e;
             }
+        } catch (InterruptedException e) {
+        } finally {
+            this.resetQueue();
         }
         this.status = Status.STOPEED;
     }
 
-    private void process() throws IOException, InterruptedException, JudgeClientErrorException,
-            JudgeServerErrorException {
+    private void process() throws IOException, InterruptedException {
         this.status = Status.CONNECTING;
         this.socket = new Socket();
         this.socket.setKeepAlive(true);
@@ -177,27 +181,33 @@ public class JudgeClientJudgeThread extends Thread {
                         this.submissionQueueReader =
                                 this.client.getService().getSubmissionQueue().getReader(submissionFilter);
                     }
-                    this.submission = this.submissionQueueReader.poll();
+                    // IMPORTANT: set to null here to avoid rejudging this one when queue.poll throws a
+                    // PersistenceException
+                    this.submission = null;
+                    this.submission = this.submissionQueueReader.poll(this);
                     this.client.getService().judgeStart(submission);
                     this.status = Status.RUNNING;
                     try {
                         this.judge(this.submission);
-                    } catch (ProblemDataErrorException e) {
-                        logger.error(e);
+                    } catch (JudgeServerErrorException e) {
+                        this.logger.error(e);
+                        this.submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
+                    } catch (JudgeClientErrorException e) {
+                        this.logger.error(e);
+                        this.submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
+                    } catch (PersistenceException e) {
+                        this.logger.error(e);
                         this.submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
                     }
                     this.commitSubmission();
                     this.submission.setContent(null);
-                    // IMPORTANT: set to null here to avoid rejudging this one when queue.poll throws a
-                    // PersistenceException
-                    this.submission = null;
-                    this.client.getErrorHandlingStrategy().onJudgeSuccess();
                 } catch (PersistenceException e) {
-                    throw new JudgeServerErrorException(e);
+                    this.client.getService().judge(this.submission, Priority.HIGH);
+                    this.resetQueue();
+                    Thread.sleep(60000);
                 } finally {
                     this.client.getService().judgeDone(submission);
                 }
-
             }
         } finally {
             Utility.closeSocket(this.socket);
@@ -226,9 +236,9 @@ public class JudgeClientJudgeThread extends Thread {
         }
         String content = submission.getContent();
         if (content == null) {
+            content = this.submissionDAO.getSubmissionSource(submission.getId());
         }
         reply = this.sendCompileCommand(submission.getId(), submission.getLanguage(), content);
-
         if (reply != JudgeReply.COMPILING.getId()) {
             throw new JudgeClientErrorException();
         }
@@ -293,7 +303,8 @@ public class JudgeClientJudgeThread extends Thread {
     }
 
     private int sendJudgeCommand(long problemId, int problemRevision, long submissionId) throws IOException {
-        logger.info("Judge prob:" + problemId + " rev:" + problemRevision + " sub:" + submissionId);
+        logger.info(this.address + " Judge problem:" + problemId + " revision:" + problemRevision + " submission:" +
+                submissionId);
         this.sendCommand(JudgeClientCommandsFactory.createJudgeCommand(problemId, problemRevision, submissionId));
         return this.readJudgeReply();
 
@@ -306,9 +317,9 @@ public class JudgeClientJudgeThread extends Thread {
             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(outputFile));
             try {
                 List<Reference> inputFiles =
-                        DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(), ReferenceType.INPUT);
+                        this.referenceDAO.getProblemReferences(problem.getId(), ReferenceType.INPUT);
                 List<Reference> outputFiles =
-                        DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(), ReferenceType.OUTPUT);
+                        this.referenceDAO.getProblemReferences(problem.getId(), ReferenceType.OUTPUT);
                 if (inputFiles.size() != outputFiles.size() && inputFiles.size() > 0 && outputFiles.size() > 0) {
                     throw new ProblemDataErrorException("Unequal number of inputs and outputs for problem " +
                             problem.getId());
@@ -328,8 +339,7 @@ public class JudgeClientJudgeThread extends Thread {
                 Reference specialJudge = null;
                 if (problem.isChecker()) {
                     List<Reference> specialJudges =
-                            DAOFactory.getReferenceDAO().getProblemReferences(problem.getId(),
-                                    ReferenceType.CHECKER_SOURCE);
+                            this.referenceDAO.getProblemReferences(problem.getId(), ReferenceType.CHECKER_SOURCE);
                     if (specialJudges.size() == 0) {
                         throw new ProblemDataErrorException("Can not find special judge for problem " + problem.getId());
                     }

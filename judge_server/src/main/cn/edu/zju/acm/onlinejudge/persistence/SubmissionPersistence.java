@@ -135,6 +135,8 @@ public interface SubmissionPersistence {
     
     void changeQQStatus(long pid, long uid, String status) throws PersistenceException;
     List searchQQs(long contestId) throws PersistenceException;
+
+    String getSubmissionSource(long id) throws PersistenceException;
 }
 
 

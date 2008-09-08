@@ -6,6 +6,8 @@ import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 public interface SubmissionDAO extends GenericDAO {
 
     Submission getSubmission(long id) throws PersistenceException;
+    
+    String getSubmissionSource(long id) throws PersistenceException;
 
     void save(Submission submission, long contestId) throws PersistenceException;
 
