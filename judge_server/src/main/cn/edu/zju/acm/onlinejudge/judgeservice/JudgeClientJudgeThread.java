@@ -38,16 +38,16 @@ import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
-import cn.edu.zju.acm.onlinejudge.dao.DAOFactory;
-import cn.edu.zju.acm.onlinejudge.dao.ProblemDAO;
-import cn.edu.zju.acm.onlinejudge.dao.ReferenceDAO;
-import cn.edu.zju.acm.onlinejudge.dao.SubmissionDAO;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.CompoundSubmissionFilter;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.SimpleSubmissionFilter;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissionfilter.SubmissionFilter;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissiontest.LanguageTest;
 import cn.edu.zju.acm.onlinejudge.judgeservice.submissiontest.NegationTest;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
+import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
+import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
 // TODO: add limit checks here
@@ -60,11 +60,11 @@ public class JudgeClientJudgeThread extends Thread {
 
     private DataOutputStream out;
 
-    private ReferenceDAO referenceDAO = DAOFactory.getReferenceDAO();
+    private ReferencePersistence referenceDAO = PersistenceManager.getInstance().getReferencePersistence();
 
-    private ProblemDAO problemDAO = DAOFactory.getProblemDAO();
+    private ProblemPersistence problemDAO = PersistenceManager.getInstance().getProblemPersistence();
 
-    private SubmissionDAO submissionDAO = DAOFactory.getSubmissionDAO();
+    private SubmissionPersistence submissionDAO = PersistenceManager.getInstance().getSubmissionPersistence();
 
     private Socket socket;
 
@@ -199,7 +199,7 @@ public class JudgeClientJudgeThread extends Thread {
                         this.logger.error(e);
                         this.submission.setJudgeReply(JudgeReply.JUDGE_INTERNAL_ERROR);
                     }
-                    this.commitSubmission();
+                    this.submissionDAO.updateSubmission(this.submission, 1);
                     this.submission.setContent(null);
                 } catch (PersistenceException e) {
                     this.client.getService().judge(this.submission, Priority.HIGH);
@@ -213,12 +213,6 @@ public class JudgeClientJudgeThread extends Thread {
             Utility.closeSocket(this.socket);
 
         }
-    }
-
-    private void commitSubmission() throws PersistenceException {
-        submissionDAO.beginTransaction();
-        submissionDAO.update(this.submission, problemDAO.getProblem(this.submission.getProblemId()).getContestId());
-        submissionDAO.commitTransaction();
     }
 
     private void judge(Submission submission) throws JudgeServerErrorException, IOException, PersistenceException,
