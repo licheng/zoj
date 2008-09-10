@@ -4,7 +4,7 @@
  * This file is part of ZOJ.
  * 
  * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
  * 
  * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -114,19 +114,11 @@ public class JudgeClientJudgeThread extends Thread {
         this.submissionFilter = submissionFilter;
     }
 
-    public synchronized void resetQueue() {
-        if (this.submissionQueueReader != null) {
-            this.submissionQueueReader.close();
-        }
-        this.submissionQueueReader = null;
-    }
-
     @Override
     public void interrupt() {
         this.logger.info("interrrupted");
         super.interrupt();
         Utility.closeSocket(this.socket);
-        this.resetQueue();
     }
 
     @Override
@@ -139,7 +131,6 @@ public class JudgeClientJudgeThread extends Thread {
                     this.status = Status.ERROR;
                     this.error = e;
                     this.client.getService().judge(submission, Priority.HIGH);
-                    this.resetQueue();
                     if (!this.client.ping()) {
                         break;
                     }
@@ -151,7 +142,7 @@ public class JudgeClientJudgeThread extends Thread {
             }
         } catch (InterruptedException e) {
         } finally {
-            this.resetQueue();
+            this.submissionQueueReader = null;
         }
         this.status = Status.STOPEED;
     }
@@ -203,7 +194,6 @@ public class JudgeClientJudgeThread extends Thread {
                     this.submission.setContent(null);
                 } catch (PersistenceException e) {
                     this.client.getService().judge(this.submission, Priority.HIGH);
-                    this.resetQueue();
                     Thread.sleep(60000);
                 } finally {
                     this.client.getService().judgeDone(submission);

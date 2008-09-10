@@ -4,7 +4,7 @@
  * This file is part of ZOJ.
  * 
  * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
  * 
  * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -18,6 +18,9 @@
  */
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -31,13 +34,14 @@ import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 class SubmissionQueue {
     private Candidate head = new Candidate();
     private Candidate tail = head;
-    private Map<SubmissionFilter, SubmissionQueueReaderImpl> readerMap =
-            new HashMap<SubmissionFilter, SubmissionQueueReaderImpl>();
+    private Map<SubmissionFilter, WeakReference<SubmissionQueueReaderImpl>> readerMap =
+            new HashMap<SubmissionFilter, WeakReference<SubmissionQueueReaderImpl>>();
+    private ReferenceQueue<SubmissionQueueReaderImpl> readerReferenceQueue =
+            new ReferenceQueue<SubmissionQueueReaderImpl>();
 
     public synchronized void push(Submission submission, int priority) {
         Candidate candidate = new Candidate();
         candidate.prev = this.tail;
-        this.tail.submissionId = submission.getId();
         this.tail.submission = submission;
         this.tail.priority = priority;
         this.tail.next = candidate;
@@ -47,39 +51,58 @@ class SubmissionQueue {
 
     public SubmissionQueueReader getReader(SubmissionFilter submissionFilter) {
         synchronized (this.readerMap) {
-            SubmissionQueueReaderImpl reader = this.readerMap.get(submissionFilter);
+            this.clearReferences();
+            WeakReference<SubmissionQueueReaderImpl> readerReference = this.readerMap.get(submissionFilter);
+            SubmissionQueueReaderImpl reader = null;
+            if (readerReference != null) {
+                reader = readerReference.get();
+            }
             if (reader == null) {
                 reader = this.new SubmissionQueueReaderImpl(submissionFilter);
-                this.readerMap.put(submissionFilter, reader);
+                readerReference =
+                        new SubmissionQueue.ReaderReference(reader, this.readerReferenceQueue, submissionFilter);
+                this.readerMap.put(submissionFilter, readerReference);
             }
-            ++reader.referenceCount;
             return reader;
+        }
+    }
+
+    private void clearReferences() {
+        for (;;) {
+            ReaderReference readerReference = (ReaderReference) this.readerReferenceQueue.poll();
+            if (readerReference == null) {
+                break;
+            }
+            this.readerMap.remove(readerReference.submissionFilter);
+        }
+    }
+
+    private static class ReaderReference extends WeakReference<SubmissionQueueReaderImpl> {
+        SubmissionFilter submissionFilter;
+
+        public ReaderReference(SubmissionQueueReaderImpl referent,
+                ReferenceQueue<? super SubmissionQueueReaderImpl> queue, SubmissionFilter submissionFilter) {
+            super(referent, queue);
+            this.submissionFilter = submissionFilter;
         }
     }
 
     private class Candidate {
         Candidate prev = null;
         Candidate next = null;
-        long submissionId = -1;
-
         Submission submission = null;
-
-        boolean claimed = false;
         int priority;
 
-        public synchronized Submission getSubmission() throws PersistenceException {
-            return this.submission;
-        }
-
-        public boolean tryClaim() {
-            if (this.claimed) {
-                return false;
+        public Submission tryClaim() {
+            if (this.submission == null) {
+                return null;
             }
+            Submission ret = this.submission;
             synchronized (this) {
-                if (this.claimed) {
-                    return false;
+                if (this.submission == null) {
+                    return null;
                 }
-                this.claimed = true;
+                this.submission = null;
             }
             synchronized (SubmissionQueue.this) {
                 if (this.prev != null) {
@@ -94,7 +117,7 @@ class SubmissionQueue {
                 // multi-threaded queue readers.
                 this.prev = null;
             }
-            return true;
+            return ret;
         }
     }
 
@@ -117,17 +140,13 @@ class SubmissionQueue {
                 PersistenceException {
             for (;;) {
                 while (this.head.next != null) {
-                    if (!this.head.claimed) {
-                        this.add(this.head);
-                    }
+                    this.add(this.head);
                     this.head = this.head.next;
                 }
                 if (this.size == 0) {
                     synchronized (SubmissionQueue.this) {
                         while (this.head.next != null) {
-                            if (!this.head.claimed) {
-                                this.add(this.head);
-                            }
+                            this.add(this.head);
                             this.head = this.head.next;
                         }
                         if (this.size == 0) {
@@ -141,25 +160,20 @@ class SubmissionQueue {
                     while (candidatesList.size() > 0) {
                         Candidate candidate = candidatesList.removeFirst();
                         --this.size;
-                        if (candidate.tryClaim()) {
-                            return candidate.getSubmission();
+                        Submission ret = candidate.tryClaim();
+                        if (ret != null) {
+                            return ret;
                         }
                     }
                 }
             }
         }
 
-        @Override
-        public void close() {
-            synchronized (SubmissionQueue.this.readerMap) {
-                if (--this.referenceCount == 0) {
-                    SubmissionQueue.this.readerMap.remove(this.submissionFilter);
-                }
-            }
-        }
-
         private void add(Candidate candidate) throws PersistenceException {
-            Submission submission = candidate.getSubmission();
+            Submission submission = candidate.submission;
+            if (submission == null) {
+                return;
+            }
             int priority = candidate.priority;
             priority += this.submissionFilter.filter(submission, priority);
             priority -= Priority.MIN;

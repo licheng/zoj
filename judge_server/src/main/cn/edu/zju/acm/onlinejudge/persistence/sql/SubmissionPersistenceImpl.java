@@ -970,7 +970,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setString(2, judgeReply.getName());
             ps.setString(3, judgeReply.getDescription());
             ps.setString(4, judgeReply.getStyle());
-            ps.setBoolean(5, judgeReply.isCommitted());
+            ps.setBoolean(5, judgeReply.isCommittedReply());
             
             ps.setLong(6, user);
             ps.setTimestamp(7, new Timestamp(new Date().getTime()));
@@ -1007,7 +1007,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setString(1, judgeReply.getName());
             ps.setString(2, judgeReply.getDescription());
             ps.setString(3, judgeReply.getStyle());
-            ps.setBoolean(4, judgeReply.isCommitted());            
+            ps.setBoolean(4, judgeReply.isCommittedReply());            
             ps.setLong(5, user);
             ps.setTimestamp(6, new Timestamp(new Date().getTime()));
             ps.setLong(7, judgeReply.getId());

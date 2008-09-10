@@ -24,46 +24,46 @@ public class JudgeReply {
 
     public final static JudgeReply RUNNING = new JudgeReply(2, "Running", "Running", null, false);
 
-    public final static JudgeReply RUNTIME_ERROR = new JudgeReply(3, "Runtime Error", "Runtime Error", null, false);
+    public final static JudgeReply RUNTIME_ERROR = new JudgeReply(3, "Runtime Error", "Runtime Error", null, true);
 
-    public final static JudgeReply WRONG_ANSWER = new JudgeReply(4, "Wrong Answer", "Wrong Answer", null, false);
+    public final static JudgeReply WRONG_ANSWER = new JudgeReply(4, "Wrong Answer", "Wrong Answer", null, true);
 
-    public final static JudgeReply ACCEPTED = new JudgeReply(5, "Accepted", "Accepted", null, false);
+    public final static JudgeReply ACCEPTED = new JudgeReply(5, "Accepted", "Accepted", null, true);
 
     public final static JudgeReply TIME_LIMIT_EXCEEDED = new JudgeReply(6, "Time Limit Exceeded",
-            "Time Limit Exceeded", null, false);
+            "Time Limit Exceeded", null, true);
 
     public final static JudgeReply MEMORY_LIMIT_EXCEEDED = new JudgeReply(7, "Memory Limit Exceeded",
-            "Memory Limit Exceeded", null, false);
+            "Memory Limit Exceeded", null, true);
 
     public final static JudgeReply OUT_OF_CONTEST_TIME = new JudgeReply(8, "Out of Contest Time",
-            "Out of Contest Time", null, false);
+            "Out of Contest Time", null, true);
 
     public final static JudgeReply RESTRICTED_FUNCTION = new JudgeReply(9, "Restricted Function",
-            "Restricted Function", null, false);
+            "Restricted Function", null, true);
 
     public final static JudgeReply OUTPUT_LIMIT_EXCEEDED = new JudgeReply(10, "Output Limit Exceeded",
-            "Output Limit Exceeded", null, false);
+            "Output Limit Exceeded", null, true);
 
     public final static JudgeReply COMPILATION_ERROR = new JudgeReply(12, "Compilation Error", "Compilation Error",
-            null, false);
+            null, true);
 
     public final static JudgeReply PRESENTATION_ERROR = new JudgeReply(13, "Presentation Error", "Presentation Error",
-            null, false);
+            null, true);
 
     public final static JudgeReply JUDGE_INTERNAL_ERROR = new JudgeReply(14, "Judge Internal Error",
-            "Judge Internal Error", null, false);
+            "Judge Internal Error", null, true);
 
     public final static JudgeReply FLOATING_POINT_ERROR = new JudgeReply(15, "Floating Point Error",
-            "Floating Point Error", null, false);
+            "Floating Point Error", null, true);
 
     public final static JudgeReply SEGMENTATION_FAULT = new JudgeReply(16, "Segmentation Fault", "Segmentation Fault",
-            null, false);
+            null, true);
 
     public final static JudgeReply JUDGING = new JudgeReply(19, "Judging", "Judging", null, false);
 
     public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED = new JudgeReply(20, "Submission Limit Exceeded",
-            "Submission Limit Exceeded", null, false);
+            "Submission Limit Exceeded", null, true);
     public final static JudgeReply READY = new JudgeReply(100, "Ready", "Ready", null, false);
     public final static JudgeReply NO_SUCH_PROBLEM = new JudgeReply(101, "No Such Problem",
             "No Such Problem", null, false);
@@ -95,7 +95,7 @@ public class JudgeReply {
      * Represents whether it is committed.
      * </p>
      */
-    private boolean committed;
+    private boolean committedReply;
 
     /**
      * <p>
@@ -138,7 +138,7 @@ public class JudgeReply {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.committed = committed;
+        this.committedReply = committed;
         this.style = style;
         replies.add(this);
     }
@@ -183,8 +183,8 @@ public class JudgeReply {
      * 
      * @return true if the JudgeReply is committed.
      */
-    public boolean isCommitted() {
-        return this.committed;
+    public boolean isCommittedReply() {
+        return this.committedReply;
     }
 
     /**
