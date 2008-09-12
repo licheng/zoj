@@ -29,45 +29,49 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ChangeQQStatusAction extends BaseAction {
-    
-    
+
     /**
      * ShowQQAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
-        ActionForward forward = checkProblemAdminPermission(mapping, context, false);
+
+        ActionForward forward = this.checkProblemAdminPermission(mapping, context, false);
         if (forward != null) {
             return forward;
         }
-        
+
         if (forward != null) {
             return forward;
         }
         AbstractContest contest = context.getContest();
         long uid = Utility.parseLong(context.getRequest().getParameter("userProfileId"));
         long pid = Utility.parseLong(context.getRequest().getParameter("problemId"));
-        
+
         String status = context.getRequest().getParameter("status");
         if (pid != -1 && uid != -1) {
             PersistenceManager.getInstance().getSubmissionPersistence().changeQQStatus(pid, uid, status);
         }
-        return handleSuccess(mapping, context, "success", "?contestId=" + contest.getId());
-                                  	    	  
-    }         
+        return this.handleSuccess(mapping, context, "success", "?contestId=" + contest.getId());
+
+    }
 
 }
-    

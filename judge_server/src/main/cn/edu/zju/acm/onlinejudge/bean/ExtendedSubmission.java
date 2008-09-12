@@ -16,13 +16,14 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>ExtendedSubmission bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * ExtendedSubmission bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class ExtendedSubmission extends Submission {
 
-    
 }

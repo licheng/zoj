@@ -31,12 +31,11 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowRolesAction extends BaseAction {
-    
-	
+
     /**
      * <p>
      * Default constructor.
@@ -48,32 +47,36 @@ public class ShowRolesAction extends BaseAction {
 
     /**
      * ShowRolesAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
-        ActionForward forward = checkAdmin(mapping, context);
+
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
-        AuthorizationPersistence authorizationPersistence 
-            = PersistenceManager.getInstance().getAuthorizationPersistence();
+
+        AuthorizationPersistence authorizationPersistence =
+                PersistenceManager.getInstance().getAuthorizationPersistence();
         List<RoleSecurity> roles = authorizationPersistence.getAllRoles();
         context.setAttribute("Roles", roles);
-        
-                        
-        return handleSuccess(mapping, context, "success");
-                  	    	   
-    }         
+
+        return this.handleSuccess(mapping, context, "success");
+
+    }
 
 }
-    

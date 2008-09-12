@@ -40,50 +40,55 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ExportProblemsAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ExportProblemsAction() {
-        // empty
+    // empty
     }
 
     /**
      * ExportProblemsAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
+
         // check contest
         boolean isProblemset = context.getRequest().getRequestURI().endsWith("exportProblems.do");
-        
-        ActionForward forward = checkContestAdminPermission(mapping, context, isProblemset, false);
+
+        ActionForward forward = this.checkContestAdminPermission(mapping, context, isProblemset, false);
         if (forward != null) {
-            return  forward;
-        }                             
-        
-        AbstractContest contest = context.getContest();                
+            return forward;
+        }
+
+        AbstractContest contest = context.getContest();
         List<Problem> problems = ContestManager.getInstance().getContestProblems(contest.getId());
 
-        
         HttpServletResponse response = context.getResponse();
-        response.setContentType("application/zip");        
-        response.setHeader("Content-disposition", 
-                    "attachment; filename=" + convertFilename(contest.getTitle()) + ".zip");
+        response.setContentType("application/zip");
+        response.setHeader("Content-disposition", "attachment; filename=" + this.convertFilename(contest.getTitle()) +
+            ".zip");
 
         ZipOutputStream out = null;
         StringBuilder sb = new StringBuilder();
@@ -91,13 +96,13 @@ public class ExportProblemsAction extends BaseAction {
             out = new ZipOutputStream(response.getOutputStream());
             for (Object obj : problems) {
                 Problem p = (Problem) obj;
-                zipReference(p, "text", ReferenceType.DESCRIPTION, out); 
-                zipReference(p, "input", ReferenceType.INPUT, out);
-                zipReference(p, "output", ReferenceType.OUTPUT, out);
-                zipReference(p, "solution", ReferenceType.JUDGE_SOLUTION, out);
-                zipReference(p, "checker", ReferenceType.CHECKER, out);
-                zipReference(p, "checker", ReferenceType.CHECKER_SOURCE, out);
-                
+                this.zipReference(p, "text", ReferenceType.DESCRIPTION, out);
+                this.zipReference(p, "input", ReferenceType.INPUT, out);
+                this.zipReference(p, "output", ReferenceType.OUTPUT, out);
+                this.zipReference(p, "solution", ReferenceType.JUDGE_SOLUTION, out);
+                this.zipReference(p, "checker", ReferenceType.CHECKER, out);
+                this.zipReference(p, "checker", ReferenceType.CHECKER_SOURCE, out);
+
                 sb.append(p.getCode()).append(",");
                 sb.append(p.getTitle()).append(",");
                 sb.append(p.isChecker()).append(",");
@@ -107,48 +112,47 @@ public class ExportProblemsAction extends BaseAction {
                 sb.append(p.getLimit().getSubmissionLimit()).append(",");
                 sb.append(p.getAuthor()).append(",");
                 sb.append(p.getSource()).append(",");
-                sb.append(p.getContest()).append("\n");                                   
+                sb.append(p.getContest()).append("\n");
             }
             out.putNextEntry(new ZipEntry("problems.csv"));
             out.write(sb.toString().getBytes());
-            
-        } catch (IOException e) {            
+
+        } catch (IOException e) {
             throw e;
         } finally {
             if (out != null) {
                 out.close();
             }
         }
-               
+
         return null;
-                          	    	   
-    } 
-    
-    
+
+    }
+
     private void zipReference(Problem p, String fileName, ReferenceType type, ZipOutputStream out) throws Exception {
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
         List<Reference> refs = referencePersistence.getProblemReferences(p.getId(), type);
-        
+
         if (refs.size() == 0) {
             return;
         }
-        Reference ref = (Reference) refs.get(0);
+        Reference ref = refs.get(0);
         if (type == ReferenceType.CHECKER_SOURCE || type == ReferenceType.JUDGE_SOLUTION) {
-        	String contentType = ref.getContentType();
-        	if (contentType == null) {
-        		contentType = "cc";
-        	}
-        	fileName += "." + contentType;
+            String contentType = ref.getContentType();
+            if (contentType == null) {
+                contentType = "cc";
+            }
+            fileName += "." + contentType;
         }
         out.putNextEntry(new ZipEntry(p.getCode() + "/" + fileName));
-        
+
         byte[] data = ref.getContent();
-        out.write(data);                               
-        out.closeEntry();        
+        out.write(data);
+        out.closeEntry();
     }
-    
+
     private String convertFilename(String name) {
-        char[] s = name.toCharArray();        
+        char[] s = name.toCharArray();
         for (int i = 0; i < s.length; i++) {
             if (Character.isSpaceChar(s[i])) {
                 s[i] = '_';
@@ -157,4 +161,3 @@ public class ExportProblemsAction extends BaseAction {
         return new String(s);
     }
 }
-    

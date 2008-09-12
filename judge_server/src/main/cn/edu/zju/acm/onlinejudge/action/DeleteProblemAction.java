@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -33,57 +32,61 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class DeleteProblemAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public DeleteProblemAction() {
-        // empty
+    // empty
     }
 
     /**
      * Register.
      * 
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
-        
+
         // check problem
-        boolean isProblemset = context.getRequest().getRequestURI().endsWith("deleteProblem.do");        
-        ActionForward forward = checkProblemAdminPermission(mapping, context, isProblemset);
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("deleteProblem.do");
+        ActionForward forward = this.checkProblemAdminPermission(mapping, context, isProblemset);
         if (forward != null) {
             return forward;
-        }               
-                
-        Problem problem = context.getProblem();        
-        ActionMessages messages = new ActionMessages();        
+        }
+
+        Problem problem = context.getProblem();
+        ActionMessages messages = new ActionMessages();
         ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
         problemPersistence.deleteProblem(problem.getId(), context.getUserProfile().getId());
-                
+
         messages.add("message", new ActionMessage("onlinejudge.deleteProblem.success"));
-        
+
         this.saveErrors(context.getRequest(), messages);
         String back = isProblemset ? "showProblems" : "showContestProblems";
         context.setAttribute("back", back + ".do?contestId=" + context.getContest().getId());
-        
+
         ContestManager.getInstance().refreshContest(context.getContest().getId());
-        
-        return handleSuccess(mapping, context, "success");
-    }    
+
+        return this.handleSuccess(mapping, context, "success");
+    }
 
 }
-    

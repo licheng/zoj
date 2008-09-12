@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -33,59 +32,63 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class DeleteContestAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public DeleteContestAction() {
-        // empty
+    // empty
     }
 
     /**
      * Register.
      * 
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
+
         // check contest
         boolean isProblemset = context.getRequest().getRequestURI().endsWith("deleteProblemset.do");
-                
-        ActionForward forward = checkContestAdminPermission(mapping, context, isProblemset, false);
+
+        ActionForward forward = this.checkContestAdminPermission(mapping, context, isProblemset, false);
         if (forward != null) {
             return forward;
         }
-        
-        
+
         AbstractContest contest = context.getContest();
         ContestPersistence contestPersistence = PersistenceManager.getInstance().getContestPersistence();
         contestPersistence.deleteContest(contest.getId(), context.getUserSecurity().getId());
-        
+
         ContestManager.getInstance().refreshContest(contest.getId());
-        
+
         ActionMessages messages = new ActionMessages();
-        if (isProblemset) {                                        
-            messages.add("message", new ActionMessage("onlinejudge.deleteProblemset.success"));            
+        if (isProblemset) {
+            messages.add("message", new ActionMessage("onlinejudge.deleteProblemset.success"));
         } else {
-            messages.add("message", new ActionMessage("onlinejudge.deleteContest.success"));            
+            messages.add("message", new ActionMessage("onlinejudge.deleteContest.success"));
         }
         this.saveErrors(context.getRequest(), messages);
-        context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");           
-        return handleSuccess(mapping, context, "success");
-    }    
+        context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+        return this.handleSuccess(mapping, context, "success");
+    }
 
 }
-    

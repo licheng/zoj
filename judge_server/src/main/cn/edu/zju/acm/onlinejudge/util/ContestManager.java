@@ -18,6 +18,12 @@ package cn.edu.zju.acm.onlinejudge.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
+import cn.edu.zju.acm.onlinejudge.bean.Problem;
+import cn.edu.zju.acm.onlinejudge.bean.Reference;
+import cn.edu.zju.acm.onlinejudge.bean.Submission;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
+import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
@@ -25,12 +31,6 @@ import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.cache.Cache;
-import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.bean.Problem;
-import cn.edu.zju.acm.onlinejudge.bean.Reference;
-import cn.edu.zju.acm.onlinejudge.bean.Submission;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
-import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 
 public class ContestManager {
 
@@ -62,13 +62,13 @@ public class ContestManager {
      * 
      */
     private ContestManager() throws PersistenceCreationException {
-        contestProblemsCache = new Cache<List<Problem>>(60000, 50);
-        contestCache = new Cache<AbstractContest>(60000, 30);
-        problemCache = new Cache<Problem>(60000, 50);
-        submissionCache = new Cache<Submission>(10000, 50);
-        descriptionCache = new Cache<byte[]>(60000, 50);
-        contestsCache = new Cache<List<AbstractContest>>(60000, 20);
-        problemCountCache = new Cache<Integer>(60000, 20);
+        this.contestProblemsCache = new Cache<List<Problem>>(60000, 50);
+        this.contestCache = new Cache<AbstractContest>(60000, 30);
+        this.problemCache = new Cache<Problem>(60000, 50);
+        this.submissionCache = new Cache<Submission>(10000, 50);
+        this.descriptionCache = new Cache<byte[]>(60000, 50);
+        this.contestsCache = new Cache<List<AbstractContest>>(60000, 20);
+        this.problemCountCache = new Cache<Integer>(60000, 20);
     }
 
     /**
@@ -78,28 +78,28 @@ public class ContestManager {
      * @throws PersistenceCreationException
      */
     public static ContestManager getInstance() throws PersistenceCreationException {
-        if (instance == null) {
+        if (ContestManager.instance == null) {
             synchronized (ContestManager.class) {
-                if (instance == null) {
-                    instance = new ContestManager();
+                if (ContestManager.instance == null) {
+                    ContestManager.instance = new ContestManager();
                 }
             }
         }
-        return instance;
+        return ContestManager.instance;
     }
 
     public List<AbstractContest> getAllContests() throws PersistenceException {
-        return getContests(false);
+        return this.getContests(false);
     }
 
     public List<AbstractContest> getAllProblemsets() throws PersistenceException {
-        return getContests(true);
+        return this.getContests(true);
     }
 
     public List<AbstractContest> getContests(boolean isProblemset) throws PersistenceException {
         Object key = new Boolean(isProblemset);
-        synchronized (contestsCache) {
-            List<AbstractContest> contests = contestsCache.get(key);
+        synchronized (this.contestsCache) {
+            List<AbstractContest> contests = this.contestsCache.get(key);
             if (contests == null) {
                 ContestPersistence contestPersistence = PersistenceManager.getInstance().getContestPersistence();
                 if (isProblemset) {
@@ -107,7 +107,7 @@ public class ContestManager {
                 } else {
                     contests = contestPersistence.getAllContests();
                 }
-                contestsCache.put(key, contests);
+                this.contestsCache.put(key, contests);
             }
             return contests;
         }
@@ -115,12 +115,12 @@ public class ContestManager {
 
     public int getProblemsCount(long contestId) throws PersistenceException {
         Object key = new Long(contestId);
-        synchronized (problemCountCache) {
-            Integer count = (Integer) problemCountCache.get(key);
+        synchronized (this.problemCountCache) {
+            Integer count = this.problemCountCache.get(key);
             if (count == null) {
                 ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
                 int ret = problemPersistence.getProblemsCount(contestId);
-                problemCountCache.put(key, ret);
+                this.problemCountCache.put(key, ret);
                 return ret;
             }
             return count.intValue();
@@ -129,12 +129,12 @@ public class ContestManager {
 
     public AbstractContest getContest(long contestId) throws PersistenceException {
         Object key = new Long(contestId);
-        synchronized (contestCache) {
-            AbstractContest contest = (AbstractContest) contestCache.get(key);
+        synchronized (this.contestCache) {
+            AbstractContest contest = this.contestCache.get(key);
             if (contest == null) {
                 ContestPersistence contestPersistence = PersistenceManager.getInstance().getContestPersistence();
                 contest = contestPersistence.getContest(contestId);
-                contestCache.put(key, contest);
+                this.contestCache.put(key, contest);
             }
             return contest;
         }
@@ -143,13 +143,13 @@ public class ContestManager {
     public List<Problem> getContestProblems(long contestId, int offset, int count) throws PersistenceException {
         ProblemCriteria criteria = new ProblemCriteria();
         criteria.setContestId(new Long(contestId));
-        return searchProblems(criteria, offset, count);
+        return this.searchProblems(criteria, offset, count);
     }
 
     public List<Problem> getContestProblems(long contestId) throws PersistenceException {
         ProblemCriteria criteria = new ProblemCriteria();
         criteria.setContestId(new Long(contestId));
-        return searchProblems(criteria, 0, Integer.MAX_VALUE);
+        return this.searchProblems(criteria, 0, Integer.MAX_VALUE);
     }
 
     public List<Problem> searchProblems(ProblemCriteria criteria, int offset, int count) throws PersistenceException {
@@ -157,12 +157,12 @@ public class ContestManager {
         key.add(criteria);
         key.add(new Integer(offset));
         key.add(new Integer(count));
-        synchronized (contestProblemsCache) {
-            List<Problem> problems = (List<Problem>) contestProblemsCache.get(key);
+        synchronized (this.contestProblemsCache) {
+            List<Problem> problems = this.contestProblemsCache.get(key);
             if (problems == null) {
                 ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
                 problems = problemPersistence.searchProblems(criteria, offset, count);
-                contestProblemsCache.put(key, problems);
+                this.contestProblemsCache.put(key, problems);
             }
             return problems;
         }
@@ -170,12 +170,12 @@ public class ContestManager {
 
     public Problem getProblem(long problemId) throws PersistenceException {
         Object key = new Long(problemId);
-        synchronized (problemCache) {
-            Problem problem = (Problem) problemCache.get(key);
+        synchronized (this.problemCache) {
+            Problem problem = this.problemCache.get(key);
             if (problem == null) {
                 ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
                 problem = problemPersistence.getProblem(problemId);
-                problemCache.put(key, problem);
+                this.problemCache.put(key, problem);
             }
             return problem;
         }
@@ -183,13 +183,13 @@ public class ContestManager {
 
     public Submission getSubmission(long submissionId) throws PersistenceException {
         Object key = new Long(submissionId);
-        synchronized (submissionCache) {
-            Submission submission = (Submission) submissionCache.get(key);
+        synchronized (this.submissionCache) {
+            Submission submission = this.submissionCache.get(key);
             if (submission == null) {
                 SubmissionPersistence submissionPersistence =
                         PersistenceManager.getInstance().getSubmissionPersistence();
                 submission = submissionPersistence.getSubmission(submissionId);
-                submissionCache.put(key, submission);
+                this.submissionCache.put(key, submission);
             }
             return submission;
         }
@@ -197,19 +197,19 @@ public class ContestManager {
 
     public byte[] getDescription(long problemId) throws PersistenceException {
         Object key = new Long(problemId);
-        synchronized (descriptionCache) {
-            byte[] text = (byte[]) descriptionCache.get(key);
+        synchronized (this.descriptionCache) {
+            byte[] text = this.descriptionCache.get(key);
             if (text == null) {
                 ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
 
                 List<Reference> ref = referencePersistence.getProblemReferences(problemId, ReferenceType.DESCRIPTION);
                 if (ref.size() > 0) {
-                    text = ((Reference) ref.get(0)).getContent();
+                    text = ref.get(0).getContent();
                 } else {
                     text = new byte[0];
                 }
 
-                descriptionCache.put(key, text);
+                this.descriptionCache.put(key, text);
             }
             return text;
         }
@@ -217,28 +217,28 @@ public class ContestManager {
 
     public void refreshContest(long contestId) {
 
-        synchronized (contestProblemsCache) {
-            for (Object key : contestProblemsCache.getKeys()) {
-                ProblemCriteria criteria = (ProblemCriteria) ((List<ProblemCriteria>) key).iterator().next();
+        synchronized (this.contestProblemsCache) {
+            for (Object key : this.contestProblemsCache.getKeys()) {
+                ProblemCriteria criteria = ((List<ProblemCriteria>) key).iterator().next();
                 if (criteria.getContestId() == contestId) {
-                    contestProblemsCache.remove(key);
+                    this.contestProblemsCache.remove(key);
                 }
             }
         }
 
-        contestCache.remove(contestId);
-        problemCountCache.remove(contestId);
-        contestsCache.remove(true);
-        contestsCache.remove(false);
+        this.contestCache.remove(contestId);
+        this.problemCountCache.remove(contestId);
+        this.contestsCache.remove(true);
+        this.contestsCache.remove(false);
     }
 
     public void refreshProblem(Problem problem) {
-        refreshContest(problem.getContestId());
-        synchronized (problemCache) {
-            problemCache.remove(new Long(problem.getId()));
+        this.refreshContest(problem.getContestId());
+        synchronized (this.problemCache) {
+            this.problemCache.remove(new Long(problem.getId()));
         }
-        synchronized (descriptionCache) {
-            descriptionCache.remove(new Long(problem.getId()));
+        synchronized (this.descriptionCache) {
+            this.descriptionCache.remove(new Long(problem.getId()));
         }
 
     }

@@ -29,7 +29,6 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.judgeservice.Priority;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
@@ -40,93 +39,95 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class SubmitAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public SubmitAction() {
-        // empty
+    // empty
     }
 
     /**
      * SubmitAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	
-    	if (!isLogin(context, true)) {   
-    		return handleSuccess(mapping, context, "login");    		    		
-    	}
 
-    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("submit.do");
-    	
-    	ActionForward forward = checkProblemParticipatePermission(mapping, context, isProblemset);
-    	if (forward != null) {
-    		return forward;
-    	}    	    
-        
-        AbstractContest contest = context.getContest();    	
+        if (!this.isLogin(context, true)) {
+            return this.handleSuccess(mapping, context, "login");
+        }
+
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("submit.do");
+
+        ActionForward forward = this.checkProblemParticipatePermission(mapping, context, isProblemset);
+        if (forward != null) {
+            return forward;
+        }
+
+        AbstractContest contest = context.getContest();
         Problem problem = context.getProblem();
-                
+
         long languageId = Utility.parseLong(context.getRequest().getParameter("languageId"));
-        ContestPersistence contestPersistence = PersistenceManager.getInstance().getContestPersistence();
-        Language language = contestPersistence.getLanguage(languageId);        
+        Language language = PersistenceManager.getInstance().getLanguagePersistence().getLanguage(languageId);
         if (language == null) {
-        	return handleSuccess(mapping, context, "submit");
+            return this.handleSuccess(mapping, context, "submit");
         }
         String source = context.getRequest().getParameter("source");
         if (source == null || source.length() == 0) {
-        	return handleSuccess(mapping, context, "submit");
-        } 
+            return this.handleSuccess(mapping, context, "submit");
+        }
         if (contest.isCheckIp()) {
-            forward = checkLastLoginIP(mapping, context, isProblemset);
+            forward = this.checkLastLoginIP(mapping, context, isProblemset);
             if (forward != null) {
                 return forward;
-            }           
+            }
         }
         UserProfile user = context.getUserProfile();
         Submission submission = new Submission();
         submission.setContestId(contest.getId());
         submission.setLanguage(language);
         submission.setProblemId(problem.getId());
-        submission.setUserProfileId(user.getId());        
-        submission.setContent(source);        
+        submission.setUserProfileId(user.getId());
+        submission.setContent(source);
         submission.setMemoryConsumption(0);
         submission.setTimeConsumption(0);
         submission.setSubmitDate(new Date());
         SubmissionPersistence submissionPersistence = PersistenceManager.getInstance().getSubmissionPersistence();
-        
-        
-        
+
         if (contest.getEndTime() != null && new Date().after(contest.getEndTime())) {
             submission.setJudgeReply(JudgeReply.OUT_OF_CONTEST_TIME);
             submissionPersistence.createSubmission(submission, user.getId());
         } else if (source.getBytes().length > problem.getLimit().getSubmissionLimit() * 1024) {
-        	submission.setContent(source.substring(0, problem.getLimit().getSubmissionLimit() * 1024));
+            submission.setContent(source.substring(0, problem.getLimit().getSubmissionLimit() * 1024));
             submission.setJudgeReply(JudgeReply.SUBMISSION_LIMIT_EXCEEDED);
             submissionPersistence.createSubmission(submission, user.getId());
         } else {
-        	submission.setJudgeReply(JudgeReply.QUEUING);
+            submission.setJudgeReply(JudgeReply.QUEUING);
             submissionPersistence.createSubmission(submission, user.getId());
             JudgeService.getInstance().judge(submission, Priority.NORMAL);
         }
         context.setAttribute("submissionId", submission.getId());
-        return handleSuccess(mapping, context, "success");
-                  	    	   
-    }       
+        return this.handleSuccess(mapping, context, "success");
+
+    }
 }
-    

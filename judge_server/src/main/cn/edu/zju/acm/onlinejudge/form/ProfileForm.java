@@ -15,7 +15,15 @@
 
 package cn.edu.zju.acm.onlinejudge.form;
 
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
@@ -26,19 +34,12 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Country;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
-import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-
 /**
  * <p>
  * ProfileForm.
  * </p>
- *
- * @author ZOJDEV
+ * 
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ProfileForm extends ActionForm implements Serializable {
@@ -62,7 +63,7 @@ public class ProfileForm extends ActionForm implements Serializable {
      * The confirmPassword.
      */
     private String confirmPassword = null;
-    
+
     /**
      * The newPassword.
      */
@@ -71,7 +72,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * The email.
      */
-    private String email = null;    
+    private String email = null;
 
     /**
      * The firstName.
@@ -152,13 +153,12 @@ public class ProfileForm extends ActionForm implements Serializable {
      * The graduateStudent.
      */
     private boolean graduateStudent = false;
-    
+
     /**
      * The active.
      */
     private boolean active = false;
-       
-    
+
     /**
      * The roles.
      */
@@ -168,12 +168,12 @@ public class ProfileForm extends ActionForm implements Serializable {
      * Empty constructor.
      */
     public ProfileForm() {
-        // Empty constructor
+    // Empty constructor
     }
 
     /**
      * Sets the handle.
-     *
+     * 
      * @prama handle the handle to set.
      */
     public void setHandle(String handle) {
@@ -182,16 +182,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the handle.
-     *
+     * 
      * @return the handle.
      */
     public String getHandle() {
-        return handle;
+        return this.handle;
     }
 
     /**
      * Sets the nick.
-     *
+     * 
      * @prama nick the nick to set.
      */
     public void setNick(String nick) {
@@ -200,16 +200,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the nick.
-     *
+     * 
      * @return the nick.
      */
     public String getNick() {
-        return nick;
+        return this.nick;
     }
 
     /**
      * Sets the password.
-     *
+     * 
      * @prama password the password to set.
      */
     public void setPassword(String password) {
@@ -218,16 +218,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the password.
-     *
+     * 
      * @return the password.
      */
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     /**
      * Sets the confirmPassword.
-     *
+     * 
      * @prama confirmPassword the confirmPassword to set.
      */
     public void setConfirmPassword(String confirmPassword) {
@@ -236,16 +236,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the confirmPassword.
-     *
+     * 
      * @return the confirmPassword.
      */
     public String getConfirmPassword() {
-        return confirmPassword;
+        return this.confirmPassword;
     }
 
     /**
      * Sets the newPassword.
-     *
+     * 
      * @prama newPassword the newPassword to set.
      */
     public void setNewPassword(String newPassword) {
@@ -254,16 +254,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the newPassword.
-     *
+     * 
      * @return the newPassword.
      */
     public String getNewPassword() {
-        return newPassword;
+        return this.newPassword;
     }
-    
+
     /**
      * Sets the email.
-     *
+     * 
      * @prama email the email to set.
      */
     public void setEmail(String email) {
@@ -272,16 +272,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the email.
-     *
+     * 
      * @return the email.
      */
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     /**
      * Sets the firstName.
-     *
+     * 
      * @prama firstName the firstName to set.
      */
     public void setFirstName(String firstName) {
@@ -290,16 +290,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the firstName.
-     *
+     * 
      * @return the firstName.
      */
     public String getFirstName() {
-        return firstName;
+        return this.firstName;
     }
 
     /**
      * Sets the lastName.
-     *
+     * 
      * @prama lastName the lastName to set.
      */
     public void setLastName(String lastName) {
@@ -308,16 +308,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the lastName.
-     *
+     * 
      * @return the lastName.
      */
     public String getLastName() {
-        return lastName;
+        return this.lastName;
     }
 
     /**
      * Sets the birthday.
-     *
+     * 
      * @prama birthday the birthday to set.
      */
     public void setBirthday(String birthday) {
@@ -326,16 +326,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the birthday.
-     *
+     * 
      * @return the birthday.
      */
     public String getBirthday() {
-        return birthday;
+        return this.birthday;
     }
 
     /**
      * Sets the gender.
-     *
+     * 
      * @prama gender the gender to set.
      */
     public void setGender(String gender) {
@@ -344,16 +344,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the gender.
-     *
+     * 
      * @return the gender.
      */
     public String getGender() {
-        return gender;
+        return this.gender;
     }
 
     /**
      * Sets the addressLine1.
-     *
+     * 
      * @prama addressLine1 the addressLine1 to set.
      */
     public void setAddressLine1(String addressLine1) {
@@ -362,16 +362,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the addressLine1.
-     *
+     * 
      * @return the addressLine1.
      */
     public String getAddressLine1() {
-        return addressLine1;
+        return this.addressLine1;
     }
 
     /**
      * Sets the addressLine2.
-     *
+     * 
      * @prama addressLine2 the addressLine2 to set.
      */
     public void setAddressLine2(String addressLine2) {
@@ -380,16 +380,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the addressLine2.
-     *
+     * 
      * @return the addressLine2.
      */
     public String getAddressLine2() {
-        return addressLine2;
+        return this.addressLine2;
     }
 
     /**
      * Sets the state.
-     *
+     * 
      * @prama state the state to set.
      */
     public void setState(String state) {
@@ -398,16 +398,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the state.
-     *
+     * 
      * @return the state.
      */
     public String getState() {
-        return state;
+        return this.state;
     }
 
     /**
      * Sets the city.
-     *
+     * 
      * @prama city the city to set.
      */
     public void setCity(String city) {
@@ -416,16 +416,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the city.
-     *
+     * 
      * @return the city.
      */
     public String getCity() {
-        return city;
+        return this.city;
     }
 
     /**
      * Sets the country.
-     *
+     * 
      * @prama country the country to set.
      */
     public void setCountry(String country) {
@@ -434,16 +434,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the country.
-     *
+     * 
      * @return the country.
      */
     public String getCountry() {
-        return country;
+        return this.country;
     }
 
     /**
      * Sets the zipCode.
-     *
+     * 
      * @prama zipCode the zipCode to set.
      */
     public void setZipCode(String zipCode) {
@@ -452,16 +452,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the zipCode.
-     *
+     * 
      * @return the zipCode.
      */
     public String getZipCode() {
-        return zipCode;
+        return this.zipCode;
     }
 
     /**
      * Sets the phone.
-     *
+     * 
      * @prama phone the phone to set.
      */
     public void setPhone(String phone) {
@@ -470,16 +470,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the phone.
-     *
+     * 
      * @return the phone.
      */
     public String getPhone() {
-        return phone;
+        return this.phone;
     }
 
     /**
      * Sets the school.
-     *
+     * 
      * @prama school the school to set.
      */
     public void setSchool(String school) {
@@ -488,17 +488,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the school.
-     *
+     * 
      * @return the school.
      */
     public String getSchool() {
-        return school;
+        return this.school;
     }
-
 
     /**
      * Sets the major.
-     *
+     * 
      * @prama major the major to set.
      */
     public void setMajor(String major) {
@@ -507,16 +506,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the major.
-     *
+     * 
      * @return the major.
      */
     public String getMajor() {
-        return major;
+        return this.major;
     }
 
     /**
      * Sets the studentNumber.
-     *
+     * 
      * @prama studentNumber the studentNumber to set.
      */
     public void setStudentNumber(String studentNumber) {
@@ -525,16 +524,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the studentNumber.
-     *
+     * 
      * @return the studentNumber.
      */
     public String getStudentNumber() {
-        return studentNumber;
+        return this.studentNumber;
     }
 
     /**
      * Sets the graduationYear.
-     *
+     * 
      * @prama graduationYear the graduationYear to set.
      */
     public void setGraduationYear(String graduationYear) {
@@ -543,18 +542,16 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the graduationYear.
-     *
+     * 
      * @return the graduationYear.
      */
     public String getGraduationYear() {
-        return graduationYear;
+        return this.graduationYear;
     }
-    
-    
-    
+
     /**
      * Sets the graduateStudent.
-     *
+     * 
      * @prama graduateStudent the graduateStudent to set.
      */
     public void setGraduateStudent(boolean graduateStudent) {
@@ -563,25 +560,25 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the graduateStudent.
-     *
+     * 
      * @return the graduateStudent.
      */
     public boolean isGraduateStudent() {
-        return graduateStudent;
+        return this.graduateStudent;
     }
-    
+
     /**
      * Gets the active.
-     *
+     * 
      * @return the active.
      */
     public boolean isActive() {
-        return active;
+        return this.active;
     }
-    
+
     /**
      * Sets the active.
-     *
+     * 
      * @prama active the graduateStudent to set.
      */
     public void setActive(boolean active) {
@@ -590,7 +587,7 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Sets the roles.
-     *
+     * 
      * @prama roles the roles to set.
      */
     public void setRoles(String[] roles) {
@@ -599,254 +596,268 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     /**
      * Gets the roles.
-     *
+     * 
      * @return the roles.
      */
     public String[] getRoles() {
-        return roles;
+        return this.roles;
     }
 
-	 /**
+    /**
      * Validates the form.
-     *
-     * @param mapping the action mapping.
-     * @param request the user request.
-     *
+     * 
+     * @param mapping
+     *            the action mapping.
+     * @param request
+     *            the user request.
+     * 
      * @return collection of validation errors.
      */
+    @Override
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        
+
         try {
-        	request.setAttribute("Countries", 
-        	PersistenceManager.getInstance().getUserPersistence().getAllCountries());	            
+            request.setAttribute("Countries", PersistenceManager.getInstance().getUserPersistence().getAllCountries());
         } catch (Exception e) {
             e.printStackTrace();
-        	request.setAttribute("Countries", new ArrayList<Country>());
+            request.setAttribute("Countries", new ArrayList<Country>());
         }
-        
-        if (handle == null) {
-        	return null;
+
+        if (this.handle == null) {
+            return null;
         }
-        handle = handle.trim();
+        this.handle = this.handle.trim();
 
         ActionErrors errors = new ActionErrors();
-        checkHandle(handle, errors, "handle", "ProfileForm.handle.required");        
-        checkEmail(email, errors, "email", "ProfileForm.email.required");
-        
-        
-        if (password == null) {
-        	checkRequired(newPassword, errors, "newPassword", "ProfileForm.newPassword.required");
-        	checkRequired(confirmPassword, errors, "confirmPassword", "ProfileForm.confirmPassword.required");        	                    	        
+        this.checkHandle(this.handle, errors, "handle", "ProfileForm.handle.required");
+        this.checkEmail(this.email, errors, "email", "ProfileForm.email.required");
+
+        if (this.password == null) {
+            this.checkRequired(this.newPassword, errors, "newPassword", "ProfileForm.newPassword.required");
+            this.checkRequired(this.confirmPassword, errors, "confirmPassword", "ProfileForm.confirmPassword.required");
         } else {
-        	checkRequired(password, errors, "password", "ProfileForm.password.required");        	
+            this.checkRequired(this.password, errors, "password", "ProfileForm.password.required");
         }
-        	
-        if (((newPassword != null && newPassword.length() > 0)
-        	|| (confirmPassword != null && confirmPassword.length() > 0))
-        	&& !newPassword.equals(confirmPassword)) {
-        	errors.add("confirmPassword", new ActionMessage("ProfileForm.confirmPassword.notMatch"));
+
+        if ((this.newPassword != null && this.newPassword.length() > 0 || this.confirmPassword != null &&
+            this.confirmPassword.length() > 0) &&
+            !this.newPassword.equals(this.confirmPassword)) {
+            errors.add("confirmPassword", new ActionMessage("ProfileForm.confirmPassword.notMatch"));
         }
-        
-        checkRequired(firstName, errors, "firstName", "ProfileForm.firstName.required");
-        checkRequired(lastName, errors, "lastName", "ProfileForm.lastName.required");
-        checkRequired(addressLine1, errors, "addressLine1", "ProfileForm.addressLine1.required");
-        checkRequired(city, errors, "city", "ProfileForm.city.required");
-        checkRequired(state, errors, "state", "ProfileForm.state.required");        
-        checkRequired(zipCode, errors, "zipCode", "ProfileForm.zipCode.required");
-        checkRequired(phone, errors, "phone", "ProfileForm.phone.required");
-        
-        checkBirthday(errors);
-        checkCountry(errors);
-        checkGender(errors);
-        checkGraduationYear(errors);    
-                
+
+        this.checkRequired(this.firstName, errors, "firstName", "ProfileForm.firstName.required");
+        this.checkRequired(this.lastName, errors, "lastName", "ProfileForm.lastName.required");
+        this.checkRequired(this.addressLine1, errors, "addressLine1", "ProfileForm.addressLine1.required");
+        this.checkRequired(this.city, errors, "city", "ProfileForm.city.required");
+        this.checkRequired(this.state, errors, "state", "ProfileForm.state.required");
+        this.checkRequired(this.zipCode, errors, "zipCode", "ProfileForm.zipCode.required");
+        this.checkRequired(this.phone, errors, "phone", "ProfileForm.phone.required");
+
+        this.checkBirthday(errors);
+        this.checkCountry(errors);
+        this.checkGender(errors);
+        this.checkGraduationYear(errors);
+
         return errors;
     }
-    
+
     /**
      * Checks the required field.
      * 
-     * @param field the field to check
-     * @param errors the errors
-     * @param property the error property
-     * @param message the error message
+     * @param field
+     *            the field to check
+     * @param errors
+     *            the errors
+     * @param property
+     *            the error property
+     * @param message
+     *            the error message
      */
     private void checkRequired(String field, ActionErrors errors, String property, String message) {
-    	if (field == null || field.trim().length() == 0) {
-        	errors.add(property, new ActionMessage(message));
+        if (field == null || field.trim().length() == 0) {
+            errors.add(property, new ActionMessage(message));
         }
     }
-    
+
     private void checkHandle(String handle, ActionErrors errors, String property, String message) {
-        checkRequired(handle, errors, "handle", "ProfileForm.handle.required");
-        if (handle != null && handle.length() > 0) {    
+        this.checkRequired(handle, errors, "handle", "ProfileForm.handle.required");
+        if (handle != null && handle.length() > 0) {
             if (handle.length() < 2) {
                 errors.add("handle", new ActionMessage("ProfileForm.handle.invalid"));
-                return;         
+                return;
             }
             for (int i = 0; i < handle.length(); ++i) {
                 char c = handle.charAt(i);
-                if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
+                if (!(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')) {
                     errors.add("handle", new ActionMessage("ProfileForm.handle.invalid"));
                     return;
                 }
-            }            
+            }
         }
     }
-    
+
     private void checkEmail(String email, ActionErrors errors, String property, String message) {
-        checkRequired(email, errors, "email", "ProfileForm.email.required");
+        this.checkRequired(email, errors, "email", "ProfileForm.email.required");
         if (errors.size() == 0) {
             // TODO
-            //errors.add("email", new ActionMessage("ProfileForm.email.invalid"));
+            // errors.add("email", new ActionMessage("ProfileForm.email.invalid"));
         }
     }
-    
-    
+
     /**
      * Checks the gender. Gender is required and should be ' ', 'M' or 'F'.
      * 
-     * @param errors the errors
+     * @param errors
+     *            the errors
      */
     private void checkGender(ActionErrors errors) {
-    	if (gender == null || gender.length() == 0) {
-    		errors.add("gender", new ActionMessage("ProfileForm.gender.required"));        	
-        } else if (!(" ".equals(gender) || "M".equals(gender) || "F".equals(gender))) {
-        	errors.add("gender", new ActionMessage("ProfileForm.gender.invalid"));
+        if (this.gender == null || this.gender.length() == 0) {
+            errors.add("gender", new ActionMessage("ProfileForm.gender.required"));
+        } else if (!(" ".equals(this.gender) || "M".equals(this.gender) || "F".equals(this.gender))) {
+            errors.add("gender", new ActionMessage("ProfileForm.gender.invalid"));
         }
     }
-    
+
     /**
      * Checks the graduation year. Graduation year is not required and should be a valid integer.
      * 
-     * @param errors the errors
+     * @param errors
+     *            the errors
      */
     private void checkGraduationYear(ActionErrors errors) {
-    	if (!(graduationYear == null || graduationYear.trim().length() == 0)) {    		        	        
-        	int year = 10000;
-        	try {
-        		year = Integer.parseInt(graduationYear);
-        	} catch (Exception e) {
-        		
-        	}
-        	if (year > 9999 || year < 0) {
-        		errors.add("graduationYear", new ActionMessage("ProfileForm.graduationYear.invalid"));
-        	}
+        if (!(this.graduationYear == null || this.graduationYear.trim().length() == 0)) {
+            int year = 10000;
+            try {
+                year = Integer.parseInt(this.graduationYear);
+            } catch (Exception e) {
+
+            }
+            if (year > 9999 || year < 0) {
+                errors.add("graduationYear", new ActionMessage("ProfileForm.graduationYear.invalid"));
+            }
         }
     }
-    
+
     /**
      * Checks the country id. Country id is required and should be a valid integer.
      * 
-     * @param errors the errors
+     * @param errors
+     *            the errors
      */
     private void checkCountry(ActionErrors errors) {
-    	if (country == null || country.trim().length() ==0) {
-    		errors.add("country", new ActionMessage("ProfileForm.country.required"));
-    	} else {
-	    	Country c = null;
-	    	try {
-	    		c = PersistenceManager.getInstance().getCountry(country);	    		
-	    	} catch (Exception e) {    		
-	    	}
-	    	if (c == null) {
-	    		errors.add("country", new ActionMessage("ProfileForm.country.invalid"));
-	    	}
-    	}
+        if (this.country == null || this.country.trim().length() == 0) {
+            errors.add("country", new ActionMessage("ProfileForm.country.required"));
+        } else {
+            Country c = null;
+            try {
+                c = PersistenceManager.getInstance().getCountry(this.country);
+            } catch (Exception e) {}
+            if (c == null) {
+                errors.add("country", new ActionMessage("ProfileForm.country.invalid"));
+            }
+        }
     }
-    
+
     /**
      * Checks the birthday. Birthday should be a valid date.
      * 
-     * @param errors the errors
+     * @param errors
+     *            the errors
      */
     private void checkBirthday(ActionErrors errors) {
-    	if (birthday == null || birthday.trim().length() ==0) {
-    		errors.add("birthday", new ActionMessage("ProfileForm.birthday.required"));
-    	} else {
-    		if (parseDate(birthday) == null) {
-        		errors.add("birthday", new ActionMessage("ProfileForm.birthday.invalid"));
-        	}
-    	}    	    	
+        if (this.birthday == null || this.birthday.trim().length() == 0) {
+            errors.add("birthday", new ActionMessage("ProfileForm.birthday.required"));
+        } else {
+            if (this.parseDate(this.birthday) == null) {
+                errors.add("birthday", new ActionMessage("ProfileForm.birthday.invalid"));
+            }
+        }
     }
-    
+
     /**
      * Parses given date, return null if it's invalid.
      * 
-     * @param date the date to parse
+     * @param date
+     *            the date to parse
      * @return the Date instance or null.
      */
     private Date parseDate(String date) {
-    	try {    		
-    		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).parse(date);
-    	} catch (Exception e) {
-    		return null;
-    	}    	
-    }    
-    
+        try {
+            return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).parse(date);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /**
      * Converts the form bean to UserProfile bean.
+     * 
      * @return the UserProfile bean.
-     * @throws PersistenceException if failed to convert
+     * @throws PersistenceException
+     *             if failed to convert
      */
     public UserProfile toUserProfile() throws PersistenceException {
-    	UserProfile profile = new UserProfile();
-        if (nick != null && nick.trim().length() > 0) {
-            profile.setNickName(nick);
+        UserProfile profile = new UserProfile();
+        if (this.nick != null && this.nick.trim().length() > 0) {
+            profile.setNickName(this.nick);
         } else {
-            profile.setNickName(handle);
+            profile.setNickName(this.handle);
         }
-    	profile.setAddressLine1(addressLine1);
-    	profile.setAddressLine2(addressLine2);
-    	profile.setBirthDate(parseDate(birthday));
-    	profile.setCity(city);    	
-    	profile.setCountry(PersistenceManager.getInstance().getCountry(country));
-    	profile.setEmail(email.trim());
-    	profile.setFirstName(firstName.trim());
-    	profile.setLastName(lastName.trim());
-    	profile.setGender(gender.charAt(0));
-    	profile.setGraduateStudent(graduateStudent);
-    	profile.setGraduationYear(
-    			graduationYear == null || graduationYear.trim().length() == 0 ? 0 : Integer.parseInt(graduationYear));
-    	profile.setHandle(handle.trim());
-    	profile.setMajor(major);
-    	profile.setPhoneNumber(phone);    	
-    	profile.setSchool(school);
-    	profile.setState(state);
-    	profile.setStudentNumber(studentNumber);
-    	profile.setZipCode(zipCode);
-    	profile.setPassword(newPassword);    	
-    	return profile;
+        profile.setAddressLine1(this.addressLine1);
+        profile.setAddressLine2(this.addressLine2);
+        profile.setBirthDate(this.parseDate(this.birthday));
+        profile.setCity(this.city);
+        profile.setCountry(PersistenceManager.getInstance().getCountry(this.country));
+        profile.setEmail(this.email.trim());
+        profile.setFirstName(this.firstName.trim());
+        profile.setLastName(this.lastName.trim());
+        profile.setGender(this.gender.charAt(0));
+        profile.setGraduateStudent(this.graduateStudent);
+        profile
+               .setGraduationYear(this.graduationYear == null || this.graduationYear.trim().length() == 0 ? 0
+                                                                                                         : Integer
+                                                                                                                  .parseInt(this.graduationYear));
+        profile.setHandle(this.handle.trim());
+        profile.setMajor(this.major);
+        profile.setPhoneNumber(this.phone);
+        profile.setSchool(this.school);
+        profile.setState(this.state);
+        profile.setStudentNumber(this.studentNumber);
+        profile.setZipCode(this.zipCode);
+        profile.setPassword(this.newPassword);
+        return profile;
     }
-    
+
     /**
      * Converts the form bean to UserProfile bean.
+     * 
      * @return the UserProfile bean.
-     * @throws PersistenceException if failed to convert
+     * @throws PersistenceException
+     *             if failed to convert
      */
     public void populate(UserProfile profile) throws PersistenceException {
-    	
+
         this.setNick(profile.getNickName());
-    	this.setAddressLine1(profile.getAddressLine1());
-    	this.setAddressLine2(profile.getAddressLine2());
-    	this.setBirthday(new SimpleDateFormat("MM/dd/yyyy").format(profile.getBirthDate()));
-    	this.setCity(profile.getCity());    	
-    	this.setCountry(String.valueOf(profile.getCountry().getId()));
-    	this.setEmail(profile.getEmail());
-    	this.setFirstName(profile.getFirstName());
-    	this.setLastName(profile.getLastName());
-    	this.setGender(String.valueOf(profile.getGender()));
-    	this.setGraduateStudent(profile.isGraduateStudent());
-    	this.setGraduationYear(profile.getGraduationYear() == 0 ? "" : String.valueOf(profile.getGraduationYear()));
-    	this.setHandle(profile.getHandle());
-    	this.setMajor(profile.getMajor());
-    	this.setPhone(profile.getPhoneNumber());
-    	this.setSchool(profile.getSchool());
-    	this.setState(profile.getState());
-    	this.setStudentNumber(profile.getStudentNumber());
-    	this.setZipCode(profile.getZipCode());
-    	this.setPassword(null);
-    	this.setNewPassword(null);
-    	this.setConfirmPassword(null);
+        this.setAddressLine1(profile.getAddressLine1());
+        this.setAddressLine2(profile.getAddressLine2());
+        this.setBirthday(new SimpleDateFormat("MM/dd/yyyy").format(profile.getBirthDate()));
+        this.setCity(profile.getCity());
+        this.setCountry(String.valueOf(profile.getCountry().getId()));
+        this.setEmail(profile.getEmail());
+        this.setFirstName(profile.getFirstName());
+        this.setLastName(profile.getLastName());
+        this.setGender(String.valueOf(profile.getGender()));
+        this.setGraduateStudent(profile.isGraduateStudent());
+        this.setGraduationYear(profile.getGraduationYear() == 0 ? "" : String.valueOf(profile.getGraduationYear()));
+        this.setHandle(profile.getHandle());
+        this.setMajor(profile.getMajor());
+        this.setPhone(profile.getPhoneNumber());
+        this.setSchool(profile.getSchool());
+        this.setState(profile.getState());
+        this.setStudentNumber(profile.getStudentNumber());
+        this.setZipCode(profile.getZipCode());
+        this.setPassword(null);
+        this.setNewPassword(null);
+        this.setConfirmPassword(null);
     }
 }

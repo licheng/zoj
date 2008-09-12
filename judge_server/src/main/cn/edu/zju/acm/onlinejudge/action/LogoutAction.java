@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import javax.servlet.http.Cookie;
 
 import org.apache.struts.action.ActionForm;
@@ -28,51 +27,56 @@ import org.apache.struts.action.ActionMapping;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class LogoutAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public LogoutAction() {
-        // empty
+    // empty
     }
 
     /**
      * Log out.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-      
-    	
-    	Cookie ch = new Cookie("oj_handle", "");
-		ch.setMaxAge(0);
-		ch.setPath("/");
-		context.getResponse().addCookie(ch);
-		 
-		Cookie cp = new Cookie("oj_password", "");
-		cp.setMaxAge(0);
-		cp.setPath("/");
-		context.getResponse().addCookie(cp);
-		 
-    	context.getRequest().getSession().invalidate();      
-      
-    	return handleSuccess(mapping, context, "success");    	    	    	 		    
-    }    
-    
+
+        Cookie ch = new Cookie("oj_handle", "");
+        ch.setMaxAge(0);
+        ch.setPath("/");
+        context.getResponse().addCookie(ch);
+
+        Cookie cp = new Cookie("oj_password", "");
+        cp.setMaxAge(0);
+        cp.setPath("/");
+        context.getResponse().addCookie(cp);
+
+        context.getRequest().getSession().invalidate();
+
+        return this.handleSuccess(mapping, context, "success");
+    }
+
 }
-    

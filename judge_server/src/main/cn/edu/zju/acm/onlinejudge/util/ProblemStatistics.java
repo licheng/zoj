@@ -23,69 +23,69 @@ import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 
 public class ProblemStatistics {
-	Map<Long, Integer> counts = new HashMap<Long, Integer>();
-	private final long problemId;
-	private final String orderBy;
-	private int total = 0;
-	private List<Submission> bestRuns = null;
-	
-	public ProblemStatistics(long problemId, String orderBy) {
-		this.problemId = problemId;
-		this.orderBy = orderBy;
-	}
-	
-	public long getProblemId() {
-		return problemId;
-	}
-	
-	public String getOrderBy() {
-		return orderBy;
-	}
-	
-	public int getTotal() {
-		return total;
-	}
-	
-	public int getCount(JudgeReply judgeReply) {
-		return getCount(judgeReply.getId());
-	}
-	
-	public double getPercentage(JudgeReply judgeReply) {
-		return getPercentage(judgeReply.getId());
-	}
-	
-	public double getPercentage(long judgeReplyId) {
-		return total == 0 ? 0 : 1.0 * getCount(judgeReplyId) / total;
-	}
-	
-	public int getPercentageInt(JudgeReply judgeReply) {
-		return getPercentageInt(judgeReply.getId());
-	}
-	
-	public int getPercentageInt(long judgeReplyId) {
-		return total == 0 ? 0 : getCount(judgeReplyId) * 100 / total;
-	}
-	
-	public int getCount(long judgeReplyId) {
-		return counts.containsKey(judgeReplyId) ? counts.get(judgeReplyId) : 0;
-	}
-	
-	public void setCount(JudgeReply judgeReply, int value) {
-		setCount(judgeReply.getId(), value);
-	}
-	
-	public void setCount(long judgeReplyId, int value) {
-		total -= getCount(judgeReplyId);
-		counts.put(judgeReplyId, value);
-		total += value;
-	}
+    Map<Long, Integer> counts = new HashMap<Long, Integer>();
+    private final long problemId;
+    private final String orderBy;
+    private int total = 0;
+    private List<Submission> bestRuns = null;
 
-	public List<Submission> getBestRuns() {
-		return bestRuns;
-	}
+    public ProblemStatistics(long problemId, String orderBy) {
+        this.problemId = problemId;
+        this.orderBy = orderBy;
+    }
 
-	public void setBestRuns(List<Submission> bestRuns) {
-		this.bestRuns = bestRuns;
-	}
-	
+    public long getProblemId() {
+        return this.problemId;
+    }
+
+    public String getOrderBy() {
+        return this.orderBy;
+    }
+
+    public int getTotal() {
+        return this.total;
+    }
+
+    public int getCount(JudgeReply judgeReply) {
+        return this.getCount(judgeReply.getId());
+    }
+
+    public double getPercentage(JudgeReply judgeReply) {
+        return this.getPercentage(judgeReply.getId());
+    }
+
+    public double getPercentage(long judgeReplyId) {
+        return this.total == 0 ? 0 : 1.0 * this.getCount(judgeReplyId) / this.total;
+    }
+
+    public int getPercentageInt(JudgeReply judgeReply) {
+        return this.getPercentageInt(judgeReply.getId());
+    }
+
+    public int getPercentageInt(long judgeReplyId) {
+        return this.total == 0 ? 0 : this.getCount(judgeReplyId) * 100 / this.total;
+    }
+
+    public int getCount(long judgeReplyId) {
+        return this.counts.containsKey(judgeReplyId) ? this.counts.get(judgeReplyId) : 0;
+    }
+
+    public void setCount(JudgeReply judgeReply, int value) {
+        this.setCount(judgeReply.getId(), value);
+    }
+
+    public void setCount(long judgeReplyId, int value) {
+        this.total -= this.getCount(judgeReplyId);
+        this.counts.put(judgeReplyId, value);
+        this.total += value;
+    }
+
+    public List<Submission> getBestRuns() {
+        return this.bestRuns;
+    }
+
+    public void setBestRuns(List<Submission> bestRuns) {
+        this.bestRuns = bestRuns;
+    }
+
 }

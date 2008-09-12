@@ -36,8 +36,9 @@ public class JudgeService extends Thread {
     static {
         try {
             JudgeService.instance =
-                    new JudgeService(Integer.parseInt(ConfigManager.getValue("queue_port")), ConfigManager
-                            .getValues("client_ip"), Integer.parseInt(ConfigManager.getValue("client_max_job")));
+                    new JudgeService(Integer.parseInt(ConfigManager.getValue("queue_port")),
+                                     ConfigManager.getValues("client_ip"),
+                                     Integer.parseInt(ConfigManager.getValue("client_max_job")));
             JudgeService.instance.start();
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
@@ -75,14 +76,15 @@ public class JudgeService extends Thread {
         this.defaultNumberOfJudgeThreads = defaultNumberOfJudgeThreads;
     }
 
+    @Override
     public void run() {
         while (!this.serverSocket.isClosed()) {
             try {
                 Socket socket = this.serverSocket.accept();
                 this.logger
-                        .info("Connection from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+                           .info("Connection from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
                 if (!socket.getInetAddress().isLoopbackAddress() &&
-                        !this.clientHostAddressSet.contains(socket.getInetAddress().getHostAddress())) {
+                    !this.clientHostAddressSet.contains(socket.getInetAddress().getHostAddress())) {
                     this.logger.info("Refused");
                     socket.close();
                     continue;

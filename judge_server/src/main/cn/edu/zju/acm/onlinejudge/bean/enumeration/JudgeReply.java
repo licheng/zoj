@@ -23,12 +23,12 @@ import java.util.List;
  * This class represents the Judge Reply.
  * </p>
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class JudgeReply {
 
-    private static List<JudgeReply> replies = new ArrayList<JudgeReply>();    
+    private static List<JudgeReply> replies = new ArrayList<JudgeReply>();
 
     public final static JudgeReply QUEUING = new JudgeReply(0, "Queuing", "Queuing", null, false);
 
@@ -42,45 +42,44 @@ public class JudgeReply {
 
     public final static JudgeReply ACCEPTED = new JudgeReply(5, "Accepted", "Accepted", null, true);
 
-    public final static JudgeReply TIME_LIMIT_EXCEEDED = new JudgeReply(6, "Time Limit Exceeded",
-            "Time Limit Exceeded", null, true);
+    public final static JudgeReply TIME_LIMIT_EXCEEDED =
+            new JudgeReply(6, "Time Limit Exceeded", "Time Limit Exceeded", null, true);
 
-    public final static JudgeReply MEMORY_LIMIT_EXCEEDED = new JudgeReply(7, "Memory Limit Exceeded",
-            "Memory Limit Exceeded", null, true);
+    public final static JudgeReply MEMORY_LIMIT_EXCEEDED =
+            new JudgeReply(7, "Memory Limit Exceeded", "Memory Limit Exceeded", null, true);
 
-    public final static JudgeReply OUT_OF_CONTEST_TIME = new JudgeReply(8, "Out of Contest Time",
-            "Out of Contest Time", null, true);
+    public final static JudgeReply OUT_OF_CONTEST_TIME =
+            new JudgeReply(8, "Out of Contest Time", "Out of Contest Time", null, true);
 
-    public final static JudgeReply RESTRICTED_FUNCTION = new JudgeReply(9, "Restricted Function",
-            "Restricted Function", null, true);
+    public final static JudgeReply RESTRICTED_FUNCTION =
+            new JudgeReply(9, "Restricted Function", "Restricted Function", null, true);
 
-    public final static JudgeReply OUTPUT_LIMIT_EXCEEDED = new JudgeReply(10, "Output Limit Exceeded",
-            "Output Limit Exceeded", null, true);
+    public final static JudgeReply OUTPUT_LIMIT_EXCEEDED =
+            new JudgeReply(10, "Output Limit Exceeded", "Output Limit Exceeded", null, true);
 
-    public final static JudgeReply COMPILATION_ERROR = new JudgeReply(12, "Compilation Error", "Compilation Error",
-            null, true);
+    public final static JudgeReply COMPILATION_ERROR =
+            new JudgeReply(12, "Compilation Error", "Compilation Error", null, true);
 
-    public final static JudgeReply PRESENTATION_ERROR = new JudgeReply(13, "Presentation Error", "Presentation Error",
-            null, true);
+    public final static JudgeReply PRESENTATION_ERROR =
+            new JudgeReply(13, "Presentation Error", "Presentation Error", null, true);
 
-    public final static JudgeReply JUDGE_INTERNAL_ERROR = new JudgeReply(14, "Judge Internal Error",
-            "Judge Internal Error", null, true);
+    public final static JudgeReply JUDGE_INTERNAL_ERROR =
+            new JudgeReply(14, "Judge Internal Error", "Judge Internal Error", null, true);
 
-    public final static JudgeReply FLOATING_POINT_ERROR = new JudgeReply(15, "Floating Point Error",
-            "Floating Point Error", null, true);
+    public final static JudgeReply FLOATING_POINT_ERROR =
+            new JudgeReply(15, "Floating Point Error", "Floating Point Error", null, true);
 
-    public final static JudgeReply SEGMENTATION_FAULT = new JudgeReply(16, "Segmentation Fault", "Segmentation Fault",
-            null, true);
+    public final static JudgeReply SEGMENTATION_FAULT =
+            new JudgeReply(16, "Segmentation Fault", "Segmentation Fault", null, true);
 
     public final static JudgeReply JUDGING = new JudgeReply(19, "Judging", "Judging", null, false);
 
-    public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED = new JudgeReply(20, "Submission Limit Exceeded",
-            "Submission Limit Exceeded", null, true);
+    public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED =
+            new JudgeReply(20, "Submission Limit Exceeded", "Submission Limit Exceeded", null, true);
     public final static JudgeReply READY = new JudgeReply(100, "Ready", "Ready", null, false);
-    public final static JudgeReply NO_SUCH_PROBLEM = new JudgeReply(101, "No Such Problem",
-            "No Such Problem", null, false);
-    public final static JudgeReply INVALID_INPUT = new JudgeReply(102, "Invalid Input",
-            "Invalid Input", null, false);
+    public final static JudgeReply NO_SUCH_PROBLEM =
+            new JudgeReply(101, "No Such Problem", "No Such Problem", null, false);
+    public final static JudgeReply INVALID_INPUT = new JudgeReply(102, "Invalid Input", "Invalid Input", null, false);
     /**
      * <p>
      * Represents the id of JudgeReply.
@@ -115,7 +114,7 @@ public class JudgeReply {
      * </p>
      */
     private String style;
-    
+
     /**
      * <p>
      * Create a new instance of JudgeReply.
@@ -152,7 +151,7 @@ public class JudgeReply {
         this.description = description;
         this.committedReply = committed;
         this.style = style;
-        replies.add(this);
+        JudgeReply.replies.add(this);
     }
 
     /**
@@ -216,6 +215,7 @@ public class JudgeReply {
      * 
      * @return the name
      */
+    @Override
     public String toString() {
         return this.name;
     }
@@ -230,6 +230,7 @@ public class JudgeReply {
      * @param object
      *            the object to compare.
      */
+    @Override
     public boolean equals(Object object) {
         return object instanceof JudgeReply && this.id == ((JudgeReply) object).id;
     }
@@ -241,6 +242,7 @@ public class JudgeReply {
      * 
      * @return the hash code of this instance.
      */
+    @Override
     public int hashCode() {
         return new Long(this.id).hashCode();
     }
@@ -256,7 +258,7 @@ public class JudgeReply {
      *            the id of JudgeReply
      */
     public static JudgeReply findById(long id) {
-        for (JudgeReply reply : replies) {
+        for (JudgeReply reply : JudgeReply.replies) {
             if (reply.getId() == id) {
                 return reply;
             }
@@ -275,13 +277,23 @@ public class JudgeReply {
      *            the name of JudgeReply.
      */
     public static JudgeReply findByName(String name) {
-        for (JudgeReply reply : replies) {
+        for (JudgeReply reply : JudgeReply.replies) {
             if (reply.getName().equals(name)) {
                 return reply;
             }
         }
         return null;
 
+    }
+
+    public static List<JudgeReply> getAllJudgeReplies() {
+        List<JudgeReply> judgeReplies = new ArrayList<JudgeReply>();
+        for (JudgeReply reply : JudgeReply.replies) {
+            if (reply.isCommittedReply()) {
+                judgeReplies.add(reply);
+            }
+        }
+        return judgeReplies;
     }
 
 }

@@ -23,49 +23,51 @@ import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.util.ProblemStatistics;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 
-/** 
- * MyEclipse Struts
- * Creation date: 07-27-2008
+/**
+ * MyEclipse Struts Creation date: 07-27-2008
  * 
  * XDoclet definition:
+ * 
  * @struts.action validate="true"
  * @struts.action-forward name="success" path="/show_problem_status.jsp"
  */
 public class ShowProblemStatusAction extends BaseAction {
-	/*
-	 * Generated Methods
-	 */
+    /*
+     * Generated Methods
+     */
 
-	/** 
-	 * Method execute
-	 * @param mapping
-	 * @param form
-	 * @param request
-	 * @param response
-	 * @return ActionForward
-	 */
-	public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-		
-		
-    	// check contest
-    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblemStatus.do");
-    	
-    	ActionForward forward = checkProblemViewPermission(mapping, context, isProblemset);
-    	if (forward != null) {
-    		return forward;
-    	}    	    	
-    	
-    	Problem problem = context.getProblem();
-    	String orderBy = context.getRequest().getParameter("orderBy");
-    	if (!"date".equals(orderBy) && !"memory".equals(orderBy)) {
-    		orderBy = "time";
-    	}
-    	if (problem != null) {
-    		ProblemStatistics statistics = StatisticsManager.getInstance().getProblemStatistics(problem.getId(), orderBy, 20);
-    		context.setAttribute("ProblemStatistics", statistics);
-    		
-    	}
-		
-		return handleSuccess(mapping, context, "success");
-	}
+    /**
+     * Method execute
+     * 
+     * @param mapping
+     * @param form
+     * @param request
+     * @param response
+     * @return ActionForward
+     */
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
+
+        // check contest
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblemStatus.do");
+
+        ActionForward forward = this.checkProblemViewPermission(mapping, context, isProblemset);
+        if (forward != null) {
+            return forward;
+        }
+
+        Problem problem = context.getProblem();
+        String orderBy = context.getRequest().getParameter("orderBy");
+        if (!"date".equals(orderBy) && !"memory".equals(orderBy)) {
+            orderBy = "time";
+        }
+        if (problem != null) {
+            ProblemStatistics statistics =
+                    StatisticsManager.getInstance().getProblemStatistics(problem.getId(), orderBy, 20);
+            context.setAttribute("ProblemStatistics", statistics);
+
+        }
+
+        return this.handleSuccess(mapping, context, "success");
+    }
 }

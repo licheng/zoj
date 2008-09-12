@@ -24,95 +24,93 @@ import cn.edu.zju.acm.onlinejudge.util.cache.Cache;
 
 public class ImageManager {
 
-	private final Cache<byte[]> imageCache;
-	
-	/**
-	 * ContestManager.
-	 */
-	private static ImageManager instance = null; 
+    private final Cache<byte[]> imageCache;
 
-	
     /**
-     * <p>Constructor of ContestManager class.</p>
-     * @throws PersistenceCreationException 
-     *
+     * ContestManager.
+     */
+    private static ImageManager instance = null;
+
+    /**
+     * <p>
+     * Constructor of ContestManager class.
+     * </p>
+     * 
+     * @throws PersistenceCreationException
+     * 
      */
     private ImageManager() throws PersistenceCreationException {
-    	imageCache = new Cache<byte[]>(60000, 30);      	
+        this.imageCache = new Cache<byte[]>(60000, 30);
     }
-    
+
     /**
      * Gets the singleton instance.
+     * 
      * @return the singleton instance.
-     * @throws PersistenceCreationException 
+     * @throws PersistenceCreationException
      */
     public static ImageManager getInstance() throws PersistenceCreationException {
-    	if (instance == null) {
-    		synchronized (ImageManager.class) {
-    			if (instance == null) {
-    				instance = new ImageManager();
-    			}
-    		}
-    	}
-    	return instance;
+        if (ImageManager.instance == null) {
+            synchronized (ImageManager.class) {
+                if (ImageManager.instance == null) {
+                    ImageManager.instance = new ImageManager();
+                }
+            }
+        }
+        return ImageManager.instance;
     }
-    
-   
-    
+
     public byte[] getImage(String name) {
-    	if (name == null || name.trim().length() == 0) {
-        	return null;
+        if (name == null || name.trim().length() == 0) {
+            return null;
         }
-    	
-    	synchronized (imageCache) {
-    		byte[] image = (byte[]) imageCache.get(name);
-    		if (image == null) {
-    			image = getImageFile(name);
-    			imageCache.put(name, image);
-    		}
-    		return image;
-    	}
+
+        synchronized (this.imageCache) {
+            byte[] image = this.imageCache.get(name);
+            if (image == null) {
+                image = this.getImageFile(name);
+                this.imageCache.put(name, image);
+            }
+            return image;
+        }
     }
-    
-    private byte[] getImageFile(String name) {  
-    	
-    	File file = new File(ConfigManager.getImagePath(), name);
-    	System.out.println("**" + name);
-    	FileInputStream in = null;
+
+    private byte[] getImageFile(String name) {
+
+        File file = new File(ConfigManager.getImagePath(), name);
+        System.out.println("**" + name);
+        FileInputStream in = null;
         try {
-	        if (!file.isFile() || !file.canRead()) {
-	        	System.out.println("**fail");
-	        	return null;
-	        }
-	        
-	        in = new FileInputStream(file);
-	        ByteArrayOutputStream out = new ByteArrayOutputStream();
-	        byte[] buffer = new byte[102400];
-	        while (true) {
-	        	int l = in.read(buffer);
-	        	if (l == -1) {
-	        		break;
-	        	}
-	        	out.write(buffer, 0, l);
-	        }
-	        return out.toByteArray();
+            if (!file.isFile() || !file.canRead()) {
+                System.out.println("**fail");
+                return null;
+            }
+
+            in = new FileInputStream(file);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buffer = new byte[102400];
+            while (true) {
+                int l = in.read(buffer);
+                if (l == -1) {
+                    break;
+                }
+                out.write(buffer, 0, l);
+            }
+            return out.toByteArray();
         } catch (Exception e) {
-        	
-        	e.printStackTrace();        	
+
+            e.printStackTrace();
         } finally {
-        	if (in != null) {
-        		try {
-        			in.close();
-        		} catch (Exception e) {
-        			e.printStackTrace();
-        		}
-        	}
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        
+
         return null;
     }
-   
-    
-    
-    
+
 }

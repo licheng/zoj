@@ -36,53 +36,60 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class EditRoleAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public EditRoleAction() {
-        // empty
+    // empty
     }
 
     /**
      * Edit Role.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
+
         // check admin
-        ActionForward forward = checkAdmin(mapping, context);
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
+
         RoleForm roleForm = (RoleForm) form;
-        AuthorizationPersistence authorizationPersistence 
-            = PersistenceManager.getInstance().getAuthorizationPersistence();
-    
+        AuthorizationPersistence authorizationPersistence =
+                PersistenceManager.getInstance().getAuthorizationPersistence();
+
         if (roleForm.getId() == null || roleForm.getId().trim().length() == 0) {
-            long roleId = Utility.parseLong(context.getRequest().getParameter("roleId"));            
+            long roleId = Utility.parseLong(context.getRequest().getParameter("roleId"));
             RoleSecurity role = authorizationPersistence.getRole(roleId);
             if (role == null) {
-                return handleSuccess(mapping, context, "success");
+                return this.handleSuccess(mapping, context, "success");
             }
-            
+
             // add contest names
             Map<Long, String> contestNames = new TreeMap<Long, String>();
             for (AbstractContest contest : ContestManager.getInstance().getAllContests()) {
@@ -92,24 +99,23 @@ public class EditRoleAction extends BaseAction {
                 contestNames.put(contest.getId(), contest.getTitle());
             }
             context.setAttribute("ContestNames", contestNames);
-            
+
             // TODO add forums
             Map<Long, String> forumNames = new TreeMap<Long, String>();
             forumNames.put(1L, "ZOJ Forum");
             context.setAttribute("ForumNames", forumNames);
-                                    
+
             roleForm.populate(role);
-            return handleSuccess(mapping, context, "failure");
+            return this.handleSuccess(mapping, context, "failure");
         }
-        
-        RoleSecurity role = roleForm.toRole();        
+
+        RoleSecurity role = roleForm.toRole();
         authorizationPersistence.updateRole(role, context.getUserProfile().getId());
-        
+
         if (role.getId() == 1) {
             ContextAdapter.resetDefaultUserSecurity();
         }
-        return handleSuccess(mapping, context, "success");   	    	    	    	
-    }    
-        
+        return this.handleSuccess(mapping, context, "success");
+    }
+
 }
-    

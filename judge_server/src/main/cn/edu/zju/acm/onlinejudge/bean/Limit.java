@@ -16,10 +16,12 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>Limit bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Limit bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Limit {
@@ -28,41 +30,54 @@ public class Limit {
      * The default limit id.
      */
     public static final long DEFAULT_LIMIT_ID = 1;
-    
+
     /**
-     * <p>Represents id.</p>
+     * <p>
+     * Represents id.
+     * </p>
      */
     private long id = -1;
 
     /**
-     * <p>Represents timeLimit.</p>
+     * <p>
+     * Represents timeLimit.
+     * </p>
      */
     private int timeLimit = -1;
 
     /**
-     * <p>Represents memoryLimit.</p>
+     * <p>
+     * Represents memoryLimit.
+     * </p>
      */
     private int memoryLimit = -1;
 
     /**
-     * <p>Represents outputLimit.</p>
+     * <p>
+     * Represents outputLimit.
+     * </p>
      */
     private int outputLimit = -1;
 
     /**
-     * <p>Represents submissionLimit.</p>
+     * <p>
+     * Represents submissionLimit.
+     * </p>
      */
     private int submissionLimit = -1;
 
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Limit() {
-    }
+    public Limit() {}
 
     /**
-     * <p>Gets id.</p>
-     *
+     * <p>
+     * Gets id.
+     * </p>
+     * 
      * @return id
      */
     public long getId() {
@@ -70,17 +85,22 @@ public class Limit {
     }
 
     /**
-     * <p>Sets id.</p>
-     *
-     * @param id id
+     * <p>
+     * Sets id.
+     * </p>
+     * 
+     * @param id
+     *            id
      */
     public void setId(long id) {
         this.id = id;
     }
 
     /**
-     * <p>Gets timeLimit.</p>
-     *
+     * <p>
+     * Gets timeLimit.
+     * </p>
+     * 
      * @return timeLimit
      */
     public int getTimeLimit() {
@@ -88,17 +108,22 @@ public class Limit {
     }
 
     /**
-     * <p>Sets timeLimit.</p>
-     *
-     * @param timeLimit timeLimit
+     * <p>
+     * Sets timeLimit.
+     * </p>
+     * 
+     * @param timeLimit
+     *            timeLimit
      */
     public void setTimeLimit(int timeLimit) {
         this.timeLimit = timeLimit;
     }
 
     /**
-     * <p>Gets memoryLimit.</p>
-     *
+     * <p>
+     * Gets memoryLimit.
+     * </p>
+     * 
      * @return memoryLimit
      */
     public int getMemoryLimit() {
@@ -106,17 +131,22 @@ public class Limit {
     }
 
     /**
-     * <p>Sets memoryLimit.</p>
-     *
-     * @param memoryLimit memoryLimit
+     * <p>
+     * Sets memoryLimit.
+     * </p>
+     * 
+     * @param memoryLimit
+     *            memoryLimit
      */
     public void setMemoryLimit(int memoryLimit) {
         this.memoryLimit = memoryLimit;
     }
 
     /**
-     * <p>Gets outputLimit.</p>
-     *
+     * <p>
+     * Gets outputLimit.
+     * </p>
+     * 
      * @return outputLimit
      */
     public int getOutputLimit() {
@@ -124,17 +154,22 @@ public class Limit {
     }
 
     /**
-     * <p>Sets outputLimit.</p>
-     *
-     * @param outputLimit outputLimit
+     * <p>
+     * Sets outputLimit.
+     * </p>
+     * 
+     * @param outputLimit
+     *            outputLimit
      */
     public void setOutputLimit(int outputLimit) {
         this.outputLimit = outputLimit;
     }
 
     /**
-     * <p>Gets submissionLimit.</p>
-     *
+     * <p>
+     * Gets submissionLimit.
+     * </p>
+     * 
      * @return submissionLimit
      */
     public int getSubmissionLimit() {
@@ -142,9 +177,12 @@ public class Limit {
     }
 
     /**
-     * <p>Sets submissionLimit.</p>
-     *
-     * @param submissionLimit submissionLimit
+     * <p>
+     * Sets submissionLimit.
+     * </p>
+     * 
+     * @param submissionLimit
+     *            submissionLimit
      */
     public void setSubmissionLimit(int submissionLimit) {
         this.submissionLimit = submissionLimit;

@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import javax.servlet.http.Cookie;
 
 import org.apache.struts.action.ActionForm;
@@ -39,68 +38,75 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class LoginAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public LoginAction() {
-        // empty
+    // empty
     }
 
     /**
      * Login.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    		
-    	LoginForm loginForm = (LoginForm) form;    	
-    	String forwardPath = context.getRequest().getParameter("forward");
 
-    	if (loginForm.getHandle() == null) {
-    		context.setAttribute("forward", forwardPath);
-    		return handleSuccess(mapping, context, "failure");
-    	}    	    	
-    	
-    	ActionMessages errors = authenticate(loginForm, context);
-    	if (errors.size() > 0) {
-    		context.setAttribute("forward", forwardPath);
-    		return handleFailure(mapping, context, errors);
-    	}    	     	
-    	
-    	if (loginForm.isRememberMe()) {
-    		 Cookie ch = new Cookie("oj_handle", loginForm.getHandle());
-    		 ch.setMaxAge(3600 * 24 * 30);
-    		 ch.setPath("/");
-    		 context.getResponse().addCookie(ch);
-    		 
-    		 Cookie cp = new Cookie("oj_password", loginForm.getPassword());
-    		 cp.setMaxAge(3600 * 24 * 30);
-    		 cp.setPath("/");
-    		 context.getResponse().addCookie(cp);
-    	} 
-    	  
-    	if (forwardPath != null) {    		    		
-    		return handleSuccess(new ActionForward(forwardPath, true), context, forwardPath);
-    	}
-    	return handleSuccess(mapping, context, "success");    	    	    	
-    }    
-    
+        LoginForm loginForm = (LoginForm) form;
+        String forwardPath = context.getRequest().getParameter("forward");
+
+        if (loginForm.getHandle() == null) {
+            context.setAttribute("forward", forwardPath);
+            return this.handleSuccess(mapping, context, "failure");
+        }
+
+        ActionMessages errors = this.authenticate(loginForm, context);
+        if (errors.size() > 0) {
+            context.setAttribute("forward", forwardPath);
+            return this.handleFailure(mapping, context, errors);
+        }
+
+        if (loginForm.isRememberMe()) {
+            Cookie ch = new Cookie("oj_handle", loginForm.getHandle());
+            ch.setMaxAge(3600 * 24 * 30);
+            ch.setPath("/");
+            context.getResponse().addCookie(ch);
+
+            Cookie cp = new Cookie("oj_password", loginForm.getPassword());
+            cp.setMaxAge(3600 * 24 * 30);
+            cp.setPath("/");
+            context.getResponse().addCookie(cp);
+        }
+
+        if (forwardPath != null) {
+            return this.handleSuccess(new ActionForward(forwardPath, true), context, forwardPath);
+        }
+        return this.handleSuccess(mapping, context, "success");
+    }
+
     /**
      * Authenticate.
      * 
@@ -110,39 +116,37 @@ public class LoginAction extends BaseAction {
      */
     private ActionMessages authenticate(LoginForm form, ContextAdapter context) throws PersistenceException {
         context.getRequest().getSession().invalidate();
-    	ActionMessages errors = new ActionMessages();
-    	UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
-    	UserProfile profile = userPersistence.login(form.getHandle(), form.getPassword());
-    	
-    	// no such user
-    	if (profile == null) {
-    		errors.add("password", new ActionMessage("LoginForm.password.invalid"));
-    		return errors;
-    	}
-    	
-    	// deactivated
-    	if (!profile.isActive()) {
-    		errors.add("password", new ActionMessage("LoginForm.password.deactivated"));
-    		return errors;
-    	}
-    	
-    	AuthorizationPersistence authorizationPersistence 
-    		= PersistenceManager.getInstance().getAuthorizationPersistence();
-    	
-    	// get UserSecurity
-    	UserSecurity security = authorizationPersistence.getUserSecurity(profile.getId());
-    	
-    	// get UserPreference
-    	UserPreference perference = userPersistence.getUserPreference(profile.getId());
-    	
-    	context.setUserProfile(profile);
-    	context.setUserSecurity(security);
-    	context.setUserPreference(perference);
-    	    	
-    	return errors;
+        ActionMessages errors = new ActionMessages();
+        UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
+        UserProfile profile = userPersistence.login(form.getHandle(), form.getPassword());
 
-    }    
+        // no such user
+        if (profile == null) {
+            errors.add("password", new ActionMessage("LoginForm.password.invalid"));
+            return errors;
+        }
 
+        // deactivated
+        if (!profile.isActive()) {
+            errors.add("password", new ActionMessage("LoginForm.password.deactivated"));
+            return errors;
+        }
+
+        AuthorizationPersistence authorizationPersistence =
+                PersistenceManager.getInstance().getAuthorizationPersistence();
+
+        // get UserSecurity
+        UserSecurity security = authorizationPersistence.getUserSecurity(profile.getId());
+
+        // get UserPreference
+        UserPreference perference = userPersistence.getUserPreference(profile.getId());
+
+        context.setUserProfile(profile);
+        context.setUserSecurity(security);
+        context.setUserPreference(perference);
+
+        return errors;
+
+    }
 
 }
-    

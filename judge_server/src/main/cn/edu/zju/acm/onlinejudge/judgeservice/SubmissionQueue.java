@@ -16,6 +16,7 @@
 /**
  * 
  */
+
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import java.lang.ref.ReferenceQueue;
@@ -32,7 +33,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 
 class SubmissionQueue {
     private Candidate head = new Candidate();
-    private Candidate tail = head;
+    private Candidate tail = this.head;
     private Map<SubmissionFilter, WeakReference<SubmissionQueueReaderImpl>> readerMap =
             new HashMap<SubmissionFilter, WeakReference<SubmissionQueueReaderImpl>>();
     private ReferenceQueue<SubmissionQueueReaderImpl> readerReferenceQueue =
@@ -80,7 +81,8 @@ class SubmissionQueue {
         SubmissionFilter submissionFilter;
 
         public ReaderReference(SubmissionQueueReaderImpl referent,
-                ReferenceQueue<? super SubmissionQueueReaderImpl> queue, SubmissionFilter submissionFilter) {
+                               ReferenceQueue<? super SubmissionQueueReaderImpl> queue,
+                               SubmissionFilter submissionFilter) {
             super(referent, queue);
             this.submissionFilter = submissionFilter;
         }
@@ -130,7 +132,7 @@ class SubmissionQueue {
         private SubmissionQueueReaderImpl(SubmissionFilter submissionFilter) {
             this.submissionFilter = submissionFilter;
             for (int i = Priority.MIN; i <= Priority.MAX; ++i) {
-                candidatesLists.add(new LinkedList<Candidate>());
+                this.candidatesLists.add(new LinkedList<Candidate>());
             }
         }
 

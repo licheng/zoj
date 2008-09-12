@@ -34,8 +34,8 @@ public class Cache<T> {
     private final CacheCleaner cacheCleaner;
 
     public Set<Object> getKeys() {
-        synchronized (entries) {
-            return new HashSet<Object>(entries.keySet());
+        synchronized (this.entries) {
+            return new HashSet<Object>(this.entries.keySet());
         }
     }
 
@@ -48,79 +48,79 @@ public class Cache<T> {
         }
         this.timeout = timeout;
         this.capability = capability;
-        cacheCleaner = new CacheCleaner();
-        cacheCleaner.start();
+        this.cacheCleaner = new CacheCleaner();
+        this.cacheCleaner.start();
     }
 
     public T get(Object key) {
         if (key == null) {
             throw new IllegalArgumentException("key is null");
         }
-        synchronized (entries) {
-            CacheEntry<T> entry = entries.get(key);
+        synchronized (this.entries) {
+            CacheEntry<T> entry = this.entries.get(key);
             if (entry == null) {
                 return null;
             }
             CacheKey cacheKey = entry.getKey();
-            lastAccessQueue.remove(cacheKey);
+            this.lastAccessQueue.remove(cacheKey);
             cacheKey.setLastAccessTime(System.currentTimeMillis());
-            lastAccessQueue.add(cacheKey);
+            this.lastAccessQueue.add(cacheKey);
             return entry.getEntry();
         }
     }
 
     public void put(Object key, T value) {
-        put(key, value, timeout);
+        this.put(key, value, this.timeout);
     }
 
     public void put(Object key, T value, long timeout) {
         if (key == null) {
             throw new IllegalArgumentException("key is null");
         }
-        if (capability == 0) {
+        if (this.capability == 0) {
             return;
         }
-        synchronized (entries) {
-            CacheEntry<T> entry = entries.get(key);
+        synchronized (this.entries) {
+            CacheEntry<T> entry = this.entries.get(key);
             CacheKey cacheKey = null;
             long now = System.currentTimeMillis();
             if (entry == null) {
                 cacheKey = new CacheKey(key, now + timeout, now);
-                if (entries.size() >= capability) {
-                    CacheKey next = (CacheKey) lastAccessQueue.first();
+                if (this.entries.size() >= this.capability) {
+                    CacheKey next = this.lastAccessQueue.first();
                     if (!key.equals(next.getKey())) {
-                        removeKey(next);
+                        this.removeKey(next);
                     }
                 }
             } else {
                 cacheKey = entry.getKey();
-                lastAccessQueue.remove(cacheKey);
-                evictionQueue.remove(cacheKey);
+                this.lastAccessQueue.remove(cacheKey);
+                this.evictionQueue.remove(cacheKey);
                 cacheKey.setLastAccessTime(now);
                 cacheKey.setEvictionTime(now + timeout);
             }
-            lastAccessQueue.add(cacheKey);
-            evictionQueue.add(cacheKey);
-            entries.put(key, new CacheEntry<T>(value, cacheKey));
+            this.lastAccessQueue.add(cacheKey);
+            this.evictionQueue.add(cacheKey);
+            this.entries.put(key, new CacheEntry<T>(value, cacheKey));
         }
     }
 
     private void removeKey(CacheKey key) {
-        lastAccessQueue.remove(key);
-        evictionQueue.remove(key);
-        entries.remove(key.getKey());
+        this.lastAccessQueue.remove(key);
+        this.evictionQueue.remove(key);
+        this.entries.remove(key.getKey());
     }
 
     public Object remove(Object key) {
         if (key == null) {
             throw new IllegalArgumentException("key is null");
         }
-        synchronized (entries) {
-            CacheEntry<T> entry = entries.get(key);
+        synchronized (this.entries) {
+            CacheEntry<T> entry = this.entries.get(key);
             if (entry == null) {
                 return null;
             } else {
-                removeKey(entry.getKey());
+                this.removeKey(entry.getKey());
             }
             return entry.getEntry();
         }
@@ -131,13 +131,14 @@ public class Cache<T> {
             throw new IllegalArgumentException("key is null");
         }
         CacheKey key = new CacheKey(obj);
-        synchronized (entries) {
-            return entries.containsKey(key);
+        synchronized (this.entries) {
+            return this.entries.containsKey(key);
         }
     }
 
+    @Override
     public void finalize() {
-        cacheCleaner.quit();
+        this.cacheCleaner.quit();
     }
 
     private class AccessTimeComparator implements Comparator<CacheKey> {
@@ -172,27 +173,28 @@ public class Cache<T> {
 
         }
 
+        @Override
         public void run() {
-            while (!quitFlag) {
+            while (!this.quitFlag) {
 
-                see("cleaner - before");
+                Cache.this.see("cleaner - before");
                 long now = System.currentTimeMillis();
-                synchronized (entries) {
-                    for (Iterator<CacheKey> it = evictionQueue.iterator(); it.hasNext();) {
+                synchronized (Cache.this.entries) {
+                    for (Iterator<CacheKey> it = Cache.this.evictionQueue.iterator(); it.hasNext();) {
                         CacheKey key = it.next();
                         if (key.getEvictionTime() < now) {
-                            see("cleaning - " + key.getKey());
+                            Cache.this.see("cleaning - " + key.getKey());
                             it.remove();
-                            evictionQueue.remove(key);
-                            entries.remove(key.getKey());
+                            Cache.this.evictionQueue.remove(key);
+                            Cache.this.entries.remove(key.getKey());
                         } else {
                             break;
                         }
                     }
                 }
-                see("cleaner - after");
+                Cache.this.see("cleaner - after");
                 try {
-                    Thread.sleep(SLEEP_TIME);
+                    Thread.sleep(Cache.SLEEP_TIME);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -200,7 +202,7 @@ public class Cache<T> {
         }
 
         public void quit() {
-            quitFlag = true;
+            this.quitFlag = true;
         }
 
     }
@@ -208,15 +210,15 @@ public class Cache<T> {
     private long start = System.currentTimeMillis();
 
     public void see(String message) {
-        if (true)
+        if (true) {
             return;
-        System.out.println(message + " " + (System.currentTimeMillis() - start));
-        synchronized (entries) {
-            for (Iterator<Object> it = entries.keySet().iterator(); it.hasNext();) {
-                Object key = it.next();
-                CacheEntry<T> value = entries.get(key);
-                System.out.print(key + "(" + (value.getKey().getEvictionTime() - start) + "," +
-                        (value.getKey().getLastAccessTime() - start) + ") - ");
+        }
+        System.out.println(message + " " + (System.currentTimeMillis() - this.start));
+        synchronized (this.entries) {
+            for (Object key : this.entries.keySet()) {
+                CacheEntry<T> value = this.entries.get(key);
+                System.out.print(key + "(" + (value.getKey().getEvictionTime() - this.start) + "," +
+                    (value.getKey().getLastAccessTime() - this.start) + ") - ");
                 System.out.println(value.getEntry());
             }
         }

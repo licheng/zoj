@@ -16,8 +16,9 @@
 package cn.edu.zju.acm.onlinejudge.bean.request;
 
 /**
- * <p></p>
+ * <p>
+ * </p>
+ * 
  * @poseidon-object-id [I1a80fb8m1050eed7fbfmm439f]
  */
-public class ThreadCriteria {
-}
+public class ThreadCriteria {}

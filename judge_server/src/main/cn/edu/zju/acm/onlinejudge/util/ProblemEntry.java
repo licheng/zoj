@@ -19,19 +19,18 @@ import cn.edu.zju.acm.onlinejudge.bean.Problem;
 
 public class ProblemEntry {
 
-	private Problem problem = null;
-	private byte[] checker = null;
-	private byte[] input = null;
-	private byte[] output = null;
-	private byte[] text = null;
+    private Problem problem = null;
+    private byte[] checker = null;
+    private byte[] input = null;
+    private byte[] output = null;
+    private byte[] text = null;
     private byte[] checkerSource = null;
-    private byte[] solution = null;	
-	private String checkerSourceType = null;
+    private byte[] solution = null;
+    private String checkerSourceType = null;
     private String solutionType = null;
-    
-	
-	public byte[] getCheckerSource() {
-        return checkerSource;
+
+    public byte[] getCheckerSource() {
+        return this.checkerSource;
     }
 
     public void setCheckerSource(byte[] checkerSource) {
@@ -39,7 +38,7 @@ public class ProblemEntry {
     }
 
     public byte[] getSolution() {
-        return solution;
+        return this.solution;
     }
 
     public void setSolution(byte[] solution) {
@@ -47,51 +46,51 @@ public class ProblemEntry {
     }
 
     public ProblemEntry() {
-		
-	}
-	
-	public Problem getProblem() {
-		return problem;
-	}
-	
-	public void setProblem(Problem problem) {
-		this.problem = problem;
-	}
-	
-	public byte[] getChecker() {
-		return checker;
-	}
-	
-	public void setChecker(byte[] checker) {
-		this.checker = checker;
-	}
-	
-	public byte[] getInput() {
-		return input;
-	}
-	
-	public void setInput(byte[] input) {
-		this.input = input;
-	}
-	
-	public byte[] getOutput() {
-		return output;
-	}
-	
-	public void setOutput(byte[] output) {
-		this.output = output;
-	}
-	
-	public byte[] getText() {
-		return text;
-	}
-	
-	public void setText(byte[] text) {
-		this.text = text;
-	}
+
+    }
+
+    public Problem getProblem() {
+        return this.problem;
+    }
+
+    public void setProblem(Problem problem) {
+        this.problem = problem;
+    }
+
+    public byte[] getChecker() {
+        return this.checker;
+    }
+
+    public void setChecker(byte[] checker) {
+        this.checker = checker;
+    }
+
+    public byte[] getInput() {
+        return this.input;
+    }
+
+    public void setInput(byte[] input) {
+        this.input = input;
+    }
+
+    public byte[] getOutput() {
+        return this.output;
+    }
+
+    public void setOutput(byte[] output) {
+        this.output = output;
+    }
+
+    public byte[] getText() {
+        return this.text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
+    }
 
     public String getCheckerSourceType() {
-        return checkerSourceType;
+        return this.checkerSourceType;
     }
 
     public void setCheckerSourceType(String checkerSourceType) {
@@ -99,7 +98,7 @@ public class ProblemEntry {
     }
 
     public String getSolutionType() {
-        return solutionType;
+        return this.solutionType;
     }
 
     public void setSolutionType(String solutionType) {

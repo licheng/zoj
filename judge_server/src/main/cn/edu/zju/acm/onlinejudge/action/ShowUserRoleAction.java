@@ -30,58 +30,62 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowUserRoleAction extends BaseAction {
-    
-	
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ShowUserRoleAction() {
-    	
+
     }
 
     /**
      * ShowRunsAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	
-        
+
         // check admin
-        ActionForward forward = checkAdmin(mapping, context);
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
+
         long userId = Utility.parseLong(String.valueOf(context.getRequest().getParameter("userId")));
         UserProfile user = UserManager.getInstance().getUserProfile(userId);
         if (user == null) {
-            return handleSuccess(mapping, context, "failure");
+            return this.handleSuccess(mapping, context, "failure");
         }
-        
-        
-        context.getRequest().setAttribute("User", user);        
-        context.getRequest().setAttribute("Roles", 
-                PersistenceManager.getInstance().getAuthorizationPersistence().getAllRoles());
-        context.getRequest().setAttribute("UserRoles", 
-                PersistenceManager.getInstance().getAuthorizationPersistence().getUserSecurity(userId).getRoles());
 
-        return handleSuccess(mapping, context, "success");
-                  	    	   
+        context.getRequest().setAttribute("User", user);
+        context.getRequest().setAttribute("Roles",
+                                          PersistenceManager.getInstance().getAuthorizationPersistence().getAllRoles());
+        context.getRequest().setAttribute(
+                                          "UserRoles",
+                                          PersistenceManager.getInstance().getAuthorizationPersistence()
+                                                            .getUserSecurity(userId).getRoles());
+
+        return this.handleSuccess(mapping, context, "success");
+
     }
 
 }
-    

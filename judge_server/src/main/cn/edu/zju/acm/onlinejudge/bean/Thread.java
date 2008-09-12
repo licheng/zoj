@@ -16,43 +16,56 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>Thread bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Thread bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Thread {
 
     /**
-     * <p>Represents id.</p>
+     * <p>
+     * Represents id.
+     * </p>
      */
     private long id = -1;
 
     /**
-     * <p>Represents forumId.</p>
+     * <p>
+     * Represents forumId.
+     * </p>
      */
     private long forumId = -1;
 
     /**
-     * <p>Represents userProfileId.</p>
+     * <p>
+     * Represents userProfileId.
+     * </p>
      */
     private long userProfileId = -1;
 
     /**
-     * <p>Represents title.</p>
+     * <p>
+     * Represents title.
+     * </p>
      */
     private String title = null;
 
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Thread() {
-    }
+    public Thread() {}
 
     /**
-     * <p>Gets id.</p>
-     *
+     * <p>
+     * Gets id.
+     * </p>
+     * 
      * @return id
      */
     public long getId() {
@@ -60,17 +73,22 @@ public class Thread {
     }
 
     /**
-     * <p>Sets id.</p>
-     *
-     * @param id id
+     * <p>
+     * Sets id.
+     * </p>
+     * 
+     * @param id
+     *            id
      */
     public void setId(long id) {
         this.id = id;
     }
 
     /**
-     * <p>Gets forumId.</p>
-     *
+     * <p>
+     * Gets forumId.
+     * </p>
+     * 
      * @return forumId
      */
     public long getForumId() {
@@ -78,17 +96,22 @@ public class Thread {
     }
 
     /**
-     * <p>Sets forumId.</p>
-     *
-     * @param forumId forumId
+     * <p>
+     * Sets forumId.
+     * </p>
+     * 
+     * @param forumId
+     *            forumId
      */
     public void setForumId(long forumId) {
         this.forumId = forumId;
     }
 
     /**
-     * <p>Gets userProfileId.</p>
-     *
+     * <p>
+     * Gets userProfileId.
+     * </p>
+     * 
      * @return userProfileId
      */
     public long getUserProfileId() {
@@ -96,17 +119,22 @@ public class Thread {
     }
 
     /**
-     * <p>Sets userProfileId.</p>
-     *
-     * @param userProfileId userProfileId
+     * <p>
+     * Sets userProfileId.
+     * </p>
+     * 
+     * @param userProfileId
+     *            userProfileId
      */
     public void setUserProfileId(long userProfileId) {
         this.userProfileId = userProfileId;
     }
 
     /**
-     * <p>Gets title.</p>
-     *
+     * <p>
+     * Gets title.
+     * </p>
+     * 
      * @return title
      */
     public String getTitle() {
@@ -114,9 +142,12 @@ public class Thread {
     }
 
     /**
-     * <p>Sets title.</p>
-     *
-     * @param title title
+     * <p>
+     * Sets title.
+     * </p>
+     * 
+     * @param title
+     *            title
      */
     public void setTitle(String title) {
         this.title = title;

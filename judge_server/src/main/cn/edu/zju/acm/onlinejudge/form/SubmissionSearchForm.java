@@ -27,88 +27,113 @@ import org.apache.struts.action.ActionMessage;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.LanguagePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
-
 /**
- * <p>SubmissionSerachForm.</p>
+ * <p>
+ * SubmissionSerachForm.
+ * </p>
  * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public class SubmissionSearchForm extends ActionForm implements Serializable {
-	
+
     /**
-     * <p>Represents search.</p>
+     * <p>
+     * Represents search.
+     * </p>
      */
     private boolean search = false;
-    
+
     /**
-     * <p>Represents contestId.</p>
+     * <p>
+     * Represents contestId.
+     * </p>
      */
     private String contestId;
 
     /**
-     * <p>Represents problemId.</p>
+     * <p>
+     * Represents problemId.
+     * </p>
      */
     private String problemCode;
 
     /**
-     * <p>Represents handle.</p>
+     * <p>
+     * Represents handle.
+     * </p>
      */
     private String handle;
 
     /**
-     * <p>Represents idStart.</p>
+     * <p>
+     * Represents idStart.
+     * </p>
      */
     private String idStart;
 
     /**
-     * <p>Represents idEnd.</p>
+     * <p>
+     * Represents idEnd.
+     * </p>
      */
     private String idEnd;
 
     /**
-     * <p>Represents timeStart.</p>
+     * <p>
+     * Represents timeStart.
+     * </p>
      */
     private String timeStart;
 
     /**
-     * <p>Represents timeEnd.</p>
+     * <p>
+     * Represents timeEnd.
+     * </p>
      */
     private String timeEnd;
-    
+
     /**
-     * <p>Represents lastId.</p>
+     * <p>
+     * Represents lastId.
+     * </p>
      */
     private String lastId;
 
     /**
-     * <p>Represents firstId.</p>
+     * <p>
+     * Represents firstId.
+     * </p>
      */
     private String firstId;
-    
+
     /**
-     * <p>Represents judgeReplies.</p>
+     * <p>
+     * Represents judgeReplies.
+     * </p>
      */
     private String[] judgeReplyIds;
 
     /**
-     * <p>Represents languages.</p>
+     * <p>
+     * Represents languages.
+     * </p>
      */
     private String[] languageIds;
 
     /**
      * SubmissionCriteria.
      */
-    public SubmissionSearchForm() {    	
-    }
-    
+    public SubmissionSearchForm() {}
+
     /**
-     * @param search The search to set.
+     * @param search
+     *            The search to set.
      */
     public void setSearch(boolean search) {
         this.search = search;
@@ -118,11 +143,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the search.
      */
     public boolean isSearch() {
-        return search;
+        return this.search;
     }
-    
+
     /**
-     * @param problemId The problemId to set.
+     * @param problemId
+     *            The problemId to set.
      */
     public void setProblemCode(String problemCode) {
         this.problemCode = problemCode;
@@ -132,11 +158,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the problemId.
      */
     public String getProblemCode() {
-        return problemCode;
+        return this.problemCode;
     }
 
     /**
-     * @param contestId The contestId to set.
+     * @param contestId
+     *            The contestId to set.
      */
     public void setContestId(String contestId) {
         this.contestId = contestId;
@@ -146,11 +173,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the contestId.
      */
     public String getContestId() {
-        return contestId;
+        return this.contestId;
     }
 
     /**
-     * @param handle The handle to set.
+     * @param handle
+     *            The handle to set.
      */
     public void setHandle(String handle) {
         this.handle = handle;
@@ -160,11 +188,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the handle.
      */
     public String getHandle() {
-        return handle;
+        return this.handle;
     }
 
     /**
-     * @param idStart The idStart to set.
+     * @param idStart
+     *            The idStart to set.
      */
     public void setIdStart(String idStart) {
         this.idStart = idStart;
@@ -174,11 +203,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the idStart.
      */
     public String getIdStart() {
-        return idStart;
+        return this.idStart;
     }
 
     /**
-     * @param idEnd The idEnd to set.
+     * @param idEnd
+     *            The idEnd to set.
      */
     public void setIdEnd(String idEnd) {
         this.idEnd = idEnd;
@@ -188,11 +218,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the idEnd.
      */
     public String getIdEnd() {
-        return idEnd;
+        return this.idEnd;
     }
 
     /**
-     * @param timeStart The timeStart to set.
+     * @param timeStart
+     *            The timeStart to set.
      */
     public void setTimeStart(String timeStart) {
         this.timeStart = timeStart;
@@ -202,11 +233,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the timeStart.
      */
     public String getTimeStart() {
-        return timeStart;
+        return this.timeStart;
     }
 
     /**
-     * @param timeEnd The timeEnd to set.
+     * @param timeEnd
+     *            The timeEnd to set.
      */
     public void setTimeEnd(String timeEnd) {
         this.timeEnd = timeEnd;
@@ -216,11 +248,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the timeEnd.
      */
     public String getTimeEnd() {
-        return timeEnd;
+        return this.timeEnd;
     }
 
     /**
-     * @param judgeReplyIds The judgeReplyIds to set.
+     * @param judgeReplyIds
+     *            The judgeReplyIds to set.
      */
     public void setJudgeReplyIds(String[] judgeReplyIds) {
         this.judgeReplyIds = judgeReplyIds;
@@ -230,11 +263,12 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the judgeReplies.
      */
     public String[] getJudgeReplyIds() {
-        return judgeReplyIds;
+        return this.judgeReplyIds;
     }
 
     /**
-     * @param languageIds The languages to set.
+     * @param languageIds
+     *            The languages to set.
      */
     public void setLanguageIds(String[] languageIds) {
         this.languageIds = languageIds;
@@ -244,141 +278,141 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
      * @return Returns the languages.
      */
     public String[] getLanguageIds() {
-        return languageIds;
+        return this.languageIds;
     }
-   
+
     /**
      * Validates the form.
-     *
-     * @param mapping the action mapping.
-     * @param request the user request.
-     *
+     * 
+     * @param mapping
+     *            the action mapping.
+     * @param request
+     *            the user request.
+     * 
      * @return collection of validation errors.
      */
-    public ActionErrors check() {    	
-       
+    public ActionErrors check() {
+
         ActionErrors errors = new ActionErrors();
-        
-        checkString(errors, problemCode, 8, "problemCode", "SubmissionSearchForm.problemCode.invalid");
-        checkString(errors, handle, 32, "handle", "SubmissionSearchForm.handle.invalid");
-        checkLong(errors, idStart, "idStart", "SubmissionSearchForm.idStart.invalid");
-        checkLong(errors, idEnd, "idEnd", "SubmissionSearchForm.idEnd.invalid");
-        checkTime(errors, timeStart, "timeStart", "SubmissionSearchForm.timeStart.invalid");
-        checkTime(errors, timeEnd, "timeEnd", "SubmissionSearchForm.timeEnd.invalid");
-        checkLongArray(errors, languageIds, "languageIds", "SubmissionSearchForm.languageIds.invalid");
-        checkLongArray(errors, judgeReplyIds, "judgeReplyIds", "SubmissionSearchForm.judgeReplyIds.invalid");
-                        
+
+        this.checkString(errors, this.problemCode, 8, "problemCode", "SubmissionSearchForm.problemCode.invalid");
+        this.checkString(errors, this.handle, 32, "handle", "SubmissionSearchForm.handle.invalid");
+        this.checkLong(errors, this.idStart, "idStart", "SubmissionSearchForm.idStart.invalid");
+        this.checkLong(errors, this.idEnd, "idEnd", "SubmissionSearchForm.idEnd.invalid");
+        this.checkTime(errors, this.timeStart, "timeStart", "SubmissionSearchForm.timeStart.invalid");
+        this.checkTime(errors, this.timeEnd, "timeEnd", "SubmissionSearchForm.timeEnd.invalid");
+        this.checkLongArray(errors, this.languageIds, "languageIds", "SubmissionSearchForm.languageIds.invalid");
+        this.checkLongArray(errors, this.judgeReplyIds, "judgeReplyIds", "SubmissionSearchForm.judgeReplyIds.invalid");
+
         return errors;
     }
-    
+
     private void checkString(ActionErrors errors, String value, int length, String key, String message) {
-    	if (value != null && value.trim().length() > 0) {
-        	if (value.trim().length() > length) {
-        		errors.add(key, new ActionMessage(message));
-        	}
+        if (value != null && value.trim().length() > 0) {
+            if (value.trim().length() > length) {
+                errors.add(key, new ActionMessage(message));
+            }
         }
     }
-    
+
     private void checkLong(ActionErrors errors, String value, String key, String message) {
-    	if (value != null && value.trim().length() > 0) {    		 
-    		try {
-    			long l = Long.parseLong(value);
-    			if (l < 0) {
-    				errors.add(key, new ActionMessage(message));
-    			}
-    		} catch (Exception e) {
-    			errors.add(key, new ActionMessage(message));
-    		}
-    	}
+        if (value != null && value.trim().length() > 0) {
+            try {
+                long l = Long.parseLong(value);
+                if (l < 0) {
+                    errors.add(key, new ActionMessage(message));
+                }
+            } catch (Exception e) {
+                errors.add(key, new ActionMessage(message));
+            }
+        }
     }
-    
+
     private void checkLongArray(ActionErrors errors, String[] value, String key, String message) {
-    	if (value != null && value.length > 0) {    
-    		if (value.length > 100) {
-    			errors.add(key, new ActionMessage(message));
-				return;
-    		}
-    		for(int i = 0; i < value.length; ++i) {
-    			try {
-	    			long l = Long.parseLong(value[i]);
-	    			if (l < 0) {
-	    				errors.add(key, new ActionMessage(message));
-	    				return;
-	    			}
-	    		} catch (Exception e) {
-	    			errors.add(key, new ActionMessage(message));
-	    			return;
-	    		}
-    	}
-    	}
+        if (value != null && value.length > 0) {
+            if (value.length > 100) {
+                errors.add(key, new ActionMessage(message));
+                return;
+            }
+            for (int i = 0; i < value.length; ++i) {
+                try {
+                    long l = Long.parseLong(value[i]);
+                    if (l < 0) {
+                        errors.add(key, new ActionMessage(message));
+                        return;
+                    }
+                } catch (Exception e) {
+                    errors.add(key, new ActionMessage(message));
+                    return;
+                }
+            }
+        }
     }
-    
+
     private void checkTime(ActionErrors errors, String value, String key, String message) {
-    	if (value != null && value.trim().length() > 0) {
-	    	if (!Utility.validateTimestamp(value)) {
-	            errors.add(key, new ActionMessage(message));
-	        }
-    	}
+        if (value != null && value.trim().length() > 0) {
+            if (!Utility.validateTimestamp(value)) {
+                errors.add(key, new ActionMessage(message));
+            }
+        }
     }
-    
-    
+
     public SubmissionCriteria toSubmissionCriteria() throws ParseException, NumberFormatException, PersistenceException {
-    	
-    	SubmissionCriteria criteria = new SubmissionCriteria();
-    	if (contestId != null && contestId.trim().length() > 0) {
-    		criteria.setContestId(Long.valueOf(contestId.trim()));
-    	}
-    	if (problemCode != null && problemCode.trim().length() > 0) {
-    		criteria.setProblemCode(problemCode);
-    	}
-    	if (handle != null && handle.trim().length() > 0) {
-    		criteria.setHandle(handle);
-    	}
-    	if (idStart != null && idStart.trim().length() > 0) {
-    		criteria.setIdStart(Long.valueOf(idStart.trim()));
-    	}
-    	if (idEnd != null && idEnd.trim().length() > 0) {
-    		criteria.setIdEnd(Long.valueOf(idEnd.trim()));
-    	}
-    	if (timeStart != null && timeStart.trim().length() > 0) {
-    		criteria.setTimeStart(Utility.parseTimestamp(timeStart));
-    	}
-    	if (timeEnd != null && timeEnd.trim().length() > 0) {
-    		criteria.setTimeEnd(Utility.parseTimestamp(timeEnd));
-    	}
-    	if (languageIds != null && languageIds.length > 0) {
-    		ContestPersistence persistence = PersistenceManager.getInstance().getContestPersistence();
-    		List<Language> languages = new ArrayList<Language>();
-    		for (int i = 0; i < languageIds.length; ++i) {
-    			languages.add(persistence.getLanguage(Long.parseLong(languageIds[i])));
-    		}
-    		criteria.setLanguages(languages);
-    	}
-    	if (judgeReplyIds != null && judgeReplyIds.length > 0) {
-    		List<JudgeReply> judgeReplies = new ArrayList<JudgeReply>();
-    		for (int i = 0; i < judgeReplyIds.length; ++i) {
-    			judgeReplies.add(JudgeReply.findById(Long.parseLong(judgeReplyIds[i])));
-    		}
-    		criteria.setJudgeReplies(judgeReplies);
-    	}    	    	    	
-    	return criteria;
+
+        SubmissionCriteria criteria = new SubmissionCriteria();
+        if (this.contestId != null && this.contestId.trim().length() > 0) {
+            criteria.setContestId(Long.valueOf(this.contestId.trim()));
+        }
+        if (this.problemCode != null && this.problemCode.trim().length() > 0) {
+            criteria.setProblemCode(this.problemCode);
+        }
+        if (this.handle != null && this.handle.trim().length() > 0) {
+            criteria.setHandle(this.handle);
+        }
+        if (this.idStart != null && this.idStart.trim().length() > 0) {
+            criteria.setIdStart(Long.valueOf(this.idStart.trim()));
+        }
+        if (this.idEnd != null && this.idEnd.trim().length() > 0) {
+            criteria.setIdEnd(Long.valueOf(this.idEnd.trim()));
+        }
+        if (this.timeStart != null && this.timeStart.trim().length() > 0) {
+            criteria.setTimeStart(Utility.parseTimestamp(this.timeStart));
+        }
+        if (this.timeEnd != null && this.timeEnd.trim().length() > 0) {
+            criteria.setTimeEnd(Utility.parseTimestamp(this.timeEnd));
+        }
+        if (this.languageIds != null && this.languageIds.length > 0) {
+            LanguagePersistence persistence = PersistenceManager.getInstance().getLanguagePersistence();
+            List<Language> languages = new ArrayList<Language>();
+            for (int i = 0; i < this.languageIds.length; ++i) {
+                languages.add(persistence.getLanguage(Long.parseLong(this.languageIds[i])));
+            }
+            criteria.setLanguages(languages);
+        }
+        if (this.judgeReplyIds != null && this.judgeReplyIds.length > 0) {
+            List<JudgeReply> judgeReplies = new ArrayList<JudgeReply>();
+            for (int i = 0; i < this.judgeReplyIds.length; ++i) {
+                judgeReplies.add(JudgeReply.findById(Long.parseLong(this.judgeReplyIds[i])));
+            }
+            criteria.setJudgeReplies(judgeReplies);
+        }
+        return criteria;
     }
 
-	public String getLastId() {
-		return lastId;
-	}
+    public String getLastId() {
+        return this.lastId;
+    }
 
-	public void setLastId(String lastId) {
-		this.lastId = lastId;
-	}
+    public void setLastId(String lastId) {
+        this.lastId = lastId;
+    }
 
-	public String getFirstId() {
-		return firstId;
-	}
+    public String getFirstId() {
+        return this.firstId;
+    }
 
-	public void setFirstId(String firstId) {
-		this.firstId = firstId;
-	}
-    
-    
+    public void setFirstId(String firstId) {
+        this.firstId = firstId;
+    }
+
 }

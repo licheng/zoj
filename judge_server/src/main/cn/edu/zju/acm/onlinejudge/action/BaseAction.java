@@ -43,18 +43,14 @@ import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.PerformanceManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
-
-
-
-
 /**
  * BaseAction.
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public abstract class BaseAction extends Action {
-    
+
     /**
      * The enter operation.
      */
@@ -74,7 +70,7 @@ public abstract class BaseAction extends Action {
      * The generic error resource key.
      */
     private static final String GENERIC_ERROR_RESOURCE_KEY = "onlinejudge.failure";
-    
+
     /**
      * The logger name.
      */
@@ -83,66 +79,70 @@ public abstract class BaseAction extends Action {
     /**
      * The logger.
      */
-    private static Logger logger = null;        
-    
+    private static Logger logger = null;
+
     /**
      * This is where the action processes the request. It forwards the invocation to the abstract execute() method and
      * returns its forward. Unexcepted exceptions are handled.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param form the form bean for input.
-     * @param request the http servlet request.
-     * @param response the http servlet response.
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param form
+     *            the form bean for input.
+     * @param request
+     *            the http servlet request.
+     * @param response
+     *            the http servlet response.
+     * 
      * @return an action forward or null if the response is committed.
-     *
+     * 
      */
-    public ActionForward execute(ActionMapping mapping, ActionForm form, 
-    		HttpServletRequest request, HttpServletResponse response) {
-    	UserProfile user = (UserProfile) request.getSession().getAttribute(ContextAdapter.USER_PROFILE_SESSION_KEY);
-    	long actionId = PerformanceManager.getInstance().actionStart(this, request, user);
-    	
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+                                 HttpServletResponse response) {
+        UserProfile user = (UserProfile) request.getSession().getAttribute(ContextAdapter.USER_PROFILE_SESSION_KEY);
+        long actionId = PerformanceManager.getInstance().actionStart(this, request, user);
+
         ContextAdapter context = null;
         ActionForward forward = null;
         try {
             context = new ContextAdapter(request, response);
-            info(makeInfo(ENTER_OP, context.getOperator(), null, request));
+            this.info(this.makeInfo(BaseAction.ENTER_OP, context.getOperator(), null, request));
 
             // log parameters with debug level
             /*
-            debug("Received parameters:");
-            for (Enumeration enu = request.getParameterNames(); enu.hasMoreElements();) {
-                String name = (String) enu.nextElement();
-                debug("[" + name + "]");
-                for (int i = 0; i < request.getParameterValues(name).length; ++i) {
-                    debug("   [" + request.getParameterValues(name)[i] + "]");
-                }
-            } 
-            */           
+             * debug("Received parameters:"); for (Enumeration enu = request.getParameterNames();
+             * enu.hasMoreElements();) { String name = (String) enu.nextElement(); debug("[" + name + "]"); for (int i =
+             * 0; i < request.getParameterValues(name).length; ++i) { debug("   [" + request.getParameterValues(name)[i]
+             * + "]"); } }
+             */
 
-            forward = execute(mapping, form, context);
-        } catch (Exception e) {  
-        	error(e);
-        	forward = handleFailure(mapping, context, GENERIC_ERROR_RESOURCE_KEY);
+            forward = this.execute(mapping, form, context);
+        } catch (Exception e) {
+            this.error(e);
+            forward = this.handleFailure(mapping, context, BaseAction.GENERIC_ERROR_RESOURCE_KEY);
         }
-        
+
         PerformanceManager.getInstance().actionEnd(actionId);
         return forward;
-        
+
     }
 
     /**
      * This is the template method for BaseAction. All the actions in this component implements this metod.
-     *
+     * 
      * @return an action forward or null if the response is committed.
-     * @param mapping the action mapping that holds the forwards.
-     * @param form the form bean for input.
-     * @param context the action context to access resources.
-     *
-     * @throws Exception for unexpected errors during exection.
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param form
+     *            the form bean for input.
+     * @param context
+     *            the action context to access resources.
+     * 
+     * @throws Exception
+     *             for unexpected errors during exection.
      */
-    protected abstract ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) 
-    	throws Exception;
+    protected abstract ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception;
 
     /**
      * Gets the logger.
@@ -150,201 +150,238 @@ public abstract class BaseAction extends Action {
      * @return the logger.
      */
     private Logger getLogger() {
-    	if (logger == null) {
-    		synchronized (this) {
-    			if (logger == null) {
-    				String fileName = BaseAction.class.getClassLoader().getResource("log4j.properties").getFile();
-    				PropertyConfigurator.configure(fileName);
-    				logger = Logger.getLogger(LOGGER_NAME);
-    			}
-    		}
-    	}
-    	return logger;
+        if (BaseAction.logger == null) {
+            synchronized (this) {
+                if (BaseAction.logger == null) {
+                    String fileName = BaseAction.class.getClassLoader().getResource("log4j.properties").getFile();
+                    PropertyConfigurator.configure(fileName);
+                    BaseAction.logger = Logger.getLogger(BaseAction.LOGGER_NAME);
+                }
+            }
+        }
+        return BaseAction.logger;
     }
+
     /**
      * This logs a message with a level of DEBUG.
-     *
-     * @param message the message to log.
+     * 
+     * @param message
+     *            the message to log.
      */
     protected void debug(String message) {
-    	getLogger().debug(message);        
+        this.getLogger().debug(message);
     }
 
     /**
      * This logs a message with a level of INFO.
-     *
-     * @param message the message to log.
+     * 
+     * @param message
+     *            the message to log.
      */
     protected void info(String message) {
-    	getLogger().info(message);        
+        this.getLogger().info(message);
     }
 
     /**
      * This logs a message with a level of ERROR.
-     *
-     * @param message the message to log.
+     * 
+     * @param message
+     *            the message to log.
      */
     protected void error(String message) {
-    	getLogger().error(message);
+        this.getLogger().error(message);
     }
 
     /**
      * This logs an exception's stack trace with a level of ERROR.
-     *
-     * @param exception the exception to log.
+     * 
+     * @param exception
+     *            the exception to log.
      */
     protected void error(Throwable exception) {
-    	getLogger().error(null, exception);
+        this.getLogger().error(null, exception);
     }
 
     /**
      * Provides convenience method to handle errors.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param request the http servlet request.
-     * @param messageKey the resource key to retrieve the error message.
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param request
+     *            the http servlet request.
+     * @param messageKey
+     *            the resource key to retrieve the error message.
+     * 
      * @return the failure forward.
      */
     protected ActionForward handleFailure(ActionMapping mapping, ContextAdapter context, String resourceKey) {
-    	return handleFailure(mapping, context, GENERIC_ERROR_MESSAGE_KEY, resourceKey);
+        return this.handleFailure(mapping, context, BaseAction.GENERIC_ERROR_MESSAGE_KEY, resourceKey);
     }
-    
+
     /**
      * Provides convenience method to handle errors.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param request the http servlet request.
-     * @param messageKey the resource key to retrieve the error message.
-     * @param errorKey the error key.
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param request
+     *            the http servlet request.
+     * @param messageKey
+     *            the resource key to retrieve the error message.
+     * @param errorKey
+     *            the error key.
+     * 
      * @return the failure forward.
      */
-    protected ActionForward handleFailure(ActionMapping mapping, ContextAdapter context, 
-    		String errorKey, String resourceKey) {
-        info(makeInfo(EXIT_OP, context.getOperator(), "failure"));
-        
-        ActionMessages errors = new ActionMessages();        
+    protected ActionForward handleFailure(ActionMapping mapping, ContextAdapter context, String errorKey,
+                                          String resourceKey) {
+        this.info(this.makeInfo(BaseAction.EXIT_OP, context.getOperator(), "failure"));
+
+        ActionMessages errors = new ActionMessages();
         errors.add(errorKey, new ActionMessage(resourceKey));
-        saveErrors(context.getRequest(), errors);       
-        
+        this.saveErrors(context.getRequest(), errors);
+
         return mapping.findForward("failure");
     }
-    
+
     /**
      * Provides convenience method to handle errors.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param request the http servlet request.
-     * @param errors ActionMessages
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param request
+     *            the http servlet request.
+     * @param errors
+     *            ActionMessages
+     * 
      * @return the failure forward.
      */
-    protected ActionForward handleFailure(
-            ActionMapping mapping, ContextAdapter context, ActionMessages errors, String forwardName) {
-        info(makeInfo(EXIT_OP, context.getOperator(), forwardName));        
-        saveErrors(context.getRequest(), errors);               
+    protected ActionForward handleFailure(ActionMapping mapping, ContextAdapter context, ActionMessages errors,
+                                          String forwardName) {
+        this.info(this.makeInfo(BaseAction.EXIT_OP, context.getOperator(), forwardName));
+        this.saveErrors(context.getRequest(), errors);
         return mapping.findForward(forwardName);
     }
 
     /**
      * Provides convenience method to handle errors.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param request the http servlet request.
-     * @param errors ActionMessages
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param request
+     *            the http servlet request.
+     * @param errors
+     *            ActionMessages
+     * 
      * @return the failure forward.
      */
     protected ActionForward handleFailure(ActionMapping mapping, ContextAdapter context, ActionMessages errors) {
-        return handleFailure(mapping, context, errors, "failure");
+        return this.handleFailure(mapping, context, errors, "failure");
     }
-    
+
     /**
      * Handle successful exit with log. Helper method.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param context the action context to access resources.
-     * @param forwardName represents messsageKey if fail, forward name if succeed.
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param context
+     *            the action context to access resources.
+     * @param forwardName
+     *            represents messsageKey if fail, forward name if succeed.
+     * 
      * @return the specified forward.
      */
     protected ActionForward handleSuccess(ActionMapping mapping, ContextAdapter context) {
-        return handleSuccess(mapping.getInputForward(), context, mapping.getInput());
+        return this.handleSuccess(mapping.getInputForward(), context, mapping.getInput());
     }
-    
+
     /**
      * Handle successful exit with log. Helper method.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param context the action context to access resources.
-     * @param forwardName represents messsageKey if fail, forward name if succeed.
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param context
+     *            the action context to access resources.
+     * @param forwardName
+     *            represents messsageKey if fail, forward name if succeed.
+     * 
      * @return the specified forward.
      */
     protected ActionForward handleSuccess(ActionMapping mapping, ContextAdapter context, String forwardName) {
-        
-        return handleSuccess(mapping.findForward(forwardName), context, forwardName);
+
+        return this.handleSuccess(mapping.findForward(forwardName), context, forwardName);
     }
-    
-    
+
     /**
      * Handle successful exit with log. Helper method.
-     *
-     * @param mapping the action mapping that holds the forwards.
-     * @param context the action context to access resources.
-     * @param forwardName represents messsageKey if fail, forward name if succeed.
-     *
+     * 
+     * @param mapping
+     *            the action mapping that holds the forwards.
+     * @param context
+     *            the action context to access resources.
+     * @param forwardName
+     *            represents messsageKey if fail, forward name if succeed.
+     * 
      * @return the specified forward.
      */
-    protected ActionForward handleSuccess(ActionMapping mapping, ContextAdapter context, String forwardName, String parameter) {
+    protected ActionForward handleSuccess(ActionMapping mapping, ContextAdapter context, String forwardName,
+                                          String parameter) {
         String newPath = mapping.findForward(forwardName).getPath() + parameter;
         ActionForward forward = new RedirectingActionForward(newPath);
         System.out.print("*** " + newPath);
-        return handleSuccess(forward, context, forwardName);
+        return this.handleSuccess(forward, context, forwardName);
     }
-    
+
     /**
      * Handle successful exit with log. Helper method.
-     *
-     * @param forward the  forward.
-     * @param context the action context to access resources.
-     * @param forwardName represents messsageKey if fail, forward name if succeed.
-     *
+     * 
+     * @param forward
+     *            the forward.
+     * @param context
+     *            the action context to access resources.
+     * @param forwardName
+     *            represents messsageKey if fail, forward name if succeed.
+     * 
      * @return the specified forward.
      */
     protected ActionForward handleSuccess(ActionForward forward, ContextAdapter context, String forwardName) {
-        info(makeInfo(EXIT_OP, context.getOperator(), forwardName));
+        this.info(this.makeInfo(BaseAction.EXIT_OP, context.getOperator(), forwardName));
         return forward;
     }
-    
-    /**
-     * Synthesize information for entrance or exit in each action. Helper method.
-     *
-     * @param operation "Enter" or "Exit".
-     * @param actionType type of action.
-     * @param user the user.
-     * @param forward the action forward string.
-     *
-     * @return the synthesized information.
-     */
-    private String makeInfo(String operation, Object user, String forward) {
-        return makeInfo(operation, user, forward, null);
-    }
-    
 
     /**
      * Synthesize information for entrance or exit in each action. Helper method.
-     *
-     * @param operation "Enter" or "Exit".
-     * @param actionType type of action.
-     * @param user the user.
-     * @param forward the action forward string.
-     *
+     * 
+     * @param operation
+     *            "Enter" or "Exit".
+     * @param actionType
+     *            type of action.
+     * @param user
+     *            the user.
+     * @param forward
+     *            the action forward string.
+     * 
+     * @return the synthesized information.
+     */
+    private String makeInfo(String operation, Object user, String forward) {
+        return this.makeInfo(operation, user, forward, null);
+    }
+
+    /**
+     * Synthesize information for entrance or exit in each action. Helper method.
+     * 
+     * @param operation
+     *            "Enter" or "Exit".
+     * @param actionType
+     *            type of action.
+     * @param user
+     *            the user.
+     * @param forward
+     *            the action forward string.
+     * 
      * @return the synthesized information.
      */
     private String makeInfo(String operation, Object user, String forward, HttpServletRequest request) {
-        String actionType = getClass().getName();
+        String actionType = this.getClass().getName();
         actionType = actionType.substring(actionType.lastIndexOf(".") + 1);
         StringBuffer buffer = new StringBuffer();
         buffer.append(operation);
@@ -359,91 +396,90 @@ public abstract class BaseAction extends Action {
         }
         return buffer.toString();
     }
-    
 
-    
     /**
-     * Checks whether user is logged in. 
+     * Checks whether user is logged in.
+     * 
      * @return
      */
     protected boolean isLogin(ContextAdapter context) {
-    	return isLogin(context, false);
+        return this.isLogin(context, false);
     }
+
     /**
-     * Checks whether user is logged in. 
+     * Checks whether user is logged in.
+     * 
      * @return
      */
     protected boolean isLogin(ContextAdapter context, boolean includeParameters) {
-    	if (context.getUserProfile() == null) {
-    		String uri = context.getRequest().getRequestURI(); 
-    		uri = uri.substring(uri.indexOf('/', 1));    		
-    		if (includeParameters) {
-    			StringBuffer sb = new StringBuffer();
-    			sb.append(uri);
-    			Enumeration<String> e = context.getRequest().getParameterNames();
-    			boolean first = true;
-    			while (e.hasMoreElements()) {
+        if (context.getUserProfile() == null) {
+            String uri = context.getRequest().getRequestURI();
+            uri = uri.substring(uri.indexOf('/', 1));
+            if (includeParameters) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(uri);
+                Enumeration<String> e = context.getRequest().getParameterNames();
+                boolean first = true;
+                while (e.hasMoreElements()) {
                     String key = e.nextElement();
                     if ("source".equals(key)) {
                         continue;
                     }
-    				if (first) {
-    					sb.append("?");
-    					first = false;
-    				} else {
-    					sb.append("&");
-    				}
-    				sb.append(key + "=" + context.getRequest().getParameter(key));
-    			}
-    			uri = sb.toString();    			
-    		}
-    		context.setAttribute("forward", uri);
-    		
-    		
-    		return false;
-    	}
-    	return true;
+                    if (first) {
+                        sb.append("?");
+                        first = false;
+                    } else {
+                        sb.append("&");
+                    }
+                    sb.append(key + "=" + context.getRequest().getParameter(key));
+                }
+                uri = sb.toString();
+            }
+            context.setAttribute("forward", uri);
+
+            return false;
+        }
+        return true;
     }
 
-          
-    protected ActionForward checkContestViewPermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
-        return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.VIEW);
+    protected ActionForward checkContestViewPermission(ActionMapping mapping, ContextAdapter context,
+                                                       Boolean isProblemset, boolean checkStart) throws Exception {
+        return this.checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.VIEW);
     }
-    
-    protected ActionForward checkContestParticipatePermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
-        return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.PARTICIPATE);
-    }    
-    
-    protected ActionForward checkContestAdminPermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
-        return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.ADMIN);
+
+    protected ActionForward checkContestParticipatePermission(ActionMapping mapping, ContextAdapter context,
+                                                              Boolean isProblemset, boolean checkStart) throws Exception {
+        return this.checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.PARTICIPATE);
     }
-    
-    protected ActionForward checkContestViewSourcePermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, boolean checkStart) throws Exception {
-        return checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.PARTICIPATECANVIEWSOURCE);
+
+    protected ActionForward checkContestAdminPermission(ActionMapping mapping, ContextAdapter context,
+                                                        Boolean isProblemset, boolean checkStart) throws Exception {
+        return this.checkContestPermission(mapping, context, isProblemset, checkStart, PermissionLevel.ADMIN);
     }
-    
-    protected ActionForward checkContestPermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset, 
-            boolean checkStart, PermissionLevel level) throws Exception {
+
+    protected ActionForward checkContestViewSourcePermission(ActionMapping mapping, ContextAdapter context,
+                                                             Boolean isProblemset, boolean checkStart) throws Exception {
+        return this.checkContestPermission(mapping, context, isProblemset, checkStart,
+                                           PermissionLevel.PARTICIPATECANVIEWSOURCE);
+    }
+
+    protected ActionForward checkContestPermission(ActionMapping mapping, ContextAdapter context, Boolean isProblemset,
+                                                   boolean checkStart, PermissionLevel level) throws Exception {
         // get the contest
         AbstractContest contest = context.getContest();
-        if (contest == null || (isProblemset != null && (contest instanceof Contest == isProblemset.booleanValue()))) {
+        if (contest == null || isProblemset != null && contest instanceof Contest == isProblemset.booleanValue()) {
             context.setAttribute("contest", null);
-            ActionMessages messages = new ActionMessages();       
+            ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nocontestid"));
             this.saveErrors(context.getRequest(), messages);
             if (isProblemset != null) {
-            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+                context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
             }
-            return handleFailure(mapping, context, messages, "nopermission");
+            return this.handleFailure(mapping, context, messages, "nopermission");
         }
-        
+
         context.setAttribute("contest", contest);
-        // check contest permission 
+        // check contest permission
         UserSecurity userSecurity = context.getUserSecurity();
         boolean hasPermisstion = false;
         if (level == PermissionLevel.ADMIN) {
@@ -454,74 +490,69 @@ public abstract class BaseAction extends Action {
             hasPermisstion = userSecurity.canViewContest(contest.getId());
         } else if (level == PermissionLevel.PARTICIPATECANVIEWSOURCE) {
             hasPermisstion = userSecurity.canViewSource(contest.getId());
-        }  
+        }
         if (!hasPermisstion) {
-            ActionMessages messages = new ActionMessages();       
+            ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nopermission"));
             this.saveErrors(context.getRequest(), messages);
             if (isProblemset != null) {
-            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+                context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
             }
-            return handleFailure(mapping, context, messages, "nopermission");                   
-        }        
-        
+            return this.handleFailure(mapping, context, messages, "nopermission");
+        }
+
         // check start time
         if (checkStart && !userSecurity.canAdminContest(contest.getId())) {
-            return checkContestStart(mapping, context, contest);                      
+            return this.checkContestStart(mapping, context, contest);
         }
-        return null;        
+        return null;
     }
-    
-    protected ActionForward checkProblemViewPermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
-        return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.VIEW);
-    }
-    
-    protected ActionForward checkProblemParticipatePermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
-        return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.PARTICIPATE);
-    }    
-    
- 
-    
-    
-    
-    protected ActionForward checkProblemAdminPermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
-        return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.ADMIN);
-    } 
-    
-    protected ActionForward checkProblemViewSourecPermission(
-            ActionMapping mapping, ContextAdapter context, Boolean isProblemset) throws Exception {
-        return checkProblemPermission(mapping, context, isProblemset, PermissionLevel.PARTICIPATECANVIEWSOURCE);
-    } 
-    
-    protected ActionForward checkProblemPermission(ActionMapping mapping, ContextAdapter context, 
-    		Boolean isProblemset, PermissionLevel level) throws Exception {
-    	
-        
-        Problem problem = context.getProblem();
-    	AbstractContest contest = null;
 
-    	if (problem != null) {
-        	contest = ContestManager.getInstance().getContest(problem.getContestId());
-    	}
-    	
-        if (problem == null || contest == null || 
-        		(isProblemset != null && (contest instanceof Contest) == isProblemset.booleanValue())) {        	
-        	ActionMessages messages = new ActionMessages();       
+    protected ActionForward checkProblemViewPermission(ActionMapping mapping, ContextAdapter context,
+                                                       Boolean isProblemset) throws Exception {
+        return this.checkProblemPermission(mapping, context, isProblemset, PermissionLevel.VIEW);
+    }
+
+    protected ActionForward checkProblemParticipatePermission(ActionMapping mapping, ContextAdapter context,
+                                                              Boolean isProblemset) throws Exception {
+        return this.checkProblemPermission(mapping, context, isProblemset, PermissionLevel.PARTICIPATE);
+    }
+
+    protected ActionForward checkProblemAdminPermission(ActionMapping mapping, ContextAdapter context,
+                                                        Boolean isProblemset) throws Exception {
+        return this.checkProblemPermission(mapping, context, isProblemset, PermissionLevel.ADMIN);
+    }
+
+    protected ActionForward checkProblemViewSourecPermission(ActionMapping mapping, ContextAdapter context,
+                                                             Boolean isProblemset) throws Exception {
+        return this.checkProblemPermission(mapping, context, isProblemset, PermissionLevel.PARTICIPATECANVIEWSOURCE);
+    }
+
+    protected ActionForward checkProblemPermission(ActionMapping mapping, ContextAdapter context, Boolean isProblemset,
+                                                   PermissionLevel level) throws Exception {
+
+        Problem problem = context.getProblem();
+        AbstractContest contest = null;
+
+        if (problem != null) {
+            contest = ContestManager.getInstance().getContest(problem.getContestId());
+        }
+
+        if (problem == null || contest == null || isProblemset != null &&
+            contest instanceof Contest == isProblemset.booleanValue()) {
+            ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showproblem.noproblemid"));
             this.saveErrors(context.getRequest(), messages);
             if (isProblemset != null) {
-            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
-            }   
-            return handleFailure(mapping, context, messages, "nopermission");
+                context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+            }
+            return this.handleFailure(mapping, context, messages, "nopermission");
         }
-        
-        context.setAttribute("contest", contest);
-        context.setAttribute("problem", problem);        
 
-        // check contest permission 
+        context.setAttribute("contest", contest);
+        context.setAttribute("problem", problem);
+
+        // check contest permission
         UserSecurity userSecurity = context.getUserSecurity();
         boolean hasPermisstion = false;
         if (level == PermissionLevel.ADMIN) {
@@ -532,53 +563,50 @@ public abstract class BaseAction extends Action {
             hasPermisstion = userSecurity.canViewSource(contest.getId());
         } else if (level == PermissionLevel.VIEW) {
             hasPermisstion = userSecurity.canViewContest(contest.getId());
-        }  
+        }
         if (!hasPermisstion) {
-            ActionMessages messages = new ActionMessages();       
+            ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nopermission"));
             this.saveErrors(context.getRequest(), messages);
             if (isProblemset != null) {
-            	context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
+                context.setAttribute("back", isProblemset ? "showProblemsets.do" : "showContests.do");
             }
-            return handleFailure(mapping, context, messages, "nopermission");                   
+            return this.handleFailure(mapping, context, messages, "nopermission");
         }
-        
+
         // check start time
         if (userSecurity.canAdminContest(contest.getId())) {
             return null;
         } else {
-            return checkContestStart(mapping, context, contest);                      
+            return this.checkContestStart(mapping, context, contest);
         }
-         
+
     }
-    
-    private ActionForward checkContestStart(ActionMapping mapping, ContextAdapter context, AbstractContest contest) 
-        throws PersistenceException {
+
+    private ActionForward checkContestStart(ActionMapping mapping, ContextAdapter context, AbstractContest contest) throws PersistenceException {
         if (contest.getStartTime() == null) {
             return null;
         }
-    	if (contest.getStartTime().getTime() > System.currentTimeMillis()) {         	
-         	ActionMessages messages = new ActionMessages();       
+        if (contest.getStartTime().getTime() > System.currentTimeMillis()) {
+            ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nostarted"));
             this.saveErrors(context.getRequest(), messages);
-            context.setAttribute("back", "contestInfo.do?contestId=" + contest.getId());         
-             
-        	return handleFailure(mapping, context, messages, "nopermission");
+            context.setAttribute("back", "contestInfo.do?contestId=" + contest.getId());
+
+            return this.handleFailure(mapping, context, messages, "nopermission");
         }
-        return null;  
+        return null;
     }
-    
+
     protected ActionForward checkAdmin(ActionMapping mapping, ContextAdapter context) throws Exception {
         UserSecurity security = context.getUserSecurity();
         if (security == null || !security.isSuperAdmin()) {
-            return handleSuccess(mapping, context, "nopermission");
+            return this.handleSuccess(mapping, context, "nopermission");
         }
-        return null;            
+        return null;
     }
 
-
-    protected ActionForward checkLastLoginIP(
-            ActionMapping mapping, ContextAdapter context, boolean isProblemset) throws Exception {
+    protected ActionForward checkLastLoginIP(ActionMapping mapping, ContextAdapter context, boolean isProblemset) throws Exception {
         String ip = context.getRequest().getRemoteHost();
         long contestId = context.getContest().getId();
         String ipSessionKey = "last_submit_ip" + contestId;
@@ -596,14 +624,14 @@ public abstract class BaseAction extends Action {
             context.setSessionAttribute(ipSessionKey, lastIp);
         }
         if (!lastIp.equals(ip)) {
-            ActionMessages messages = new ActionMessages();       
+            ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.submit.invalid_ip"));
             this.saveErrors(context.getRequest(), messages);
-            context.setAttribute("back", "contestInfo.do?contestId=" + contestId);         
-             
-            return handleFailure(mapping, context, messages, "nopermission");
+            context.setAttribute("back", "contestInfo.do?contestId=" + contestId);
+
+            return this.handleFailure(mapping, context, messages, "nopermission");
         }
-        return null;  
-        
-    }   
+        return null;
+
+    }
 }

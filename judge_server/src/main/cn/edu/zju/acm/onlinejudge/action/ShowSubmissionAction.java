@@ -32,37 +32,43 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowSubmissionAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ShowSubmissionAction() {
-        // empty
+    // empty
     }
 
     /**
      * ShowSourceAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
         HttpServletResponse response = context.getResponse();
-        
+
         long id = Utility.parseLong(context.getRequest().getParameter("submissionId"));
-        
+
         Submission submission = ContestManager.getInstance().getSubmission(id);
         if (submission == null) {
             response.sendError(404);
@@ -70,24 +76,23 @@ public class ShowSubmissionAction extends BaseAction {
         }
         Problem problem = ContestManager.getInstance().getProblem(submission.getProblemId());
         context.setAttribute("problem", problem);
-        ActionForward forward = checkProblemViewSourecPermission(mapping, context, null);
+        ActionForward forward = this.checkProblemViewSourecPermission(mapping, context, null);
         if (forward != null) {
             response.sendError(404);
             return null;
         }
-                
+
         response.setContentType("text/plain");
-        boolean download = "true".equalsIgnoreCase(context.getRequest().getParameter("download"));        
-        if (download) { 
-            response.setHeader("Content-disposition", 
-                    "attachment; filename=" + id + "." + submission.getLanguage().getOptions());
+        boolean download = "true".equalsIgnoreCase(context.getRequest().getParameter("download"));
+        if (download) {
+            response.setHeader("Content-disposition", "attachment; filename=" + id + "." +
+                submission.getLanguage().getOptions());
         }
         response.getOutputStream().write(submission.getContent().getBytes());
-        
+
         response.getOutputStream().close();
-                
+
         return null;
-                          	    	   
-    }                 
+
+    }
 }
-    

@@ -40,122 +40,137 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowProblemsAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ShowProblemsAction() {
-        // empty
+    // empty
     }
 
     /**
      * ShowProblemsAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	// check contest
-    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblems.do");
-    	
-    	ActionForward forward = checkContestViewPermission(mapping, context, isProblemset, true);
-    	if (forward != null) {
-    		return  forward;
-    	}    
+        // check contest
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblems.do");
+
+        ActionForward forward = this.checkContestViewPermission(mapping, context, isProblemset, true);
+        if (forward != null) {
+            return forward;
+        }
         AbstractContest contest = context.getContest();
 
         long problemsCount = ContestManager.getInstance().getProblemsCount(contest.getId());
-        
+
         long pageNumber = Utility.parseLong(context.getRequest().getParameter("pageNumber"));
         if (pageNumber < 1) {
-            pageNumber = 1;            
+            pageNumber = 1;
         }
         long problemsPerPage = 100;
-    	if (problemsCount <= (pageNumber - 1) * problemsPerPage) {
+        if (problemsCount <= (pageNumber - 1) * problemsPerPage) {
             pageNumber = 1;
         }
         long totalPages = 1;
         if (problemsCount > 0) {
             totalPages = (problemsCount - 1) / problemsPerPage + 1;
         }
-        
-        List<Problem> problems = ContestManager.getInstance().getContestProblems(
-                contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);               
-        
-    	ContestStatistics contestStatistics = null;
-    	contestStatistics = StatisticsManager.getInstance().getContestStatistics(
-            contest.getId(), (int) ((pageNumber - 1) * problemsPerPage), (int) problemsPerPage);
-    	
-    	UserStatistics userStatistics = null;
+
+        List<Problem> problems =
+                ContestManager.getInstance().getContestProblems(contest.getId(),
+                                                                (int) ((pageNumber - 1) * problemsPerPage),
+                                                                (int) problemsPerPage);
+
+        ContestStatistics contestStatistics = null;
+        contestStatistics =
+                StatisticsManager.getInstance().getContestStatistics(contest.getId(),
+                                                                     (int) ((pageNumber - 1) * problemsPerPage),
+                                                                     (int) problemsPerPage);
+
+        UserStatistics userStatistics = null;
         if (context.getUserProfile() != null && problems.size() > 0) {
-        	userStatistics = StatisticsManager.getInstance().getUserStatistics(
-        			contest.getId(), context.getUserProfile().getId());
-        } 
-        
-	    context.setAttribute("problems", problems);
-	    context.setAttribute("ContestStatistics", contestStatistics);
-	    context.setAttribute("UserStatistics", userStatistics);
-	    context.setAttribute("totalPages", new Long(totalPages));
-        context.setAttribute("currentPage", new Long(pageNumber));                 
+            userStatistics =
+                    StatisticsManager.getInstance()
+                                     .getUserStatistics(contest.getId(), context.getUserProfile().getId());
+        }
+
+        context.setAttribute("problems", problems);
+        context.setAttribute("ContestStatistics", contestStatistics);
+        context.setAttribute("UserStatistics", userStatistics);
+        context.setAttribute("totalPages", new Long(totalPages));
+        context.setAttribute("currentPage", new Long(pageNumber));
         System.out.println(problems.size());
         System.out.println(contestStatistics);
         System.out.println(userStatistics);
         System.out.println(pageNumber);
         System.out.println(totalPages);
-        if (checkContestAdminPermission(mapping, context, isProblemset, true) == null
-        	&& "true".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
+        if (this.checkContestAdminPermission(mapping, context, isProblemset, true) == null &&
+            "true".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
             List<String> checkMessages = new ArrayList<String>();
             for (Object obj : problems) {
                 Problem p = (Problem) obj;
-                checkExists("Text", getReferenceLength(p, ReferenceType.DESCRIPTION), "ERROR", checkMessages, p);
-                checkExists("Input", getReferenceLength(p, ReferenceType.INPUT), "ERROR", checkMessages, p);
+                this.checkExists("Text", this.getReferenceLength(p, ReferenceType.DESCRIPTION), "ERROR", checkMessages,
+                                 p);
+                this.checkExists("Input", this.getReferenceLength(p, ReferenceType.INPUT), "ERROR", checkMessages, p);
                 if (p.isChecker()) {
-                    checkExists("Output", getReferenceLength(p, ReferenceType.OUTPUT), "WARNING", checkMessages, p);
-                    //checkExists("Checker", getReferenceLength(p, ReferenceType.CHECKER), "WARNING", checkMessages, p);
-                    checkExists("Checker source", getReferenceLength(p, ReferenceType.CHECKER_SOURCE), "ERROR", checkMessages, p);
+                    this.checkExists("Output", this.getReferenceLength(p, ReferenceType.OUTPUT), "WARNING",
+                                     checkMessages, p);
+                    // checkExists("Checker", getReferenceLength(p, ReferenceType.CHECKER), "WARNING", checkMessages,
+                    // p);
+                    this.checkExists("Checker source", this.getReferenceLength(p, ReferenceType.CHECKER_SOURCE),
+                                     "ERROR", checkMessages, p);
                 } else {
-                    checkExists("Output", getReferenceLength(p, ReferenceType.OUTPUT), "ERROR", checkMessages, p);
+                    this.checkExists("Output", this.getReferenceLength(p, ReferenceType.OUTPUT), "ERROR",
+                                     checkMessages, p);
                 }
-                checkExists("Judge solution", getReferenceLength(p, ReferenceType.JUDGE_SOLUTION), "WARNING", checkMessages, p);
+                this.checkExists("Judge solution", this.getReferenceLength(p, ReferenceType.JUDGE_SOLUTION), "WARNING",
+                                 checkMessages, p);
             }
             context.setAttribute("CheckMessages", checkMessages);
         }
-        
-        return handleSuccess(mapping, context, "success");                
-                  	    	   
-    }  
-    
+
+        return this.handleSuccess(mapping, context, "success");
+
+    }
+
     private void checkExists(String name, long length, String level, List<String> checkMessages, Problem p) {
         if (length == -1) {
-            checkMessages.add(level + "[ "+ p.getCode() + "] - " + name + " is missing.");
+            checkMessages.add(level + "[ " + p.getCode() + "] - " + name + " is missing.");
         } else if (length == 0) {
-            checkMessages.add(level + "[ "+ p.getCode() + "] - " + name + " is empty.");
+            checkMessages.add(level + "[ " + p.getCode() + "] - " + name + " is empty.");
         }
     }
-    
-    
+
     private long getReferenceLength(Problem p, ReferenceType type) throws Exception {
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
         List<Reference> refs = referencePersistence.getProblemReferenceInfo(p.getId(), type);
-        
+
         if (refs.size() == 0) {
             return -1;
         }
-        Reference ref = (Reference) refs.get(0);
-        return ref.getSize();        
+        Reference ref = refs.get(0);
+        return ref.getSize();
     }
 
 }
-    

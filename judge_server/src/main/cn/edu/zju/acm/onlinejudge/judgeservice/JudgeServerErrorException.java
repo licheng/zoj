@@ -12,6 +12,7 @@
  * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
  * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;

@@ -20,31 +20,38 @@ import java.util.List;
 import cn.edu.zju.acm.onlinejudge.bean.Configuration;
 
 /**
- * <p>ConfigurationPersistence interface defines the API used to load and store Configurations
- * from the persistence layer.</p>
- *
+ * <p>
+ * ConfigurationPersistence interface defines the API used to load and store Configurations from the persistence layer.
+ * </p>
+ * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public interface ConfigurationPersistence {
 
     /**
-     * <p>Returns a list of Configuration instances retrieved from persistence layer.</p>
-     *
+     * <p>
+     * Returns a list of Configuration instances retrieved from persistence layer.
+     * </p>
+     * 
      * @return a list of Configuration instances retrieved from persistence layer.
-     * @throws PersistenceException wrapping a persistence implementation specific exception
+     * @throws PersistenceException
+     *             wrapping a persistence implementation specific exception
      */
     List<Configuration> getConfigurations() throws PersistenceException;
 
     /**
-     * <p>Stores the given list of Configuration instances to persistence layer.</p>
-     *
-     * @param configurations a list of Configuration instances to store
-     * @param user the id of the user who made this modification.
-     * @throws PersistenceException wrapping a persistence implementation specific exception
+     * <p>
+     * Stores the given list of Configuration instances to persistence layer.
+     * </p>
+     * 
+     * @param configurations
+     *            a list of Configuration instances to store
+     * @param user
+     *            the id of the user who made this modification.
+     * @throws PersistenceException
+     *             wrapping a persistence implementation specific exception
      */
     void setConfigurations(List<Configuration> configurations, long user) throws PersistenceException;
 
 }
-
-

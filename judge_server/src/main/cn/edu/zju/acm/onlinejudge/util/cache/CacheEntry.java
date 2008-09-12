@@ -16,17 +16,19 @@
 package cn.edu.zju.acm.onlinejudge.util.cache;
 
 class CacheEntry<T> {
-	private final T entry;
-	private final CacheKey key;
-	public CacheEntry(T entry, CacheKey key) {
-		this.entry = entry;
-		this.key = key;		
-	}
-	public T getEntry() {
-		return entry;
-	}
-	
-	public CacheKey getKey() {
-		return key;
-	}
+    private final T entry;
+    private final CacheKey key;
+
+    public CacheEntry(T entry, CacheKey key) {
+        this.entry = entry;
+        this.key = key;
+    }
+
+    public T getEntry() {
+        return this.entry;
+    }
+
+    public CacheKey getKey() {
+        return this.key;
+    }
 }

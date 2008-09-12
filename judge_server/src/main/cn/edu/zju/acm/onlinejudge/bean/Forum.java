@@ -16,38 +16,49 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>Forum bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Forum bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Forum {
 
     /**
-     * <p>Represents id.</p>
+     * <p>
+     * Represents id.
+     * </p>
      */
     private long id = -1;
 
     /**
-     * <p>Represents name.</p>
+     * <p>
+     * Represents name.
+     * </p>
      */
     private String name = null;
 
     /**
-     * <p>Represents description.</p>
+     * <p>
+     * Represents description.
+     * </p>
      */
     private String description = null;
 
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Forum() {
-    }
+    public Forum() {}
 
     /**
-     * <p>Gets id.</p>
-     *
+     * <p>
+     * Gets id.
+     * </p>
+     * 
      * @return id
      */
     public long getId() {
@@ -55,17 +66,22 @@ public class Forum {
     }
 
     /**
-     * <p>Sets id.</p>
-     *
-     * @param id id
+     * <p>
+     * Sets id.
+     * </p>
+     * 
+     * @param id
+     *            id
      */
     public void setId(long id) {
         this.id = id;
     }
 
     /**
-     * <p>Gets name.</p>
-     *
+     * <p>
+     * Gets name.
+     * </p>
+     * 
      * @return name
      */
     public String getName() {
@@ -73,17 +89,22 @@ public class Forum {
     }
 
     /**
-     * <p>Sets name.</p>
-     *
-     * @param name name
+     * <p>
+     * Sets name.
+     * </p>
+     * 
+     * @param name
+     *            name
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * <p>Gets description.</p>
-     *
+     * <p>
+     * Gets description.
+     * </p>
+     * 
      * @return description
      */
     public String getDescription() {
@@ -91,9 +112,12 @@ public class Forum {
     }
 
     /**
-     * <p>Sets description.</p>
-     *
-     * @param description description
+     * <p>
+     * Sets description.
+     * </p>
+     * 
+     * @param description
+     *            description
      */
     public void setDescription(String description) {
         this.description = description;

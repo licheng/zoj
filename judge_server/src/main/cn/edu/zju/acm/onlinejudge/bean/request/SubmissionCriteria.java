@@ -21,78 +21,99 @@ import java.util.List;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 
-
 /**
- * <p>SubmissionCriteria.</p>
+ * <p>
+ * SubmissionCriteria.
+ * </p>
  * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public class SubmissionCriteria {
-	
+
     /**
-     * <p>Represents contestId.</p>
+     * <p>
+     * Represents contestId.
+     * </p>
      */
     private Long contestId;
 
     /**
-     * <p>Represents problemId.</p>
+     * <p>
+     * Represents problemId.
+     * </p>
      */
     private Long problemId;
 
     /**
-     * <p>Represents problemCode.</p>
+     * <p>
+     * Represents problemCode.
+     * </p>
      */
     private String problemCode;
-    
+
     /**
      * 
      */
     private Long userId;
-    
+
     /**
-     * <p>Represents handle.</p>
+     * <p>
+     * Represents handle.
+     * </p>
      */
     private String handle;
 
     /**
-     * <p>Represents idStart.</p>
+     * <p>
+     * Represents idStart.
+     * </p>
      */
     private Long idStart;
 
     /**
-     * <p>Represents idEnd.</p>
+     * <p>
+     * Represents idEnd.
+     * </p>
      */
     private Long idEnd;
 
     /**
-     * <p>Represents timeStart.</p>
+     * <p>
+     * Represents timeStart.
+     * </p>
      */
     private Date timeStart;
 
     /**
-     * <p>Represents timeEnd.</p>
+     * <p>
+     * Represents timeEnd.
+     * </p>
      */
     private Date timeEnd;
 
     /**
-     * <p>Represents judgeReplies.</p>
+     * <p>
+     * Represents judgeReplies.
+     * </p>
      */
     private List<JudgeReply> judgeReplies;
 
     /**
-     * <p>Represents languages.</p>
+     * <p>
+     * Represents languages.
+     * </p>
      */
     private List<Language> languages;
 
     /**
      * SubmissionCriteria.
      */
-    public SubmissionCriteria() {    	
-    }
-    
+    public SubmissionCriteria() {}
+
     /**
-     * @param problemId The problemId to set.
+     * @param problemId
+     *            The problemId to set.
      */
     public void setProblemId(Long problemId) {
         this.problemId = problemId;
@@ -102,11 +123,12 @@ public class SubmissionCriteria {
      * @return Returns the problemId.
      */
     public Long getProblemId() {
-        return problemId;
+        return this.problemId;
     }
 
     /**
-     * @param problemCode The problemCode to set.
+     * @param problemCode
+     *            The problemCode to set.
      */
     public void setProblemCode(String problemCode) {
         this.problemCode = problemCode;
@@ -116,11 +138,12 @@ public class SubmissionCriteria {
      * @return Returns the problemCode.
      */
     public String getProblemCode() {
-        return problemCode;
+        return this.problemCode;
     }
-    
+
     /**
-     * @param contestId The contestId to set.
+     * @param contestId
+     *            The contestId to set.
      */
     public void setContestId(Long contestId) {
         this.contestId = contestId;
@@ -130,11 +153,12 @@ public class SubmissionCriteria {
      * @return Returns the contestId.
      */
     public Long getContestId() {
-        return contestId;
+        return this.contestId;
     }
 
     /**
-     * @param handle The handle to set.
+     * @param handle
+     *            The handle to set.
      */
     public void setHandle(String handle) {
         this.handle = handle;
@@ -144,11 +168,12 @@ public class SubmissionCriteria {
      * @return Returns the handle.
      */
     public String getHandle() {
-        return handle;
+        return this.handle;
     }
 
     /**
-     * @param idStart The idStart to set.
+     * @param idStart
+     *            The idStart to set.
      */
     public void setIdStart(Long idStart) {
         this.idStart = idStart;
@@ -158,11 +183,12 @@ public class SubmissionCriteria {
      * @return Returns the idStart.
      */
     public Long getIdStart() {
-        return idStart;
+        return this.idStart;
     }
 
     /**
-     * @param idEnd The idEnd to set.
+     * @param idEnd
+     *            The idEnd to set.
      */
     public void setIdEnd(Long idEnd) {
         this.idEnd = idEnd;
@@ -172,11 +198,12 @@ public class SubmissionCriteria {
      * @return Returns the idEnd.
      */
     public Long getIdEnd() {
-        return idEnd;
+        return this.idEnd;
     }
 
     /**
-     * @param timeStart The timeStart to set.
+     * @param timeStart
+     *            The timeStart to set.
      */
     public void setTimeStart(Date timeStart) {
         this.timeStart = timeStart;
@@ -186,11 +213,12 @@ public class SubmissionCriteria {
      * @return Returns the timeStart.
      */
     public Date getTimeStart() {
-        return timeStart;
+        return this.timeStart;
     }
 
     /**
-     * @param timeEnd The timeEnd to set.
+     * @param timeEnd
+     *            The timeEnd to set.
      */
     public void setTimeEnd(Date timeEnd) {
         this.timeEnd = timeEnd;
@@ -200,11 +228,12 @@ public class SubmissionCriteria {
      * @return Returns the timeEnd.
      */
     public Date getTimeEnd() {
-        return timeEnd;
+        return this.timeEnd;
     }
 
     /**
-     * @param judgeReplies The judgeReplies to set.
+     * @param judgeReplies
+     *            The judgeReplies to set.
      */
     public void setJudgeReplies(List<JudgeReply> judgeReplies) {
         this.judgeReplies = judgeReplies;
@@ -214,11 +243,12 @@ public class SubmissionCriteria {
      * @return Returns the judgeReplies.
      */
     public List<JudgeReply> getJudgeReplies() {
-        return judgeReplies;
+        return this.judgeReplies;
     }
 
     /**
-     * @param languages The languages to set.
+     * @param languages
+     *            The languages to set.
      */
     public void setLanguages(List<Language> languages) {
         this.languages = languages;
@@ -228,86 +258,91 @@ public class SubmissionCriteria {
      * @return Returns the languages.
      */
     public List<Language> getLanguages() {
-        return languages;
+        return this.languages;
     }
-    
+
+    @Override
     public int hashCode() {
-    	int hash = 0;
-    	hash = cal(contestId, hash);
-    	hash = cal(problemId, hash);
-    	hash = cal(handle, hash);
-    	hash = cal(problemCode, hash);
-    	hash = cal(idStart, hash);
-    	hash = cal(idEnd, hash);
-    	hash = cal(timeStart, hash);
-    	hash = cal(timeEnd, hash);
-    	hash = cal(judgeReplies, hash);
-    	hash = cal(languages, hash);
-    	hash = cal(userId, hash);
-        
-    	return hash;    	
+        int hash = 0;
+        hash = this.cal(this.contestId, hash);
+        hash = this.cal(this.problemId, hash);
+        hash = this.cal(this.handle, hash);
+        hash = this.cal(this.problemCode, hash);
+        hash = this.cal(this.idStart, hash);
+        hash = this.cal(this.idEnd, hash);
+        hash = this.cal(this.timeStart, hash);
+        hash = this.cal(this.timeEnd, hash);
+        hash = this.cal(this.judgeReplies, hash);
+        hash = this.cal(this.languages, hash);
+        hash = this.cal(this.userId, hash);
+
+        return hash;
     }
+
     private int cal(Object obj, int hash) {
-    	hash = (hash >>> 3);
-    	if (obj == null) {
-    		return hash ^ 1234567891;
-    	} else {
-    		return hash ^ obj.hashCode();
-    	}
+        hash = hash >>> 3;
+        if (obj == null) {
+            return hash ^ 1234567891;
+        } else {
+            return hash ^ obj.hashCode();
+        }
     }
+
+    @Override
     public boolean equals(Object obj) {
-    	if (!(obj instanceof SubmissionCriteria)) {
-    		return false;
-    	}
-    	SubmissionCriteria that = (SubmissionCriteria) obj;
-    	if (!equals(this.contestId, that.contestId)) {
-    		return false;
-    	}
-    	if (!equals(this.problemId, that.problemId)) {
-    		return false;
-    	}
-    	if (!equals(this.problemCode, that.problemCode)) {
-    		return false;
-    	}
-    	if (!equals(this.idStart, that.idStart)) {
-    		return false;
-    	}
-    	if (!equals(this.idEnd, that.idEnd)) {
-    		return false;
-    	}
-    	if (!equals(this.timeStart, that.timeStart)) {
-    		return false;
-    	}
-    	if (!equals(this.timeEnd, that.timeEnd)) {
-    		return false;
-    	}
-    	if (!equals(this.judgeReplies, that.judgeReplies)) {
-    		return false;
-    	}
-    	if (!equals(this.languages, that.languages)) {
-    		return false;
-    	}
-    	if (!equals(this.userId, that.userId)) {
-    		return false;
-    	}
-    	if (!equals(this.handle, that.handle)) {
-    		return false;
-    	}
-    	return true;
-    	
+        if (!(obj instanceof SubmissionCriteria)) {
+            return false;
+        }
+        SubmissionCriteria that = (SubmissionCriteria) obj;
+        if (!this.equals(this.contestId, that.contestId)) {
+            return false;
+        }
+        if (!this.equals(this.problemId, that.problemId)) {
+            return false;
+        }
+        if (!this.equals(this.problemCode, that.problemCode)) {
+            return false;
+        }
+        if (!this.equals(this.idStart, that.idStart)) {
+            return false;
+        }
+        if (!this.equals(this.idEnd, that.idEnd)) {
+            return false;
+        }
+        if (!this.equals(this.timeStart, that.timeStart)) {
+            return false;
+        }
+        if (!this.equals(this.timeEnd, that.timeEnd)) {
+            return false;
+        }
+        if (!this.equals(this.judgeReplies, that.judgeReplies)) {
+            return false;
+        }
+        if (!this.equals(this.languages, that.languages)) {
+            return false;
+        }
+        if (!this.equals(this.userId, that.userId)) {
+            return false;
+        }
+        if (!this.equals(this.handle, that.handle)) {
+            return false;
+        }
+        return true;
+
     }
+
     private boolean equals(Object o1, Object o2) {
-    	if (o1 == null) {
-    		return o2 == null;
-    	} 
-    	return o1.equals(o2);
+        if (o1 == null) {
+            return o2 == null;
+        }
+        return o1.equals(o2);
     }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public Long getUserId() {
+        return this.userId;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }

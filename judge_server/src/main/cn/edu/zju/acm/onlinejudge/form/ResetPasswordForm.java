@@ -15,20 +15,21 @@
 
 package cn.edu.zju.acm.onlinejudge.form;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 
-import java.io.Serializable;
-
 /**
  * <p>
  * ProfileForm.
  * </p>
- *
- * @author ZOJDEV
+ * 
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ResetPasswordForm extends ActionForm implements Serializable {
@@ -48,66 +49,74 @@ public class ResetPasswordForm extends ActionForm implements Serializable {
      */
     private String confirmPassword = null;
 
-	 /**
+    /**
      * Validates the form.
-     *
-     * @param mapping the action mapping.
-     * @param request the user request.
-     *
+     * 
+     * @param mapping
+     *            the action mapping.
+     * @param request
+     *            the user request.
+     * 
      * @return collection of validation errors.
      */
+    @Override
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
-        
-        if (password == null) {
-        	return null;
+
+        if (this.password == null) {
+            return null;
         }
 
         ActionErrors errors = new ActionErrors();
-        checkRequired(password, errors, "password", "ResetPasswordForm.password.required");
-        checkRequired(confirmPassword, errors, "confirmPassword", "ResetPasswordForm.confirmPassword.required");
-        if (!password.equals(confirmPassword)) {
-        	errors.add("confirmPassword", new ActionMessage("ResetPasswordForm.confirmPassword.notMatch"));
+        this.checkRequired(this.password, errors, "password", "ResetPasswordForm.password.required");
+        this.checkRequired(this.confirmPassword, errors, "confirmPassword",
+                           "ResetPasswordForm.confirmPassword.required");
+        if (!this.password.equals(this.confirmPassword)) {
+            errors.add("confirmPassword", new ActionMessage("ResetPasswordForm.confirmPassword.notMatch"));
         }
-                
+
         return errors;
     }
-    
+
     /**
      * Checks the required field.
      * 
-     * @param field the field to check
-     * @param errors the errors
-     * @param property the error property
-     * @param message the error message
+     * @param field
+     *            the field to check
+     * @param errors
+     *            the errors
+     * @param property
+     *            the error property
+     * @param message
+     *            the error message
      */
     private void checkRequired(String field, ActionErrors errors, String property, String message) {
-    	if (field == null || field.trim().length() == 0) {
-        	errors.add(property, new ActionMessage(message));
+        if (field == null || field.trim().length() == 0) {
+            errors.add(property, new ActionMessage(message));
         }
     }
 
-	public String getCode() {
-		return code;
-	}
+    public String getCode() {
+        return this.code;
+    }
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getPassword() {
+        return this.password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public String getConfirmPassword() {
-		return confirmPassword;
-	}
+    public String getConfirmPassword() {
+        return this.confirmPassword;
+    }
 
-	public void setConfirmPassword(String confirmPassword) {
-		this.confirmPassword = confirmPassword;
-	}
-    
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
 }

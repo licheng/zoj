@@ -16,18 +16,21 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>Problemset bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Problemset bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Problemset extends AbstractContest {
 
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Problemset() {
-    }
+    public Problemset() {}
 
 }

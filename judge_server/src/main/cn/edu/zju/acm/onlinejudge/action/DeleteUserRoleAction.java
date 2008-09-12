@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -31,54 +30,57 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class DeleteUserRoleAction extends BaseAction {
-    
-	
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public DeleteUserRoleAction() {
-    	
+
     }
 
     /**
      * DeleteUserRoleAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	
-        
+
         // check admin
-        ActionForward forward = checkAdmin(mapping, context);
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
+
         long userId = Utility.parseLong(String.valueOf(context.getRequest().getParameter("userId")));
         long roleId = Utility.parseLong(String.valueOf(context.getRequest().getParameter("roleId")));
         UserProfile user = UserManager.getInstance().getUserProfile(userId);
         if (user == null) {
-            return handleSuccess(mapping, context, "failure");
+            return this.handleSuccess(mapping, context, "failure");
         }
-        
-        PersistenceManager.getInstance().getAuthorizationPersistence().deleteUserRole(userId, roleId);        
 
-        return handleSuccess(mapping, context, "success", "?userId=" + userId);
-                  	    	   
-    }   
-    
+        PersistenceManager.getInstance().getAuthorizationPersistence().deleteUserRole(userId, roleId);
+
+        return this.handleSuccess(mapping, context, "success", "?userId=" + userId);
+
+    }
+
 }
-    

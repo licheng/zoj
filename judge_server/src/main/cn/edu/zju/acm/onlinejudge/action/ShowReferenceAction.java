@@ -32,72 +32,76 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowReferenceAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ShowReferenceAction() {
-        // empty
+    // empty
     }
 
     /**
      * ShowRankListAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
         HttpServletResponse response = context.getResponse();
         if (!context.isAdmin()) {
             response.sendError(404);
             return null;
         }
-        
-    	long id = Utility.parseLong(context.getRequest().getParameter("referenceId"));
+
+        long id = Utility.parseLong(context.getRequest().getParameter("referenceId"));
         String problemCode = context.getRequest().getParameter("code");
         boolean download = "true".equalsIgnoreCase(context.getRequest().getParameter("download"));
-        
+
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
         Reference ref = referencePersistence.getReference(id);
-        
+
         if (ref == null) {
             response.sendError(404);
             return null;
         }
-        
-        
-        response.setContentType("text/plain");   
+
+        response.setContentType("text/plain");
         if (download) {
-        
-            response.setHeader("Content-disposition", 
-                    "attachment; filename=" + problemCode + "_" + ref.getReferenceType().getDescription() + ".txt");
+
+            response.setHeader("Content-disposition", "attachment; filename=" + problemCode + "_" +
+                ref.getReferenceType().getDescription() + ".txt");
             response.getOutputStream().write(ref.getContent());
         } else {
             int length = ref.getContent().length;
             if (length > 100 * 1024) {
-                response.getOutputStream().write(ref.getContent(), 0, 100 * 1024);                
-                response.getOutputStream().write("\n\n...\n".getBytes());                
+                response.getOutputStream().write(ref.getContent(), 0, 100 * 1024);
+                response.getOutputStream().write("\n\n...\n".getBytes());
             } else {
                 response.getOutputStream().write(ref.getContent());
             }
         }
-        
+
         response.getOutputStream().close();
-                
+
         return null;
-                          	    	   
-    }                 
+
+    }
 }
-    

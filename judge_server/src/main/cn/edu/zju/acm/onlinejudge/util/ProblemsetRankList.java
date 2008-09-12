@@ -18,49 +18,48 @@ package cn.edu.zju.acm.onlinejudge.util;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 
 public class ProblemsetRankList {
-	
-	
-	private int offset = -1;
-	private int count = -1;
-	private UserProfile[] users;
-	private int[] solved;
-	private int[] total;
-	
-	public ProblemsetRankList(int offset, int count) {
-		this.offset = offset;
-		this.count = count;
-	}
 
-	public int getOffset() {
-		return offset;
-	}
+    private int offset = -1;
+    private int count = -1;
+    private UserProfile[] users;
+    private int[] solved;
+    private int[] total;
 
-	public int getCount() {
-		return count;
-	}
+    public ProblemsetRankList(int offset, int count) {
+        this.offset = offset;
+        this.count = count;
+    }
 
-	public UserProfile[] getUsers() {
-		return users;
-	}
+    public int getOffset() {
+        return this.offset;
+    }
 
-	public void setUsers(UserProfile[] users) {
-		this.users = users;
-	}
+    public int getCount() {
+        return this.count;
+    }
 
-	public int[] getSolved() {
-		return solved;
-	}
+    public UserProfile[] getUsers() {
+        return this.users;
+    }
 
-	public void setSolved(int[] solved) {
-		this.solved = solved;
-	}
+    public void setUsers(UserProfile[] users) {
+        this.users = users;
+    }
 
-	public int[] getTotal() {
-		return total;
-	}
+    public int[] getSolved() {
+        return this.solved;
+    }
 
-	public void setTotal(int[] total) {
-		this.total = total;
-	}
+    public void setSolved(int[] solved) {
+        this.solved = solved;
+    }
+
+    public int[] getTotal() {
+        return this.total;
+    }
+
+    public void setTotal(int[] total) {
+        this.total = total;
+    }
 
 }

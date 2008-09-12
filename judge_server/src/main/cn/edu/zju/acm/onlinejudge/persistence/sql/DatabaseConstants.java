@@ -15,9 +15,8 @@
 
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
-
 /**
- * Databse constants. 
+ * Databse constants.
  * 
  * @version 2.0
  * @author ZOIDEV
@@ -504,7 +503,6 @@ public class DatabaseConstants {
      */
     public static final String PROBLEM_COLOR = "color";
 
-    
     /**
      * SUBMISSION table.
      */
@@ -554,7 +552,7 @@ public class DatabaseConstants {
      * SUBMISSION_DATE column in SUBMISSION table.
      */
     public static final String SUBMISSION_SUBMISSION_DATE = "submission_date";
-    
+
     /**
      * JUDGE_DATE column in SUBMISSION table.
      */
@@ -804,40 +802,40 @@ public class DatabaseConstants {
      * DESCRIPTION column in CONFIGURATION table.
      */
     public static final String CONFIGURATION_DESCRIPTION = "description";
-    
+
     /**
      * CREATE_USER column.
      */
     public static final String CREATE_USER = "create_user";
-    
+
     /**
      * CREATE_DATE column.
      */
     public static final String CREATE_DATE = "create_date";
-    
+
     /**
      * LAST_UPDATE_USER column.
      */
     public static final String LAST_UPDATE_USER = "last_update_user";
-    
+
     /**
      * LAST_UPDATE_DATE column.
      */
     public static final String LAST_UPDATE_DATE = "last_update_date";
-    
+
     /**
      * CONTEST_CHECK_IP column.
      */
     public static final String CONTEST_CHECK_IP = "check_ip";
-    
-    public static final String SUBMISSION_USERSTAT_TABLE="UserStat";
-    public static final String SUBMISSION_PROBLEMSTAT_TABLE="ProblemStat";
-    
-	/**
-	 * Private constructor.
-	 */
-	private DatabaseConstants() {
-		// empty
-	}
+
+    public static final String SUBMISSION_USERSTAT_TABLE = "UserStat";
+    public static final String SUBMISSION_PROBLEMSTAT_TABLE = "ProblemStat";
+
+    /**
+     * Private constructor.
+     */
+    private DatabaseConstants() {
+    // empty
+    }
 
 }

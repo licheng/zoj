@@ -24,43 +24,50 @@ public class RankList {
     private List<RankListEntry> entries = new ArrayList<RankListEntry>();
     private List<RoleSecurity> roles = new ArrayList<RoleSecurity>();
     private RoleSecurity role = null;
-    
+
     /**
      * @return the entries
      */
     public List<RankListEntry> getEntries() {
-        return entries;
+        return this.entries;
     }
+
     /**
-     * @param entries the entries to set
+     * @param entries
+     *            the entries to set
      */
     public void setEntries(List<RankListEntry> entries) {
         this.entries = entries;
     }
+
     /**
      * @return the roles
      */
     public List<RoleSecurity> getRoles() {
-        return roles;
+        return this.roles;
     }
+
     /**
-     * @param roles the roles to set
+     * @param roles
+     *            the roles to set
      */
     public void setRoles(List<RoleSecurity> roles) {
         this.roles = roles;
     }
+
     /**
      * @return the role
      */
     public RoleSecurity getRole() {
-        return role;
+        return this.role;
     }
+
     /**
-     * @param role the role to set
+     * @param role
+     *            the role to set
      */
     public void setRole(RoleSecurity role) {
         this.role = role;
     }
-    
-    
+
 }

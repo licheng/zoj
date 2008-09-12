@@ -60,7 +60,7 @@ public class JudgeClient extends Thread {
 
     private SubmissionFilter submissionFilter = null;
 
-    private int[] pingCounter = new int[] { 0 };
+    private int[] pingCounter = new int[] {0};
 
     private Object pingBarrier = new Object();
 
@@ -82,6 +82,7 @@ public class JudgeClient extends Thread {
         }
     }
 
+    @Override
     public void run() {
         try {
             this.logger.info("Start to get information");
@@ -92,14 +93,14 @@ public class JudgeClient extends Thread {
                 this.supportedLanguages.clear();
                 int n = this.in.readInt();
                 if (n < 0 || n > LanguageManager.getNumberOfLanguages()) {
-                    logger.error("Invalid number of supported languages:" + n);
+                    this.logger.error("Invalid number of supported languages:" + n);
                     return;
                 }
                 for (int i = 0; i < n; ++i) {
                     int id = this.in.readInt();
                     Language language = LanguageManager.getLanguage(id);
                     if (language == null) {
-                        logger.error("Invalid language id:" + id);
+                        this.logger.error("Invalid language id:" + id);
                         return;
                     }
                     this.supportedLanguages.add(language);
@@ -146,6 +147,7 @@ public class JudgeClient extends Thread {
         }
     }
 
+    @Override
     public void interrupt() {
         super.interrupt();
         synchronized (this.judgeThreads) {

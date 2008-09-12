@@ -16,17 +16,18 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Country;
+import cn.edu.zju.acm.onlinejudge.persistence.AuthorizationPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.ConfigurationPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.ForumPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.LanguagePersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceLocator;
-import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
-import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.AuthorizationPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ForumPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ConfigurationPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.sql.SQLPersistenceLocator;
 
 /**
@@ -35,7 +36,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.sql.SQLPersistenceLocator;
  * </p>
  * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public class PersistenceManager {
 
@@ -84,6 +85,8 @@ public class PersistenceManager {
      */
     private ProblemPersistence problemPersistence = null;
 
+    private LanguagePersistence languagePersistence = null;
+
     /**
      * PersistenceManager.
      */
@@ -91,7 +94,7 @@ public class PersistenceManager {
 
     static {
         try {
-            instance = new PersistenceManager();
+            PersistenceManager.instance = new PersistenceManager();
         } catch (PersistenceCreationException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -106,15 +109,16 @@ public class PersistenceManager {
      *             if any exceptions occurs while creating the persistence
      */
     private PersistenceManager() throws PersistenceCreationException {
-        locator = new SQLPersistenceLocator();
-        userPersistence = locator.createUserPersistence();
-        contestPersistence = locator.createContestPersistence();
-        authorizationPersistence = locator.createAuthorizationPersistence();
-        submissionPersistence = locator.createSubmissionPersistence();
-        forumPersistence = locator.createForumPersistence();
-        configurationPersistence = locator.createConfigurationPersistence();
-        referencePersistence = locator.createReferencePersistence();
-        problemPersistence = locator.createProblemPersistence();
+        this.locator = new SQLPersistenceLocator();
+        this.userPersistence = this.locator.createUserPersistence();
+        this.contestPersistence = this.locator.createContestPersistence();
+        this.authorizationPersistence = this.locator.createAuthorizationPersistence();
+        this.submissionPersistence = this.locator.createSubmissionPersistence();
+        this.forumPersistence = this.locator.createForumPersistence();
+        this.configurationPersistence = this.locator.createConfigurationPersistence();
+        this.referencePersistence = this.locator.createReferencePersistence();
+        this.problemPersistence = this.locator.createProblemPersistence();
+        this.languagePersistence = this.locator.createLanguagePersistence();
     }
 
     /**
@@ -125,7 +129,7 @@ public class PersistenceManager {
      *             if any exceptions occurs while creating the persistence
      */
     public static PersistenceManager getInstance() {
-        return instance;
+        return PersistenceManager.instance;
     }
 
     /**
@@ -136,7 +140,7 @@ public class PersistenceManager {
      * @return a UserPersistence implementation
      */
     public UserPersistence getUserPersistence() {
-        return userPersistence;
+        return this.userPersistence;
     }
 
     /**
@@ -147,7 +151,7 @@ public class PersistenceManager {
      * @return an AuthorizationPersistence implementation
      */
     public AuthorizationPersistence getAuthorizationPersistence() {
-        return authorizationPersistence;
+        return this.authorizationPersistence;
     }
 
     /**
@@ -158,7 +162,7 @@ public class PersistenceManager {
      * @return a ContestPersistence implementation
      */
     public ContestPersistence getContestPersistence() {
-        return contestPersistence;
+        return this.contestPersistence;
     }
 
     /**
@@ -169,7 +173,7 @@ public class PersistenceManager {
      * @return a ProblemPersistence implementation
      */
     public ProblemPersistence getProblemPersistence() {
-        return problemPersistence;
+        return this.problemPersistence;
     }
 
     /**
@@ -180,7 +184,7 @@ public class PersistenceManager {
      * @return a SubmissionPersistence implementation
      */
     public SubmissionPersistence getSubmissionPersistence() {
-        return submissionPersistence;
+        return this.submissionPersistence;
     }
 
     /**
@@ -191,7 +195,7 @@ public class PersistenceManager {
      * @return a ForumPersistence implementation
      */
     public ForumPersistence getForumPersistence() {
-        return forumPersistence;
+        return this.forumPersistence;
     }
 
     /**
@@ -202,7 +206,7 @@ public class PersistenceManager {
      * @return a ConfigurationPersistence implementation
      */
     public ConfigurationPersistence getConfigurationPersistence() {
-        return configurationPersistence;
+        return this.configurationPersistence;
     }
 
     /**
@@ -213,7 +217,7 @@ public class PersistenceManager {
      * @return a ReferencePersistence implementation
      */
     public ReferencePersistence getReferencePersistence() {
-        return referencePersistence;
+        return this.referencePersistence;
     }
 
     /**
@@ -232,13 +236,17 @@ public class PersistenceManager {
             return null;
         }
 
-        for (Country c : userPersistence.getAllCountries()) {
+        for (Country c : this.userPersistence.getAllCountries()) {
             if (c.getId() == countryId) {
                 return c;
             }
         }
         return null;
 
+    }
+
+    public LanguagePersistence getLanguagePersistence() {
+        return this.languagePersistence;
     }
 
 }

@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -26,46 +25,52 @@ import org.apache.struts.action.ActionMapping;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ContestInfoAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ContestInfoAction() {
-        // empty
+    // empty
     }
 
     /**
      * Show Contest Info.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	
-    	// check contest
-    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("problemsetInfo.do");
-    	
-    	ActionForward forward = checkContestViewPermission(mapping, context, isProblemset, false);
-    	if (forward != null) {
-    		return forward;
-    	}    	    	
-               
-    	return handleSuccess(mapping, context, "success");    	    	    	
-    }    
+
+        // check contest
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("problemsetInfo.do");
+
+        ActionForward forward = this.checkContestViewPermission(mapping, context, isProblemset, false);
+        if (forward != null) {
+            return forward;
+        }
+
+        return this.handleSuccess(mapping, context, "success");
+    }
 
 }
-    

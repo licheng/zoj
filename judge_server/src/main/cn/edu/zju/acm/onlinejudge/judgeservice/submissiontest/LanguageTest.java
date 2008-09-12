@@ -33,12 +33,12 @@ public class LanguageTest implements Test {
 
     @Override
     public boolean test(Submission submission, int priority) {
-        return supportedLanguageIds.contains(submission.getLanguage().getId());
+        return this.supportedLanguageIds.contains(submission.getLanguage().getId());
     }
 
     @Override
     public int hashCode() {
-        return supportedLanguageIds.hashCode();
+        return this.supportedLanguageIds.hashCode();
     }
 
     @Override

@@ -16,43 +16,56 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>Post bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Post bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Post {
 
     /**
-     * <p>Represents id.</p>
+     * <p>
+     * Represents id.
+     * </p>
      */
     private long id = -1;
 
     /**
-     * <p>Represents threadId.</p>
+     * <p>
+     * Represents threadId.
+     * </p>
      */
     private long threadId = -1;
-    
+
     /**
-     * <p>Represents userProfileId.</p>
+     * <p>
+     * Represents userProfileId.
+     * </p>
      */
     private long userProfileId = -1;
 
     /**
-     * <p>Represents content.</p>
+     * <p>
+     * Represents content.
+     * </p>
      */
     private String content = null;
 
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Post() {
-    }
+    public Post() {}
 
     /**
-     * <p>Gets id.</p>
-     *
+     * <p>
+     * Gets id.
+     * </p>
+     * 
      * @return id
      */
     public long getId() {
@@ -60,17 +73,22 @@ public class Post {
     }
 
     /**
-     * <p>Sets id.</p>
-     *
-     * @param id id
+     * <p>
+     * Sets id.
+     * </p>
+     * 
+     * @param id
+     *            id
      */
     public void setId(long id) {
         this.id = id;
     }
 
     /**
-     * <p>Gets threadId.</p>
-     *
+     * <p>
+     * Gets threadId.
+     * </p>
+     * 
      * @return threadId
      */
     public long getThreadId() {
@@ -78,17 +96,22 @@ public class Post {
     }
 
     /**
-     * <p>Sets threadId.</p>
-     *
-     * @param threadId threadId
+     * <p>
+     * Sets threadId.
+     * </p>
+     * 
+     * @param threadId
+     *            threadId
      */
     public void setThreadId(long threadId) {
         this.threadId = threadId;
     }
 
     /**
-     * <p>Gets userProfileId.</p>
-     *
+     * <p>
+     * Gets userProfileId.
+     * </p>
+     * 
      * @return userProfileId
      */
     public long getUserProfileId() {
@@ -96,17 +119,22 @@ public class Post {
     }
 
     /**
-     * <p>Sets userProfileId.</p>
-     *
-     * @param userProfileId userProfileId
+     * <p>
+     * Sets userProfileId.
+     * </p>
+     * 
+     * @param userProfileId
+     *            userProfileId
      */
     public void setUserProfileId(long userProfileId) {
         this.userProfileId = userProfileId;
     }
 
     /**
-     * <p>Gets content.</p>
-     *
+     * <p>
+     * Gets content.
+     * </p>
+     * 
      * @return content
      */
     public String getContent() {
@@ -114,9 +142,12 @@ public class Post {
     }
 
     /**
-     * <p>Sets content.</p>
-     *
-     * @param content content
+     * <p>
+     * Sets content.
+     * </p>
+     * 
+     * @param content
+     *            content
      */
     public void setContent(String content) {
         this.content = content;

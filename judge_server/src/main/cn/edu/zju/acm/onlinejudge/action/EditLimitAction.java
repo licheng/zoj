@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -32,71 +31,77 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class EditLimitAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public EditLimitAction() {
-        // empty
+    // empty
     }
 
     /**
      * Edit Role.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
+
         // check admin
-        ActionForward forward = checkAdmin(mapping, context);
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
+
         LimitForm limitForm = (LimitForm) form;
-        
+
         if (limitForm.getId() == null || limitForm.getId().trim().length() == 0) {
-            
+
             Limit limit = PersistenceManager.getInstance().getContestPersistence().getDefaultLimit();
             limitForm.setId("1");
             limitForm.setTimeLimit("" + limit.getTimeLimit());
             limitForm.setMemoryLimit("" + limit.getMemoryLimit());
             limitForm.setSubmissionLimit("" + limit.getSubmissionLimit());
             limitForm.setOutputLimit("" + limit.getOutputLimit());
-            
-            return handleSuccess(mapping, context, "failure");
+
+            return this.handleSuccess(mapping, context, "failure");
         }
-        
+
         Limit limit = new Limit();
         limit.setId(1);
         limit.setTimeLimit(Integer.parseInt(limitForm.getTimeLimit()));
         limit.setMemoryLimit(Integer.parseInt(limitForm.getMemoryLimit()));
         limit.setOutputLimit(Integer.parseInt(limitForm.getOutputLimit()));
         limit.setSubmissionLimit(Integer.parseInt(limitForm.getSubmissionLimit()));
-                
+
         PersistenceManager.getInstance().getContestPersistence().updateDefaultLimit(limit);
-        
-        ActionMessages messages = new ActionMessages();       
+
+        ActionMessages messages = new ActionMessages();
         messages.add("success", new ActionMessage("onlinejudge.DefaultLimit.success"));
         this.saveErrors(context.getRequest(), messages);
-                
-        return handleSuccess(mapping, context, "success");   	    	    	    	
-    }    
-        
+
+        return this.handleSuccess(mapping, context, "success");
+    }
+
 }
-    

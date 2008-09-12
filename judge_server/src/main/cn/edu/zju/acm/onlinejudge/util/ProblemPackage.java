@@ -19,45 +19,44 @@ import java.util.Map;
 
 public class ProblemPackage {
 
-	private ProblemEntry[] problemEntries = null;	
-	private Map<String, byte[]> images = null;;
-	private Map<String, String> usedImages = null;;
-	private Map<String, String> duplicateImages = null;;
-	
-	
-	public ProblemPackage() {
-		
-	}
-	
-	public ProblemEntry[] getProblemEntries() {
-		return problemEntries;
-	}
-	
-	public void setProblemEntries(ProblemEntry[] problemEntries) {
-		this.problemEntries = problemEntries;
-	}
+    private ProblemEntry[] problemEntries = null;
+    private Map<String, byte[]> images = null;;
+    private Map<String, String> usedImages = null;;
+    private Map<String, String> duplicateImages = null;;
 
-	public Map<String, byte[]> getImages() {
-		return images;
-	}
-	
-	public void setImages(Map<String, byte[]> images) {
-		this.images = images;
-	}
+    public ProblemPackage() {
 
-	public Map<String, String> getUsedImages() {
-		return usedImages;
-	}
+    }
 
-	public void setUsedImages(Map<String, String> usedImages) {
-		this.usedImages = usedImages;
-	}
+    public ProblemEntry[] getProblemEntries() {
+        return this.problemEntries;
+    }
 
-	public Map<String, String> getDuplicateImages() {
-		return duplicateImages;
-	}
+    public void setProblemEntries(ProblemEntry[] problemEntries) {
+        this.problemEntries = problemEntries;
+    }
 
-	public void setDuplicateImages(Map<String, String> duplicateImages) {
-		this.duplicateImages = duplicateImages;
-	}
+    public Map<String, byte[]> getImages() {
+        return this.images;
+    }
+
+    public void setImages(Map<String, byte[]> images) {
+        this.images = images;
+    }
+
+    public Map<String, String> getUsedImages() {
+        return this.usedImages;
+    }
+
+    public void setUsedImages(Map<String, String> usedImages) {
+        this.usedImages = usedImages;
+    }
+
+    public Map<String, String> getDuplicateImages() {
+        return this.duplicateImages;
+    }
+
+    public void setDuplicateImages(Map<String, String> duplicateImages) {
+        this.duplicateImages = duplicateImages;
+    }
 }

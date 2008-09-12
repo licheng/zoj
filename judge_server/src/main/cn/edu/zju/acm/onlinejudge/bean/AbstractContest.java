@@ -21,67 +21,86 @@ import java.util.List;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 
 /**
- * <p>AbstractContest bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * AbstractContest bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public abstract class AbstractContest {
 
-    
-    
     /**
-     * <p>Represents id.</p>
+     * <p>
+     * Represents id.
+     * </p>
      */
     private long id = -1;
 
     /**
-     * <p>Represents title.</p>
+     * <p>
+     * Represents title.
+     * </p>
      */
     private String title = null;
 
     /**
-     * <p>Represents description.</p>
+     * <p>
+     * Represents description.
+     * </p>
      */
     private String description = null;
 
     /**
-     * <p>Represents limit.</p>
+     * <p>
+     * Represents limit.
+     * </p>
      */
     private Limit limit = null;
 
     /**
-     * <p>Represents forumId.</p>
+     * <p>
+     * Represents forumId.
+     * </p>
      */
     private long forumId = -1;
 
     /**
-     * <p>Represents languages.</p>
+     * <p>
+     * Represents languages.
+     * </p>
      */
     private List<Language> languages = null;
 
     /**
-     * <p>Represents startTime.</p>
+     * <p>
+     * Represents startTime.
+     * </p>
      */
     private Date startTime = null;
 
     /**
-     * <p>Represents endTime.</p>
+     * <p>
+     * Represents endTime.
+     * </p>
      */
     private Date endTime = null;
 
     private boolean checkIp = false;
-    
-    /**
-     * <p>Abstract constructor.</p>
-     */
-    protected AbstractContest() {
-    }
 
     /**
-     * <p>Gets id.</p>
-     *
+     * <p>
+     * Abstract constructor.
+     * </p>
+     */
+    protected AbstractContest() {}
+
+    /**
+     * <p>
+     * Gets id.
+     * </p>
+     * 
      * @return id
      */
     public long getId() {
@@ -89,37 +108,45 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets id.</p>
-     *
-     * @param id id
+     * <p>
+     * Sets id.
+     * </p>
+     * 
+     * @param id
+     *            id
      */
     public void setId(long id) {
         this.id = id;
     }
 
     /**
-     * <p>Gets title.</p>
-     *
+     * <p>
+     * Gets title.
+     * </p>
+     * 
      * @return title
      */
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
-
-    
     /**
-     * <p>Sets title.</p>
-     *
-     * @param title title
+     * <p>
+     * Sets title.
+     * </p>
+     * 
+     * @param title
+     *            title
      */
     public void setTitle(String title) {
         this.title = title;
     }
 
     /**
-     * <p>Gets description.</p>
-     *
+     * <p>
+     * Gets description.
+     * </p>
+     * 
      * @return description
      */
     public String getDescription() {
@@ -127,17 +154,22 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets description.</p>
-     *
-     * @param description description
+     * <p>
+     * Sets description.
+     * </p>
+     * 
+     * @param description
+     *            description
      */
     public void setDescription(String description) {
         this.description = description;
     }
 
     /**
-     * <p>Gets limit.</p>
-     *
+     * <p>
+     * Gets limit.
+     * </p>
+     * 
      * @return limit
      */
     public Limit getLimit() {
@@ -145,17 +177,22 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets limit.</p>
-     *
-     * @param limit limit
+     * <p>
+     * Sets limit.
+     * </p>
+     * 
+     * @param limit
+     *            limit
      */
     public void setLimit(Limit limit) {
         this.limit = limit;
     }
 
     /**
-     * <p>Gets forumId.</p>
-     *
+     * <p>
+     * Gets forumId.
+     * </p>
+     * 
      * @return forumId
      */
     public long getForumId() {
@@ -163,17 +200,22 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets forumId.</p>
-     *
-     * @param forumId forumId
+     * <p>
+     * Sets forumId.
+     * </p>
+     * 
+     * @param forumId
+     *            forumId
      */
     public void setForumId(long forumId) {
         this.forumId = forumId;
     }
 
     /**
-     * <p>Gets languages.</p>
-     *
+     * <p>
+     * Gets languages.
+     * </p>
+     * 
      * @return languages
      */
     public List<Language> getLanguages() {
@@ -181,17 +223,22 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets languages.</p>
-     *
-     * @param languages languages
+     * <p>
+     * Sets languages.
+     * </p>
+     * 
+     * @param languages
+     *            languages
      */
     public void setLanguages(List<Language> languages) {
         this.languages = languages;
     }
-    
+
     /**
-     * <p>Gets startTime.</p>
-     *
+     * <p>
+     * Gets startTime.
+     * </p>
+     * 
      * @return startTime
      */
     public Date getStartTime() {
@@ -199,17 +246,22 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets startTime.</p>
-     *
-     * @param startTime startTime
+     * <p>
+     * Sets startTime.
+     * </p>
+     * 
+     * @param startTime
+     *            startTime
      */
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
     /**
-     * <p>Gets endTime.</p>
-     *
+     * <p>
+     * Gets endTime.
+     * </p>
+     * 
      * @return endTime
      */
     public Date getEndTime() {
@@ -217,17 +269,22 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Sets endTime.</p>
-     *
-     * @param endTime endTime
+     * <p>
+     * Sets endTime.
+     * </p>
+     * 
+     * @param endTime
+     *            endTime
      */
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
     /**
-     * <p>Gets the hours the contest lasts.</p>
-     *
+     * <p>
+     * Gets the hours the contest lasts.
+     * </p>
+     * 
      * @return the hours the contest lasts
      */
     public int getHours() {
@@ -235,33 +292,37 @@ public abstract class AbstractContest {
     }
 
     /**
-     * <p>Gets the minutes the contest lasts.</p>
-     *
+     * <p>
+     * Gets the minutes the contest lasts.
+     * </p>
+     * 
      * @return the minutes the contest lasts
      */
     public int getMinutes() {
-        return (int) (((this.endTime.getTime() - this.startTime.getTime()) / 1000 / 60) % 60);
+        return (int) ((this.endTime.getTime() - this.startTime.getTime()) / 1000 / 60 % 60);
     }
 
     /**
-     * <p>Gets the seconds the contest lasts.</p>
-     *
+     * <p>
+     * Gets the seconds the contest lasts.
+     * </p>
+     * 
      * @return the seconds the contest lasts
      */
     public int getSeconds() {
-        return (int) (((this.endTime.getTime() - this.startTime.getTime()) / 1000) % 60);
-    }    
+        return (int) ((this.endTime.getTime() - this.startTime.getTime()) / 1000 % 60);
+    }
+
     public long getLength() {
-    	return endTime.getTime() - startTime.getTime();
+        return this.endTime.getTime() - this.startTime.getTime();
     }
 
     public boolean isCheckIp() {
-        return checkIp;
+        return this.checkIp;
     }
 
     public void setCheckIp(boolean checkIp) {
         this.checkIp = checkIp;
     }
-    
 
 }

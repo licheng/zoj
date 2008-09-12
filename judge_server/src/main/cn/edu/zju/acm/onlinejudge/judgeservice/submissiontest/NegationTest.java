@@ -32,7 +32,7 @@ public class NegationTest implements Test {
 
     @Override
     public int hashCode() {
-        return test.hashCode();
+        return this.test.hashCode();
     }
 
     @Override

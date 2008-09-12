@@ -16,21 +16,21 @@
 package cn.edu.zju.acm.onlinejudge.bean;
 
 /**
- * <p>Contest bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Contest bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Contest extends AbstractContest {
 
-
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Contest() {
-    }
-
-    
+    public Contest() {}
 
 }

@@ -16,61 +16,78 @@
 package cn.edu.zju.acm.onlinejudge.security;
 
 /**
- * <p>AbstractSecurity.</p>
- *
+ * <p>
+ * AbstractSecurity.
+ * </p>
+ * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public abstract class AbstractSecurity {
     /**
-     * <p>Security id.</p>
+     * <p>
+     * Security id.
+     * </p>
      */
     private long id;
 
     /**
-     * <p>The contest permissions.</p>
+     * <p>
+     * The contest permissions.
+     * </p>
      */
     private final PermissionCollection contestPermission = new PermissionCollection();
 
     /**
-     * <p>The forum permissions.</p>
+     * <p>
+     * The forum permissions.
+     * </p>
      */
     private final PermissionCollection forumPermission = new PermissionCollection();
 
     /**
-     * <p>Constructor with id.</p>
-     *
+     * <p>
+     * Constructor with id.
+     * </p>
      * 
-     * @param id the id.
+     * 
+     * @param id
+     *            the id.
      */
     protected AbstractSecurity(long id) {
-    	this.id = id; 
+        this.id = id;
     }
 
     /**
-     * <p>Gets the id.</p>
-     *
+     * <p>
+     * Gets the id.
+     * </p>
+     * 
      * @return the id
      */
     public long getId() {
-        return id;
+        return this.id;
     }
 
     /**
-     * <p>Gets the contest permissions.</p>
+     * <p>
+     * Gets the contest permissions.
+     * </p>
      * 
      * @return the contest permissions
      */
     public PermissionCollection getContestPermission() {
-    	return contestPermission;
+        return this.contestPermission;
     }
 
     /**
-     * <p>Gets the forum permissions.</p>
+     * <p>
+     * Gets the forum permissions.
+     * </p>
      * 
      * @return the forum permissions
      */
     public PermissionCollection getForumPermission() {
-    	return forumPermission;
+        return this.forumPermission;
     }
 }

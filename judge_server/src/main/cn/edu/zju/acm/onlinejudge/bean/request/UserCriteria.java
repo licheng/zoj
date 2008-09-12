@@ -24,13 +24,13 @@ public class UserCriteria {
     private String lastName;
     private Long countryId;
     private String school;
-    
+
     public UserCriteria() {
-    
+
     }
 
     public Long getCountryId() {
-        return countryId;
+        return this.countryId;
     }
 
     public void setCountryId(Long countryId) {
@@ -38,7 +38,7 @@ public class UserCriteria {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -46,7 +46,7 @@ public class UserCriteria {
     }
 
     public String getFirstName() {
-        return firstName;
+        return this.firstName;
     }
 
     public void setFirstName(String firstName) {
@@ -54,7 +54,7 @@ public class UserCriteria {
     }
 
     public String getHandle() {
-        return handle;
+        return this.handle;
     }
 
     public void setHandle(String handle) {
@@ -62,7 +62,7 @@ public class UserCriteria {
     }
 
     public String getLastName() {
-        return lastName;
+        return this.lastName;
     }
 
     public void setLastName(String lastName) {
@@ -70,7 +70,7 @@ public class UserCriteria {
     }
 
     public Long getRoleId() {
-        return roleId;
+        return this.roleId;
     }
 
     public void setRoleId(Long roleId) {
@@ -78,7 +78,7 @@ public class UserCriteria {
     }
 
     public String getSchool() {
-        return school;
+        return this.school;
     }
 
     public void setSchool(String school) {

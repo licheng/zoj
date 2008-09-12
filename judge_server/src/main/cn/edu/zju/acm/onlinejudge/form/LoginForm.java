@@ -15,19 +15,21 @@
 
 package cn.edu.zju.acm.onlinejudge.form;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
-import java.io.Serializable;
 
 /**
  * <p>
  * LoginForm.
  * </p>
- *
- * @author ZOJDEV
+ * 
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class LoginForm extends ActionForm implements Serializable {
@@ -51,12 +53,12 @@ public class LoginForm extends ActionForm implements Serializable {
      * Empty constructor.
      */
     public LoginForm() {
-        // Empty constructor
+    // Empty constructor
     }
 
     /**
      * Sets the handle.
-     *
+     * 
      * @prama handle the handle to set.
      */
     public void setHandle(String handle) {
@@ -65,16 +67,16 @@ public class LoginForm extends ActionForm implements Serializable {
 
     /**
      * Gets the handle.
-     *
+     * 
      * @return the handle.
      */
     public String getHandle() {
-        return handle;
+        return this.handle;
     }
 
     /**
      * Sets the password.
-     *
+     * 
      * @prama password the password to set.
      */
     public void setPassword(String password) {
@@ -83,16 +85,16 @@ public class LoginForm extends ActionForm implements Serializable {
 
     /**
      * Gets the password.
-     *
+     * 
      * @return the password.
      */
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     /**
      * Sets the rememberMe.
-     *
+     * 
      * @prama rememberMe the rememberMe to set.
      */
     public void setRememberMe(boolean rememberMe) {
@@ -101,34 +103,37 @@ public class LoginForm extends ActionForm implements Serializable {
 
     /**
      * Gets the rememberMe.
-     *
+     * 
      * @return the rememberMe.
      */
     public boolean isRememberMe() {
-        return rememberMe;
+        return this.rememberMe;
     }
 
-	 /**
+    /**
      * Validates the form.
-     *
-     * @param mapping the action mapping.
-     * @param request the user request.
-     *
+     * 
+     * @param mapping
+     *            the action mapping.
+     * @param request
+     *            the user request.
+     * 
      * @return collection of validation errors.
      */
+    @Override
     public ActionErrors validate(ActionMapping mapping, HttpServletRequest request) {
         ActionErrors errors = new ActionErrors();
-        
-        if (handle == null) {
-        	return errors;
+
+        if (this.handle == null) {
+            return errors;
         }
-        if (handle == null || handle.trim().length() == 0) {
-        	errors.add("handle", new ActionMessage("LoginForm.handle.required"));
+        if (this.handle == null || this.handle.trim().length() == 0) {
+            errors.add("handle", new ActionMessage("LoginForm.handle.required"));
         }
-        if (password == null || password.length() == 0) {
-        	errors.add("password", new ActionMessage("LoginForm.password.required"));
-        }         
-        
+        if (this.password == null || this.password.length() == 0) {
+            errors.add("password", new ActionMessage("LoginForm.password.required"));
+        }
+
         return errors;
     }
 

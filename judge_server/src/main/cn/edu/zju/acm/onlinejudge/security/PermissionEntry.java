@@ -22,7 +22,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.PermissionLevel;
  * This class represents the PermissionEntry.
  * </p>
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class PermissionEntry {
@@ -64,7 +64,7 @@ public class PermissionEntry {
      * @return context
      */
     public long getContext() {
-        return context;
+        return this.context;
     }
 
     /**
@@ -75,7 +75,7 @@ public class PermissionEntry {
      * @return action
      */
     public PermissionLevel getAction() {
-        return action;
+        return this.action;
     }
 
 }

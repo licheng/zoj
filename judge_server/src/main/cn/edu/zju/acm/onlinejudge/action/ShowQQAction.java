@@ -25,47 +25,49 @@ import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.QQ;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
-
 /**
  * <p>
  * ShowQQAction
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowQQAction extends BaseAction {
-    
-    
+
     /**
      * ShowQQAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
-        
-        ActionForward forward = checkContestAdminPermission(mapping, context, false, true);
+
+        ActionForward forward = this.checkContestAdminPermission(mapping, context, false, true);
         if (forward != null) {
             return forward;
         }
-        
+
         AbstractContest contest = context.getContest();
-    	List<QQ> qqs = PersistenceManager.getInstance().getSubmissionPersistence().searchQQs(contest.getId());
-                       
+        List<QQ> qqs = PersistenceManager.getInstance().getSubmissionPersistence().searchQQs(contest.getId());
+
         context.setAttribute("qqs", qqs);
-        
-        return handleSuccess(mapping, context, "success");
-                  	    	   
-    }         
+
+        return this.handleSuccess(mapping, context, "success");
+
+    }
 
 }
-    

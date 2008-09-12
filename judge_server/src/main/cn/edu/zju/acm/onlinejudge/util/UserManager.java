@@ -15,68 +15,69 @@
 
 package cn.edu.zju.acm.onlinejudge.util;
 
-
+import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
 import cn.edu.zju.acm.onlinejudge.util.cache.Cache;
-import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
+
 public class UserManager {
 
-	
-	private final Cache<UserProfile> userCache;
-	
-	/**
-	 * UserManager.
-	 */
-	private static UserManager instance = null; 
+    private final Cache<UserProfile> userCache;
 
-	
     /**
-     * <p>Constructor of UserManager class.</p>
-     * @throws PersistenceCreationException 
-     *
+     * UserManager.
      */
-    private UserManager() throws PersistenceCreationException {    	 
-    	userCache = new Cache<UserProfile>(60000, 200); 
+    private static UserManager instance = null;
+
+    /**
+     * <p>
+     * Constructor of UserManager class.
+     * </p>
+     * 
+     * @throws PersistenceCreationException
+     * 
+     */
+    private UserManager() throws PersistenceCreationException {
+        this.userCache = new Cache<UserProfile>(60000, 200);
     }
-    
+
     /**
      * Gets the singleton instance.
+     * 
      * @return the singleton instance.
-     * @throws PersistenceCreationException 
+     * @throws PersistenceCreationException
      */
     public static UserManager getInstance() throws PersistenceCreationException {
-    	if (instance == null) {
-    		synchronized (UserManager.class) {
-    			if (instance == null) {
-    				instance = new UserManager();
-    			}
-    		}
-    	}
-    	return instance;
+        if (UserManager.instance == null) {
+            synchronized (UserManager.class) {
+                if (UserManager.instance == null) {
+                    UserManager.instance = new UserManager();
+                }
+            }
+        }
+        return UserManager.instance;
     }
-    
+
     public UserProfile getUserProfile(long userId) throws PersistenceException {
-    	Object key = new Long(userId);
-    	synchronized (userCache) {
-    		UserProfile user = (UserProfile) userCache.get(key);
-    		if (user == null) {
-    			UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
-    			user = userPersistence.getUserProfile(userId);
-    			userCache.put(key, user);
-    		}
-    		return user;
-    	}
+        Object key = new Long(userId);
+        synchronized (this.userCache) {
+            UserProfile user = this.userCache.get(key);
+            if (user == null) {
+                UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
+                user = userPersistence.getUserProfile(userId);
+                this.userCache.put(key, user);
+            }
+            return user;
+        }
     }
-    
-    
+
     public void refresh(long userId) {
 
-    	Object key = new Long(userId);
-    	synchronized (userCache) {
-    		userCache.remove(key);
-    	}    	
+        Object key = new Long(userId);
+        synchronized (this.userCache) {
+            this.userCache.remove(key);
+        }
     }
-    
+
 }

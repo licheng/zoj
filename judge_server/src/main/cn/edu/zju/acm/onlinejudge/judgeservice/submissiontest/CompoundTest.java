@@ -27,7 +27,7 @@ public abstract class CompoundTest implements Test {
 
     @Override
     public int hashCode() {
-        return tests.hashCode();
+        return this.tests.hashCode();
     }
 
     @Override

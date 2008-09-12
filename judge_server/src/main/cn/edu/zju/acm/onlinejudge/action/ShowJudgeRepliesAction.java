@@ -22,7 +22,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
-import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
 /**
  * <p>
@@ -30,46 +29,52 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowJudgeRepliesAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ShowJudgeRepliesAction() {
-        // empty
+    // empty
     }
 
     /**
      * ShowJudgeRepliesAction.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-        
+
         // check admin
-        ActionForward forward = checkAdmin(mapping, context);
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
-        List<JudgeReply> judgeReplies = PersistenceManager.getInstance().getSubmissionPersistence().getAllJudgeReplies();
+
+        List<JudgeReply> judgeReplies = JudgeReply.getAllJudgeReplies();
         context.setAttribute("JudgeReplies", judgeReplies);
-        return handleSuccess(mapping, context, "success");   	    	    	    	
-    }    
-        
+        return this.handleSuccess(mapping, context, "success");
+    }
+
 }
-    

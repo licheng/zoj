@@ -17,81 +17,106 @@ package cn.edu.zju.acm.onlinejudge.form;
 
 import java.io.Serializable;
 import java.text.ParseException;
+
 import org.apache.struts.action.ActionForm;
+
 import cn.edu.zju.acm.onlinejudge.bean.request.UserCriteria;
 
-
 /**
- * <p>UserSearchForm.</p>
+ * <p>
+ * UserSearchForm.
+ * </p>
  * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public class UserSearchForm extends ActionForm implements Serializable {
-	
+
     /**
-     * <p>Represents search.</p>
+     * <p>
+     * Represents search.
+     * </p>
      */
     private boolean search = false;
 
     /**
-     * <p>Represents handle.</p>
+     * <p>
+     * Represents handle.
+     * </p>
      */
     private String handle;
 
     /**
-     * <p>Represents email.</p>
+     * <p>
+     * Represents email.
+     * </p>
      */
     private String email;
 
     /**
-     * <p>Represents roleId.</p>
+     * <p>
+     * Represents roleId.
+     * </p>
      */
     private String roleId;
-    
+
     /**
-     * <p>Represents firstName.</p>
+     * <p>
+     * Represents firstName.
+     * </p>
      */
     private String firstName;
-    
+
     /**
-     * <p>Represents lastName.</p>
+     * <p>
+     * Represents lastName.
+     * </p>
      */
     private String lastName;
 
     /**
-     * <p>Represents countryId.</p>
+     * <p>
+     * Represents countryId.
+     * </p>
      */
     private String countryId;
 
     /**
-     * <p>Represents school.</p>
+     * <p>
+     * Represents school.
+     * </p>
      */
     private String school;
-    
+
     /**
-     * <p>Represents totalPages.</p>
+     * <p>
+     * Represents totalPages.
+     * </p>
      */
     private String totalPages;
-    
+
     /**
-     * <p>Represents pageNumber.</p>
+     * <p>
+     * Represents pageNumber.
+     * </p>
      */
     private String pageNumber;
-    
+
     /**
-     * <p>Represents paging.</p>
+     * <p>
+     * Represents paging.
+     * </p>
      */
     private String paging;
-    
+
     /**
      * UserSearchForm.
      */
-    public UserSearchForm() {    	
-    }
-    
+    public UserSearchForm() {}
+
     /**
-     * @param search The search to set.
+     * @param search
+     *            The search to set.
      */
     public void setSearch(boolean search) {
         this.search = search;
@@ -101,11 +126,11 @@ public class UserSearchForm extends ActionForm implements Serializable {
      * @return Returns the search.
      */
     public boolean isSearch() {
-        return search;
+        return this.search;
     }
-            
+
     public String getCountryId() {
-        return countryId;
+        return this.countryId;
     }
 
     public void setCountryId(String countryId) {
@@ -113,7 +138,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -121,7 +146,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getFirstName() {
-        return firstName;
+        return this.firstName;
     }
 
     public void setFirstName(String firstName) {
@@ -129,7 +154,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getHandle() {
-        return handle;
+        return this.handle;
     }
 
     public void setHandle(String handle) {
@@ -137,7 +162,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getLastName() {
-        return lastName;
+        return this.lastName;
     }
 
     public void setLastName(String lastName) {
@@ -145,7 +170,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getPageNumber() {
-        return pageNumber;
+        return this.pageNumber;
     }
 
     public void setPageNumber(String pageNumber) {
@@ -153,7 +178,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getRoleId() {
-        return roleId;
+        return this.roleId;
     }
 
     public void setRoleId(String roleId) {
@@ -161,7 +186,7 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getSchool() {
-        return school;
+        return this.school;
     }
 
     public void setSchool(String school) {
@@ -169,46 +194,46 @@ public class UserSearchForm extends ActionForm implements Serializable {
     }
 
     public String getTotalPages() {
-        return totalPages;
+        return this.totalPages;
     }
 
     public void setTotalPages(String totalPages) {
         this.totalPages = totalPages;
-    }    
-    
+    }
+
     public UserCriteria toUserCriteria() throws ParseException, NumberFormatException {
-    	
-    	UserCriteria criteria = new UserCriteria();
-                
-    	if (handle != null && handle.trim().length() > 0) {
-    		criteria.setHandle(handle.trim());
-    	}
-    	if (email != null && email.trim().length() > 0) {
-    		criteria.setEmail(email.trim());
-    	}
-    	if (roleId != null && roleId.trim().length() > 0) {
-    		criteria.setRoleId(Long.valueOf(roleId));
-    	}
-        if (firstName != null && firstName.trim().length() > 0) {
-            criteria.setFirstName(firstName.trim());
+
+        UserCriteria criteria = new UserCriteria();
+
+        if (this.handle != null && this.handle.trim().length() > 0) {
+            criteria.setHandle(this.handle.trim());
         }
-        if (lastName != null && lastName.trim().length() > 0) {
-            criteria.setLastName(lastName.trim());
+        if (this.email != null && this.email.trim().length() > 0) {
+            criteria.setEmail(this.email.trim());
         }
-        if (countryId != null && countryId.trim().length() > 0) {
-            criteria.setCountryId(Long.valueOf(countryId));
-        }        
-        if (school != null && school.trim().length() > 0) {
-            criteria.setSchool(school.trim());
+        if (this.roleId != null && this.roleId.trim().length() > 0) {
+            criteria.setRoleId(Long.valueOf(this.roleId));
         }
-    	return criteria;
+        if (this.firstName != null && this.firstName.trim().length() > 0) {
+            criteria.setFirstName(this.firstName.trim());
+        }
+        if (this.lastName != null && this.lastName.trim().length() > 0) {
+            criteria.setLastName(this.lastName.trim());
+        }
+        if (this.countryId != null && this.countryId.trim().length() > 0) {
+            criteria.setCountryId(Long.valueOf(this.countryId));
+        }
+        if (this.school != null && this.school.trim().length() > 0) {
+            criteria.setSchool(this.school.trim());
+        }
+        return criteria;
     }
 
     public String getPaging() {
-        return paging;
+        return this.paging;
     }
 
     public void setPaging(String paging) {
         this.paging = paging;
-    }        
+    }
 }

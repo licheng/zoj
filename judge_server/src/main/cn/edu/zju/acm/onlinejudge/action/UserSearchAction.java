@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -44,115 +43,117 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class UserSearchAction extends BaseAction {
-    
-	
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public UserSearchAction() {
-    	
+
     }
 
     /**
      * ShowRunsAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	
-        ActionForward forward = checkAdmin(mapping, context);
+
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
-        
+
         context.setAttribute("UserSearchForm", form);
-        
-        context.getRequest().setAttribute("Countries", 
-                PersistenceManager.getInstance().getUserPersistence().getAllCountries());
-        context.getRequest().setAttribute("Roles", 
-                PersistenceManager.getInstance().getAuthorizationPersistence().getAllRoles());
-        
+
+        context.getRequest().setAttribute("Countries",
+                                          PersistenceManager.getInstance().getUserPersistence().getAllCountries());
+        context.getRequest().setAttribute("Roles",
+                                          PersistenceManager.getInstance().getAuthorizationPersistence().getAllRoles());
+
         UserSearchForm userForm = (UserSearchForm) form;
-        
-        if (empty(userForm.getCountryId()) &&
-            empty(userForm.getEmail()) &&
-            empty(userForm.getFirstName()) &&
-            empty(userForm.getHandle()) &&
-            empty(userForm.getLastName()) &&
-            empty(userForm.getRoleId()) &&
-            empty(userForm.getSchool())) {
-            
-            return handleSuccess(mapping, context, "success");
-            
+
+        if (this.empty(userForm.getCountryId()) && this.empty(userForm.getEmail()) &&
+            this.empty(userForm.getFirstName()) && this.empty(userForm.getHandle()) &&
+            this.empty(userForm.getLastName()) && this.empty(userForm.getRoleId()) && this.empty(userForm.getSchool())) {
+
+            return this.handleSuccess(mapping, context, "success");
+
         }
-        
-        
-        UserCriteria criteria = userForm.toUserCriteria();         
+
+        UserCriteria criteria = userForm.toUserCriteria();
         String export = context.getRequest().getParameter("exportFormat");
-        
+
         if ("txt".equalsIgnoreCase(export)) {
-            List<UserProfile> users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
-                    criteria, 0, Integer.MAX_VALUE);
-            return export(context, criteria, users, export);
+            List<UserProfile> users =
+                    PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(criteria, 0,
+                                                                                             Integer.MAX_VALUE);
+            return this.export(context, criteria, users, export);
         } else if ("xls".equalsIgnoreCase(export)) {
-            List<UserProfile> users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
-                    criteria, 0, Integer.MAX_VALUE);            
-            return export(context, criteria, users, export);
-        } 
+            List<UserProfile> users =
+                    PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(criteria, 0,
+                                                                                             Integer.MAX_VALUE);
+            return this.export(context, criteria, users, export);
+        }
         long paging = Utility.parseLong(userForm.getPaging(), 10, 50);;
-        
+
         long usersNumber = PersistenceManager.getInstance().getUserPersistence().searchUserProfilesCount(criteria);
         if (usersNumber == 0) {
             context.setAttribute("users", new ArrayList<UserProfile>());
             context.setAttribute("pageNumber", new Long(0));
-            context.setAttribute("totalPages", new Long(0));      
+            context.setAttribute("totalPages", new Long(0));
             context.setAttribute("paging", new Long(paging));
             context.setAttribute("total", new Long(0));
-            return handleSuccess(mapping, context, "success");
-        } 
-        
+            return this.handleSuccess(mapping, context, "success");
+        }
+
         long totalPages = (usersNumber - 1) / paging + 1;
-        long pageNumber = Utility.parseLong(userForm.getPageNumber(), 1, totalPages);        
+        long pageNumber = Utility.parseLong(userForm.getPageNumber(), 1, totalPages);
         long startIndex = paging * (pageNumber - 1);
-    	
-    	List<UserProfile> users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
-                criteria, (int) startIndex, (int) paging);                      
+
+        List<UserProfile> users =
+                PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(criteria, (int) startIndex,
+                                                                                         (int) paging);
 
         context.setAttribute("users", users);
         context.setAttribute("pageNumber", new Long(pageNumber));
         context.setAttribute("totalPages", new Long(totalPages));
         context.setAttribute("paging", new Long(paging));
         context.setAttribute("total", new Long(usersNumber));
-                        
-        return handleSuccess(mapping, context, "success");
-                  	    	   
-    }   
-    
+
+        return this.handleSuccess(mapping, context, "success");
+
+    }
+
     private boolean empty(String value) {
         return value == null || value.trim().length() == 0;
     }
-    
-    
-    private ActionForward export(ContextAdapter context, UserCriteria criteria, List<UserProfile> users, String export) throws Exception {        
-        
+
+    private ActionForward export(ContextAdapter context, UserCriteria criteria, List<UserProfile> users, String export) throws Exception {
+
         byte[] out;
         String fileName = "userlist";
         HttpServletResponse response = context.getResponse();
         if ("xls".equalsIgnoreCase(export)) {
-            out = exportToExcel(criteria, users);            
+            out = this.exportToExcel(criteria, users);
             response.setContentType("application/doc");
             response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".xls");
         } else {
@@ -161,10 +162,10 @@ public class UserSearchAction extends BaseAction {
             if (userAgentHeader != null && userAgentHeader.length() > 0) {
                 windows = userAgentHeader.indexOf("Windows") != -1;
             }
-            out = exportToText(criteria, users, windows);
-            response.setContentType("text/plain");      
+            out = this.exportToText(criteria, users, windows);
+            response.setContentType("text/plain");
             response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".txt");
-        }        
+        }
         response.getOutputStream().write(out);
         response.getOutputStream().close();
         return null;
@@ -172,30 +173,30 @@ public class UserSearchAction extends BaseAction {
 
     private byte[] exportToText(UserCriteria criteria, List<UserProfile> users, boolean windows) throws Exception {
         String lineHolder = windows ? "\r\n" : "\n";
-        
-        ByteArrayOutputStream out = new ByteArrayOutputStream();        
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
         for (Object user : users) {
             writer.write(((UserProfile) user).getHandle());
             writer.write(lineHolder);
-        }        
+        }
         writer.close();
-        
+
         return out.toByteArray();
     }
-    
+
     private byte[] exportToExcel(UserCriteria criteria, List<UserProfile> users) throws Exception {
-        
-        HSSFWorkbook wb = new HSSFWorkbook();       
-        HSSFSheet sheet = wb.createSheet();  
+
+        HSSFWorkbook wb = new HSSFWorkbook();
+        HSSFSheet sheet = wb.createSheet();
         short rowId = 0;
         for (Object user : users) {
             HSSFRow row = sheet.createRow(rowId);
             rowId++;
             HSSFCell cell = row.createCell((short) 0);
             cell.setCellValue(((UserProfile) user).getHandle());
-        }           
-        
+        }
+
         // output to stream
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -203,7 +204,6 @@ public class UserSearchAction extends BaseAction {
             return out.toByteArray();
         } finally {
             out.close();
-        }                
+        }
     }
 }
-    

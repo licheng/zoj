@@ -33,62 +33,70 @@ import cn.edu.zju.acm.onlinejudge.util.RandomStringGenerator;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ForgotPasswordAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ForgotPasswordAction() {
-        // empty
+    // empty
     }
 
     /**
      * Login.
+     * 
      * <pre>
      * </pre>
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	if (!Features.forgotPassword()) {
-    		context.getResponse().sendError(404);
+        if (!Features.forgotPassword()) {
+            context.getResponse().sendError(404);
             return null;
-    	}
-    	String handle = context.getRequest().getParameter("handle");
-    	
-    	if (handle != null) {
-    		forgotPassword(handle, context);
-    		context.getRequest().setAttribute("handle", handle);
-    	}
-    	
-    	return handleSuccess(mapping, context, "success");
-    }    
-    
+        }
+        String handle = context.getRequest().getParameter("handle");
+
+        if (handle != null) {
+            this.forgotPassword(handle, context);
+            context.getRequest().setAttribute("handle", handle);
+        }
+
+        return this.handleSuccess(mapping, context, "success");
+    }
+
     public void forgotPassword(String handle, ContextAdapter context) throws Exception {
-    	UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
-		UserProfile user = userPersistence.getUserProfileByHandle(handle);
-		if (user == null) {
-			return;
-		}
-		
-		String code = RandomStringGenerator.generate();
-		userPersistence.createConfirmCode(user.getId(), code, user.getId());
-		
-		String url = ConfigManager.getValue("home_url") + context.getRequest().getContextPath() + "/resetPassword.do?code=" + code;
-		EmailService.sendPasswordEmail(user, url);
+        UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
+        UserProfile user = userPersistence.getUserProfileByHandle(handle);
+        if (user == null) {
+            return;
+        }
+
+        String code = RandomStringGenerator.generate();
+        userPersistence.createConfirmCode(user.getId(), code, user.getId());
+
+        String url =
+                ConfigManager.getValue("home_url") + context.getRequest().getContextPath() + "/resetPassword.do?code=" +
+                    code;
+        EmailService.sendPasswordEmail(user, url);
     }
 
 }
-    

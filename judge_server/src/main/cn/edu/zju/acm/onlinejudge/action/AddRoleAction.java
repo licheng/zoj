@@ -15,7 +15,6 @@
 
 package cn.edu.zju.acm.onlinejudge.action;
 
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -30,55 +29,60 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class AddRoleAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public AddRoleAction() {
-        // empty
+    // empty
     }
 
     /**
      * AddRoleAction.
      * 
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-                     
+
         // check admin
-        ActionForward forward = checkAdmin(mapping, context);
+        ActionForward forward = this.checkAdmin(mapping, context);
         if (forward != null) {
             return forward;
         }
         String name = context.getRequest().getParameter("name");
         if (name == null || name.trim().length() == 0) {
-            return handleSuccess(mapping, context, "success");
+            return this.handleSuccess(mapping, context, "success");
         }
         String description = context.getRequest().getParameter("description");
         if (description == null) {
             description = "";
         }
         RoleSecurity role = new RoleSecurity(-1, name, description);
-        
+
         AuthorizationPersistence ap = PersistenceManager.getInstance().getAuthorizationPersistence();
         ap.createRole(role, context.getUserProfile().getId());
-        
-        return handleSuccess(mapping, context, "success");
-        
-    }    
+
+        return this.handleSuccess(mapping, context, "success");
+
+    }
 
 }
-    

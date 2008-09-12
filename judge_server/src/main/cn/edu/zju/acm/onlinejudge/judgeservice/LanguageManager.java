@@ -16,47 +16,47 @@
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
+import cn.edu.zju.acm.onlinejudge.persistence.LanguagePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
+// TODO(xuchuan): Remove this class. Use LanguagePersistence directly
 public class LanguageManager {
     private static Map<Long, Language> languageMap = new HashMap<Long, Language>();
 
     private static Map<String, Language> languageExtensionMap = new HashMap<String, Language>();
 
-    private static ContestPersistence languageDAO = PersistenceManager.getInstance().getContestPersistence();
+    private static LanguagePersistence languageDAO = PersistenceManager.getInstance().getLanguagePersistence();
 
     static {
         try {
-            reload();
+            LanguageManager.reload();
         } catch (PersistenceException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
 
     synchronized public static Language getLanguage(long languageId) {
-        return languageMap.get(languageId);
+        return LanguageManager.languageMap.get(languageId);
     }
 
     synchronized public static Language getLanguageByExtension(String extension) {
-        return languageExtensionMap.get(extension);
+        return LanguageManager.languageExtensionMap.get(extension);
     }
 
     synchronized public static int getNumberOfLanguages() {
-        return languageMap.size();
+        return LanguageManager.languageMap.size();
     }
 
     synchronized public static void reload() throws PersistenceException {
-        languageMap.clear();
-        languageExtensionMap.clear();
-        for (Language language : (List<Language>) languageDAO.getAllLanguages()) {
-            languageMap.put(language.getId(), language);
-            languageExtensionMap.put(language.getOptions(), language);
+        LanguageManager.languageMap.clear();
+        LanguageManager.languageExtensionMap.clear();
+        for (Language language : LanguageManager.languageDAO.getAllLanguages()) {
+            LanguageManager.languageMap.put(language.getId(), language);
+            LanguageManager.languageExtensionMap.put(language.getOptions(), language);
         }
     }
 }

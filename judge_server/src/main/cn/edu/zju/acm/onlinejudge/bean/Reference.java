@@ -18,58 +18,77 @@ package cn.edu.zju.acm.onlinejudge.bean;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
 
 /**
- * <p>Reference bean.</p>
- *
- * @author ZOJDEV
- *
+ * <p>
+ * Reference bean.
+ * </p>
+ * 
+ * @author Zhang, Zheng
+ * 
  * @version 2.0
  */
 public class Reference {
 
     /**
-     * <p>Represents id.</p>
+     * <p>
+     * Represents id.
+     * </p>
      */
     private long id = -1;
 
     /**
-     * <p>Represents size.</p>
+     * <p>
+     * Represents size.
+     * </p>
      */
     private long size = -1;
 
     /**
-     * <p>Represents referenceType.</p>
+     * <p>
+     * Represents referenceType.
+     * </p>
      */
     private ReferenceType referenceType = null;
 
     /**
-     * <p>Represents contentType.</p>
+     * <p>
+     * Represents contentType.
+     * </p>
      */
     private String contentType = null;
 
     /**
-     * <p>Represents name.</p>
+     * <p>
+     * Represents name.
+     * </p>
      */
     private String name = null;
 
     /**
-     * <p>Represents compressed.</p>
+     * <p>
+     * Represents compressed.
+     * </p>
      */
     private boolean compressed = false;
 
     /**
-     * <p>Represents content.</p>
+     * <p>
+     * Represents content.
+     * </p>
      */
     private byte[] content = null;
 
     /**
-     * <p>Empty constructor.</p>
+     * <p>
+     * Empty constructor.
+     * </p>
      */
-    public Reference() {
-    }
+    public Reference() {}
 
     /**
-     * <p>Gets id.</p>
-     *
+     * <p>
+     * Gets id.
+     * </p>
+     * 
      * @return id
      */
     public long getId() {
@@ -77,17 +96,22 @@ public class Reference {
     }
 
     /**
-     * <p>Sets id.</p>
-     *
-     * @param id id
+     * <p>
+     * Sets id.
+     * </p>
+     * 
+     * @param id
+     *            id
      */
     public void setId(long id) {
         this.id = id;
     }
 
     /**
-     * <p>Gets size.</p>
-     *
+     * <p>
+     * Gets size.
+     * </p>
+     * 
      * @return size
      */
     public long getSize() {
@@ -95,17 +119,22 @@ public class Reference {
     }
 
     /**
-     * <p>Sets size.</p>
-     *
-     * @param size size
+     * <p>
+     * Sets size.
+     * </p>
+     * 
+     * @param size
+     *            size
      */
     public void setSize(long size) {
         this.size = size;
     }
 
     /**
-     * <p>Gets referenceType.</p>
-     *
+     * <p>
+     * Gets referenceType.
+     * </p>
+     * 
      * @return referenceType
      */
     public ReferenceType getReferenceType() {
@@ -113,17 +142,22 @@ public class Reference {
     }
 
     /**
-     * <p>Sets referenceType.</p>
-     *
-     * @param referenceType referenceType
+     * <p>
+     * Sets referenceType.
+     * </p>
+     * 
+     * @param referenceType
+     *            referenceType
      */
     public void setReferenceType(ReferenceType referenceType) {
         this.referenceType = referenceType;
     }
 
     /**
-     * <p>Gets contentType.</p>
-     *
+     * <p>
+     * Gets contentType.
+     * </p>
+     * 
      * @return contentType
      */
     public String getContentType() {
@@ -131,17 +165,22 @@ public class Reference {
     }
 
     /**
-     * <p>Sets contentType.</p>
-     *
-     * @param contentType contentType
+     * <p>
+     * Sets contentType.
+     * </p>
+     * 
+     * @param contentType
+     *            contentType
      */
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
 
     /**
-     * <p>Gets name.</p>
-     *
+     * <p>
+     * Gets name.
+     * </p>
+     * 
      * @return name
      */
     public String getName() {
@@ -149,17 +188,22 @@ public class Reference {
     }
 
     /**
-     * <p>Sets name.</p>
-     *
-     * @param name name
+     * <p>
+     * Sets name.
+     * </p>
+     * 
+     * @param name
+     *            name
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * <p>Gets compressed.</p>
-     *
+     * <p>
+     * Gets compressed.
+     * </p>
+     * 
      * @return compressed
      */
     public boolean isCompressed() {
@@ -167,17 +211,22 @@ public class Reference {
     }
 
     /**
-     * <p>Sets compressed.</p>
-     *
-     * @param compressed compressed
+     * <p>
+     * Sets compressed.
+     * </p>
+     * 
+     * @param compressed
+     *            compressed
      */
     public void setCompressed(boolean compressed) {
         this.compressed = compressed;
     }
 
     /**
-     * <p>Gets content.</p>
-     *
+     * <p>
+     * Gets content.
+     * </p>
+     * 
      * @return content
      */
     public byte[] getContent() {
@@ -185,9 +234,12 @@ public class Reference {
     }
 
     /**
-     * <p>Sets content.</p>
-     *
-     * @param content content
+     * <p>
+     * Sets content.
+     * </p>
+     * 
+     * @param content
+     *            content
      */
     public void setContent(byte[] content) {
         this.content = content;

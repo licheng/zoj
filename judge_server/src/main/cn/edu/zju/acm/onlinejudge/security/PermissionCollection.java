@@ -17,9 +17,9 @@ package cn.edu.zju.acm.onlinejudge.security;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.PermissionLevel;
 
@@ -29,7 +29,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.PermissionLevel;
  * </p>
  * 
  * @version 2.0
- * @author ZOJDEV
+ * @author Zhang, Zheng
  */
 public class PermissionCollection {
 
@@ -46,7 +46,7 @@ public class PermissionCollection {
      * </p>
      */
     public PermissionCollection() {
-        // empty constructor
+    // empty constructor
     }
 
     /**
@@ -69,9 +69,9 @@ public class PermissionCollection {
         }
 
         Long contextLong = new Long(context);
-        PermissionLevel oldAction = permissions.get(contextLong);
+        PermissionLevel oldAction = this.permissions.get(contextLong);
         if (action.compareTo(oldAction) > 0) {
-            permissions.put(contextLong, action);
+            this.permissions.put(contextLong, action);
         }
         return oldAction;
 
@@ -87,7 +87,7 @@ public class PermissionCollection {
      *            the context
      */
     public PermissionLevel removePermission(long context) {
-        return permissions.remove(new Long(context));
+        return this.permissions.remove(new Long(context));
     }
 
     /**
@@ -100,7 +100,7 @@ public class PermissionCollection {
      *            the context
      */
     public PermissionLevel getPermission(long context) {
-        return permissions.get(new Long(context));
+        return this.permissions.get(new Long(context));
     }
 
     /**
@@ -112,10 +112,9 @@ public class PermissionCollection {
      */
     public List<PermissionEntry> getPermissions() {
         List<PermissionEntry> entries = new ArrayList<PermissionEntry>();
-        for (Iterator<Map.Entry<Long, PermissionLevel>> it = permissions.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<Long, PermissionLevel> entry = it.next();
-            long id = ((Long) entry.getKey()).longValue();
-            PermissionLevel action = (PermissionLevel) entry.getValue();
+        for (Entry<Long, PermissionLevel> entry : this.permissions.entrySet()) {
+            long id = entry.getKey().longValue();
+            PermissionLevel action = entry.getValue();
             entries.add(new PermissionEntry(id, action));
         }
         return entries;
@@ -127,7 +126,7 @@ public class PermissionCollection {
      * </p>
      */
     public void clearPermissions() {
-        permissions.clear();
+        this.permissions.clear();
     }
 
     /**
@@ -146,12 +145,10 @@ public class PermissionCollection {
             throw new NullPointerException("permissions should not be null.");
         }
 
-        for (Iterator<Map.Entry<Long, PermissionLevel>> iter = permissions.permissions.entrySet().iterator(); iter
-                .hasNext();) {
-            Map.Entry<Long, PermissionLevel> entry = iter.next();
-            long id = ((Long) entry.getKey()).longValue();
-            PermissionLevel action = (PermissionLevel) entry.getValue();
-            addPermission(id, action);
+        for (Entry<Long, PermissionLevel> entry : permissions.permissions.entrySet()) {
+            long id = entry.getKey().longValue();
+            PermissionLevel action = entry.getValue();
+            this.addPermission(id, action);
         }
     }
 }

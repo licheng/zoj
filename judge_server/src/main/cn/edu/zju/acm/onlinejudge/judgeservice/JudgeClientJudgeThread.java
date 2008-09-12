@@ -16,12 +16,12 @@
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.DataOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
@@ -130,7 +130,7 @@ public class JudgeClientJudgeThread extends Thread {
                 } catch (IOException e) {
                     this.status = Status.ERROR;
                     this.error = e;
-                    this.client.getService().judge(submission, Priority.HIGH);
+                    this.client.getService().judge(this.submission, Priority.HIGH);
                     if (!this.client.ping()) {
                         break;
                     }
@@ -140,8 +140,7 @@ public class JudgeClientJudgeThread extends Thread {
                     this.logger.error(e);
                 }
             }
-        } catch (InterruptedException e) {
-        } finally {
+        } catch (InterruptedException e) {} finally {
             this.submissionQueueReader = null;
         }
         this.status = Status.STOPEED;
@@ -152,11 +151,12 @@ public class JudgeClientJudgeThread extends Thread {
         this.socket = new Socket();
         this.socket.setKeepAlive(true);
         this.socket.setSoTimeout(JudgeClient.READ_TIMEOUT);
-        logger.info("Connecting to " + this.address.getAddress().getCanonicalHostName() + ":" + this.address.getPort());
-        this.socket.connect(address, JudgeClient.CONNECTION_TIMEOUT);
-        logger.info("Connected");
-        this.in = new DataInputStream(socket.getInputStream());
-        this.out = new DataOutputStream(socket.getOutputStream());
+        this.logger.info("Connecting to " + this.address.getAddress().getCanonicalHostName() + ":" +
+            this.address.getPort());
+        this.socket.connect(this.address, JudgeClient.CONNECTION_TIMEOUT);
+        this.logger.info("Connected");
+        this.in = new DataInputStream(this.socket.getInputStream());
+        this.out = new DataOutputStream(this.socket.getOutputStream());
         this.status = Status.RUNNING;
         try {
             while (!this.isInterrupted()) {
@@ -164,8 +164,13 @@ public class JudgeClientJudgeThread extends Thread {
                     this.status = Status.WAITING;
                     if (this.submissionQueueReader == null) {
                         CompoundSubmissionFilter submissionFilter = new CompoundSubmissionFilter();
-                        submissionFilter.add(new SimpleSubmissionFilter(new NegationTest(new LanguageTest(this.client
-                                .getSupportedLanguages())), Priority.DENY));
+                        submissionFilter
+                                        .add(new SimpleSubmissionFilter(
+                                                                        new NegationTest(
+                                                                                         new LanguageTest(
+                                                                                                          this.client
+                                                                                                                     .getSupportedLanguages())),
+                                                                        Priority.DENY));
                         submissionFilter.add(this.submissionFilter);
                         submissionFilter.add(this.client.getSubmissionFilter());
                         submissionFilter.add(this.client.getService().getSubmissionFilter());
@@ -176,7 +181,7 @@ public class JudgeClientJudgeThread extends Thread {
                     // PersistenceException
                     this.submission = null;
                     this.submission = this.submissionQueueReader.poll(this);
-                    this.client.getService().judgeStart(submission);
+                    this.client.getService().judgeStart(this.submission);
                     this.status = Status.RUNNING;
                     try {
                         this.judge(this.submission);
@@ -196,7 +201,7 @@ public class JudgeClientJudgeThread extends Thread {
                     this.client.getService().judge(this.submission, Priority.HIGH);
                     Thread.sleep(60000);
                 } finally {
-                    this.client.getService().judgeDone(submission);
+                    this.client.getService().judgeDone(this.submission);
                 }
             }
         } finally {
@@ -205,9 +210,12 @@ public class JudgeClientJudgeThread extends Thread {
         }
     }
 
-    private void judge(Submission submission) throws JudgeServerErrorException, IOException, PersistenceException,
-            JudgeClientErrorException, ProblemDataErrorException {
-        Problem problem = problemDAO.getProblem(submission.getProblemId());
+    private void judge(Submission submission) throws JudgeServerErrorException,
+            IOException,
+            PersistenceException,
+            JudgeClientErrorException,
+            ProblemDataErrorException {
+        Problem problem = this.problemDAO.getProblem(submission.getProblemId());
         int reply = this.sendJudgeCommand(problem.getId(), problem.getRevision(), submission.getId());
         if (reply == JudgeReply.NO_SUCH_PROBLEM.getId()) {
             reply = this.sendDataCommand(problem);
@@ -250,7 +258,7 @@ public class JudgeClientJudgeThread extends Thread {
             int memoryConsumption = this.in.readInt();
             submission.setTimeConsumption(timeConsumption);
             submission.setMemoryConsumption(memoryConsumption);
-            logger.info("Running " + timeConsumption + " " + memoryConsumption);
+            this.logger.info("Running " + timeConsumption + " " + memoryConsumption);
             reply = this.readJudgeReply();
         }
         if (reply == JudgeReply.JUDGING.getId()) {
@@ -263,14 +271,14 @@ public class JudgeClientJudgeThread extends Thread {
         }
         submission.setJudgeReply(JudgeReply.findById(reply));
         if (submission.getJudgeReply() == null || submission.getJudgeReply() != JudgeReply.TIME_LIMIT_EXCEEDED &&
-                submission.getJudgeReply() != JudgeReply.MEMORY_LIMIT_EXCEEDED &&
-                submission.getJudgeReply() != JudgeReply.OUTPUT_LIMIT_EXCEEDED &&
-                submission.getJudgeReply() != JudgeReply.FLOATING_POINT_ERROR &&
-                submission.getJudgeReply() != JudgeReply.SEGMENTATION_FAULT &&
-                submission.getJudgeReply() != JudgeReply.RUNTIME_ERROR &&
-                submission.getJudgeReply() != JudgeReply.ACCEPTED &&
-                submission.getJudgeReply() != JudgeReply.WRONG_ANSWER &&
-                submission.getJudgeReply() != JudgeReply.PRESENTATION_ERROR) {
+            submission.getJudgeReply() != JudgeReply.MEMORY_LIMIT_EXCEEDED &&
+            submission.getJudgeReply() != JudgeReply.OUTPUT_LIMIT_EXCEEDED &&
+            submission.getJudgeReply() != JudgeReply.FLOATING_POINT_ERROR &&
+            submission.getJudgeReply() != JudgeReply.SEGMENTATION_FAULT &&
+            submission.getJudgeReply() != JudgeReply.RUNTIME_ERROR &&
+            submission.getJudgeReply() != JudgeReply.ACCEPTED &&
+            submission.getJudgeReply() != JudgeReply.WRONG_ANSWER &&
+            submission.getJudgeReply() != JudgeReply.PRESENTATION_ERROR) {
             throw new JudgeClientErrorException();
         }
     }
@@ -279,23 +287,24 @@ public class JudgeClientJudgeThread extends Thread {
         int reply = this.in.readInt();
         JudgeReply r = JudgeReply.findById(reply);
         if (r == null) {
-            logger.error("Invalid judge reply " + reply);
+            this.logger.error("Invalid judge reply " + reply);
         } else if (r != JudgeReply.RUNNING) {
-            logger.info(r.getDescription());
+            this.logger.info(r.getDescription());
         }
         return reply;
     }
 
     private int sendJudgeCommand(long problemId, int problemRevision, long submissionId) throws IOException {
-        logger.info(this.address + " Judge problem:" + problemId + " revision:" + problemRevision + " submission:" +
-                submissionId);
+        this.logger.info(this.address + " Judge problem:" + problemId + " revision:" + problemRevision +
+            " submission:" + submissionId);
         this.sendCommand(JudgeClientCommandsFactory.createJudgeCommand(problemId, problemRevision, submissionId));
         return this.readJudgeReply();
 
     }
 
     private void zipProblemData(File outputFile, Problem problem) throws PersistenceException,
-            JudgeServerErrorException, ProblemDataErrorException {
+            JudgeServerErrorException,
+            ProblemDataErrorException {
 
         try {
             ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(outputFile));
@@ -306,18 +315,18 @@ public class JudgeClientJudgeThread extends Thread {
                         this.referenceDAO.getProblemReferences(problem.getId(), ReferenceType.OUTPUT);
                 if (inputFiles.size() != outputFiles.size() && inputFiles.size() > 0 && outputFiles.size() > 0) {
                     throw new ProblemDataErrorException("Unequal number of inputs and outputs for problem " +
-                            problem.getId());
+                        problem.getId());
                 }
                 for (Reference input : inputFiles) {
                     if (input.getContent() == null) {
                         throw new ProblemDataErrorException("Can not find content for input with reference id " +
-                                input.getId());
+                            input.getId());
                     }
                 }
                 for (Reference output : outputFiles) {
                     if (output.getContent() == null) {
                         throw new ProblemDataErrorException("Can not find content for output with reference id " +
-                                output.getId());
+                            output.getId());
                     }
                 }
                 Reference specialJudge = null;
@@ -329,24 +338,24 @@ public class JudgeClientJudgeThread extends Thread {
                     }
                     if (specialJudges.size() > 1) {
                         throw new ProblemDataErrorException("Find more than one special judge for problem " +
-                                problem.getId());
+                            problem.getId());
                     }
                     specialJudge = specialJudges.get(0);
                     String contentType = specialJudge.getContentType();
                     if (contentType == null) {
                         throw new ProblemDataErrorException(
-                                "Can not find source content type for special judge with reference id " +
-                                        specialJudge.getId());
+                                                            "Can not find source content type for special judge with reference id " +
+                                                                specialJudge.getId());
                     }
                     byte[] content = specialJudge.getContent();
                     if (content == null) {
                         throw new ProblemDataErrorException(
-                                "Can not find source content for special judge with reference id " +
-                                        specialJudge.getId());
+                                                            "Can not find source content for special judge with reference id " +
+                                                                specialJudge.getId());
                     }
                     if (content.length == 0) {
                         throw new ProblemDataErrorException("Empty source for special judge with reference id " +
-                                specialJudge.getId());
+                            specialJudge.getId());
                     }
                 }
                 for (int i = 0; i < inputFiles.size(); i++) {
@@ -370,7 +379,9 @@ public class JudgeClientJudgeThread extends Thread {
         }
     }
 
-    private int sendDataCommand(Problem problem) throws PersistenceException, JudgeServerErrorException, IOException,
+    private int sendDataCommand(Problem problem) throws PersistenceException,
+            JudgeServerErrorException,
+            IOException,
             ProblemDataErrorException {
         File tempFile;
         try {
@@ -386,12 +397,12 @@ public class JudgeClientJudgeThread extends Thread {
             } catch (FileNotFoundException e) {
                 throw new JudgeServerErrorException("Can not find temporary file " + tempFile.getAbsolutePath(), e);
             }
-            logger.info("Data size:" + tempFile.length());
+            this.logger.info("Data size:" + tempFile.length());
             this.sendCommand(JudgeClientCommandsFactory.createDataCommand((int) tempFile.length()));
             int reply = this.readJudgeReply();
             if (reply == JudgeReply.READY.getId()) {
                 try {
-                    CopyUtils.copy(fin, out);
+                    CopyUtils.copy(fin, this.out);
                 } finally {
                     fin.close();
                 }
@@ -411,8 +422,9 @@ public class JudgeClientJudgeThread extends Thread {
         this.out.flush();
     }
 
-    private int sendCompileCommand(long submissionId, Language language, String sourceFile)
-            throws JudgeServerErrorException, IOException, ProblemDataErrorException {
+    private int sendCompileCommand(long submissionId, Language language, String sourceFile) throws JudgeServerErrorException,
+            IOException,
+            ProblemDataErrorException {
         this.logger.info("Compile " + submissionId + "." + language.getOptions());
         byte[] bytes = sourceFile.getBytes();
         this.logger.info("Compiler:" + language.getId() + " source size:" + bytes.length);
@@ -428,8 +440,9 @@ public class JudgeClientJudgeThread extends Thread {
 
     private int sendTestcaseCommand(int testcase, int timeLimit, int memoryLimit, int outputLimit) throws IOException {
         this.logger.info("Testcase:" + testcase + " TL:" + timeLimit + " ML:" + memoryLimit + " OL:" + outputLimit);
-        this.sendCommand(JudgeClientCommandsFactory
-                .createTestCaseCommand(testcase, timeLimit, memoryLimit, outputLimit));
+        this
+            .sendCommand(JudgeClientCommandsFactory
+                                                   .createTestCaseCommand(testcase, timeLimit, memoryLimit, outputLimit));
         return this.readJudgeReply();
     }
 }

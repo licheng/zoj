@@ -20,8 +20,8 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
+import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 
 /**
  * <p>
@@ -29,49 +29,54 @@ import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class ShowStatisticsAction extends BaseAction {
-    
+
     /**
      * <p>
      * Default constructor.
      * </p>
      */
     public ShowStatisticsAction() {
-        // empty
+    // empty
     }
 
     /**
      * ShowStatisticsAction.
-     *
-     * @param mapping action mapping
-     * @param form action form
-     * @param request http servlet request
-     * @param response http servlet response
-     *
+     * 
+     * @param mapping
+     *            action mapping
+     * @param form
+     *            action form
+     * @param request
+     *            http servlet request
+     * @param response
+     *            http servlet response
+     * 
      * @return action forward instance
-     *
-     * @throws Exception any errors happened
+     * 
+     * @throws Exception
+     *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-    	
-    	// check contest
-    	boolean isProblemset = context.getRequest().getRequestURI().endsWith("showStatistics.do");
-    	
-    	ActionForward forward = checkContestViewPermission(mapping, context, isProblemset, true);
-    	if (forward != null) {
-    		return forward;
-    	}
-    	AbstractContest contest = context.getContest();
-    	
-    	ContestStatistics statistics = StatisticsManager.getInstance().getContestStatistics(contest.getId());    	    	
+
+        // check contest
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("showStatistics.do");
+
+        ActionForward forward = this.checkContestViewPermission(mapping, context, isProblemset, true);
+        if (forward != null) {
+            return forward;
+        }
+        AbstractContest contest = context.getContest();
+
+        ContestStatistics statistics = StatisticsManager.getInstance().getContestStatistics(contest.getId());
         context.setAttribute("ContestStatistics", statistics);
-                
-        return handleSuccess(mapping, context, "success");
-                  	    	   
-    }         
+
+        return this.handleSuccess(mapping, context, "success");
+
+    }
 
 }
-    

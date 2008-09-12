@@ -41,7 +41,7 @@ import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
  * </p>
  * 
  * 
- * @author ZOJDEV
+ * @author Zhang, Zheng
  * @version 2.0
  */
 public class AddProblemAction extends BaseAction {
@@ -52,7 +52,7 @@ public class AddProblemAction extends BaseAction {
      * </p>
      */
     public AddProblemAction() {
-        // empty
+    // empty
     }
 
     /**
@@ -72,24 +72,25 @@ public class AddProblemAction extends BaseAction {
      * @throws Exception
      *             any errors happened
      */
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
         // check contest
         boolean isProblemset = context.getRequest().getRequestURI().endsWith("addProblem.do");
 
-        ActionForward forward = checkContestAdminPermission(mapping, context, isProblemset, false);
+        ActionForward forward = this.checkContestAdminPermission(mapping, context, isProblemset, false);
         if (forward != null) {
             return forward;
         }
 
         ProblemForm problemForm = (ProblemForm) form;
         if (problemForm == null || problemForm.getProblemId() == null) {
-            return handleSuccess(mapping, context);
+            return this.handleSuccess(mapping, context);
         }
 
         // check title and code
-        ActionMessages errors = validate(problemForm, context);
+        ActionMessages errors = this.validate(problemForm, context);
         if (errors.size() > 0) {
-            return handleFailure(mapping, context, errors);
+            return this.handleFailure(mapping, context, errors);
         }
 
         ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
@@ -105,16 +106,16 @@ public class AddProblemAction extends BaseAction {
         problemPersistence.createProblem(problem, userId);
 
         // cprete problem reference, i.e. text, input, output, checker, judge solution, checker source
-        createReference(ReferenceType.DESCRIPTION, problemForm.getDescription(), problem.getId(), userId);
-        createReference(ReferenceType.INPUT, problemForm.getInputData(), problem.getId(), userId);
-        createReference(ReferenceType.OUTPUT, problemForm.getOutputData(), problem.getId(), userId);
-        createReference(ReferenceType.CHECKER, problemForm.getChecker(), problem.getId(), userId);
-        createReference(ReferenceType.CHECKER_SOURCE, problemForm.getCheckerSource(), problem.getId(), userId);
-        createReference(ReferenceType.JUDGE_SOLUTION, problemForm.getJudgeSolution(), problem.getId(), userId);
+        this.createReference(ReferenceType.DESCRIPTION, problemForm.getDescription(), problem.getId(), userId);
+        this.createReference(ReferenceType.INPUT, problemForm.getInputData(), problem.getId(), userId);
+        this.createReference(ReferenceType.OUTPUT, problemForm.getOutputData(), problem.getId(), userId);
+        this.createReference(ReferenceType.CHECKER, problemForm.getChecker(), problem.getId(), userId);
+        this.createReference(ReferenceType.CHECKER_SOURCE, problemForm.getCheckerSource(), problem.getId(), userId);
+        this.createReference(ReferenceType.JUDGE_SOLUTION, problemForm.getJudgeSolution(), problem.getId(), userId);
 
         ContestManager.getInstance().refreshContest(problem.getContestId());
 
-        return handleSuccess(mapping, context, "success", "?contestId=" + contest.getId());
+        return this.handleSuccess(mapping, context, "success", "?contestId=" + contest.getId());
     }
 
     private void createReference(ReferenceType type, FormFile formFile, long problemId, long user) throws Exception {
@@ -149,23 +150,23 @@ public class AddProblemAction extends BaseAction {
 
         ActionErrors errors = new ActionErrors();
 
-        checkInteger(form.getProblemId(), 0, Integer.MAX_VALUE, "id", errors);
+        this.checkInteger(form.getProblemId(), 0, Integer.MAX_VALUE, "id", errors);
         String name = form.getName();
         String code = form.getCode();
-        if ((name == null) || (name.trim().length() == 0)) {
+        if (name == null || name.trim().length() == 0) {
             errors.add("name", new ActionMessage("ProblemForm.name.required"));
         }
 
-        if ((code == null) || (code.trim().length() == 0)) {
+        if (code == null || code.trim().length() == 0) {
             errors.add("code", new ActionMessage("ProblemForm.code.required"));
         }
         // TODO check code
 
         if (!form.isUseContestDefault()) {
-            checkInteger(form.getTimeLimit(), 0, 3600, "timeLimit", errors);
-            checkInteger(form.getMemoryLimit(), 0, 1024 * 1024, "memoryLimit", errors);
-            checkInteger(form.getOutputLimit(), 0, 100 * 1024, "outputLimit", errors);
-            checkInteger(form.getSubmissionLimit(), 0, 10 * 1024, "submissionLimit", errors);
+            this.checkInteger(form.getTimeLimit(), 0, 3600, "timeLimit", errors);
+            this.checkInteger(form.getMemoryLimit(), 0, 1024 * 1024, "memoryLimit", errors);
+            this.checkInteger(form.getOutputLimit(), 0, 100 * 1024, "outputLimit", errors);
+            this.checkInteger(form.getSubmissionLimit(), 0, 10 * 1024, "submissionLimit", errors);
         }
 
         List<Problem> problems = ContestManager.getInstance().getContestProblems(context.getContest().getId());
@@ -194,7 +195,7 @@ public class AddProblemAction extends BaseAction {
      * @param errors
      */
     private void checkInteger(String value, int min, int max, String name, ActionErrors errors) {
-        if ((value == null) || (value.trim().length() == 0)) {
+        if (value == null || value.trim().length() == 0) {
             errors.add(name, new ActionMessage("ProblemForm." + name + ".required"));
             return;
         }
