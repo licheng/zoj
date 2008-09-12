@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.form;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +31,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 
 /**
@@ -610,7 +621,7 @@ public class ProfileForm extends ActionForm implements Serializable {
         	PersistenceManager.getInstance().getUserPersistence().getAllCountries());	            
         } catch (Exception e) {
             e.printStackTrace();
-        	request.setAttribute("Countries", new ArrayList());
+        	request.setAttribute("Countries", new ArrayList<Country>());
         }
         
         if (handle == null) {
@@ -668,7 +679,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     
     private void checkHandle(String handle, ActionErrors errors, String property, String message) {
         checkRequired(handle, errors, "handle", "ProfileForm.handle.required");
-        if (handle != null || handle.length() > 0) {    
+        if (handle != null && handle.length() > 0) {    
             if (handle.length() < 2) {
                 errors.add("handle", new ActionMessage("ProfileForm.handle.invalid"));
                 return;         

@@ -1,11 +1,21 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 import org.apache.commons.dbcp.BasicDataSource;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
@@ -182,10 +192,10 @@ public class Database {
      * @param values the values
      * @return a string like '(value1, value2, value3)'
      */
-    public static String createValues(Collection values) {
+    public static String createValues(Collection<String> values) {
     	StringBuffer ret = new StringBuffer();
     	ret.append('(');
-    	for (Iterator itr = values.iterator(); itr.hasNext();) {
+    	for (Iterator<String> itr = values.iterator(); itr.hasNext();) {
     		if (ret.length() > 1) {
     			ret.append(", ");
     		}
@@ -201,10 +211,10 @@ public class Database {
      * @param values the values
      * @return a string like '(value1, value2, value3)'
      */
-    public static String createNumberValues(Collection values) {
+    public static String createNumberValues(Collection<Long> values) {
     	StringBuffer ret = new StringBuffer();
     	ret.append('(');
-    	for (Iterator itr = values.iterator(); itr.hasNext();) {
+    	for (Iterator<Long> itr = values.iterator(); itr.hasNext();) {
     		if (ret.length() > 1) {
     			ret.append(", ");
     		}

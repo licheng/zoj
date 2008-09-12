@@ -105,7 +105,7 @@ public class JudgeService extends Thread {
         }
     }
 
-    public JudgingView getJudgingView() {
+    public JudgingQueueIterator getJudgingView() {
         return this.judgingQueue.getJudingView();
     }
 
@@ -123,7 +123,7 @@ public class JudgeService extends Thread {
     }
 
     void judgeDone(Submission submission) {
-        this.judgingQueue.tryPop();
+        this.judgingQueue.remove(submission);
     }
 
     public SubmissionQueue getSubmissionQueue() {

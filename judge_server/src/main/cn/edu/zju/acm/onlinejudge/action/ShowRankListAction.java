@@ -1,13 +1,24 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.action;
 
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,23 +34,11 @@ import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
-import cn.edu.zju.acm.onlinejudge.bean.Reference;
-import cn.edu.zju.acm.onlinejudge.bean.Submission;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
-import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
-import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
-import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
-import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ProblemsetRankList;
 import cn.edu.zju.acm.onlinejudge.util.RankList;
 import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
-import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
 
 /**
  * <p>
@@ -84,7 +83,7 @@ public class ShowRankListAction extends BaseAction {
     	}    	
     	AbstractContest contest = context.getContest();
     	if (!isProblemset) {
-    		List problems = context.getProblems();
+    		List<Problem> problems = context.getProblems();
         	context.setAttribute("problems", problems);
             long roleId = Utility.parseLong(context.getRequest().getParameter("roleId"));
             
@@ -121,9 +120,7 @@ public class ShowRankListAction extends BaseAction {
     }         
     
     
-    private ActionForward export(ContextAdapter context, AbstractContest contest, List problems, RankList ranklist, String export) throws Exception {  
-        List entries = ranklist.getEntries();
-    	
+    private ActionForward export(ContextAdapter context, AbstractContest contest, List<Problem> problems, RankList ranklist, String export) throws Exception {     	
     	byte[] out;
     	String fileName = getFileName(contest);
     	HttpServletResponse response = context.getResponse();
@@ -146,8 +143,8 @@ public class ShowRankListAction extends BaseAction {
         return null;
     }
 
-    private byte[] exportToExcel(AbstractContest contest, List problems, RankList ranklist) throws Exception {
-        List entries = ranklist.getEntries();
+    private byte[] exportToExcel(AbstractContest contest, List<Problem> problems, RankList ranklist) throws Exception {
+        List<RankListEntry> entries = ranklist.getEntries();
     	long time = getTimeEscaped(contest);
     	
     	HSSFWorkbook wb = new HSSFWorkbook();    	
@@ -180,7 +177,7 @@ public class ShowRankListAction extends BaseAction {
         row.createCell((short) 2).setCellValue("Nickname");
     	row.createCell((short) 3).setCellValue("Solved");
     	short columnIndex = 4;
-    	for (Iterator it = problems.iterator(); it.hasNext();) {    		
+    	for (Iterator<Problem> it = problems.iterator(); it.hasNext();) {    		
     		Problem problem = (Problem) it.next();
     		row.createCell(columnIndex).setCellValue(problem.getCode());
     		columnIndex++;
@@ -188,7 +185,7 @@ public class ShowRankListAction extends BaseAction {
     	row.createCell(columnIndex).setCellValue("Penalty");
     	
     	int rowIndex = 6;
-    	for (Iterator it = entries.iterator(); it.hasNext();) {    		
+    	for (Iterator<RankListEntry> it = entries.iterator(); it.hasNext();) {    		
     		RankListEntry entry = (RankListEntry) it.next();
     		row = sheet.createRow(rowIndex);
     		row.createCell((short) 0).setCellValue(rowIndex - 5);
@@ -223,8 +220,8 @@ public class ShowRankListAction extends BaseAction {
     	}    	         
     }
     
-    private byte[] exportToText(AbstractContest contest, List problems, RankList ranklist, boolean windows) throws Exception {
-        List entries = ranklist.getEntries();
+    private byte[] exportToText(AbstractContest contest, List<Problem> problems, RankList ranklist, boolean windows) throws Exception {
+        List<RankListEntry> entries = ranklist.getEntries();
     	String lineHolder = windows ? "\r\n" : "\n";
     	long time = getTimeEscaped(contest);
     	
@@ -241,7 +238,7 @@ public class ShowRankListAction extends BaseAction {
     	writer.write(lineHolder);
     	
     	writer.write("Rank\tHandle\tNickname\tSolved\t");
-    	for (Iterator it = problems.iterator(); it.hasNext();) {
+    	for (Iterator<Problem> it = problems.iterator(); it.hasNext();) {
     		Problem problem = (Problem) it.next();
     		writer.write(problem.getCode());
     		writer.write("\t");
@@ -250,7 +247,7 @@ public class ShowRankListAction extends BaseAction {
     	writer.write(lineHolder);
     	
     	int index = 0;
-    	for (Iterator it = entries.iterator(); it.hasNext();) {
+    	for (Iterator<RankListEntry> it = entries.iterator(); it.hasNext();) {
     		index++;
     		RankListEntry entry = (RankListEntry) it.next();
     		writer.write(index + "\t");

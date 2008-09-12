@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.bean.enumeration;
 
 import java.util.List;
@@ -12,7 +24,7 @@ import java.util.ArrayList;
  * @author ZOJDEV
  * @version 2.0
  */
-public class PermissionLevel implements Comparable {
+public class PermissionLevel implements Comparable<PermissionLevel> {
 
     /**
      * <p>Represents VIEW static instance.</p>
@@ -84,8 +96,8 @@ public class PermissionLevel implements Comparable {
      *
      * @return the list which consists of all permission levels.
      */
-    public static List getPermissionLevels() {
-        List list = new ArrayList(4);
+    public static List<PermissionLevel> getPermissionLevels() {
+        List<PermissionLevel> list = new ArrayList<PermissionLevel>(4);
         list.add(VIEW);
         list.add(PARTICIPATE);
         list.add(PARTICIPATECANVIEWSOURCE);
@@ -161,15 +173,11 @@ public class PermissionLevel implements Comparable {
      * if is less than
      * @throws ClassCastException if the object is not type of PermissionLevel
      */
-    public int compareTo(Object object) {
+    public int compareTo(PermissionLevel object) {
     	if (object == null) {
     		return 1;
     	}
-    	if (object instanceof PermissionLevel) {
-    		return new Long(id).compareTo(new Long(((PermissionLevel) object).id));
-    	} else {
-    		throw new ClassCastException("the object is not type of PermissionLevel");
-    	}        
+    	return new Long(id).compareTo(new Long(((PermissionLevel) object).id));     
     }
 
 }

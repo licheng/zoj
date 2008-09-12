@@ -1,33 +1,30 @@
+/*
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
 package cn.edu.zju.acm.onlinejudge.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
-import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
-import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.cache.Cache;
-import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.bean.Contest;
-import cn.edu.zju.acm.onlinejudge.bean.Problem;
-import cn.edu.zju.acm.onlinejudge.bean.Reference;
-import cn.edu.zju.acm.onlinejudge.bean.Submission;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
-import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 
 public class ImageManager {
 
-	private final Cache imageCache;
+	private final Cache<byte[]> imageCache;
 	
 	/**
 	 * ContestManager.
@@ -41,7 +38,7 @@ public class ImageManager {
      *
      */
     private ImageManager() throws PersistenceCreationException {
-    	imageCache = new Cache(60000, 30);      	
+    	imageCache = new Cache<byte[]>(60000, 30);      	
     }
     
     /**

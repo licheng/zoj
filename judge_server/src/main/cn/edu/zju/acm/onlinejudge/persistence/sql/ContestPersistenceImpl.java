@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
@@ -418,8 +430,8 @@ public class ContestPersistenceImpl implements ContestPersistence {
             
             // create languages
             if (contest.getLanguages() != null) { 
-            	for (Iterator it = contest.getLanguages().iterator(); it.hasNext();) {
-            		Language language = (Language) it.next();
+            	for (Iterator<Language> it = contest.getLanguages().iterator(); it.hasNext();) {
+            		Language language = it.next();
             		ps = conn.prepareStatement(INSERT_CONTEST_LANGUAGE);            
             		ps.setLong(1, contest.getId());
             		ps.setLong(2, language.getId());
@@ -538,8 +550,8 @@ public class ContestPersistenceImpl implements ContestPersistence {
             
             // insert languages
             if (contest.getLanguages() != null) {
-	            for (Iterator it = contest.getLanguages().iterator(); it.hasNext();) {
-	            	Language language = (Language) it.next();
+	            for (Iterator<Language> it = contest.getLanguages().iterator(); it.hasNext();) {
+	            	Language language = it.next();
 	            	ps = conn.prepareStatement(INSERT_CONTEST_LANGUAGE);            
 	                ps.setLong(1, contest.getId());
 	                ps.setLong(2, language.getId());
@@ -614,7 +626,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
             	return null;
             }               
             
-            populatesLanguages(conn, ps, rs, Arrays.asList(new Object[] {contest}));
+            populatesLanguages(conn, ps, rs, Arrays.asList(new AbstractContest[] {contest}));
             
             return contest;
         } catch (SQLException e) {
@@ -633,17 +645,17 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @throws SQLException
      * @throws PersistenceException 
      */
-    private void populatesLanguages(Connection conn, PreparedStatement ps, ResultSet rs, List contests) 
+    private void populatesLanguages(Connection conn, PreparedStatement ps, ResultSet rs, List<AbstractContest> contests) 
     		throws SQLException, PersistenceException {
     	
     	if (contests.isEmpty()) {
     		return;
     	}
-        Map languageMap = getLanguageMap();
+        Map<Long, Language> languageMap = getLanguageMap();
         
-    	List contestIds = new ArrayList();
-    	for (Iterator it = contests.iterator(); it.hasNext();) {
-    		AbstractContest contest = (AbstractContest) it.next();
+    	List<Long> contestIds = new ArrayList<Long>();
+    	for (Iterator<AbstractContest> it = contests.iterator(); it.hasNext();) {
+    		AbstractContest contest = it.next();
     		contestIds.add(new Long(contest.getId()));
     	}
     	
@@ -654,24 +666,24 @@ public class ContestPersistenceImpl implements ContestPersistence {
     	rs = ps.executeQuery();
         
 
-        Map contestLanguageMap = new HashMap();
+        Map<Long, List<Language>> contestLanguageMap = new HashMap<Long, List<Language>>();
         while (rs.next()) {
         	Long contestId = new Long(rs.getLong(DatabaseConstants.CONTEST_LANGUAGE_CONTEST_ID));
         	Long languageId = new Long(rs.getLong(DatabaseConstants.CONTEST_LANGUAGE_LANGUAGE_ID));
         	
-        	List contestLanguages = (List) contestLanguageMap.get(contestId);
+        	List<Language> contestLanguages = contestLanguageMap.get(contestId);
         	if (contestLanguages == null) {
-        		contestLanguages = new ArrayList();
+        		contestLanguages = new ArrayList<Language>();
         		contestLanguageMap.put(contestId, contestLanguages);
         	}
         	contestLanguages.add(languageMap.get(languageId));        	
         }
         
-    	for (Iterator it = contests.iterator(); it.hasNext();) {
-    		AbstractContest contest = (AbstractContest) it.next();
-    		List contestLanguages = (List) contestLanguageMap.get(new Long(contest.getId()));
+    	for (Iterator<AbstractContest> it = contests.iterator(); it.hasNext();) {
+    		AbstractContest contest = it.next();
+    		List<Language> contestLanguages = contestLanguageMap.get(new Long(contest.getId()));
     		if (contestLanguages == null) {
-    			contest.setLanguages(new ArrayList());
+    			contest.setLanguages(new ArrayList<Language>());
     		} else {
     			contest.setLanguages(contestLanguages);
     		}
@@ -724,7 +736,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @return a list of Contest instances containing all contests in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getAllContests() throws PersistenceException {
+    public List<AbstractContest> getAllContests() throws PersistenceException {
     	return getContests(false);
     }
 
@@ -734,7 +746,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @return a list of Problemset instances containing all problem sets in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getAllProblemsets() throws PersistenceException {
+    public List<AbstractContest> getAllProblemsets() throws PersistenceException {
     	return getContests(true);
     }
     
@@ -745,7 +757,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @return a list of Problemset instances containing all problem sets in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    private List getContests(boolean isProblemset) throws PersistenceException {
+    private List<AbstractContest> getContests(boolean isProblemset) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -759,7 +771,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
         	ps = conn.prepareStatement(query);               
             rs = ps.executeQuery();
             
-            List contests = new ArrayList();
+            List<AbstractContest> contests = new ArrayList<AbstractContest>();
             while (rs.next()) {
             	AbstractContest contest = populateContest(rs);
             	contests.add(contest);
@@ -909,9 +921,9 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
     public Language getLanguage(long id) throws PersistenceException {
-        List languages = getAllLanguages();
-        for (Iterator it = languages.iterator(); it.hasNext();) {
-            Language language = (Language) it.next();
+        List<Language> languages = getAllLanguages();
+        for (Iterator<Language> it = languages.iterator(); it.hasNext();) {
+            Language language = it.next();
             if (id == language.getId()) {
                 return language;
             }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
 package cn.edu.zju.acm.onlinejudge.util;
 
 import java.io.BufferedInputStream;
@@ -5,17 +20,14 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -23,7 +35,6 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.CopyUtils;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
-import org.apache.struts.upload.FormFile;
 
 import cn.edu.zju.acm.onlinejudge.bean.Limit;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
@@ -51,7 +62,7 @@ public class ProblemManager {
     
 	public static ProblemPackage importProblem(InputStream in, ActionMessages messages) {
 				
-        Map files = new HashMap();  
+        Map<String, byte[]> files = new HashMap<String, byte[]>();  
         ZipInputStream zis = null;
         try {
         	
@@ -117,8 +128,8 @@ public class ProblemManager {
 	}
 	
 	
-	private static ProblemPackage parse(Map files, ActionMessages messages) {
-		Map entryMap = new TreeMap();
+	private static ProblemPackage parse(Map<String, byte[]> files, ActionMessages messages) {
+		Map<String, ProblemEntry> entryMap = new TreeMap<String, ProblemEntry>();
 		byte[] csv = (byte[]) files.get(PROBLEM_CSV_FILE);
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(csv)));
@@ -245,7 +256,7 @@ public class ProblemManager {
 		
 		// retrieve checker, input, output
 		index = 0;
-		for (Iterator it = entryMap.keySet().iterator(); it.hasNext();) {
+		for (Iterator<String> it = entryMap.keySet().iterator(); it.hasNext();) {
 			ProblemEntry entry = (ProblemEntry) entryMap.get(it.next());
 			String code = entry.getProblem().getCode();
 			byte[] checker = (byte[]) files.get(code + "/" + CHECKER_FILE);
@@ -284,10 +295,10 @@ public class ProblemManager {
 			index++;
 		}
 		// retrieve images
-		Map imageMap = new HashMap();
-		Map usedImages = new HashMap();
-		Map duplicateImages = new HashMap();
-		for (Iterator it = files.keySet().iterator(); it.hasNext();) {
+		Map<String, byte[]> imageMap = new HashMap<String, byte[]>();
+		Map<String, String> usedImages = new HashMap<String, String>();
+		Map<String, String> duplicateImages = new HashMap<String, String>();
+		for (Iterator<String> it = files.keySet().iterator(); it.hasNext();) {
 			String path = (String) it.next();
 			if (isImageFile(path)) {
 				String imageName = new File(path).getName();
@@ -327,7 +338,7 @@ public class ProblemManager {
 		return f.exists();
 	}
 	
-    private static String getFileType(String code, String name, Map files) {
+    private static String getFileType(String code, String name, Map<String, byte[]> files) {
         if (files.containsKey(code + "/" + name + ".cc")) {
             return "cc";
         } else if (files.containsKey(code + "/" + name + ".cpp")) {
@@ -360,7 +371,7 @@ public class ProblemManager {
 	private static String[] split(String line) {
 		int quote = 0;
 		StringBuffer sb = new StringBuffer();
-		List values = new ArrayList();
+		List<String> values = new ArrayList<String>();
 		for (int i = 0; i < line.length(); ++i) {
 			char ch = line.charAt(i);
             if (ch == '"') {
@@ -393,64 +404,4 @@ public class ProblemManager {
 		values.add(sb.toString().trim());
 		return (String[]) values.toArray(new String[0]);
 	}
-    
-	private static void testSplit(String s) {
-        String[] ss = split(s);
-        System.out.println(s);
-        System.out.println(ss.length);
-        for (int i = 0; i < ss.length; ++i) {
-            System.out.print(ss[i] + "|");
-        }
-        System.out.println();
-        
-    }
-
-    private static void testSplit() {
-        //testSplit("a,b,c");
-        //testSplit(",adsfa,afdsb,adfc,");
-        //testSplit(",,,,");
-        //testSplit("");
-        //testSplit(",");
-        testSplit("\"\",a");
-        testSplit("\",\",a");
-    }
-	public static void main(String[] args) throws Exception {
-        
-        testSplit();
-        if (true) return;
-		ActionMessages m = new ActionMessages();
-		ProblemPackage p = importProblem(null, m);
-		if (m.size() > 0) {
-			for (Iterator it = m.properties(); it.hasNext();) {
-				String key = (String) it.next();			
-				for (Iterator it2 = m.get(key); it2.hasNext();) {
-				ActionMessage o = (ActionMessage) it2.next();
-					System.out.println(key + " - " + o.getKey());
-				}				
-			}
-			return;
-		}
-		
-		ProblemEntry[] e = p.getProblemEntries();
-		for (int i = 0; i < e.length; ++i) {
-			Problem pp = e[i].getProblem();
-			System.out.println(pp.getCode() + ", " + pp.getTitle() + ", " + pp.isChecker());
-			Limit l = pp.getLimit();
-			if (l != null) {
-				System.out.println(l.getTimeLimit() + ", " + l.getMemoryLimit() + ", " + l.getOutputLimit() + ", " + l.getSubmissionLimit());
-			}
-			System.out.println(pp.getAuthor() + ", " + pp.getSource() + ", " + pp.getContest());
-			System.out.println("checker - " + (e[i].getChecker() == null ? "null" : new String(e[i].getChecker())));
-			System.out.println("input - " + (e[i].getInput() == null ? "null" : new String(e[i].getInput())));
-			System.out.println("output - " + (e[i].getOutput() == null ? "null" : new String(e[i].getOutput())));			
-		}
-		System.out.println("-=Images=-");
-		for (Iterator it = p.getImages().keySet().iterator(); it.hasNext();) {
-			Object key = it.next();
-			System.out.println(key + ": " + new String((byte[]) p.getImages().get(key)));
-		}
-		System.out.println("-----------------");
-		
-	}
-	
 }

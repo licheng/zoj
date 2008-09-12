@@ -1,8 +1,22 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence;
 
+import cn.edu.zju.acm.onlinejudge.bean.Problem;
+import cn.edu.zju.acm.onlinejudge.bean.QQ;
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
@@ -13,7 +27,6 @@ import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
 import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * <p>SubmissionPersistence interface defines the API used to manager the submission related affairs
@@ -115,15 +128,15 @@ public interface SubmissionPersistence {
      * @return a list of JudgeReply instances containing all judge replies in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getAllJudgeReplies() throws PersistenceException;
+    List<JudgeReply> getAllJudgeReplies() throws PersistenceException;
 
-    ContestStatistics getContestStatistics(List problems) throws PersistenceException;
+    ContestStatistics getContestStatistics(List<Problem> problems) throws PersistenceException;
     
     ProblemStatistics getProblemStatistics(long problemId, String orderBy, int count) throws PersistenceException;
     
-    List getRankList(List problems, long contestStartDate) throws PersistenceException;
+    List<RankListEntry> getRankList(List<Problem> problems, long contestStartDate) throws PersistenceException;
     
-    List getRankList(List problems, long contestStartDate, long roleId) throws PersistenceException;
+    List<RankListEntry> getRankList(List<Problem> problems, long contestStartDate, long roleId) throws PersistenceException;
     
     ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count) throws PersistenceException;
     
@@ -134,7 +147,7 @@ public interface SubmissionPersistence {
     
     
     void changeQQStatus(long pid, long uid, String status) throws PersistenceException;
-    List searchQQs(long contestId) throws PersistenceException;
+    List<QQ> searchQQs(long contestId) throws PersistenceException;
 
     String getSubmissionSource(long id) throws PersistenceException;
 }

@@ -15,38 +15,33 @@
 
 package cn.edu.zju.acm.onlinejudge.judgeservice;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
 
 /**
- * This class is a queue of all submissions being judged. It is responsible for returning JudingView instances.
+ * This class is a queue of all submissions being judged.
  * 
- * This class is like ConcurrentLinkedQueue and JudgingViewImpl behaves like its iterator. However, removal is only
- * allowed from the head of queue and all removals are not reflected in JudgingView.
+ * All submissions are put in a single linked list. Removal operations only move the head reference forward without
+ * changing the internal linked list structure. Once a JudgingQueueIterator instance is created, it copies the current
+ * head reference. In this way, a JudgingQueueIterator instance can always traverse all nodes created subsequent to its
+ * construction.
  * 
- * All submissions are put in a single linked list. Pop operation only moves the head reference forward without changing
- * the internal linked list structure. Once a JudgingViewImpl instance is created, it copies the current head reference.
- * In this way, a JudgingViewImpl instance can always visit all nodes created subsequent to its construction by its
- * internal head reference.
+ * We expect this queue to be short. A submission is pushed into this queue when its judge starts and removed when judge
+ * ends. This is usually less than 1 minute. And we do not expect many judge threads using this queue.
  * 
- * Nodes can be garbage collected when no submission referenced by its prior nodes is still under judge and there is no
- * reachable(in other words, used by any living thread) JudgingViewImpl instances created prior to its construction. So
- * as long as we expect that the judge of a submission finishes quite quickly(say, in one minute) and the life of a
- * JudgingViewImpl instance is short(usually in seconds), this queue does not cost too much memory.
+ * Nodes can be garbage collected when it is not reachable from the head and by any JudgingQueueIterator. So as long as
+ * we expect that the life of a JudgingQueueIterator stays short, like in seconds, this queue does not cost too much
+ * memory.
  * 
  * This implementation is thread safe and lock-free just like ConcurrentLinkedQueue.
  * 
  * The same submission may be push into this queue multiple times. When this happens, the linked list will contains
- * multiple nodes with the same submission reference. It is safe excepting using more memory. Usually it is not a
- * problem.
+ * multiple nodes with the same submission reference. It is safe excepting using a bit more memory. Usually this is not
+ * a problem.
  * 
- * CAVEAT: Remember to invoke tryPop when the judge of a submission is done and set the judgeReply field of submissions
- * properly.
  * 
- * @author xuchuan
+ * @author Xu, Chuan
  * 
  */
 class JudgingQueue {
@@ -79,46 +74,63 @@ class JudgingQueue {
     }
 
     /**
-     * Pops all submissions that are judged.
+     * Remove the submission from this queue. It is done by marking the corresponding node and removed and move forward
+     * the head if necessary.
+     * 
+     * NOTE: It is done by a scan of this queue. This queue is expected to be short so that this operation can be
+     * finished very quickly. We do have ways to implement this in constant time like using a hashmap or just add a
+     * field in Submission class and update the to mark it as removed. The former solution is a waste when the queue
+     * keeps short which is expected. The latter one hurts readability a lot. Some alternative designs similar to the
+     * latter solution exists, but they all have defects. Let me know if anyone has a good idea about the design.
      */
-    public void tryPop() {
+    public void remove(Submission submission) {
+        // Find the submission and mark it as removed.
         JudgingQueue.JudgingQueueNode node = this.head;
-        while (node.submission != null && node.submission.getJudgeReply().isCommittedReply()) {
+        while (node.submission != null) {
+            if (node.submission == submission) {
+                node.removed = true;
+                break;
+            }
             node = node.next;
         }
+
+        // Find the last not-removed node.
+        node = this.head;
+        while (node.submission != null && node.removed) {
+            node = node.next;
+        }
+
         // Not a problem when multiple threads trying to modify this value. The head will finally be moved forward.
         this.head = node;
     }
 
-    public JudgingView getJudingView() {
-        return new JudgingViewImpl(this.head);
+    public JudgingQueueIterator getJudingView() {
+        return new JudgingQueueIteratorImpl(this.head);
     }
 
     private static class JudgingQueueNode {
         Submission submission = null;
         JudgingQueue.JudgingQueueNode next = null;
+        boolean removed = false;
     }
 
-    private static class JudgingViewImpl implements JudgingView {
+    private static class JudgingQueueIteratorImpl implements JudgingQueueIterator {
         JudgingQueue.JudgingQueueNode head;
 
-        public JudgingViewImpl(JudgingQueue.JudgingQueueNode head) {
+        public JudgingQueueIteratorImpl(JudgingQueue.JudgingQueueNode head) {
             this.head = head;
         }
 
         /**
-         * See JudgingView.getSubmissionMap
+         * See JudgingQueueIterator.next
          */
         @Override
-        public Map<Long, Submission> getSubmissionMap() {
-            HashMap<Long, Submission> submissionMap = new HashMap<Long, Submission>();
-            JudgingQueue.JudgingQueueNode p = this.head;
-            while (p.submission != null) {
-                Submission submission = p.submission;
-                submissionMap.put(submission.getId(), submission);
-                p = p.next;
+        public Submission next() {
+            Submission ret = this.head.submission;
+            if (ret != null) {
+                this.head = this.head.next;
             }
-            return submissionMap;
+            return ret;
         }
     }
 }

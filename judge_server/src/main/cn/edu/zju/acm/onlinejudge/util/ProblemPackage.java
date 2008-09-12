@@ -1,15 +1,28 @@
+/*
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
 package cn.edu.zju.acm.onlinejudge.util;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ProblemPackage {
 
 	private ProblemEntry[] problemEntries = null;	
-	private Map images = null;;
-	private Map usedImages = null;;
-	private Map duplicateImages = null;;
+	private Map<String, byte[]> images = null;;
+	private Map<String, String> usedImages = null;;
+	private Map<String, String> duplicateImages = null;;
 	
 	
 	public ProblemPackage() {
@@ -24,27 +37,27 @@ public class ProblemPackage {
 		this.problemEntries = problemEntries;
 	}
 
-	public Map getImages() {
+	public Map<String, byte[]> getImages() {
 		return images;
 	}
 	
-	public void setImages(Map images) {
+	public void setImages(Map<String, byte[]> images) {
 		this.images = images;
 	}
 
-	public Map getUsedImages() {
+	public Map<String, String> getUsedImages() {
 		return usedImages;
 	}
 
-	public void setUsedImages(Map usedImages) {
+	public void setUsedImages(Map<String, String> usedImages) {
 		this.usedImages = usedImages;
 	}
 
-	public Map getDuplicateImages() {
+	public Map<String, String> getDuplicateImages() {
 		return duplicateImages;
 	}
 
-	public void setDuplicateImages(Map duplicateImages) {
+	public void setDuplicateImages(Map<String, String> duplicateImages) {
 		this.duplicateImages = duplicateImages;
 	}
 }

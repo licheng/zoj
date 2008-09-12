@@ -1,11 +1,22 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.action;
 
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -369,10 +380,10 @@ public abstract class BaseAction extends Action {
     		if (includeParameters) {
     			StringBuffer sb = new StringBuffer();
     			sb.append(uri);
-    			Enumeration e = context.getRequest().getParameterNames();
+    			Enumeration<String> e = context.getRequest().getParameterNames();
     			boolean first = true;
     			while (e.hasMoreElements()) {
-                    String key = (String) e.nextElement();
+                    String key = e.nextElement();
                     if ("source".equals(key)) {
                         continue;
                     }

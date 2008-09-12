@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence;
 
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
@@ -21,7 +33,7 @@ public interface ReferencePersistence {
     /**
      * <p>Creates the specified problem reference in persistence layer.</p>
      *
-     * @param problemId the id of the refered problem
+     * @param problemId the id of the referred problem
      * @param reference the reference which the problem refer to
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
@@ -31,7 +43,7 @@ public interface ReferencePersistence {
     /**
      * <p>Creates the specified contest reference in persistence layer.</p>
      *
-     * @param contestId the id of the refered contest
+     * @param contestId the id of the referred contest
      * @param reference the reference which the contest refer to
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
@@ -41,7 +53,7 @@ public interface ReferencePersistence {
     /**
      * <p>Creates the specified post reference in persistence layer.</p>
      *
-     * @param postId the id of the refered post
+     * @param postId the id of the referred post
      * @param reference the reference which the contest refer to
      * @param user the id of the user who made this modification
      * @throws PersistenceException wrapping a persistence implementation specific exception
@@ -79,40 +91,40 @@ public interface ReferencePersistence {
      * <p>Gets all problem references to the given problem with specified reference type.</p>
      *
      * @return a list containing all problem references to the given problem with specified reference type
-     * @param problemId the id of the refered problem
-     * @param referenceType the reference type of the returend references
+     * @param problemId the id of the referred problem
+     * @param referenceType the reference type of the returned references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getProblemReferences(long problemId, ReferenceType referenceType) throws PersistenceException;
+    List<Reference> getProblemReferences(long problemId, ReferenceType referenceType) throws PersistenceException;
 
     /**
      * <p>Gets all problem reference without data to the given problem with specified reference type.</p>
      *
      * @return a list containing all problem references to the given problem with specified reference type
-     * @param problemId the id of the refered problem
-     * @param referenceType the reference type of the returend references
+     * @param problemId the id of the referred problem
+     * @param referenceType the reference type of the returned references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getProblemReferenceInfo(long problemId, ReferenceType referenceType) throws PersistenceException;
+    public List<Reference> getProblemReferenceInfo(long problemId, ReferenceType referenceType) throws PersistenceException;
    
         
     /**
      * <p>Gets all contest references to the given contest with specified reference type.</p>
      *
      * @return a list containing all contest references to the given contest with specified reference type
-     * @param contestId the id of the refered contest
-     * @param referenceType the reference type of the returend references
+     * @param contestId the id of the referred contest
+     * @param referenceType the reference type of the returned references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getContestReferences(long contestId, ReferenceType referenceType) throws PersistenceException;
+    List<Reference> getContestReferences(long contestId, ReferenceType referenceType) throws PersistenceException;
 
     /**
      * <p>Gets all post references to the given post with specified reference type.</p>
      *
      * @return a list containing all post references to the given post with specified reference type
-     * @param postId the id of the refered post
-     * @param referenceType the reference type of the returend references
+     * @param postId the id of the referred post
+     * @param referenceType the reference type of the returned references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getPostReferences(long postId, ReferenceType referenceType) throws PersistenceException;
+    List<Reference> getPostReferences(long postId, ReferenceType referenceType) throws PersistenceException;
 }

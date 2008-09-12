@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
@@ -327,7 +339,7 @@ public class UserPersistenceImpl implements UserPersistence {
 	/**
 	 * The list containing all countries.
 	 */
-	private List allCountries = null;
+	private List<Country> allCountries = null;
 	
 	
 	/**
@@ -717,7 +729,7 @@ public class UserPersistenceImpl implements UserPersistence {
      * @throws NullPointerException if argument is null
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List searchUserProfiles(UserCriteria criteria, int offset, int count) throws PersistenceException {
+    public List<UserProfile> searchUserProfiles(UserCriteria criteria, int offset, int count) throws PersistenceException {
         
         Connection conn = null;
         PreparedStatement ps = null;
@@ -728,7 +740,7 @@ public class UserPersistenceImpl implements UserPersistence {
             ps = getUserSearchSql(conn, criteria, false, offset, count);   
             rs = ps.executeQuery();
 
-            List users = new ArrayList();
+            List<UserProfile> users = new ArrayList<UserProfile>();
             while (rs.next()) {
                 users.add(populateUserProfile(rs));              
             } 
@@ -761,7 +773,7 @@ public class UserPersistenceImpl implements UserPersistence {
         }  
     }
 
-    private void appendParameter(String name, Object value, StringBuilder sb, List values) {
+    private void appendParameter(String name, Object value, StringBuilder sb, List<Object> values) {
         if (value == null) {
             return;
         }
@@ -783,7 +795,7 @@ public class UserPersistenceImpl implements UserPersistence {
             boolean isCount, int offset, int count)
         throws SQLException {
         
-        List values = new ArrayList();
+        List<Object> values = new ArrayList<Object>();
         StringBuilder sb = new StringBuilder();        
         sb.append(isCount ? "SELECT count(*) FROM user_profile" : GET_USER);
         appendParameter("email_address", criteria.getEmail(), sb, values);        
@@ -807,7 +819,6 @@ public class UserPersistenceImpl implements UserPersistence {
             sb.append(" LIMIT " + offset + "," + count);
         }
         
-        //System.out.println(sb);
         PreparedStatement ps = conn.prepareStatement(sb.toString());
         for (int i = 0; i < values.size(); ++i) {
             Object value = values.get(i);
@@ -1051,7 +1062,7 @@ public class UserPersistenceImpl implements UserPersistence {
      *
      * @return a list containing all country names 
      */
-    public List getAllCountries() throws PersistenceException {    
+    public List<Country> getAllCountries() throws PersistenceException {    
     	if (allCountries == null) {
     		synchronized (this) {
     			if (allCountries == null) {
@@ -1064,7 +1075,7 @@ public class UserPersistenceImpl implements UserPersistence {
     			        ps = conn.prepareStatement(GET_ALL_COUNTRIES);            
     			        rs = ps.executeQuery();
     			        
-    			        List countries = new ArrayList();
+    			        List<Country> countries = new ArrayList<Country>();
     			        while (rs.next()) {
     			        	countries.add(new Country(rs.getLong(DatabaseConstants.COUNTRY_COUNTRY_ID),
     			        							  rs.getString(DatabaseConstants.COUNTRY_NAME)));   	            			   	            	

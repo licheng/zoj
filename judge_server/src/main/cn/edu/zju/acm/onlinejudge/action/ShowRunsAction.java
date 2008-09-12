@@ -1,12 +1,23 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.action;
 
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.struts.action.ActionForm;
@@ -14,21 +25,12 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessages;
 
-import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.bean.Reference;
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
-import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
-import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.form.SubmissionSearchForm;
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.judgeservice.Priority;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
-import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
@@ -131,7 +133,7 @@ public class ShowRunsAction extends BaseAction {
         
         if (isRejudge) {
         	int maxN = 100;
-            List allRuns = PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(
+            List<Submission> allRuns = PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(
                     criteria, -1, Long.MAX_VALUE, maxN + 1, true);
             if (allRuns.size() > maxN) {
             	// TODO
@@ -154,7 +156,7 @@ public class ShowRunsAction extends BaseAction {
         	runs = runs.subList(0, runs.size() - 1);
         }
         if (firstId > -1) {
-        	runs = new ArrayList(runs);
+        	runs = new ArrayList<Submission>(runs);
     		Collections.reverse(runs);
     	}
         

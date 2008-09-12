@@ -1,10 +1,23 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence;
 
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.UserPreference;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.Country;
 import cn.edu.zju.acm.onlinejudge.bean.request.UserCriteria;
 import java.util.List;
 
@@ -92,7 +105,7 @@ public interface UserPersistence {
      * @param count the maximum number of user profiles in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List searchUserProfiles(UserCriteria criteria, int offset, int count) throws PersistenceException;
+    List<UserProfile> searchUserProfiles(UserCriteria criteria, int offset, int count) throws PersistenceException;
     
     int searchUserProfilesCount(UserCriteria criteria) throws PersistenceException;
     
@@ -160,7 +173,7 @@ public interface UserPersistence {
      * @return a list containing all country names
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getAllCountries() throws PersistenceException;
+    List<Country> getAllCountries() throws PersistenceException;
 }
 
 

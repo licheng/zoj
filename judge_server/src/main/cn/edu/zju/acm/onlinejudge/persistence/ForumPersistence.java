@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence;
 
 import cn.edu.zju.acm.onlinejudge.bean.Forum;
@@ -61,7 +73,7 @@ public interface ForumPersistence {
      * @return a list of Forum instances containing all forums in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getAllForums() throws PersistenceException;
+    List<Forum> getAllForums() throws PersistenceException;
 
 
     /**
@@ -110,7 +122,7 @@ public interface ForumPersistence {
      * @param count the maximum number of thread in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List searchThreads(ThreadCriteria criteria, int offset, int count) throws PersistenceException;
+    List<Thread> searchThreads(ThreadCriteria criteria, int offset, int count) throws PersistenceException;
 
     /**
      * <p>Creates the specified post in persistence layer.</p>
@@ -157,7 +169,7 @@ public interface ForumPersistence {
      * @return a list of Post instances containing all posts in the specified thread
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    List getPosts(long threadId, int offset, int count) throws PersistenceException;
+    List<Post> getPosts(long threadId, int offset, int count) throws PersistenceException;
 
 }
 

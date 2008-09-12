@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
@@ -15,10 +27,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
-
-
-import java.sql.Blob;
 
 /**
  * <p>ReferencePersistenceImpl implements ReferencePersistence interface</p>
@@ -281,7 +289,7 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
      * @param referenceType the reference type of the returend references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getProblemReferences(long problemId, ReferenceType referenceType) throws PersistenceException {
+    public List<Reference> getProblemReferences(long problemId, ReferenceType referenceType) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -297,7 +305,7 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
             ps.setLong(2, referenceType.getId());
             rs = ps.executeQuery();
                    
-            List references = new ArrayList();
+            List<Reference> references = new ArrayList<Reference>();
             while (rs.next()) {
             	Reference reference = populateReference(rs);
             	references.add(reference);
@@ -318,7 +326,7 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
      * @param referenceType the reference type of the returend references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getProblemReferenceInfo(long problemId, ReferenceType referenceType) throws PersistenceException {
+    public List<Reference> getProblemReferenceInfo(long problemId, ReferenceType referenceType) throws PersistenceException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -333,7 +341,7 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
             ps.setLong(2, referenceType.getId());
             rs = ps.executeQuery();
                    
-            List references = new ArrayList();
+            List<Reference> references = new ArrayList<Reference>();
             while (rs.next()) {                
                 Reference reference = populateReferenceInfo(rs);
                 references.add(reference);
@@ -355,7 +363,7 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
      * @param referenceType the reference type of the returend references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getContestReferences(long contestId, ReferenceType referenceType) throws PersistenceException {
+    public List<Reference> getContestReferences(long contestId, ReferenceType referenceType) throws PersistenceException {
     	return null;
     }
 
@@ -367,7 +375,7 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
      * @param referenceType the reference type of the returend references
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getPostReferences(long postId, ReferenceType referenceType) throws PersistenceException {
+    public List<Reference> getPostReferences(long postId, ReferenceType referenceType) throws PersistenceException {
     	return null;
     	
     }

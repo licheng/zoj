@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.security;
 
 import java.util.ArrayList;
@@ -28,7 +40,7 @@ public class UserSecurity extends AbstractSecurity {
     /**
      * <p>User roles.</p>
      */
-    private List roles = new ArrayList();
+    private List<RoleSecurity> roles = new ArrayList<RoleSecurity>();
 
     /**
      * <p>Super admin flag.</p>
@@ -61,8 +73,8 @@ public class UserSecurity extends AbstractSecurity {
      *
      * @return the role list
      */
-    public List getRoles() {
-        return new ArrayList(roles);
+    public List<RoleSecurity> getRoles() {
+        return new ArrayList<RoleSecurity>(roles);
     }
 
     /**
@@ -78,7 +90,7 @@ public class UserSecurity extends AbstractSecurity {
         }
         
         StringBuffer buffer = new StringBuffer();
-        for (Iterator it = roles.iterator(); it.hasNext();) {
+        for (Iterator<RoleSecurity> it = roles.iterator(); it.hasNext();) {
             if (buffer.length() > 0) {
             	buffer.append(", ");
             }

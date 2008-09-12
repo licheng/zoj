@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
 import java.sql.Connection;
@@ -59,7 +71,7 @@ public class ConfigurationPersistenceImpl implements ConfigurationPersistence {
      * @return a list of Configuration instances retrieved from persistence layer.
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getConfigurations() throws PersistenceException {
+    public List<Configuration> getConfigurations() throws PersistenceException {
     	
         Connection conn = null;
         PreparedStatement ps = null;
@@ -70,7 +82,7 @@ public class ConfigurationPersistenceImpl implements ConfigurationPersistence {
             ps = conn.prepareStatement(GET_ALL_CONFIGURATIONS);            
             rs = ps.executeQuery();
             
-            List configurations = new ArrayList();
+            List<Configuration> configurations = new ArrayList<Configuration>();
             while (rs.next()) {
             	Configuration configuration = new Configuration();
             	configuration.setName(rs.getString(DatabaseConstants.CONFIGURATION_NAME));
@@ -97,7 +109,7 @@ public class ConfigurationPersistenceImpl implements ConfigurationPersistence {
      * @throws NullPointerException if configurations is null
      * @throws IllegalArgumentException if configurations contains invalid or duplicate element
      */
-    public void setConfigurations(List configurations, long user) throws PersistenceException {
+    public void setConfigurations(List<Configuration> configurations, long user) throws PersistenceException {
     	if (configurations == null) {
     		throw new NullPointerException("configurations is null.");
     	}
@@ -106,8 +118,8 @@ public class ConfigurationPersistenceImpl implements ConfigurationPersistence {
     		return;
     	}
     	
-    	Set nameSet = new HashSet();
-    	for (Iterator itr = configurations.iterator(); itr.hasNext();) {  
+    	Set<String> nameSet = new HashSet<String>();
+    	for (Iterator<Configuration> itr = configurations.iterator(); itr.hasNext();) {  
     		Object obj = itr.next();
     		if (!(obj instanceof Configuration)) {
     			throw new IllegalArgumentException("configurations contains invalid element");
@@ -132,13 +144,13 @@ public class ConfigurationPersistenceImpl implements ConfigurationPersistence {
         	ps = conn.prepareStatement(GET_CONFIGURATION_NAMES + Database.createValues(nameSet));
         	
         	rs = ps.executeQuery();
-        	Set existingConfigurations = new HashSet();
+        	Set<String> existingConfigurations = new HashSet<String>();
         	while (rs.next()) {
         		existingConfigurations.add(rs.getString(DatabaseConstants.CONFIGURATION_NAME));        		
         	}
         	
         	// update
-        	for (Iterator itr = configurations.iterator(); itr.hasNext();) { 
+        	for (Iterator<Configuration> itr = configurations.iterator(); itr.hasNext();) { 
         		Configuration configuration = (Configuration) itr.next();
         		if (existingConfigurations.contains(configuration.getName())) {
         			ps = conn.prepareStatement(UPDATE_CONFIGURATION);

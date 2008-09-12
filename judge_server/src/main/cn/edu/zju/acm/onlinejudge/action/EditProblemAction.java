@@ -1,13 +1,22 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.action;
 
 
-import java.util.Iterator;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
@@ -18,23 +27,14 @@ import org.apache.struts.action.ActionMessages;
 import org.apache.struts.upload.FormFile;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.bean.Contest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
-import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
-import cn.edu.zju.acm.onlinejudge.form.ContestForm;
 import cn.edu.zju.acm.onlinejudge.form.ProblemForm;
-import cn.edu.zju.acm.onlinejudge.form.ProfileForm;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
-import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
-import cn.edu.zju.acm.onlinejudge.util.ProblemManager;
 
 /**
  * <p>
@@ -125,7 +125,7 @@ public class EditProblemAction extends BaseAction {
     private void setReference(String typeKey, ReferenceType type, long problemId, ContextAdapter context) 
         throws Exception {
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
-        List references = referencePersistence.getProblemReferenceInfo(problemId, type);
+        List<Reference> references = referencePersistence.getProblemReferenceInfo(problemId, type);
         if (references.size() > 0) {
             System.out.println(references.size());
             context.setAttribute(typeKey, references.get(0));
@@ -156,7 +156,7 @@ public class EditProblemAction extends BaseAction {
         byte[] data = formFile.getFileData();
         
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
-        List references = referencePersistence.getProblemReferenceInfo(problemId, type);        
+        List<Reference> references = referencePersistence.getProblemReferenceInfo(problemId, type);        
         if (references.size() == 0) {
             Reference ref = new Reference();
             ref.setContent(data);
@@ -206,7 +206,7 @@ public class EditProblemAction extends BaseAction {
          }
          
          
-         List problems = ContestManager.getInstance().getContestProblems(context.getContest().getId());
+         List<Problem> problems = ContestManager.getInstance().getContestProblems(context.getContest().getId());
          for (Object obj : problems) {
              Problem p = (Problem) obj;
              if (!form.getProblemId().equals("" + p.getId()) && p.getTitle().equals(name)) {

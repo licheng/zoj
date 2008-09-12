@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.action;
 
 
@@ -8,7 +20,6 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,26 +31,11 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionMessages;
 
-import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.bean.Problem;
-import cn.edu.zju.acm.onlinejudge.bean.Reference;
-import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
-import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
-import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
-import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.bean.request.UserCriteria;
-import cn.edu.zju.acm.onlinejudge.form.SubmissionSearchForm;
 import cn.edu.zju.acm.onlinejudge.form.UserSearchForm;
-import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
-import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
-import cn.edu.zju.acm.onlinejudge.util.RankListEntry;
-import cn.edu.zju.acm.onlinejudge.util.StatisticsManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
 /**
@@ -108,11 +104,11 @@ public class UserSearchAction extends BaseAction {
         String export = context.getRequest().getParameter("exportFormat");
         
         if ("txt".equalsIgnoreCase(export)) {
-            List users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
+            List<UserProfile> users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
                     criteria, 0, Integer.MAX_VALUE);
             return export(context, criteria, users, export);
         } else if ("xls".equalsIgnoreCase(export)) {
-            List users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
+            List<UserProfile> users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
                     criteria, 0, Integer.MAX_VALUE);            
             return export(context, criteria, users, export);
         } 
@@ -120,7 +116,7 @@ public class UserSearchAction extends BaseAction {
         
         long usersNumber = PersistenceManager.getInstance().getUserPersistence().searchUserProfilesCount(criteria);
         if (usersNumber == 0) {
-            context.setAttribute("users", new ArrayList());
+            context.setAttribute("users", new ArrayList<UserProfile>());
             context.setAttribute("pageNumber", new Long(0));
             context.setAttribute("totalPages", new Long(0));      
             context.setAttribute("paging", new Long(paging));
@@ -132,7 +128,7 @@ public class UserSearchAction extends BaseAction {
         long pageNumber = Utility.parseLong(userForm.getPageNumber(), 1, totalPages);        
         long startIndex = paging * (pageNumber - 1);
     	
-    	List users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
+    	List<UserProfile> users = PersistenceManager.getInstance().getUserPersistence().searchUserProfiles(
                 criteria, (int) startIndex, (int) paging);                      
 
         context.setAttribute("users", users);
@@ -150,7 +146,7 @@ public class UserSearchAction extends BaseAction {
     }
     
     
-    private ActionForward export(ContextAdapter context, UserCriteria criteria, List users, String export) throws Exception {        
+    private ActionForward export(ContextAdapter context, UserCriteria criteria, List<UserProfile> users, String export) throws Exception {        
         
         byte[] out;
         String fileName = "userlist";
@@ -174,7 +170,7 @@ public class UserSearchAction extends BaseAction {
         return null;
     }
 
-    private byte[] exportToText(UserCriteria criteria, List users, boolean windows) throws Exception {
+    private byte[] exportToText(UserCriteria criteria, List<UserProfile> users, boolean windows) throws Exception {
         String lineHolder = windows ? "\r\n" : "\n";
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();        
@@ -188,7 +184,7 @@ public class UserSearchAction extends BaseAction {
         return out.toByteArray();
     }
     
-    private byte[] exportToExcel(UserCriteria criteria, List users) throws Exception {
+    private byte[] exportToExcel(UserCriteria criteria, List<UserProfile> users) throws Exception {
         
         HSSFWorkbook wb = new HSSFWorkbook();       
         HSSFSheet sheet = wb.createSheet();  

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
 package cn.edu.zju.acm.onlinejudge.util;
 
 import java.util.HashMap;
@@ -24,22 +39,22 @@ public class ContestStatistics {
 	};
 	
     
-	private final List problems;
-	private final Map problemIdMap;
+	private final List<Problem> problems;
+	private final Map<Long, Integer> problemIdMap;
 	
 	private final int[][] statistics;
 	private final int[] judgeReplyCount;
 	private final int[] problemCount;
 	private int total = 0;
 	
-	public ContestStatistics(List problems) {		
+	public ContestStatistics(List<Problem> problems) {		
 		if (problems == null) {
 			throw new IllegalArgumentException("problems is null");
 		}
 		this.problems = problems;
-		this.problemIdMap = new HashMap();
+		this.problemIdMap = new HashMap<Long, Integer>();
 		int index = 0;
-		for (Iterator it = problems.iterator(); it.hasNext();) {
+		for (Iterator<Problem> it = problems.iterator(); it.hasNext();) {
 			Object obj = it.next();
 			if (!(obj instanceof Problem)) {
 				throw new IllegalArgumentException("problems should contain only Problem instances");
@@ -58,7 +73,7 @@ public class ContestStatistics {
 	public int getTotal() {
 		return total;
 	}
-	public List getProblems() {
+	public List<Problem> getProblems() {
 		return problems;
 	}
 	

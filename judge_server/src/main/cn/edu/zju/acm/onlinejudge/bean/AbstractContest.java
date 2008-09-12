@@ -1,11 +1,24 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.bean;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
+
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 
 /**
  * <p>AbstractContest bean.</p>
@@ -46,7 +59,7 @@ public abstract class AbstractContest {
     /**
      * <p>Represents languages.</p>
      */
-    private List languages = null;
+    private List<Language> languages = null;
 
     /**
      * <p>Represents startTime.</p>
@@ -163,7 +176,7 @@ public abstract class AbstractContest {
      *
      * @return languages
      */
-    public List getLanguages() {
+    public List<Language> getLanguages() {
         return this.languages;
     }
 
@@ -172,7 +185,7 @@ public abstract class AbstractContest {
      *
      * @param languages languages
      */
-    public void setLanguages(List languages) {
+    public void setLanguages(List<Language> languages) {
         this.languages = languages;
     }
     

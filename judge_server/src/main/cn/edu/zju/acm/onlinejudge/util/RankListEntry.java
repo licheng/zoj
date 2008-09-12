@@ -1,8 +1,23 @@
+/*
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+
 package cn.edu.zju.acm.onlinejudge.util;
 
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 
-public class RankListEntry implements Comparable {
+public class RankListEntry implements Comparable<RankListEntry> {
 
 	private UserProfile user;
 	private final int[] acceptTime;
@@ -67,10 +82,8 @@ public class RankListEntry implements Comparable {
 		return submitted;
 	}
 	
-	public int compareTo(Object obj) {
-		if (!(obj instanceof RankListEntry)) {
-			throw new ClassCastException("obj is not type of RankListEntry");
-		}
+	@Override
+	public int compareTo(RankListEntry obj) {
 		RankListEntry entry = (RankListEntry) obj;
 		if (entry.solved == this.solved) {
 			return this.penalty - entry.penalty;

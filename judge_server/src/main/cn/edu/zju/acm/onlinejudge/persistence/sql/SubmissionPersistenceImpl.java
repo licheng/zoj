@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
 import cn.edu.zju.acm.onlinejudge.bean.QQ;
@@ -445,7 +457,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     	submission.setUserProfileId(rs.getLong(DatabaseConstants.SUBMISSION_USER_PROFILE_ID));
     	submission.setJudgeComment(rs.getString(DatabaseConstants.SUBMISSION_JUDGE_COMMENT));
     	submission.setJudgeDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_JUDGE_DATE));
-    	submission.setJudgeDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_SUBMISSION_DATE));
     	submission.setSubmitDate(Database.getDate(rs,DatabaseConstants.SUBMISSION_SUBMISSION_DATE));
     	submission.setMemoryConsumption(rs.getInt(DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION));
     	submission.setTimeConsumption(rs.getInt(DatabaseConstants.SUBMISSION_TIME_CONSUMPTION));
@@ -692,8 +703,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 		return ps;
 	}   
 
-    
-    public ContestStatistics getContestStatistics(List problems) throws PersistenceException {
+    @Override
+    public ContestStatistics getContestStatistics(List<Problem> problems) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;                        
@@ -704,8 +715,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }
         try {
         	conn = Database.createConnection();
-        	List problemIds = new ArrayList();
-        	for (Iterator it = problems.iterator(); it.hasNext();) {
+        	List<Long> problemIds = new ArrayList<Long>();
+        	for (Iterator<Problem> it = problems.iterator(); it.hasNext();) {
         		problemIds.add(new Long(((Problem) it.next()).getId()));        		
         	}
         	String inProblemIds = Database.createNumberValues(problemIds);
@@ -734,24 +745,24 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }     	
     }
     
-    public List getRankList(List problems, long contestStartDate) throws PersistenceException {
+    public List<RankListEntry> getRankList(List<Problem> problems, long contestStartDate) throws PersistenceException {
         return getRankList(problems, contestStartDate, -1);
     }
     
-    public List getRankList(List problems, long contestStartDate, long roleId) throws PersistenceException {
+    public List<RankListEntry> getRankList(List<Problem> problems, long contestStartDate, long roleId) throws PersistenceException {
     	Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;                                
         if (problems.size() == 0) {
-        	return new ArrayList();
+        	return new ArrayList<RankListEntry>();
         }
         try {
         	conn = Database.createConnection();
             
-        	List problemIds = new ArrayList();
-        	Map problemIndexes = new HashMap();
+        	List<Long> problemIds = new ArrayList<Long>();
+        	Map<Long, Integer> problemIndexes = new HashMap<Long, Integer>();
         	int index = 0;
-        	for (Iterator it = problems.iterator(); it.hasNext();) {
+        	for (Iterator<Problem> it = problems.iterator(); it.hasNext();) {
         		Problem problem = (Problem) it.next();
         		problemIds.add(new Long(problem.getId()));  
         		problemIndexes.put(new Long(problem.getId()), new Integer(index));
@@ -760,16 +771,16 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             String userIdsCon = "";
             if (roleId >= 0) {
                 // TODO performance issue!!
-                List ids = new ArrayList();
+                List<Long> ids = new ArrayList<Long>();
                 String userQuery = "SELECT user_profile_id FROM user_role WHERE role_id=?";
                 ps = conn.prepareStatement(userQuery);
                 ps.setLong(1, roleId);
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    ids.add(rs.getInt(1));
+                    ids.add(rs.getLong(1));
                 }
                 if (ids.size() == 0) {
-                    return new ArrayList();
+                    return new ArrayList<RankListEntry>();
                 }
                 userIdsCon = " AND user_profile_id IN " + Database.createNumberValues(ids);                
             }                        
@@ -781,7 +792,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         	ps = conn.prepareStatement(query);
         	rs = ps.executeQuery();
         	
-        	Map entries = new HashMap();      
+        	Map<Long, RankListEntry> entries = new HashMap<Long, RankListEntry>();      
         	
         	while (rs.next()) {
             	long userId = rs.getLong(1);
@@ -801,7 +812,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             			judgeReplyId == JudgeReply.ACCEPTED.getId());            	
             } 
             
-            List entryList = new ArrayList(entries.values());
+            List<RankListEntry> entryList = new ArrayList<RankListEntry>(entries.values());
             Collections.sort(entryList);
                                          
             return entryList;
@@ -857,7 +868,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ps.setLong(1, contestId);
             
             rs = ps.executeQuery();
-            int index = 0;
             List<UserProfile> users = new ArrayList<UserProfile>();
             List<Integer> solved = new ArrayList<Integer>();
             List<Integer> total = new ArrayList<Integer>();

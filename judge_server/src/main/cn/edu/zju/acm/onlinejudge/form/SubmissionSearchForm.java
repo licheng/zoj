@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.form;
 
 import java.io.Serializable;
@@ -8,18 +20,15 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
-import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
@@ -339,14 +348,14 @@ public class SubmissionSearchForm extends ActionForm implements Serializable {
     	}
     	if (languageIds != null && languageIds.length > 0) {
     		ContestPersistence persistence = PersistenceManager.getInstance().getContestPersistence();
-    		List languages = new ArrayList();
+    		List<Language> languages = new ArrayList<Language>();
     		for (int i = 0; i < languageIds.length; ++i) {
     			languages.add(persistence.getLanguage(Long.parseLong(languageIds[i])));
     		}
     		criteria.setLanguages(languages);
     	}
     	if (judgeReplyIds != null && judgeReplyIds.length > 0) {
-    		List judgeReplies = new ArrayList();
+    		List<JudgeReply> judgeReplies = new ArrayList<JudgeReply>();
     		for (int i = 0; i < judgeReplyIds.length; ++i) {
     			judgeReplies.add(JudgeReply.findById(Long.parseLong(judgeReplyIds[i])));
     		}

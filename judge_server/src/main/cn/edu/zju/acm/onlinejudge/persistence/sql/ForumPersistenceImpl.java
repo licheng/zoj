@@ -1,6 +1,18 @@
 /*
- * Copyright (C) 2001 - 2005 ZJU Online Judge, All Rights Reserved.
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * 
+ * This file is part of ZOJ.
+ * 
+ * ZOJ is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either revision 3 of the License, or (at your option) any later revision.
+ * 
+ * ZOJ is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with ZOJ. if not, see
+ * <http://www.gnu.org/licenses/>.
  */
+
 package cn.edu.zju.acm.onlinejudge.persistence.sql;
 
 import cn.edu.zju.acm.onlinejudge.bean.Forum;
@@ -370,7 +382,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
      * @return a list of Forum instances containing all forums in persistence layer
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getAllForums() throws PersistenceException {    
+    public List<Forum> getAllForums() throws PersistenceException {    
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -380,7 +392,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
             ps = conn.prepareStatement(GET_ALL_FORUMS);            
             rs = ps.executeQuery();
             
-            List forums = new ArrayList();
+            List<Forum> forums = new ArrayList<Forum>();
             while (rs.next()) {
             	Forum forum = new Forum();
             	forum.setId(rs.getLong(DatabaseConstants.FORUM_FORUM_ID));
@@ -554,7 +566,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
      * @param count the maximum number of thread in returned list
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List searchThreads(ThreadCriteria criteria, int offset, int count) throws PersistenceException {   
+    public List<Thread> searchThreads(ThreadCriteria criteria, int offset, int count) throws PersistenceException {   
     	return null;
     }
 
@@ -563,7 +575,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
      *
      * @param post the Post instance to create
      * @param user the id of the user who made this modification
-     * @throws NullPointerException if arguemtn is null
+     * @throws NullPointerException if argument is null
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
     public void createPost(Post post, long user) throws PersistenceException {    	
@@ -714,7 +726,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
      * @throws IllegalArgumentException if offset or count is negative
      * @throws PersistenceException wrapping a persistence implementation specific exception
      */
-    public List getPosts(long threadId, int offset, int count) throws PersistenceException {
+    public List<Post> getPosts(long threadId, int offset, int count) throws PersistenceException {
     	if (offset < 0) {
     		throw new IllegalArgumentException("offset should not be negative");
     	}
@@ -722,7 +734,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
     		throw new IllegalArgumentException("count should not be negative");
     	}
     	if (count == 0) {
-    		return new ArrayList();
+    		return new ArrayList<Post>();
     	}
     	Connection conn = null;
         PreparedStatement ps = null;
@@ -733,7 +745,7 @@ public class ForumPersistenceImpl implements ForumPersistence {
             ps = conn.prepareStatement(GET_POSTS);   
             ps.setLong(1, threadId);
             rs = ps.executeQuery();                     
-            List posts = new ArrayList();
+            List<Post> posts = new ArrayList<Post>();
             int index = 0;
             while (rs.next() && index - offset < count) {
             	++index;            	
