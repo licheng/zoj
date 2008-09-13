@@ -39,7 +39,6 @@ import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.bean.request.SubmissionCriteria;
-import cn.edu.zju.acm.onlinejudge.persistence.LanguagePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.ContestStatistics;
@@ -157,8 +156,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
     private static final String GET_SUBMISSIONS_WITH_CONTENT =
             SubmissionPersistenceImpl.GET_SUBMISSION_WITH_CONTENT_PREFIX +
                 SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART;
-
-    private LanguagePersistence languagePersistence = PersistenceManager.getInstance().getLanguagePersistence();
 
     /**
      * <p>
@@ -339,7 +336,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 if (!rs.next()) {
                     return null;
                 }
-                Map<Long, Language> languageMap = this.languagePersistence.getLanguageMap();
+                Map<Long, Language> languageMap =
+                        PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
                 Submission submission = this.populateSubmission(rs, true, languageMap);
                 return submission;
             } finally {
@@ -462,7 +460,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             throw new IllegalArgumentException("count is negative");
         }
         Connection conn = null;
-        Map<Long, Language> languageMap = this.languagePersistence.getLanguageMap();
+        Map<Long, Language> languageMap = PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
         try {
             conn = Database.createConnection();
             PreparedStatement ps = null;
@@ -1003,7 +1001,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             ret = new ProblemStatistics(problemId, "date");
         }
 
-        Map<Long, Language> languageMap = this.languagePersistence.getLanguageMap();
+        Map<Long, Language> languageMap = PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
         try {
             conn = Database.createConnection();
             PreparedStatement ps = null;

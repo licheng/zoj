@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com> Xu, Chuan <xuchuan@gmail.com>
  * 
  * This file is part of ZOJ.
  * 
@@ -29,6 +29,7 @@ import cn.edu.zju.acm.onlinejudge.bean.request.ThreadCriteria;
  * 
  * @version 2.0
  * @author Zhang, Zheng
+ * @author Xu, Chuan
  */
 public interface ForumPersistence {
 

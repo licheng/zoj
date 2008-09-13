@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com> Xu Chuan <xuchuan@gmail.com>
  * 
  * This file is part of ZOJ.
  * 
@@ -23,12 +23,19 @@ import cn.edu.zju.acm.onlinejudge.persistence.ForumPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.LanguagePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
-import cn.edu.zju.acm.onlinejudge.persistence.PersistenceLocator;
 import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.ReferencePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.sql.SQLPersistenceLocator;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.AuthorizationPersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.ConfigurationPersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.ContestPersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.ForumPersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.LanguagePersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.ProblemPersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.ReferencePersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.SubmissionPersistenceImpl;
+import cn.edu.zju.acm.onlinejudge.persistence.sql.UserPersistenceImpl;
 
 /**
  * <p>
@@ -37,55 +44,50 @@ import cn.edu.zju.acm.onlinejudge.persistence.sql.SQLPersistenceLocator;
  * 
  * @version 2.0
  * @author Zhang, Zheng
+ * @author Xu, Chuan
  */
 public class PersistenceManager {
-
-    /**
-     * PersistenceLocator.
-     */
-    PersistenceLocator locator = null;
-
     /**
      * UserPersistence.
      */
-    private UserPersistence userPersistence = null;
+    private UserPersistence userPersistence = new UserPersistenceImpl();
 
     /**
      * ContestPersistence.
      */
-    private ContestPersistence contestPersistence = null;
+    private ContestPersistence contestPersistence = new ContestPersistenceImpl();
 
     /**
      * AuthorizationPersistence.
      */
-    private AuthorizationPersistence authorizationPersistence = null;
+    private AuthorizationPersistence authorizationPersistence = new AuthorizationPersistenceImpl();
 
     /**
      * SubmissionPersistence.
      */
-    private SubmissionPersistence submissionPersistence = null;
+    private SubmissionPersistence submissionPersistence = new SubmissionPersistenceImpl();
 
     /**
      * ForumPersistence.
      */
-    private ForumPersistence forumPersistence = null;
+    private ForumPersistence forumPersistence = new ForumPersistenceImpl();
 
     /**
      * ConfigurationPersistence.
      */
-    private ConfigurationPersistence configurationPersistence = null;
+    private ConfigurationPersistence configurationPersistence = new ConfigurationPersistenceImpl();
 
     /**
      * ReferencePersistence.
      */
-    private ReferencePersistence referencePersistence = null;
+    private ReferencePersistence referencePersistence = new ReferencePersistenceImpl();
 
     /**
      * ProblemPersistence.
      */
-    private ProblemPersistence problemPersistence = null;
+    private ProblemPersistence problemPersistence = new ProblemPersistenceImpl();
 
-    private LanguagePersistence languagePersistence = null;
+    private LanguagePersistence languagePersistence = new LanguagePersistenceImpl();
 
     /**
      * PersistenceManager.
@@ -109,16 +111,6 @@ public class PersistenceManager {
      *             if any exceptions occurs while creating the persistence
      */
     private PersistenceManager() throws PersistenceCreationException {
-        this.locator = new SQLPersistenceLocator();
-        this.userPersistence = this.locator.createUserPersistence();
-        this.contestPersistence = this.locator.createContestPersistence();
-        this.authorizationPersistence = this.locator.createAuthorizationPersistence();
-        this.submissionPersistence = this.locator.createSubmissionPersistence();
-        this.forumPersistence = this.locator.createForumPersistence();
-        this.configurationPersistence = this.locator.createConfigurationPersistence();
-        this.referencePersistence = this.locator.createReferencePersistence();
-        this.problemPersistence = this.locator.createProblemPersistence();
-        this.languagePersistence = this.locator.createLanguagePersistence();
     }
 
     /**

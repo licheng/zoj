@@ -33,7 +33,6 @@ import cn.edu.zju.acm.onlinejudge.bean.Limit;
 import cn.edu.zju.acm.onlinejudge.bean.Problemset;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.persistence.ContestPersistence;
-import cn.edu.zju.acm.onlinejudge.persistence.LanguagePersistence;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 
@@ -209,8 +208,6 @@ public class ContestPersistenceImpl implements ContestPersistence {
             throw new ExceptionInInitializerError(e);
         }
     }
-
-    private LanguagePersistence languagePersistence = PersistenceManager.getInstance().getLanguagePersistence();
 
     /**
      * Gets the default limit.
@@ -555,7 +552,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      */
     private void populatesLanguages(Connection conn, List<AbstractContest> contests) throws SQLException,
             PersistenceException {
-        Map<Long, Language> languageMap = this.languagePersistence.getLanguageMap();
+        Map<Long, Language> languageMap = PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
         PreparedStatement ps = null;
         try {
             Map<Long, AbstractContest> contestMap = new HashMap<Long, AbstractContest>();
