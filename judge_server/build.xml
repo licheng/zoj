@@ -3,7 +3,7 @@
 <project name="Online Review" default="compile" basedir=".">
 
     <!-- alter values to match your deployment -->
-    <property name="tomcat_path" value="F:\Tomcat\webapps" />
+    <property name="tomcat_path" value="\opt\tomcat\webapps" />
 
     <property name="package" value="cn.edu.zju.acm.onlinejudge" />
     <property name="packagedir" value="cn/edu/zju/acm/onlinejudge" />
