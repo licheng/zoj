@@ -6,26 +6,11 @@
 <font color=red>A</font>:The online judge system is running on Linux. We are using <a href="http://gcc.gnu.org">GNU GCC/G++</a> for C/C++ compile and <a href="http://www.gnu-pascal.de">GPC</a>/<a href="http://www.freepascal.org">Free Pascal</a> for pascal compile. The compile options are:<br>
 C: <font color=blue>gcc foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DONLINE_JUDGE</font><br>
 C++: <font color=blue>g++ foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DONLINE_JUDGE</font><br>
-GNU Pascal(GPC): <font color=blue>gpc foo.pas -o foo -fno-asm -Wall -lm --static -DONLINE_JUDGE</font><br>
-Free Pascal(FPC): <font color=blue>fpc -Co -Cr -Ct -Ci -dONLINE_JUDGE</font><br>
+Free Pascal(FPC): <font color=blue>fpc -Sd -O2 -Op2 -dONLINE_JUDGE</font><br>
 Our compiler software version:<br>
-<font color=blue>gcc/g++ 3.2.2 20030222 (Red Hat Linux 3.2.2-5)</font><br>
-<font color=blue>glibc 2.3.5</font><br>
-<font color=blue>GNU Pascal version 20041218, based on gcc-3.3.3</font><br>
-<font color=blue>Free Pascal Compiler version 2.0.1 [2005/09/23] for i386</font><br>
-<hr>
-<font color=green>Q</font>:What does SIGSEGV in Runtime Error stand for?<br>
-<font color=red>A</font>:The following messages will not be shown to you in contest. Here we just provide some tips: <br>
-<B>SIGSEGV</B> --- Segment Fault. The possible cases of your encountering this error are:<br>
-<ul>
-<li>1.buffer overflow --- usually caused by a pointer reference out of range.<br> 
-<li>2.stack overflow --- please keep in mind that the default stack size is 8192K.<br>
-<li>3.illegal file access --- file operations are forbidden on our judge system.<br>
-</ul>
-<B>SIGFPE</B> &nbsp;--- Divided by 0<br>
-<B>SIGBUS</B> &nbsp;--- Hardware Error. //please contact us<br>
-<B>SIGABRT</B> --- Programme aborted before it should be finished.<br>
-<B>man 7 signal</B> under Linux for more information<br> 
+<font color=blue>gcc/g++ 4.1.2 (Ubuntu 4.1.2-0ubuntu4)</font><br>
+<font color=blue>glibc 2.6.1</font><br>
+<font color=blue>Free Pascal Compiler version 2.0.4 [2007/02/02] for i386</font><br>
 <hr>
 <font color=green>Q</font>:Free Pascal Runtime Error Numbers<br>
 <font color=red>A</font>:Refer to here <a href="http://www.freepascal.org/docs-html/user/node16.html">http://www.freepascal.org/docs-html/user/node16.html</a> for detailed runtime error informations.<br>
@@ -104,19 +89,27 @@ end.
 <br>
 <font color=blue>Wrong Answer</font> : Correct solution not reached for the inputs. The inputs and outputs that we use to test the programs are not public (it is recomendable to get accustomed to a true contest dynamic ;-).<br>
 <br>
-<font color=blue>Runtime Error</font> : Your program failed during the execution (segmentation fault, floating point exception...). The exact cause is reported to the user.<br>
-<br>
 <font color=blue>Time Limit Exceeded</font> : Your program tried to run during too much time.<br>
 <br>
 <font color=blue>Memory Limit Exceeded</font> : Your program tried to use more memory than the judge default settings.  <br>
 <br>
 <font color=blue>Output Limit Exceeded</font>: Your program tried to write too much information. This usually occurs if it goes into a infinite loop. Currently the output limit is 1M bytes.<br>
 <br>
-<font color=blue>Compile Error</font> : The compiler (gcc/g++/gpc) could not compile your ANSI program. Of course, warning messages are not error messages. Click the link at the judge reply to see the actual error message.<br>
+<font color=blue>Compile Error</font> : The compiler (gcc, g++, fpc, etc) could not compile your program. Of course, warning messages are not error messages. Click the link at the judge reply to see the actual error message.<br>
 <br>
 <font color=blue>Out Of Contest Time</font>: this message can only appear during a contest, if a program is submitted out of contest time. <br>
 <br>
 <font color=blue>No such problem</font>: Either you have submitted a wrong problem id or the problem is unavailable.<br>
+<br>
+<font color=blue>Segmentation Fault</font> :  The possible cases of your encountering this error are:<br>
+<ul>
+<li>1.buffer overflow --- usually caused by a pointer reference out of range.<br> 
+<li>2.stack overflow --- please keep in mind that the default stack size is 8192K.<br>
+</ul>
+<br>
+<font color=blue>Floating Point Error</font> : Divide by 0<br>
+<br>
+<font color=blue>Runtime Error</font> : Your program executed a forbidden operation, like invoking privileged syscall, file operation, etc. Notice that buffer overflow and stack overflow can also lead to this error.<br>
 </p>
 <hr>
 </div>
