@@ -34,7 +34,7 @@
         <div id="content_body">
                 <div id="content_title"><bean:write name="contest" property="title"/> - <bean:write name="problem" property="code"/></div>
         
-                <center><font size="4"><a href="<%=problemPath%>"><bean:write name="problem" property="code"/> <bean:write name="problem" property="code"/></a></font></center>
+                <center><font size="4"><a href="<%=problemPath%>"><bean:write name="problem" property="code"/></a></font></center>
                 <p/>
                 <div>
                 <table class="list">
