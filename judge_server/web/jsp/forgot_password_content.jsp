@@ -15,18 +15,28 @@
         <blockquote>
           <br/>
           <br/>
-          <logic:notEmpty name="handle">
-            <p>An email had been sent to your email.</p>
-          </logic:notEmpty>
-          <logic:empty name="handle">
+          <%
+          String handle = (String) request.getAttribute("handle");
+          String email = (String) request.getAttribute("email");
+          Boolean ok = (Boolean) request.getAttribute("ok");
+          if (((handle != null && handle.trim().length() > 0) ||
+              (email != null && email.trim().length() > 0)) && ok == Boolean.TRUE) {
+          %>
+                <p>An email had been sent to your email.</p>
+          <% } else { %>
             <p>Fill your handle blow. We will send an email to you.</p>
             <form name="forgotPasswordForm" method="post" action="<%=request.getContextPath()%>/forgotPassword.do">
             <p>
-                <input name="handle" type="text"/>
+                <input name="handle" type="text"/><br/>
+                Or<br/>
+                <input name="email" type="text"/><br/>
+                <% if (ok == Boolean.FALSE) { %>
+                <font color="red">no such user.</font>
+                <% } %> 
                 <input type="submit" value="Submit"/>
             </p>
             </form>            
-          </logic:empty>
+          <% } %>
         </blockquote>
         </div>
         

@@ -32,7 +32,7 @@ public class EmailService {
     	
         EmailTemplate template = ConfigManager.getEmailTemplate("forgotPassword");
         Properties p = new Properties();
-        p.setProperty("FIRST_NAME", user.getFirstName());
+        p.setProperty("FIRST_NAME", user.getHandle());
         p.setProperty("RESET_URL", resetUrl);
         String email = user.getEmail();
         if (email.endsWith("@magicemailhost.com")) {

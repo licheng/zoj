@@ -74,22 +74,38 @@ public class ForgotPasswordAction extends BaseAction {
             return null;
         }
         String handle = context.getRequest().getParameter("handle");
-
-        if (handle != null) {
-            this.forgotPassword(handle, context);
-            context.getRequest().setAttribute("handle", handle);
+        String email = context.getRequest().getParameter("email");
+        if ((handle == null || handle.trim().length() == 0) && (email == null || email.trim().length() == 0)) {
+        	return this.handleSuccess(mapping, context, "success");
         }
-
+        UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
+        UserProfile user = null;
+        
+        
+        if (handle != null && handle.trim().length() > 0) {
+        	user = userPersistence.getUserProfileByHandle(handle);
+        }
+        if (user == null) {
+	        if (email != null && email.trim().length() > 0) {
+	            user = userPersistence.getUserProfileByEmail(email.trim());
+	        }
+        }
+        
+        if (user != null) {
+        	forgotPassword(user, context);
+        	context.setAttribute("ok", Boolean.TRUE);
+        } else {
+        	context.setAttribute("ok", Boolean.FALSE);
+        }
+        context.setAttribute("email", email);
+        context.setAttribute("handle", handle);
         return this.handleSuccess(mapping, context, "success");
+
+        
     }
 
-    public void forgotPassword(String handle, ContextAdapter context) throws Exception {
-        UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
-        UserProfile user = userPersistence.getUserProfileByHandle(handle);
-        if (user == null) {
-            return;
-        }
-
+    public void forgotPassword(UserProfile user, ContextAdapter context) throws Exception {
+    	UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
         String code = RandomStringGenerator.generate();
         userPersistence.createConfirmCode(user.getId(), code, user.getId());
 
