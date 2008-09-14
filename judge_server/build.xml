@@ -142,6 +142,7 @@
             <classes dir="${configdir}" includes="${data_source.properties.name}" />
             <classes dir="${configdir}" includes="${log4j.properties.name}" />
             <classes dir="${configdir}" includes="oj.conf" />
+            <classes dir="${configdir}" includes="forgot_password_template.txt" />
             
             <!--
             <classes dir="${configdir}" includes="log4j.properties" />
