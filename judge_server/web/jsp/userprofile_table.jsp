@@ -120,11 +120,9 @@
             <tr>
                 <td align="right">Plan</td>             
                 <td>                                      
-                    <textarea name="plan" type="text"
-                        <logic:present name="ProfileForm">
-                            value="<bean:write name="ProfileForm" property="plan" />"
-                        </logic:present>
-                    ></textarea>
+                    <textarea name="plan" type="text"><logic:present name="ProfileForm">
+                            <bean:write name="ProfileForm" property="plan" />
+                        </logic:present></textarea>
                 </td>
             </tr>
             <tr>
