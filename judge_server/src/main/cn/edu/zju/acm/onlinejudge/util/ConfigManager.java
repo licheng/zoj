@@ -16,6 +16,7 @@
 package cn.edu.zju.acm.onlinejudge.util;
 
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
@@ -95,7 +96,8 @@ public class ConfigManager {
 
         InputStreamReader reader = null;
         try {
-            reader = new InputStreamReader(ConfigManager.class.getClassLoader().getResourceAsStream(templateFile));
+        	String path = ConfigManager.class.getClassLoader().getResource(templateFile).getFile();
+            reader = new FileReader(path);
             char[] buffer = new char[10240];
             for (;;) {
                 int l = reader.read(buffer, 0, 10240);
