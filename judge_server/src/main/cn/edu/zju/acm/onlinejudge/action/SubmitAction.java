@@ -20,6 +20,8 @@ import java.util.Date;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
+import org.apache.struts.action.ActionMessages;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
@@ -30,6 +32,7 @@ import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.judgeservice.Priority;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
+import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
@@ -96,6 +99,23 @@ public class SubmitAction extends BaseAction {
         if (source == null || source.length() == 0) {
             return this.handleSuccess(mapping, context, "submit");
         }
+        
+        Long lastSubmitDate = (Long) context.getSessionAttribute("last_submit");
+        long now = System.currentTimeMillis();
+        long submitInterval = Long.parseLong(ConfigManager.getValue("submit_interval"));
+        
+        if (lastSubmitDate != null && now - lastSubmitDate < submitInterval) {
+        	
+        	ActionMessages messages = new ActionMessages();       
+            messages.add("message", new ActionMessage("onlinejudge.submit.interval"));
+            this.saveErrors(context.getRequest(), messages);
+            
+            context.setAttribute("source", source);
+            
+        	return handleSuccess(mapping, context, "submit");
+        }
+        context.setSessionAttribute("last_submit", now);
+        
         if (contest.isCheckIp()) {
             forward = this.checkLastLoginIP(mapping, context, isProblemset);
             if (forward != null) {
