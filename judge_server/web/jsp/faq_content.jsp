@@ -110,6 +110,5 @@ end.
 <font color=blue>Floating Point Error</font> : Divide by 0<br>
 <br>
 <font color=blue>Runtime Error</font> : Your program executed a forbidden operation, like invoking privileged syscall, file operation, etc. Notice that buffer overflow and stack overflow can also lead to this error.<br>
-</p>
 <hr>
 </div>

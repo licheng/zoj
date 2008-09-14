@@ -144,7 +144,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                 <blockquote>
                 <a href="<%=request.getContextPath()%>/add<%=actionName%>.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Add Problem</font></a>&nbsp;&nbsp;&nbsp;
                 <a href="<%=request.getContextPath()%>/export<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Export Problems</font></a>&nbsp;&nbsp;&nbsp;
-                <a href="<%=request.getContextPath()%>/show<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>&check=ture"><font color="red">Check Problems</font></a>
+                <a href="<%=request.getContextPath()%>/show<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>&check=true"><font color="red">Check Problems</font></a>
                 </blockquote>
                 <% } %>   
                 
