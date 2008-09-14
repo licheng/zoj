@@ -325,7 +325,7 @@ public class PerformanceManager {
 				if (System.currentTimeMillis() - lastSave > TIME_LIMIT - 1000) {
 					saveFinished();
 				}
-				Thread.sleep(TIME_LIMIT * 1000);
+				Thread.sleep(TIME_LIMIT);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
