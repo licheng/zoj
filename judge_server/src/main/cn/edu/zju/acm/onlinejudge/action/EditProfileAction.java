@@ -22,6 +22,7 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
+import cn.edu.zju.acm.onlinejudge.bean.UserPreference;
 import cn.edu.zju.acm.onlinejudge.form.ProfileForm;
 import cn.edu.zju.acm.onlinejudge.persistence.UserPersistence;
 import cn.edu.zju.acm.onlinejudge.util.Features;
