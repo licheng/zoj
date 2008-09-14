@@ -103,16 +103,17 @@ public class ExportProblemsAction extends BaseAction {
                 this.zipReference(p, "checker", ReferenceType.CHECKER, out);
                 this.zipReference(p, "checker", ReferenceType.CHECKER_SOURCE, out);
 
-                sb.append(p.getCode()).append(",");
-                sb.append(p.getTitle()).append(",");
+                
+                sb.append(toCsvString(p.getCode())).append(",");
+                sb.append(toCsvString(p.getTitle())).append(",");
                 sb.append(p.isChecker()).append(",");
                 sb.append(p.getLimit().getTimeLimit()).append(",");
                 sb.append(p.getLimit().getMemoryLimit()).append(",");
                 sb.append(p.getLimit().getOutputLimit()).append(",");
                 sb.append(p.getLimit().getSubmissionLimit()).append(",");
-                sb.append(p.getAuthor()).append(",");
-                sb.append(p.getSource()).append(",");
-                sb.append(p.getContest()).append("\n");
+                sb.append(toCsvString(p.getAuthor())).append(",");
+                sb.append(toCsvString(p.getSource())).append(",");
+                sb.append(toCsvString(p.getContest())).append("\n");
             }
             out.putNextEntry(new ZipEntry("problems.csv"));
             out.write(sb.toString().getBytes());
@@ -127,6 +128,16 @@ public class ExportProblemsAction extends BaseAction {
 
         return null;
 
+    }
+    private String toCsvString(String s) {
+    	if (s == null) {
+    		return "";
+    	} else if (s.contains(",")) {
+    		return "\"" + s.replace("\"", "\"\"") + "\"";
+    	} else {
+    		return s;
+    	}
+    	
     }
 
     private void zipReference(Problem p, String fileName, ReferenceType type, ZipOutputStream out) throws Exception {

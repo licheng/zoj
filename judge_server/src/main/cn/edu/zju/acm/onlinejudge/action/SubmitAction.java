@@ -105,7 +105,7 @@ public class SubmitAction extends BaseAction {
         long submitInterval = Long.parseLong(ConfigManager.getValue("submit_interval"));
         
         if (lastSubmitDate != null && now - lastSubmitDate < submitInterval) {
-        	
+        	 
         	ActionMessages messages = new ActionMessages();       
             messages.add("message", new ActionMessage("onlinejudge.submit.interval"));
             this.saveErrors(context.getRequest(), messages);
