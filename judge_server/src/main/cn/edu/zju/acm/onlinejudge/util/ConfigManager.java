@@ -96,8 +96,7 @@ public class ConfigManager {
 
         InputStreamReader reader = null;
         try {
-        	String path = ConfigManager.class.getClassLoader().getResource(templateFile).getFile();
-            reader = new FileReader(path);
+        	reader = new InputStreamReader(ConfigManager.class.getClassLoader().getResourceAsStream(templateFile));
             char[] buffer = new char[10240];
             for (;;) {
                 int l = reader.read(buffer, 0, 10240);
@@ -117,7 +116,6 @@ public class ConfigManager {
         }
 
         return new EmailTemplate(title, replyTo, content.toString());
-
     }
 
 }
