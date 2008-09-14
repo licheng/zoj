@@ -24,12 +24,11 @@
           %>
                 <p>An email had been sent to your email.</p>
           <% } else { %>
-            <p>Fill your handle blow. We will send an email to you.</p>
+            <p>Fill your handle or email blow. We will send an email to you.</p>
             <form name="forgotPasswordForm" method="post" action="<%=request.getContextPath()%>/forgotPassword.do">
             <p>
-                <input name="handle" type="text"/><br/>
-                Or<br/>
-                <input name="email" type="text"/><br/>
+                handle <input name="handle" type="text"/> or<br/>
+                email&nbsp;&nbsp; <input name="email" type="text"/><br/>
                 <% if (ok == Boolean.FALSE) { %>
                 <font color="red">no such user.</font>
                 <% } %> 
