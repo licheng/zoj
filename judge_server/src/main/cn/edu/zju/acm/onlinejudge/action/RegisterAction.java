@@ -91,14 +91,8 @@ public class RegisterAction extends BaseAction {
         userPersistence.createUserProfile(profile, 0);
 
         // create user perference
-        UserPreference perference = new UserPreference();
+        UserPreference perference = profileForm.toUserPreference();
         perference.setId(profile.getId());
-        perference.setPlan("");
-        perference.setPostPaging(20); // TODO...
-        perference.setProblemPaging(100);
-        perference.setStatusPaging(20);
-        perference.setThreadPaging(20);
-        perference.setUserPaging(20);
         userPersistence.createUserPreference(perference, 0);
 
         AuthorizationPersistence authorizationPersistence =

@@ -77,8 +77,9 @@ public class EditProfileAction extends BaseAction {
         UserPersistence userPersistence = PersistenceManager.getInstance().getUserPersistence();
         ProfileForm profileForm = (ProfileForm) form;
         UserProfile profile = context.getUserProfile();
+        UserPreference perference = userPersistence.getUserPreference(profile.getId());
         if (profileForm.getHandle() == null) {
-            profileForm.populate(profile);
+            profileForm.populate(profile, perference);
             context.setAttribute("ProfileForm", profileForm);
             return this.handleSuccess(mapping, context, "failure");
         }
@@ -90,7 +91,6 @@ public class EditProfileAction extends BaseAction {
         UserProfile newProfile = profileForm.toUserProfile();
         newProfile.setId(profile.getId());
         newProfile.setRegDate(profile.getRegDate());
-        System.out.println("cerror: " + newProfile.getPassword());
 
         if (!profile.getHandle().equals(newProfile.getHandle())) {
             return this.handleFailure(mapping, context, "handle", "ProfileForm.handle.changed");
@@ -104,7 +104,8 @@ public class EditProfileAction extends BaseAction {
         }
 
         userPersistence.updateUserProfile(newProfile, profile.getId());
-
+        UserPreference newPerference = profileForm.toUserPreference();
+        userPersistence.updateUserPreference(newPerference, profile.getId());
         context.setUserProfile(newProfile);
         context.getRequest().setAttribute("Countries",
                                           PersistenceManager.getInstance().getUserPersistence().getAllCountries());

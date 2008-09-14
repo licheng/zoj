@@ -75,6 +75,11 @@ public class ProfileForm extends ActionForm implements Serializable {
     private String email = null;
 
     /**
+     * The plan.
+     */
+    private String plan = null;
+
+    /**
      * The firstName.
      */
     private String firstName = null;
@@ -277,6 +282,24 @@ public class ProfileForm extends ActionForm implements Serializable {
      */
     public String getEmail() {
         return this.email;
+    }
+
+    /**
+     * Sets the plan.
+     * 
+     * @prama plan the email to set.
+     */
+    public void setPlan(String plan) {
+        this.plan = plan;
+    }
+
+    /**
+     * Gets the plan.
+     * 
+     * @return the plan.
+     */
+    public String getPlan() {
+        return this.plan;
     }
 
     /**
@@ -828,6 +851,18 @@ public class ProfileForm extends ActionForm implements Serializable {
         return profile;
     }
 
+    public UserPreference toUserPreference() throws PersistenceException {
+        UserPreference preference= new UserPreference();
+        perference.setId(profile.getId());
+        perference.setPlan(this.plan);
+        perference.setPostPaging(20); // TODO...
+        perference.setProblemPaging(100);
+        perference.setStatusPaging(20);
+        perference.setThreadPaging(20);
+        perference.setUserPaging(20);
+        return perference;
+    }
+
     /**
      * Converts the form bean to UserProfile bean.
      * 
@@ -835,7 +870,7 @@ public class ProfileForm extends ActionForm implements Serializable {
      * @throws PersistenceException
      *             if failed to convert
      */
-    public void populate(UserProfile profile) throws PersistenceException {
+    public void populate(UserProfile profile, UserPreference preference) throws PersistenceException {
 
         this.setNick(profile.getNickName());
         this.setAddressLine1(profile.getAddressLine1());
@@ -844,6 +879,7 @@ public class ProfileForm extends ActionForm implements Serializable {
         this.setCity(profile.getCity());
         this.setCountry(String.valueOf(profile.getCountry().getId()));
         this.setEmail(profile.getEmail());
+        this.setPlan(preference.getPlan());
         this.setFirstName(profile.getFirstName());
         this.setLastName(profile.getLastName());
         this.setGender(String.valueOf(profile.getGender()));

@@ -116,12 +116,13 @@
                     >
                 </td>
             </tr>
+            
             <tr>
-                <td align="right">Plan</td> 
-                <td>  
-                    <input name="addressLine2" type="text"/
+                <td align="right">Plan</td>             
+                <td>                                      
+                    <input name="plan" type="text"
                         <logic:present name="ProfileForm">
-                            value="<bean:write name="ProfileForm" property="addressLine2" />"
+                            value="<bean:write name="ProfileForm" property="plan" />"
                         </logic:present>
                     >
                 </td>
@@ -200,7 +201,7 @@
                 </td>
             </tr>
             <tr>
-                <td align="right">Address</td> 
+                <td align="right">Address Line 1</td> 
                 <td>  
                     <input name="addressLine1" type="text"/
                         <logic:present name="ProfileForm">
@@ -212,6 +213,17 @@
                             <html:errors property="addressLine1"/>
                         </logic:messagesPresent>
                     </span>
+                </td>
+            </tr>
+            
+            <tr>
+                <td align="right">Address Line 2</td> 
+                <td>  
+                    <input name="addressLine2" type="text"/
+                        <logic:present name="ProfileForm">
+                            value="<bean:write name="ProfileForm" property="addressLine2" />"
+                        </logic:present>
+                    >
                 </td>
             </tr>
             <tr>
