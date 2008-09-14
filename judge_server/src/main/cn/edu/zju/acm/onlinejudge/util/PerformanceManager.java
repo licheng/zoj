@@ -321,13 +321,19 @@ public class PerformanceManager {
 
 	private class Runner extends Thread {
 		public void run() {
-			try {
-				if (System.currentTimeMillis() - lastSave > TIME_LIMIT - 1000) {
-					saveFinished();
+			for (;;) {
+				try {
+					if (System.currentTimeMillis() - lastSave > TIME_LIMIT - 1000) {
+						saveFinished();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				Thread.sleep(TIME_LIMIT);
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					Thread.sleep(TIME_LIMIT);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
