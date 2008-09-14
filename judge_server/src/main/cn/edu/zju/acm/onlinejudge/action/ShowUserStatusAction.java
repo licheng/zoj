@@ -20,6 +20,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
+import cn.edu.zju.acm.onlinejudge.bean.UserPreference;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
@@ -74,11 +75,15 @@ public class ShowUserStatusAction extends BaseAction {
         }
 
         UserStatistics statistics = null;
+        UserPreference pref = null;
         if (contest != null && user != null) {
+        	// TODO cache?
+        	pref = PersistenceManager.getInstance().getUserPersistence().getUserPreference(user.getId());
             statistics = StatisticsManager.getInstance().getUserStatistics(contest.getId(), user.getId());
         }
 
         context.setAttribute("user", user);
+        context.setAttribute("preference", pref);
         context.setAttribute("contest", contest);
         context.setAttribute("UserStatistics", statistics);
 

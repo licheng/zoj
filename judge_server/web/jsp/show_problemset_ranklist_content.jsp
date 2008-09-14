@@ -71,11 +71,16 @@
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
                         <td class="problemsetRanklistRank"><%=rank%></td>
-                        <td class="problemsetRanklistUser"><a href="<%=userStatusPath + users[i].getId()%>"><font color="db6d00"><%=
+                        <td class="problemsetRanklistUser"><a href="<%=userStatusPath + users[i].getId()%>"><font color="db6d00"><%
+                        String nickname = 
                         	users[i].getNickName() == null || users[i].getNickName().length() == 0
-                        	  ? users[i].getHandle() : users[i].getNickName()
-                        %></font></a></td>
-                        <td class="problemsetRanklistUser"><%=(users[i].getDeclaration()==null)? "":users[i].getDeclaration()%></td>
+                            ? users[i].getHandle() : users[i].getNickName();
+                            request.setAttribute("nickname", nickname);
+                        %><bean:write name="nickname"/></font></a></td>
+                        <td class="problemsetRanklistUser"><%
+                        String plan = (users[i].getDeclaration() == null) ? "" : users[i].getDeclaration();
+                            request.setAttribute("plan", plan);
+                        %><bean:write name="plan"/></td>
                         <td class="problemsetRanklistSolved"><%=solved[i]%></td>
                         <td class="problemsetRanklistSubmitted"><%=total[i]%></td>
                         <td class="problemsetRanklistACRatio"><%=(new DecimalFormat("0.##")).format(100.0 * solved[i] / total[i])+"%"%></td>

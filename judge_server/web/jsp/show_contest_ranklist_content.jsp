@@ -105,11 +105,13 @@
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
                         <td class="ranklistRank"><%=displayRank%></td>
-                        <td class="ranklistUser"><a href="<%=userStatusPath + entry.getUserProfile().getId()%>"><font color="db6d00"><%=
+                        <td class="ranklistUser"><a href="<%=userStatusPath + entry.getUserProfile().getId()%>"><font color="db6d00">
+                        <% String nickname = 
                         	entry.getUserProfile().getNickName() == null ||
                         	entry.getUserProfile().getNickName().length() == 0
-                        	?  entry.getUserProfile().getHandle() : entry.getUserProfile().getNickName()
-                        %></font></a></td>
+                        	?  entry.getUserProfile().getHandle() : entry.getUserProfile().getNickName();
+                        	request.setAttribute("nickname", nickname);
+                        %><bean:write name="nickname"/></font></a></td>
                         <td class="ranklistSolved"><%=entry.getSolved()%></td>
                         <%
                         for (int j = 0; j < problems.size(); ++j) {

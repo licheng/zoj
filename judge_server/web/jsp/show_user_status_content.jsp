@@ -55,9 +55,15 @@
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <font size="3">AC Ratio:</font> <font color="red" size="4"><%=statistics.getSolved().size()%>/<%=statistics.getTotal()%> </font><br/>
         </div>
+        <logic:notEmpty name="preference" property="plan">
         <br/>
         <div>
-        Solved Problems:<br/>
+        <b>Plan:</b><br/><pre><bean:write name="preference" property="plan"/></pre>
+        </div>
+        </logic:notEmpty>
+        <br/>
+        <div>
+        <b>Solved Problems:</b><br/>
         <% 
             if (statistics.getSolved() != null) {
                 for (Iterator it = statistics.getSolved().iterator(); it.hasNext();) {

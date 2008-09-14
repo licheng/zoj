@@ -38,7 +38,9 @@
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
                         <td align="center"><%=qq.getSubmissionId()%></td>
                         <td align="center"><%=qq.getHandle()%></td>
-                        <td align="center"><%=qq.getNickName()%></td>
+                        <td align="center"><%
+                            request.setAttribute("nickname", qq.getNickName());
+                        %><bean:write name="nickname"/></td>
                         <td align="center"><%=qq.getCode()%></td>                                                                                                
                         <td align="center" width='40px' bgcolor="<%=qq.getColor() == null ? "white" : qq.getColor()%>"></td>                                                                                                
                         <td align="center"><%=Utility.toTimestamp(qq.getSubmissionDate())%></td>                                                                                                
