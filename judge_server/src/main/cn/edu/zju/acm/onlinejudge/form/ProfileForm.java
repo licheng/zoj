@@ -300,7 +300,7 @@ public class ProfileForm extends ActionForm implements Serializable {
      * @return the plan.
      */
     public String getPlan() {
-        return this.plan;
+        return this.plan.trim();
     }
 
     /**
