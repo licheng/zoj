@@ -120,7 +120,7 @@
             <tr>
                 <td align="right">Plan</td>             
                 <td>                                      
-                    <input name="plan" type="text"
+                    <textarea name="plan" type="text"
                         <logic:present name="ProfileForm">
                             value="<bean:write name="ProfileForm" property="plan" />"
                         </logic:present>
