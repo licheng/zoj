@@ -124,7 +124,7 @@
                         <logic:present name="ProfileForm">
                             value="<bean:write name="ProfileForm" property="plan" />"
                         </logic:present>
-                    >
+                    ></textarea>
                 </td>
             </tr>
             <tr>
