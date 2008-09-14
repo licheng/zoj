@@ -135,7 +135,8 @@ public class PerformanceManager {
 		} catch (SQLException e) {
 	    	throw new PersistenceException("Failed to save logs.", e);
 		} finally {
-	    	Database.dispose(conn, ps, null);
+	    	Database.dispose(ps);
+	    	Database.dispose(conn);
 	    }   
 	}
 	
@@ -263,7 +264,8 @@ public class PerformanceManager {
 		} catch (SQLException e) {
 	    	throw new PersistenceException("Failed to search logs.", e);
 		} finally {
-	    	Database.dispose(conn, ps, null);
+			Database.dispose(ps);
+	    	Database.dispose(conn);
 	    } 
 	}
 	public synchronized List<AccessLog> searchLogs(LogCriteria criteria, int offset, int count, String orderBy) throws PersistenceException {
@@ -298,7 +300,8 @@ public class PerformanceManager {
 		} catch (SQLException e) {
 	    	throw new PersistenceException("Failed to search logs.", e);
 		} finally {
-	    	Database.dispose(conn, ps, null);
+			Database.dispose(ps);
+	    	Database.dispose(conn);
 	    }   
 	}
 	
