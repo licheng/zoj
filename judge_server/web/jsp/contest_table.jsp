@@ -340,7 +340,7 @@ function checkLocalProblemFile(pform) {
                 <td align="right">Language List</td>
                 <td>
                     <%
-                        List allLanguages = PersistenceManager.getInstance().getContestPersistence().getAllLanguages();
+                        List allLanguages = PersistenceManager.getInstance().getLanguagePersistence().getAllLanguages();
                         Set selectedIds = new HashSet();
                         if (contestForm.getId() != null && contestForm.getLanguageIds() != null) {
                             selectedIds.addAll(Arrays.asList(contestForm.getLanguageIds()));
