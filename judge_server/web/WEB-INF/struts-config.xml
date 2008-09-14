@@ -144,6 +144,12 @@
             <forward name="failure" path="/show_dashboard.jsp" redirect="false"/>
         </action>
         
+        <action path="/showActionDashboard" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowActionDashboardAction"
+            validate="false" name="LogSearchForm" scope="request" input="/show_action_dashboard.jsp">
+            <forward name="success" path="/show_action_dashboard.jsp" redirect="false"/>
+            <forward name="failure" path="/show_action_dashboard.jsp" redirect="false"/>
+        </action>
+        
         <action path="/manageContests" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.CreateContestAction"
                 validate="true" name="ContestForm" scope="request" input="/manage_contests.jsp">
             <forward name="success" path="/contest_message.jsp" redirect="false"/>

@@ -19,7 +19,7 @@
                 <logic:present name="oj_security">
                 <logic:equal name="oj_security" property="superAdmin" value="true" scope="session">
                 | <a <logic:equal name="region" value="Admin">class="selected"</logic:equal>
-                href="<%=request.getContextPath()%>/showDashboard.do">Admin</a>
+                href="<%=request.getContextPath()%>/showActionDashboard.do">Admin</a>
                 </logic:equal>
                 </logic:present>
                 </div>

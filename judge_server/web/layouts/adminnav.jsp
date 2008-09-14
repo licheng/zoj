@@ -14,7 +14,7 @@
 
                 <logic:equal name="menuId" value="ConfigueSystem">
                 <tr><td class="<%="ShowDashBoard".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
-                    <a href="<%=request.getContextPath()%>/showDashboard.do">Dashboard</a>
+                    <a href="<%=request.getContextPath()%>/showActionDashboard.do">Dashboard</a>
                 </td></tr>
                 <tr><td class="<%="SystemParameters".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/systemParameters.do">System Parameters</a>
