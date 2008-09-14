@@ -120,7 +120,8 @@
             <tr>
                 <td align="right">Plan</td>             
                 <td>                                      
-                    <textarea name="plan" type="text"><logic:present name="ProfileForm"><bean:write name="ProfileForm" property="plan" /></logic:present></textarea>
+                    <textarea name="plan" cols="16" rows="4"><logic:present name="ProfileForm"><bean:write name="ProfileForm" property="plan" /></logic:present></textarea>
+                    (255 characters)
                 </td>
             </tr>
             <tr>

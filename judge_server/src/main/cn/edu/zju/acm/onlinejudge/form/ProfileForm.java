@@ -180,7 +180,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the handle.
      * 
-     * @prama handle the handle to set.
+     * @param handle the handle to set.
      */
     public void setHandle(String handle) {
         this.handle = handle;
@@ -198,7 +198,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the nick.
      * 
-     * @prama nick the nick to set.
+     * @param nick the nick to set.
      */
     public void setNick(String nick) {
         this.nick = nick;
@@ -216,7 +216,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the password.
      * 
-     * @prama password the password to set.
+     * @param password the password to set.
      */
     public void setPassword(String password) {
         this.password = password;
@@ -234,7 +234,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the confirmPassword.
      * 
-     * @prama confirmPassword the confirmPassword to set.
+     * @param confirmPassword the confirmPassword to set.
      */
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
@@ -252,7 +252,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the newPassword.
      * 
-     * @prama newPassword the newPassword to set.
+     * @param newPassword the newPassword to set.
      */
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
@@ -270,7 +270,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the email.
      * 
-     * @prama email the email to set.
+     * @param email the email to set.
      */
     public void setEmail(String email) {
         this.email = email;
@@ -288,9 +288,12 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the plan.
      * 
-     * @prama plan the email to set.
+     * @param plan the plan to set.
      */
     public void setPlan(String plan) {
+    	if (plan != null && plan.length() > 255) {
+    		plan = plan.substring(0, 255);
+    	}
         this.plan = plan;
     }
 
@@ -300,13 +303,13 @@ public class ProfileForm extends ActionForm implements Serializable {
      * @return the plan.
      */
     public String getPlan() {
-        return this.plan.trim();
+        return this.plan;
     }
 
     /**
      * Sets the firstName.
      * 
-     * @prama firstName the firstName to set.
+     * @param firstName the firstName to set.
      */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -324,7 +327,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the lastName.
      * 
-     * @prama lastName the lastName to set.
+     * @param lastName the lastName to set.
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
@@ -342,7 +345,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the birthday.
      * 
-     * @prama birthday the birthday to set.
+     * @param birthday the birthday to set.
      */
     public void setBirthday(String birthday) {
         this.birthday = birthday;
@@ -360,7 +363,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the gender.
      * 
-     * @prama gender the gender to set.
+     * @param gender the gender to set.
      */
     public void setGender(String gender) {
         this.gender = gender;
@@ -378,7 +381,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the addressLine1.
      * 
-     * @prama addressLine1 the addressLine1 to set.
+     * @param addressLine1 the addressLine1 to set.
      */
     public void setAddressLine1(String addressLine1) {
         this.addressLine1 = addressLine1;
@@ -396,7 +399,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the addressLine2.
      * 
-     * @prama addressLine2 the addressLine2 to set.
+     * @param addressLine2 the addressLine2 to set.
      */
     public void setAddressLine2(String addressLine2) {
         this.addressLine2 = addressLine2;
@@ -414,7 +417,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the state.
      * 
-     * @prama state the state to set.
+     * @param state the state to set.
      */
     public void setState(String state) {
         this.state = state;
@@ -432,7 +435,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the city.
      * 
-     * @prama city the city to set.
+     * @param city the city to set.
      */
     public void setCity(String city) {
         this.city = city;
@@ -450,7 +453,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the country.
      * 
-     * @prama country the country to set.
+     * @param country the country to set.
      */
     public void setCountry(String country) {
         this.country = country;
@@ -468,7 +471,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the zipCode.
      * 
-     * @prama zipCode the zipCode to set.
+     * @param zipCode the zipCode to set.
      */
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
@@ -486,7 +489,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the phone.
      * 
-     * @prama phone the phone to set.
+     * @param phone the phone to set.
      */
     public void setPhone(String phone) {
         this.phone = phone;
@@ -504,7 +507,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the school.
      * 
-     * @prama school the school to set.
+     * @param school the school to set.
      */
     public void setSchool(String school) {
         this.school = school;
@@ -522,7 +525,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the major.
      * 
-     * @prama major the major to set.
+     * @param major the major to set.
      */
     public void setMajor(String major) {
         this.major = major;
@@ -540,7 +543,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the studentNumber.
      * 
-     * @prama studentNumber the studentNumber to set.
+     * @param studentNumber the studentNumber to set.
      */
     public void setStudentNumber(String studentNumber) {
         this.studentNumber = studentNumber;
@@ -558,7 +561,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the graduationYear.
      * 
-     * @prama graduationYear the graduationYear to set.
+     * @param graduationYear the graduationYear to set.
      */
     public void setGraduationYear(String graduationYear) {
         this.graduationYear = graduationYear;
@@ -576,7 +579,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the graduateStudent.
      * 
-     * @prama graduateStudent the graduateStudent to set.
+     * @param graduateStudent the graduateStudent to set.
      */
     public void setGraduateStudent(boolean graduateStudent) {
         this.graduateStudent = graduateStudent;
@@ -603,7 +606,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the active.
      * 
-     * @prama active the graduateStudent to set.
+     * @param active the graduateStudent to set.
      */
     public void setActive(boolean active) {
         this.active = active;
@@ -612,7 +615,7 @@ public class ProfileForm extends ActionForm implements Serializable {
     /**
      * Sets the roles.
      * 
-     * @prama roles the roles to set.
+     * @param roles the roles to set.
      */
     public void setRoles(String[] roles) {
         this.roles = roles;
