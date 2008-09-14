@@ -106,6 +106,7 @@ public class EditProfileAction extends BaseAction {
 
         userPersistence.updateUserProfile(newProfile, profile.getId());
         UserPreference newPerference = profileForm.toUserPreference();
+        newPerference.setId(profile.getId());
         userPersistence.updateUserPreference(newPerference, profile.getId());
         context.setUserProfile(newProfile);
         context.getRequest().setAttribute("Countries",

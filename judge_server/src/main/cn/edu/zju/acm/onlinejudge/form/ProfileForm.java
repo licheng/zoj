@@ -854,7 +854,6 @@ public class ProfileForm extends ActionForm implements Serializable {
 
     public UserPreference toUserPreference() throws PersistenceException {
         UserPreference preference= new UserPreference();
-        perference.setId(profile.getId());
         perference.setPlan(this.plan);
         perference.setPostPaging(20); // TODO...
         perference.setProblemPaging(100);
