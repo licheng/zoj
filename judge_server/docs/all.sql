@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS access_log;
+DROP TABLE IF EXISTS user_ac;
 DROP TABLE IF EXISTS submission_status;
 DROP TABLE IF EXISTS user_contest_ip;
 
@@ -385,6 +387,39 @@ CREATE TABLE submission_status (
     problem_id          BIGINT          NOT NULL,   
     status              VARCHAR(32)     NULL  
 ) ENGINE = InnoDb;
+
+
+CREATE TABLE access_log (
+    access_log_id          BIGINT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    user_profile_id        BIGINT          NULL,
+    handle                 VARCHAR(32)     NULL,
+    action                 VARCHAR(128)    NOT NULL,
+    url                    VARCHAR(512)    NOT NULL,
+    ip                     VARCHAR(64)     NOT NULL,
+    timestamp              DATETIME        NOT NULL,
+    access_time             BIGINT          NOT NULL
+) ENGINE = InnoDb;
+
+CREATE INDEX index_access_log_timestamp
+        ON access_log (timestamp);
+
+CREATE TABLE user_ac (
+    user_profile_id     BIGINT          NOT NULL,
+    contest_id          BIGINT          NOT NULL,
+    solved              BIGINT          NOT NULL DEFAULT 0,
+    tiebreak            BIGINT          NULL,
+    PRIMARY KEY (user_profile_id, contest_id)   
+) ENGINE = InnoDb;
+
+ALTER TABLE user_ac
+    ADD CONSTRAINT fk_user_ac_user_profile FOREIGN KEY (user_profile_id)
+        REFERENCES user_profile (user_profile_id)
+        	ON DELETE RESTRICT;
+ALTER TABLE user_ac
+    ADD CONSTRAINT fk_user_ac_contest FOREIGN KEY (contest_id)
+        REFERENCES contest (contest_id)
+        	ON DELETE RESTRICT;
+
 
 ALTER TABLE user_contest_ip
     ADD CONSTRAINT fk_user_contest_ip_user_profile FOREIGN KEY (user_profile_id)
