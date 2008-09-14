@@ -31,7 +31,8 @@
         </logic:messagesPresent>
         <logic:messagesNotPresent property="error">
         <div id="content_title">
-        Action Logs
+        Action Logs | <span style="font-size:12px"><html:link action="showDashboard">Access Logs</html:link></span>
+        
         </div>
         <div id="content_body">
                 
@@ -94,11 +95,21 @@
                     
                     <%
                     List logs = (List) request.getAttribute("logs");
+                    long allCount = 0;
+                    long allAvg = 0;
+                    long allMin = Long.MAX_VALUE;
+                    long allMax = 0;
                     for (int i = 0; i < logs.size(); ++i) {
                          ActionLog log = (ActionLog) logs.get(i);
+                         allCount += log.getCount();
+                         allAvg += log.getAvgAccessTime() * log.getCount();
+                         allMin = Math.min(allMin, log.getMinAccessTime());
+                         allMax = Math.max(allMax, log.getMaxAccessTime());
+                         
                     %>
                     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">
-                        <td class="logAction"><%=log.getAction()%></td>
+                        <% p.put("action", log.getAction()); %>
+                        <td class="logAction"><html:link action="showDashboard" name="parameters"><%=log.getAction()%></html:link></td>
                         <td class="logAccessTime"><%=log.getCount()%></td>
                         <td class="logAccessTime"><%=log.getAvgAccessTime()%></td>
                         <td class="logAccessTime"><%=log.getMinAccessTime()%></td>
@@ -107,6 +118,13 @@
                     <%
                     }
                     %>
+                     <tr class="<%=logs.size() % 2 == 0 ? "rowOdd" : "rowEven"%>">
+                        <td class="logAction"><b>Summary</b></td>
+                        <td class="logAccessTime"><b><%=allCount%></b></td>
+                        <td class="logAccessTime"><b><%=allAvg / allCount%></b></td>
+                        <td class="logAccessTime"><b><%=allMin%></b></td>
+                        <td class="logAccessTime"><b><%=allMax%></b></td>
+                    </tr>
                 </table>
                 
                 </logic:notEmpty>

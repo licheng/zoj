@@ -16,6 +16,7 @@
 package cn.edu.zju.acm.onlinejudge.action;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.struts.action.ActionForm;
@@ -75,6 +76,9 @@ public class ShowDashboardAction extends BaseAction {
         }
 
         LogSearchForm searchForm = (LogSearchForm) form;
+        if (searchForm.getTimeStart() == null) {
+        	searchForm.setTimeStart(Utility.toTimestamp(new Date(System.currentTimeMillis() - 24 * 3600 * 1000)));
+        }
         ActionMessages errors = searchForm.check();
         if (errors.size() > 0) {
             context.setAttribute("logs", new ArrayList<AccessLog>());

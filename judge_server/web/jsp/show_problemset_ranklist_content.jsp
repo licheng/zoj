@@ -30,7 +30,7 @@
             <bean:write name="contest" property="title"/>
         </div>
         <div id="content_body">
-                <div align="center" style="width:400px">
+                <div align="center" >
                 <logic:present name="previousFrom">
                 <a href="<%=ranklistPath + request.getAttribute("previousFrom")%>">&lt;&lt;Previous</a>
                 </logic:present>

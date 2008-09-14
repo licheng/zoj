@@ -31,7 +31,7 @@
         </logic:messagesPresent>
         <logic:messagesNotPresent property="error">
         <div id="content_title">
-        Access Logs
+        <span style="font-size:12px"><html:link action="showActionDashboard">Action Logs</html:link></span> | Access Logs 
         </div>
         <div id="content_body">
                 
@@ -86,10 +86,19 @@
                 <font color="#777777">&lt;&lt;Previous</font>
                 <% 
                 }
-                p.put("page", String.valueOf(pageNumber + 1));
+                
                 %>
                 &nbsp;&nbsp;&nbsp;
+                <%
+                if (((List) request.getAttribute("logs")).size() >= 20) {
+                	p.put("page", String.valueOf(pageNumber + 1));
+                %>
                 <html:link action="showDashboard" name="parameters">Next&gt;&gt;</html:link>
+                <% } else  {%>
+                <font color="#777777">Next&gt;&gt;</font>
+                <% 
+                }
+                %>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Page: <bean:write name="page" />
                 </div>
                 

@@ -77,6 +77,9 @@ public class ShowActionDashboardAction extends BaseAction {
         }
         
         LogSearchForm searchForm = (LogSearchForm) form;
+        if (searchForm.getTimeStart() == null) {
+        	searchForm.setTimeStart(Utility.toTimestamp(new Date(System.currentTimeMillis() - 24 * 3600 * 1000)));
+        }
     	ActionMessages errors = searchForm.check();
     	if (errors.size() > 0) {
     		context.setAttribute("logs", new ArrayList<AccessLog>());
