@@ -30,6 +30,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
+import cn.edu.zju.acm.onlinejudge.bean.UserPreference;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Country;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
