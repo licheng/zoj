@@ -29,11 +29,9 @@
                 <tr><td class="<%="ContestRankList".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/showContestRankList.do?contestId=<bean:write name="contest" property="id"/>">Ranklist</a>
                 </td></tr>
-				<%--
                 <tr><td class="<%="Clarification".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
-                    <a href="http://acm.zju.edu.cn/forum/viewforum.php?f=10" target="_blank">Clarification</a>
+                    <a href="/forum/viewforum.php?f=2" target="_blank">Clarification</a>
                 </td></tr>
-				--%>
                 <logic:present name="oj_security">
                 
                 <%
