@@ -213,6 +213,8 @@ public class UserProfile {
      * </p>
      */
     private String lastLoginIP = null;
+    
+    private String oldEmail = null;
 
     /**
      * <p>
@@ -776,4 +778,12 @@ public class UserProfile {
     public void setLastLoginIP(String lastLoginIP) {
         this.lastLoginIP = lastLoginIP;
     }
+
+	public String getOldEmail() {
+		return oldEmail;
+	}
+
+	public void setOldEmail(String oldEmail) {
+		this.oldEmail = oldEmail;
+	}
 }

@@ -29,12 +29,16 @@ import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 public class EmailService {
 
     public static boolean sendPasswordEmail(UserProfile user, String resetUrl) throws Exception {
-
+    	
         EmailTemplate template = ConfigManager.getEmailTemplate("forgotPassword");
         Properties p = new Properties();
         p.setProperty("FIRST_NAME", user.getFirstName());
         p.setProperty("RESET_URL", resetUrl);
-        EmailService.sendEmail(user.getEmail(), template.getTitle(p), template.getContent(p));
+        String email = user.getEmail();
+        if (email.endsWith("@magicemailhost.com")) {
+        	email = user.getOldEmail();
+        }
+        EmailService.sendEmail(email, template.getTitle(p), template.getContent(p));
         return true;
     }
 

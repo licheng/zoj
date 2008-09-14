@@ -171,7 +171,7 @@ public class UserPersistenceImpl implements UserPersistence {
      */
     private static final String GET_USER =
             MessageFormat.format("SELECT  {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, "
-                + "{10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, " + "{19}, {20}, {21}, {22}, {23} FROM {24}",
+                + "{10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, " + "{19}, {20}, {21}, {22}, {23}, {24} FROM {25}",
                                  new Object[] {DatabaseConstants.USER_PROFILE_USER_PROFILE_ID,
                                                DatabaseConstants.USER_PROFILE_HANDLE,
                                                DatabaseConstants.USER_PROFILE_PASSWORD,
@@ -194,7 +194,7 @@ public class UserPersistenceImpl implements UserPersistence {
                                                DatabaseConstants.USER_PROFILE_GRADUATION_YEAR,
                                                DatabaseConstants.USER_PROFILE_STUDENT_NUMBER,
                                                DatabaseConstants.USER_PROFILE_CONFIRMED,
-                                               DatabaseConstants.USER_PROFILE_ACTIVE, "nickname",
+                                               DatabaseConstants.USER_PROFILE_ACTIVE, "nickname", "old_email",
                                                DatabaseConstants.USER_PROFILE_TABLE});
 
     /**
@@ -1155,6 +1155,7 @@ public class UserPersistenceImpl implements UserPersistence {
         profile.setConfirmed(rs.getBoolean(DatabaseConstants.USER_PROFILE_CONFIRMED));
         profile.setActive(rs.getBoolean(DatabaseConstants.USER_PROFILE_ACTIVE));
         profile.setNickName(rs.getString("nickname"));
+        profile.setOldEmail(rs.getString("old_email"));
         return profile;
     }
 }
