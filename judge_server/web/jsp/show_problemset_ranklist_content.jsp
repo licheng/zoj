@@ -49,6 +49,7 @@
                     <tr class="rowHeader" >
                         <td class="problemsetRanklistRank">Rank</td>
                         <td class="problemsetRanklistUser">Name</td>
+                        <td class="problemsetRanklistUser">Plan</td>
                         <td class="problemsetRanklistSolved">Solved</td>
                         <td class="problemsetRanklistSubmitted">Submitted</td>
                         <td class="problemsetRanklistACRatio">AC Ratio</td>
@@ -74,6 +75,7 @@
                         	users[i].getNickName() == null || users[i].getNickName().length() == 0
                         	  ? users[i].getHandle() : users[i].getNickName()
                         %></font></a></td>
+                        <td class="problemsetRanklistUser"><%=users[i].getAddressLine2()%></td>
                         <td class="problemsetRanklistSolved"><%=solved[i]%></td>
                         <td class="problemsetRanklistSubmitted"><%=total[i]%></td>
                         <td class="problemsetRanklistACRatio"><%=(new DecimalFormat("0.##")).format(100.0 * solved[i] / total[i])+"%"%></td>
