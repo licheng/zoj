@@ -67,7 +67,7 @@
                     List runs = statistics.getBestRuns();
                     if (runs != null && runs.size() > 0) {
                 %>
-                <div>Top Submssions by <font color="blue"><%="submittime".equals(orderBy) ? "Submit Time" : ("memory".equals(orderBy) ? "Run Memory" : "Run Time")%></font>
+                <div>Top Submssions by <font color="blue"><%="date".equals(orderBy) ? "Submit Time" : ("memory".equals(orderBy) ? "Run Memory" : "Run Time")%></font>
                 <table class="list">
                     <tr class="rowHeader">
                         <td class="runSubmitTime"><a href="<%=problemStatusPath%>&orderBy=date">Submit Time</a></td>
