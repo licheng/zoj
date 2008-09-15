@@ -3,7 +3,7 @@
 <div id="content_body">
 <hr>
 <font color=green>Q</font>:What is the compiler the judge is using and what are the compiler options?<br>
-<font color=red>A</font>:The online judge system is running on Linux. We are using <a href="http://gcc.gnu.org">GNU GCC/G++</a> for C/C++ compile and <a href="http://www.gnu-pascal.de">GPC</a>/<a href="http://www.freepascal.org">Free Pascal</a> for pascal compile. The compile options are:<br>
+<font color=red>A</font>:The online judge system is running on Linux. We are using <a href="http://gcc.gnu.org">GNU GCC/G++</a> for C/C++ compile and <a href="http://www.freepascal.org">Free Pascal</a> for pascal compile. The compile options are:<br>
 C: <font color=blue>gcc foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DONLINE_JUDGE</font><br>
 C++: <font color=blue>g++ foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DONLINE_JUDGE</font><br>
 Free Pascal(FPC): <font color=blue>fpc -Sd -O2 -Op2 -dONLINE_JUDGE</font><br>
@@ -53,7 +53,7 @@ int main()
 }
 </font>
 </pre>
-Here is a sample solution for problem 1001 using PASCAL(both GPC&FPC):<br>
+Here is a sample solution for problem 1001 using PASCAL(FPC):<br>
 <pre>
 <font color="20B000" size=5>
 program p1001(Input,Output); 
