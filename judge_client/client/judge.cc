@@ -367,10 +367,12 @@ int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsig
         return -1;
     }
     if (rename(tempDir.c_str(), revisionDir.c_str()) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to rename "<<tempDir<<" to "<<revisionDir;
-        SendReply(sock, INTERNAL_ERROR);
         system(StringPrintf("rm -rf '%s'", tempDir.c_str()).c_str());
-        return -1;
+        LOG(SYSCALL_ERROR)<<"Fail to rename "<<tempDir<<" to "<<revisionDir;
+        if (errno != ENOTEMPTY && errno != EEXIST) {
+            SendReply(sock, INTERNAL_ERROR);
+            return -1;
+        }
     }
     SendReply(sock, READY);
     return 0;

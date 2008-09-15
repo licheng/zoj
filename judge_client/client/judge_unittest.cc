@@ -799,6 +799,30 @@ TEST_F(ExecDataCommandTest, CheckDataFailure) {
     ASSERT_EQUAL(INVALID_INPUT, ReadLastUint32(fd_[0]));
 }
 
+TEST_F(ExecDataCommandTest, RenameFailureDirectoryExists) {
+    ASSERT_EQUAL(0, mkdir("prob/0", 0700));
+    ASSERT_EQUAL(0, mkdir("prob/0/0", 0700));
+    SendCommand();
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadLastUint32(fd_[0]));
+}
+
+TEST_F(ExecDataCommandTest, RenameFailureOther) {
+    ASSERT_EQUAL(0, mkdir("prob/0", 0700));
+    ASSERT_EQUAL(0, symlink("prob", "prob/0/0"));
+    SendCommand();
+
+    ASSERT_EQUAL(-1, Run());
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(INTERNAL_ERROR, ReadLastUint32(fd_[0]));
+}
+
 TEST_F(ExecDataCommandTest, Success) {
     SendCommand();
 
