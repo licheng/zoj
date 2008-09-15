@@ -552,6 +552,9 @@ public class ContestPersistenceImpl implements ContestPersistence {
      */
     private void populatesLanguages(Connection conn, List<AbstractContest> contests) throws SQLException,
             PersistenceException {
+        if (contests.size() == 0) {
+            return;
+        }
         Map<Long, Language> languageMap = PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
         PreparedStatement ps = null;
         try {
