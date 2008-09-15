@@ -25,7 +25,7 @@ namespace global {
     CompilerInfo COMPILER_LIST[4] = {
         {1, "gcc", "c"},
         {2, "g++", "cc"},
-        {3, "fp", "pas"},
+        {3, "fpc", "pas"},
         {4, "javac", "java"}
     };
     const int COMPILER_NUM = sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]);
