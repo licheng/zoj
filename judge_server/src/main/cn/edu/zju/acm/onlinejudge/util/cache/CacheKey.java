@@ -60,8 +60,9 @@ class CacheKey {
         }
         return this.key.equals(((CacheKey) obj).key);
     }
-
-    public int hashcode() {
+    
+    @Override
+    public int hashCode() {
         return this.key.hashCode();
     }
 }

@@ -73,7 +73,6 @@ public class ProblemManager {
                      * byte data[] = new byte[(int) entry.getSize()]; int l = 0; while (l < data.length) { int ll =
                      * zis.read(data, l, data.length - l); if (ll < 0) { break; } l += ll; }
                      */
-                    // System.out.println("zip ******* " + l);
                     ByteArrayOutputStream buf = new ByteArrayOutputStream();
                     CopyUtils.copy(zis, buf);
                     files.put(entry.getName(), buf.toByteArray());

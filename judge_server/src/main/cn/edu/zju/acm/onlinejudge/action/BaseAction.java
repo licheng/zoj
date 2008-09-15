@@ -327,7 +327,6 @@ public abstract class BaseAction extends Action {
                                           String parameter) {
         String newPath = mapping.findForward(forwardName).getPath() + parameter;
         ActionForward forward = new RedirectingActionForward(newPath);
-        System.out.print("*** " + newPath);
         return this.handleSuccess(forward, context, forwardName);
     }
 

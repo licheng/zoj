@@ -130,17 +130,13 @@ public class EditProblemAction extends BaseAction {
         ReferencePersistence referencePersistence = PersistenceManager.getInstance().getReferencePersistence();
         List<Reference> references = referencePersistence.getProblemReferenceInfo(problemId, type);
         if (references.size() > 0) {
-            System.out.println(references.size());
             context.setAttribute(typeKey, references.get(0));
         }
     }
 
     private void updateReference(ReferenceType type, FormFile formFile, long problemId, long user) throws Exception {
-        /*
-         * System.out.println(type.getDescription()); if (formFile == null) { System.out.println("null"); } else {
-         * System.out.println(formFile.getFileName()); System.out.println(formFile.getFileSize()); }
-         */
-        if (formFile == null || formFile.getFileName() == null || formFile.getFileName().trim().length() == 0) {
+
+    	if (formFile == null || formFile.getFileName() == null || formFile.getFileName().trim().length() == 0) {
             return;
         }
 

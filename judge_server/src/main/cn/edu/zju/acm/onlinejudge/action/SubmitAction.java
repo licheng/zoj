@@ -35,6 +35,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
 import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
+import cn.edu.zju.acm.onlinejudge.util.cache.Cache;
 
 /**
  * <p>
@@ -47,6 +48,15 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  */
 public class SubmitAction extends BaseAction {
 
+	private static Cache<Long> submitCache = null;
+	
+	static {
+		long interval = Utility.parseLong(ConfigManager.getValue("submit_interval"));
+		if (interval > 0) {
+			submitCache = new Cache<Long>(interval, Integer.MAX_VALUE);
+		}
+	}
+	
     /**
      * <p>
      * Default constructor.
@@ -100,11 +110,9 @@ public class SubmitAction extends BaseAction {
             return this.handleSuccess(mapping, context, "submit");
         }
         
-        Long lastSubmitDate = (Long) context.getSessionAttribute("last_submit");
-        long now = System.currentTimeMillis();
-        long submitInterval = Long.parseLong(ConfigManager.getValue("submit_interval"));
         
-        if (lastSubmitDate != null && now - lastSubmitDate < submitInterval) {
+        UserProfile user = context.getUserProfile();
+        if (submitCache != null && submitCache.contains(user.getId())) {
         	 
         	ActionMessages messages = new ActionMessages();       
             messages.add("message", new ActionMessage("onlinejudge.submit.interval"));
@@ -114,7 +122,6 @@ public class SubmitAction extends BaseAction {
             
         	return handleSuccess(mapping, context, "submit");
         }
-        context.setSessionAttribute("last_submit", now);
         
         if (contest.isCheckIp()) {
             forward = this.checkLastLoginIP(mapping, context, isProblemset);
@@ -122,7 +129,6 @@ public class SubmitAction extends BaseAction {
                 return forward;
             }
         }
-        UserProfile user = context.getUserProfile();
         Submission submission = new Submission();
         submission.setContestId(contest.getId());
         submission.setLanguage(language);
@@ -147,6 +153,9 @@ public class SubmitAction extends BaseAction {
             JudgeService.getInstance().judge(submission, Priority.NORMAL);
         }
         context.setAttribute("submissionId", submission.getId());
+        if (submitCache != null) {
+        	submitCache.put(user.getId(), user.getId());
+        }
         return this.handleSuccess(mapping, context, "success");
 
     }

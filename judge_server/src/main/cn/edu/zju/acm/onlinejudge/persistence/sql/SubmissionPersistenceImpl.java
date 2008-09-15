@@ -646,7 +646,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             index = defaultIndex;
         }
         String queryString = query.toString().replace("FORCE_INDEX", "USE INDEX (" + index + ")");
-        System.out.println(queryString);
         return conn.prepareStatement(queryString);
     }
 
@@ -860,7 +859,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                         SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART +
                         " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";
             sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_user_reply_contest)");
-            System.out.println(sql);
             List<Problem> solved = new ArrayList<Problem>();
             try {
                 ps = conn.prepareStatement(sql);
@@ -1025,7 +1023,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                     SubmissionPersistenceImpl.GET_SUBMISSIONS + " AND s.problem_id=? AND s.judge_reply_id=? ORDER BY " +
                         ob + " LIMIT " + count;
             sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_problem_reply)");
-            System.out.println(sql);
             try {
                 ps = conn.prepareStatement(sql);
                 ps.setLong(1, problemId);

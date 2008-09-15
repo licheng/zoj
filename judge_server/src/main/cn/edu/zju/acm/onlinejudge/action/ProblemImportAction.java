@@ -19,7 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.io.CopyUtils;
@@ -31,8 +30,6 @@ import org.apache.struts.action.ActionMessages;
 import org.apache.struts.upload.FormFile;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
-import cn.edu.zju.acm.onlinejudge.bean.Limit;
-import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.Reference;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
 import cn.edu.zju.acm.onlinejudge.form.ProblemImportForm;
@@ -218,64 +215,6 @@ public class ProblemImportAction extends BaseAction {
         ref.setSize(data.length);
 
         referencePersistence.createProblemReference(problemId, ref, user);
-    }
-
-    private static void seePackage(ProblemPackage p, ActionMessages m) {
-        if (m.size() > 0) {
-            for (Iterator it = m.properties(); it.hasNext();) {
-                String key = (String) it.next();
-                if (key.startsWith("Line ")) {
-                    for (Iterator it2 = m.get(key); it2.hasNext();) {
-                        ActionMessage o = (ActionMessage) it2.next();
-                        String line = key + " - " + o.getKey();
-                        System.out.println(line);
-                    }
-                } else {
-                    System.out.println(key);
-                }
-            }
-            return;
-        }
-        ProblemEntry[] e = p.getProblemEntries();
-        for (int i = 0; i < e.length; ++i) {
-            Problem pp = e[i].getProblem();
-            System.out.println(pp.getCode() + ", " + pp.getTitle() + ", " + pp.isChecker());
-            Limit l = pp.getLimit();
-            if (l != null) {
-                System.out.println(l.getTimeLimit() + ", " + l.getMemoryLimit() + ", " + l.getOutputLimit() + ", " +
-                    l.getSubmissionLimit());
-            }
-            System.out.println(pp.getAuthor() + ", " + pp.getSource() + ", " + pp.getContest());
-            /*
-             * System.out.println("checker - " + (e[i].getChecker() == null ? "null" : new String(e[i].getChecker())));
-             * System.out.println("input - " + (e[i].getInput() == null ? "null" : new String(e[i].getInput())));
-             * System.out.println("output - " + (e[i].getOutput() == null ? "null" : new String(e[i].getOutput())));
-             */
-        }
-        System.out.println("-=Images=-");
-        for (Iterator<String> it = p.getImages().keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
-            System.out.println(key + ": " + new String(p.getImages().get(key)));
-        }
-        System.out.println("-----------------");
-    }
-
-    public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            System.out.println("ProblemImportAction cid file_path");
-            return;
-        }
-        long cid = Long.parseLong(args[0]);
-        String path = args[1];
-        ActionMessages messages = new ActionMessages();
-        ProblemPackage pack = ProblemManager.importProblem(new FileInputStream(path), messages);
-        if (messages.size() == 0) {
-            ProblemImportAction.createProblems(pack, cid);
-        } else {
-            ProblemImportAction.seePackage(pack, messages);
-        }
-
-        System.out.println("success");
     }
 
 }

@@ -120,11 +120,6 @@ public class ShowProblemsAction extends BaseAction {
         context.setAttribute("UserStatistics", userStatistics);
         context.setAttribute("totalPages", new Long(totalPages));
         context.setAttribute("currentPage", new Long(pageNumber));
-        System.out.println(problems.size());
-        System.out.println(contestStatistics);
-        System.out.println(userStatistics);
-        System.out.println(pageNumber);
-        System.out.println(totalPages);
         if (this.checkContestAdminPermission(mapping, context, isProblemset, true) == null &&
             "true".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
             List<String> checkMessages = new ArrayList<String>();

@@ -78,11 +78,9 @@ public class ImageManager {
     private byte[] getImageFile(String name) {
 
         File file = new File(ConfigManager.getImagePath(), name);
-        System.out.println("**" + name);
         FileInputStream in = null;
         try {
             if (!file.isFile() || !file.canRead()) {
-                System.out.println("**fail");
                 return null;
             }
 

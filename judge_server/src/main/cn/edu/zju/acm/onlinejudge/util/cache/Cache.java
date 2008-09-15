@@ -130,9 +130,8 @@ public class Cache<T> {
         if (obj == null) {
             throw new IllegalArgumentException("key is null");
         }
-        CacheKey key = new CacheKey(obj);
         synchronized (this.entries) {
-            return this.entries.containsKey(key);
+            return this.entries.containsKey(obj);
         }
     }
 
@@ -146,7 +145,7 @@ public class Cache<T> {
             if (key1.getLastAccessTime() < key2.getLastAccessTime()) {
                 return -1;
             } else if (key1.getLastAccessTime() == key2.getLastAccessTime()) {
-                return key1.hashcode() - key2.hashcode();
+                return key1.hashCode() - key2.hashCode();
             } else {
                 return 1;
             }
@@ -158,7 +157,7 @@ public class Cache<T> {
             if (key1.getEvictionTime() < key2.getEvictionTime()) {
                 return -1;
             } else if (key1.getLastAccessTime() == key2.getLastAccessTime()) {
-                return key1.hashcode() - key2.hashcode();
+                return key1.hashCode() - key2.hashCode();
             } else {
                 return 1;
             }
@@ -177,13 +176,11 @@ public class Cache<T> {
         public void run() {
             while (!this.quitFlag) {
 
-                Cache.this.see("cleaner - before");
                 long now = System.currentTimeMillis();
                 synchronized (Cache.this.entries) {
                     for (Iterator<CacheKey> it = Cache.this.evictionQueue.iterator(); it.hasNext();) {
                         CacheKey key = it.next();
                         if (key.getEvictionTime() < now) {
-                            Cache.this.see("cleaning - " + key.getKey());
                             it.remove();
                             Cache.this.evictionQueue.remove(key);
                             Cache.this.entries.remove(key.getKey());
@@ -192,7 +189,6 @@ public class Cache<T> {
                         }
                     }
                 }
-                Cache.this.see("cleaner - after");
                 try {
                     Thread.sleep(Cache.SLEEP_TIME);
                 } catch (Exception e) {
@@ -205,23 +201,5 @@ public class Cache<T> {
             this.quitFlag = true;
         }
 
-    }
-
-    private long start = System.currentTimeMillis();
-
-    public void see(String message) {
-        if (true) {
-            return;
-        }
-        System.out.println(message + " " + (System.currentTimeMillis() - this.start));
-        synchronized (this.entries) {
-            for (Object key : this.entries.keySet()) {
-                CacheEntry<T> value = this.entries.get(key);
-                System.out.print(key + "(" + (value.getKey().getEvictionTime() - this.start) + "," +
-                    (value.getKey().getLastAccessTime() - this.start) + ") - ");
-                System.out.println(value.getEntry());
-            }
-        }
-        System.out.println("-------------");
     }
 }
