@@ -41,6 +41,14 @@
 #include <linux/string.h>
 
 static void ** orig_syscall_table;
+struct mmap_arg_struct {
+    unsigned long addr;
+    unsigned long len;
+    unsigned long prot;
+    unsigned long flags;
+    unsigned long fd;
+    unsigned long offset;
+};
 
 asmlinkage long (*old_ni_syscall)(void);
 asmlinkage int (*old_clone)(struct pt_regs);
@@ -49,8 +57,7 @@ asmlinkage int (*old_vfork)(struct pt_regs);
 asmlinkage unsigned long (*old_brk)(unsigned long);
 asmlinkage void* (*old_mmap2)(void *start, size_t length, int prot,
                               int flags, int fd, off_t pgoffset);
-asmlinkage void* (*old_mmap)(void *start, size_t length, int prot,
-                             int flags, int fd, off_t offset);
+asmlinkage void* (*old_mmap)(struct mmap_arg_struct __user *arg);
 
 /* struct for idt entry */
 struct idt{
@@ -269,7 +276,7 @@ DEFINE_CLONE(fork);
 
 DEFINE_CLONE(vfork);
 
-__always_inline int mmap_allowed(int flags, size_t length) {
+int mmap_allowed(int flags, size_t length) {
     if ((current->flags & KMMON_MASK) && (flags & MAP_ANONYMOUS)) {
         int allow = 1;
         unsigned long* mem_limit;
@@ -293,12 +300,12 @@ __always_inline int mmap_allowed(int flags, size_t length) {
     return 1;
 }
 
-asmlinkage void* kmmon_mmap(void *start, size_t length, int prot,
-                            int flags, int fd, off_t offset) {
-    if (!mmap_allowed(flags, length)) {
+asmlinkage void* kmmon_mmap(struct mmap_arg_struct __user *arg) {
+    struct mmap_arg_struct a;
+    if (copy_from_user(&a, arg, sizeof(a)) && !mmap_allowed(a.flags, a.len)) {
         return (void*)-1;
     }
-    return old_mmap(start, length, prot, flags, fd, offset);
+    return old_mmap(arg);
 }
 
 asmlinkage void* kmmon_mmap2(void *start, size_t length, int prot,
