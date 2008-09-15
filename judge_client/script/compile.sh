@@ -11,7 +11,7 @@ case $1 in
     g++)
         g++ -o $bin -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $src >/dev/null
         ;;
-    fp)
+    fpc)
         fpc -o$bin -Fe"/proc/self/fd/2" -Sd -dONLINE_JUDGE -O2 -Op2 $src >/dev/null
         if [ -f $bin ]; then
             exit 0
