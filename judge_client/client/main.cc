@@ -43,7 +43,7 @@ DEFINE_ARG(int, queue_port, "The port of the queue service to which this client 
 
 DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to stderr as well");
 
-DEFINE_OPTIONAL_ARG(int, max_judge_process, 5, "The maximal number of judge processes");
+DEFINE_OPTIONAL_ARG(int, max_judge_process, 50, "The maximal number of judge processes");
 
 void Daemonize() {
     umask(0);
