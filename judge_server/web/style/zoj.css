@@ -745,6 +745,11 @@ A:hover		{ COLOR: red; TEXT-DECORATION: none }
     width: 120px;
 }
 
+.problemsetRanklistPlan
+{
+    padding: 0 8 0 8;
+    text-align: center;
+}
 
 .problemsetRanklistSolved
 {

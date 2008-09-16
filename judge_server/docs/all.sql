@@ -7,9 +7,6 @@ DROP TABLE IF EXISTS contest_reference;
 DROP TABLE IF EXISTS problem_reference;
 DROP TABLE IF EXISTS forum_reference;
 
-DROP TABLE IF EXISTS problem_stat;
-DROP TABLE IF EXISTS user_stat;
-
 DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS user_preference;
 DROP TABLE IF EXISTS confirmation;
@@ -49,22 +46,6 @@ CREATE TABLE country (
     create_date         DATETIME        NOT NULL,
     last_update_user    BIGINT          NOT NULL,
     last_update_date    DATETIME        NOT NULL
-) ENGINE = InnoDb;
-
-CREATE TABLE user_stat (
-    user_id          BIGINT          NOT NULL,
-    contest_id       BIGINT          NOT NULL,
-	ac_number         BIGINT          NOT NULL,
-    submission_number    BIGINT          NOT NULL,
-    PRIMARY KEY(user_id,contest_id)
-) ENGINE = InnoDb;
-
-CREATE TABLE problem_stat (
-    problem_id          BIGINT          NOT NULL,
-    judge_reply_id       BIGINT          NOT NULL,
-
-    count         BIGINT          NOT NULL DEFAULT 0,
-    PRIMARY KEY(problem_id,judge_reply_id)
 ) ENGINE = InnoDb;
 
 CREATE TABLE user_profile (
@@ -987,9 +968,6 @@ NOW(), 'M', NULL, NULL, 0, NULL, NULL, 1, 1, 1, 1, NOW(), 1, NOW());
 INSERT INTO user_preference(user_profile_id, plan, problem_paging, submission_paging, status_paging, user_paging, post_paging, thread_paging, create_user, create_date, last_update_user, last_update_date)
 VALUES(1, '', 100, 20, 20, 20, 20, 20, 1, NOW(), 1, NOW());
 
-DROP TRIGGER IF EXISTS submission_ai;
-DROP TRIGGER IF EXISTS submission_au;
-DROP TRIGGER IF EXISTS problem_ai;
 
 DELIMITER |
 CREATE TRIGGER submission_ai

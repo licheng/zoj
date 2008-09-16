@@ -60,8 +60,8 @@ public class StatisticsManager {
      */
     private StatisticsManager() throws PersistenceCreationException {
         // TODO
-        this.contestStatisticsCache = new Cache<ContestStatistics>(10000, 20);
-        this.problemStatisticsCache = new Cache<ProblemStatistics>(10000, 20);
+        this.contestStatisticsCache = new Cache<ContestStatistics>(20000, 20);
+        this.problemStatisticsCache = new Cache<ProblemStatistics>(20000, 50);
         this.ranklistCache = new Cache<RankList>(10000, 20);
         this.problemsetRanklistCache = new Cache<ProblemsetRankList>(30000, 20);
         this.solvedCache = new Cache<UserStatistics>(10000, 50);

@@ -49,7 +49,7 @@
                     <tr class="rowHeader" >
                         <td class="problemsetRanklistRank">Rank</td>
                         <td class="problemsetRanklistUser">Name</td>
-                        <td class="problemsetRanklistUser">Plan</td>
+                        <td class="problemsetRanklistPlan">Plan</td>
                         <td class="problemsetRanklistSolved">Solved</td>
                         <td class="problemsetRanklistSubmitted">Submitted</td>
                         <td class="problemsetRanklistACRatio">AC Ratio</td>
@@ -77,7 +77,7 @@
                             ? users[i].getHandle() : users[i].getNickName();
                             request.setAttribute("nickname", nickname);
                         %><bean:write name="nickname"/></font></a></td>
-                        <td class="problemsetRanklistUser"><%
+                        <td class="problemsetRanklistPlan"><%
                         String plan = (users[i].getDeclaration() == null) ? "" : users[i].getDeclaration();
                             request.setAttribute("plan", plan);
                         %><bean:write name="plan"/></td>
