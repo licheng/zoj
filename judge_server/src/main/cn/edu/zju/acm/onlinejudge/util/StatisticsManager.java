@@ -217,7 +217,7 @@ public class StatisticsManager {
                 iter = (JudgingQueueIterator) pair[0];
                 submissions = (List<Submission>) pair[1];
             } else {
-                iter = JudgeService.getInstance().getJudgingView();
+                iter = JudgeService.getInstance().getJudgingQueueIterator();
                 submissions =
                         PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(criteria,
                                                                                                       firstId, lastId,

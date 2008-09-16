@@ -42,7 +42,7 @@ import cn.edu.zju.acm.onlinejudge.bean.Submission;
  * 
  * 
  * @author Xu, Chuan
- * 
+ * @version 1.0
  */
 class JudgingQueue {
 
@@ -104,7 +104,7 @@ class JudgingQueue {
         this.head = node;
     }
 
-    public JudgingQueueIterator getJudingView() {
+    public JudgingQueueIterator iterator() {
         return new JudgingQueueIteratorImpl(this.head);
     }
 

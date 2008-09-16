@@ -107,8 +107,8 @@ public class JudgeService extends Thread {
         }
     }
 
-    public JudgingQueueIterator getJudgingView() {
-        return this.judgingQueue.getJudingView();
+    public JudgingQueueIterator getJudgingQueueIterator() {
+        return this.judgingQueue.iterator();
     }
 
     public SubmissionFilter getSubmissionFilter() {
