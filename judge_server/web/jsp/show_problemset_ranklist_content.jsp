@@ -16,7 +16,7 @@
 <%
     
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
-    String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";    
+    String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";    
     String ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
       
 %>
