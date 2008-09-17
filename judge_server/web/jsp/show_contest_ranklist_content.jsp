@@ -20,7 +20,7 @@
     	List roles = ranklist.getRoles();
     	RoleSecurity role = ranklist.getRole();
     	AbstractContest contest = (AbstractContest) request.getAttribute("contest");
-        String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";    
+        String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";    
     	 
 %>
         <logic:messagesPresent property="error">

@@ -26,7 +26,7 @@
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
     boolean canViewSource = (userSecurity != null && userSecurity.canViewSource(contest.getId()));
-    String userStatusPath = request.getContextPath() + "/showUserStatus.do?contestId=" + contest.getId() + "&userId=";
+    String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";
     SubmissionSearchForm searchForm = (SubmissionSearchForm) request.getAttribute("SubmissionSearchForm");
     
 %>
