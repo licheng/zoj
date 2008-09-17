@@ -26,6 +26,7 @@ import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.UserPreference;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
+import cn.edu.zju.acm.onlinejudge.persistence.ProblemPersistence;
 import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
@@ -297,8 +298,9 @@ public class ContextAdapter {
 			ProblemCriteria pc=new ProblemCriteria();
 			pc.setContestId(new Long(ConfigManager.getDefaultProblemSetId()));
 			pc.setCode(stringCode);
-            List problems=ContestManager.getInstance().searchProblems(pc,0,1);
-			
+            
+			ProblemPersistence problemPersistence = PersistenceManager.getInstance().getProblemPersistence();
+            List problems = problemPersistence.searchProblems(pc, 0,1);
 			if(problems.size()!=0)
 			{
 				problemId = ((Problem)(problems.get(0))).getId();
