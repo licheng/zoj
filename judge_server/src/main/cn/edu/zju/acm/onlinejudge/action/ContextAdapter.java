@@ -294,7 +294,6 @@ public class ContextAdapter {
         String stringId = this.request.getParameter("problemId");
         if(stringCode!=null)
         {
-			int problemindex=Integer.parseInt(stringCode)-1001;
 			ProblemCriteria pc=new ProblemCriteria();
 			pc.setContestId(new Long(ConfigManager.getDefaultProblemSetId()));
 			pc.setCode(stringCode);

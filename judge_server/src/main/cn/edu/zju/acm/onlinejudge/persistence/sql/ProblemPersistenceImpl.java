@@ -511,6 +511,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
         }
         sb.append(" ORDER BY " + DatabaseConstants.PROBLEM_CODE);
         sb.append(" LIMIT " + offset + "," + count);
+        System.out.println(sb.toString());
         return sb.toString();
     }
 }
