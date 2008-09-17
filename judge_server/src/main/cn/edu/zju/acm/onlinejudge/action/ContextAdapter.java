@@ -293,9 +293,12 @@ public class ContextAdapter {
         String stringId = this.request.getParameter("problemId");
         if(stringCode!=null)
         {
-			long problemindex=Long.parseLong(stringCode)-1001;
-			stringId = ((Problem)(ContestManager.getInstance().getContestProblems(
-			ConfigManager.getDefaultProblemSetId()).get(problemindex))).getId().toString();
+			int problemindex=Integer.parseInt(stringCode)-1001;
+			if(problemindex>=0)
+			{
+				stringId = ((Problem)(ContestManager.getInstance().getContestProblems(
+				ConfigManager.getDefaultProblemSetId()).get(problemindex))).getId().toString();
+			}
         }
         this.setAttribute("problemId", stringId);
         if (stringId != null) {
