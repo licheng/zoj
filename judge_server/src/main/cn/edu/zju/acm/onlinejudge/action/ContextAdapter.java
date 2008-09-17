@@ -296,7 +296,7 @@ public class ContextAdapter {
         {
 			int problemindex=Integer.parseInt(stringCode)-1001;
 			ProblemCriteria pc=new ProblemCriteria();
-			pc.setContestId(new Long(getContest().getId()));
+			pc.setContestId(new Long(ConfigManager.getDefaultProblemSetId()));
 			pc.setCode(stringCode);
             List problems=ContestManager.getInstance().searchProblems(pc,0,1);
 			
