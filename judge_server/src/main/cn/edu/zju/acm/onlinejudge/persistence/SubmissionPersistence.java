@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Zhang, Zheng <oldbig@gmail.com>
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com> Xu, Chuan <xuchuan@gmail.com>
  * 
  * This file is part of ZOJ.
  * 
@@ -32,8 +32,9 @@ import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
  * SubmissionPersistence interface defines the API used to manager the submission related affairs in persistence layer.
  * </p>
  * 
- * @version 2.0
  * @author Zhang, Zheng
+ * @author Xu, Chuan
+ * @version 1.0
  */
 public interface SubmissionPersistence {
 
@@ -131,4 +132,6 @@ public interface SubmissionPersistence {
     List<QQ> searchQQs(long contestId) throws PersistenceException;
 
     String getSubmissionSource(long id) throws PersistenceException;
+
+    List<Submission> getQueueingSubmissions(long maxSubmissionId, int count) throws PersistenceException;
 }

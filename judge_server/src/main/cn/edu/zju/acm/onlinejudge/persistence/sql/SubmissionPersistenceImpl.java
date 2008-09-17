@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Zhang, Zheng <oldbig@gmail.com> Xu, Chuan <xuchuan@gmail.com>
+ * Copyright 2007 Zhang, Zheng <oldbig@gmail.com> Chen, Zhengguang <cerrorism@gmail.com> Xu, Chuan <xuchuan@gmail.com>
  * 
  * This file is part of ZOJ.
  * 
@@ -59,7 +59,7 @@ import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
  * @version 2.0
  * @author Zhang, Zheng
  * @author Xu, Chuan
- * @author Chen, zhengguang
+ * @author Chen, Zhengguang
  */
 public class SubmissionPersistenceImpl implements SubmissionPersistence {
 
@@ -573,7 +573,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             lastId = criteria.getIdEnd() + 1;
         }
 
-        StringBuffer query = new StringBuffer();
+        StringBuilder query = new StringBuilder();
         query.append(perfix);
         query.append(" AND s.contest_id=" + criteria.getContestId());
         query.append(" AND contest_order BETWEEN " + (firstId + 1) + " and " + (lastId - 1));
@@ -1051,6 +1051,52 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             }
         } catch (SQLException e) {
             throw new PersistenceException("Failed to get the QQs", e);
+        } finally {
+            Database.dispose(conn);
+        }
+    }
+
+    @Override
+    public List<Submission> getQueueingSubmissions(long maxSubmissionId, int count) throws PersistenceException {
+        Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            if (maxSubmissionId < 0) {
+                ps = conn.prepareStatement("SELECT MAX(submission_id) FROM submission;");
+                try {
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    maxSubmissionId = rs.getLong(1);
+                } finally {
+                    Database.dispose(ps);
+                }
+            }
+            StringBuilder query =
+                    new StringBuilder(SubmissionPersistenceImpl.GET_SUBMISSIONS_WITH_CONTENT.replace("FORCE_INDEX", ""));
+            query.append(" AND s.judge_reply_id=");
+            query.append(JudgeReply.QUEUING.getId());
+            query.append(" AND s.submission_id<=");
+            query.append(maxSubmissionId);
+            query.append(" ORDER BY s.submission_id DESC LIMIT ");
+            query.append(count);
+            System.out.println(query.toString());
+            ps = conn.prepareStatement(query.toString());
+            try {
+                ResultSet rs = ps.executeQuery();
+                List<Submission> submissions = new ArrayList<Submission>();
+                Map<Long, Language> languageMap =
+                        PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
+                while (rs.next()) {
+                    Submission submission = this.populateSubmission(rs, true, languageMap);
+                    submissions.add(submission);
+                }
+                return submissions;
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get queueing submissions", e);
         } finally {
             Database.dispose(conn);
         }

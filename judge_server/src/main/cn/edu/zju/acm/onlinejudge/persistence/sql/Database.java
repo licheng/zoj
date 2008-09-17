@@ -66,7 +66,6 @@ public class Database {
         try {
             Properties properties = new Properties();
             try {
-                // properties.load(new FileInputStream("D:\\work\\workspace\\zoj2dev\\conf\\data_source.properties"));
                 properties.load(Database.class.getClassLoader().getResourceAsStream(Database.CONFIG_FILE));
             } catch (IOException ioe) {
                 throw new PersistenceException("IO error occurs when load " + Database.CONFIG_FILE + ".", ioe);

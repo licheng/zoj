@@ -239,10 +239,8 @@ public class StatisticsManager {
             Submission submission = submissions.get(i);
             Submission t = submissionMap.get(submission.getId());
             if (t != null) {
-                submission.setTimeConsumption(t.getTimeConsumption());
-                submission.setMemoryConsumption(t.getMemoryConsumption());
-                submission.setJudgeComment(t.getJudgeComment());
-                submission.setJudgeReply(t.getJudgeReply());
+                // CAVEAT: t.content can be set to null in JudgeClientJudgeThread.process.
+                submissions.set(i, t);
             }
         }
         return submissions;
