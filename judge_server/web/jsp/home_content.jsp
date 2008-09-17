@@ -1,27 +1,12 @@
 <%@ page contentType="text/html; charset=utf-8" language="java" %>
-<%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
 
-<%
-                String path = ConfigManager.getValue("home_page_content");
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
-                String data = null;
-		while((data = br.readLine())!=null)
-		{
-			out.print(data); 
-		}
-%>
-        <div id="content_title">ZOJ News</div>
-        <div id="content_body">
-                    2007.4.5<br>
-                    <font size=4 color=red>HOT!!</font> <a href="<%=request.getContextPath()%>/showContests.do"><font size=4>The 7th Zhejiang University Programming Contest</font></a><br>
-                    Click <a href="<%=request.getContextPath()%>/showContests.do">here</a> to see the contests.
-                    <br>
-                    <br>
-
-                    2007.3.18<br>
-                    <font size=4 color=blue>ZOJ 2.0 Alpha2 released.</font><br>
-                    Please report bugs to <a href="mailto:zojdev@gmail.com"><font color="blue">zojdev@gmail.com</font></a>. And we also appreciate any feedback and suggestion. <br>
-                    Thank you very much.<br>
-                    <br>
-               
-       </div>
+<div id="content_title">
+    ZOJ News</div>
+<div id="content_body">
+    <p>
+        2008.9.17<br>
+        We've upgrated and migrated to the new server.<br>
+        The system is still under test, please report any bug you found <a href="/forum/viewforum.php?f=8">
+            here</a>.
+    </p>
+</div>
