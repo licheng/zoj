@@ -120,7 +120,7 @@ public interface SubmissionPersistence {
 
     List<RankListEntry> getRankList(List<Problem> problems, long contestStartDate, long roleId) throws PersistenceException;
 
-    ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count) throws PersistenceException;
+    ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count, String sort) throws PersistenceException;
 
     UserStatistics getUserStatistics(long contestId, long userId) throws PersistenceException;
 

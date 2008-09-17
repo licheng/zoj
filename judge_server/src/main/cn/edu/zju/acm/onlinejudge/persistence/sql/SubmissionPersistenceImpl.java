@@ -59,6 +59,7 @@ import cn.edu.zju.acm.onlinejudge.util.UserStatistics;
  * @version 2.0
  * @author Zhang, Zheng
  * @author Xu, Chuan
+ * @author Chen, zhengguang
  */
 public class SubmissionPersistenceImpl implements SubmissionPersistence {
 
@@ -799,17 +800,27 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }
     }
 
-    public ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count) throws PersistenceException {
+    public ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count, String sort) throws PersistenceException {
         Connection conn = null;
         try {
             conn = Database.createConnection();
             PreparedStatement ps = null;
-            String sql =
+            String sql=null;
+            if(sort.equalsIgnoreCase("submit")){
+				sql =
+                    "SELECT u.user_profile_id, u.handle, u.nickname, up.plan, ua.solved, ua.tiebreak " +
+                        "FROM user_ac ua " + "LEFT JOIN user_profile u ON ua.user_profile_id = u.user_profile_id " +
+                        "LEFT JOIN user_preference up ON ua.user_profile_id = up.user_profile_id " +
+                        "WHERE contest_id=? ORDER BY ua.tiebreak DESC, ua.solved DESC " + "LIMIT " + offset + "," +
+                        count;
+            } else {
+				sql =
                     "SELECT u.user_profile_id, u.handle, u.nickname, up.plan, ua.solved, ua.tiebreak " +
                         "FROM user_ac ua " + "LEFT JOIN user_profile u ON ua.user_profile_id = u.user_profile_id " +
                         "LEFT JOIN user_preference up ON ua.user_profile_id = up.user_profile_id " +
                         "WHERE contest_id=? ORDER BY ua.solved DESC, ua.tiebreak ASC " + "LIMIT " + offset + "," +
                         count;
+            }
             List<UserProfile> users = new ArrayList<UserProfile>();
             List<Integer> solved = new ArrayList<Integer>();
             List<Integer> total = new ArrayList<Integer>();

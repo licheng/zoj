@@ -16,9 +16,15 @@
 <%
     
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
-    String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";    
-    String ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
-      
+    String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";  
+    String order=request.getParameter("order");
+    String ranklistPath;
+    if(order==null) {
+    ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
+    }
+    else {
+    ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=" + order + "&from=";
+    }
 %>
         <logic:messagesPresent property="error">
         <div class="internalError">
@@ -50,8 +56,8 @@
                         <td class="problemsetRanklistRank">Rank</td>
                         <td class="problemsetRanklistUser">Name</td>
                         <td class="problemsetRanklistPlan">Plan</td>
-                        <td class="problemsetRanklistSolved">Solved</td>
-                        <td class="problemsetRanklistSubmitted">Submitted</td>
+                        <td class="problemsetRanklistSolved"><a href=<%=request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=AC"%>Solved</a></td>
+                        <td class="problemsetRanklistSubmitted"><a href=<%=request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=submit"%>Submitted</a></td>
                         <td class="problemsetRanklistACRatio">AC Ratio</td>
                     </tr>
                     <%

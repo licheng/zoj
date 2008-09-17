@@ -130,7 +130,7 @@ public class StatisticsManager {
 
     }
 
-    public ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count) throws PersistenceException {
+    public ProblemsetRankList getProblemsetRankList(long contestId, int offset, int count, String sort) throws PersistenceException {
         List<Object> key = new ArrayList<Object>();
         key.add(contestId);
         key.add(offset);
@@ -141,7 +141,7 @@ public class StatisticsManager {
             if (ranklist == null) {
                 ranklist =
                         PersistenceManager.getInstance().getSubmissionPersistence()
-                                          .getProblemsetRankList(contestId, offset, count);
+                                          .getProblemsetRankList(contestId, offset, count, sort);
                 this.problemsetRanklistCache.put(key, ranklist);
             }
             return ranklist;

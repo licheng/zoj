@@ -107,9 +107,14 @@ public class ShowRankListAction extends BaseAction {
                 from = 0;
             }
             int count = 30;
+            String sort=context.getRequest().getParameter("order");
+            if(sort==null)
+            {
+                sort="ac";
+            }
 
             ProblemsetRankList ranklist =
-                    StatisticsManager.getInstance().getProblemsetRankList(contest.getId(), from, count);
+                    StatisticsManager.getInstance().getProblemsetRankList(contest.getId(), from, count, sort);
             if (from > 0) {
                 context.setAttribute("previousFrom", from - count > 0 ? from - count : 0);
             }
