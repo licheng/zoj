@@ -118,8 +118,8 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                         <td class="problemTitle"><a href="<%=problemLink%>?problemCode=<%=problem.getCode()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
                         <% } %>
                         <%
-                            int ac = statistics.getCount(i, 0);
-                            int total = statistics.getProblemCount(i);
+                            int ac = problem.getAC();
+                            int total = problem.getTotal();
                             String ratio = "0.00%";
                             String acLink = "0";
                             String totalLink = "0";
