@@ -108,9 +108,14 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                         <% } %>
                         <% if (userStatistics != null) { %>
                         <td class="problemSolved"><font color="red"><%=userStatistics.getSolved().contains(problem) ? "Yes" : ""%></font></td>
-                        <% } %>     
+                        <% } %>   
+                        <% if(contest.getId()!=ConfigManager.getDefaultProblemSetId()) { %>
                         <td class="problemId"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getCode()%></font></a></td>
                         <td class="problemTitle"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
+                        <% } else {%>
+                        <td class="problemId"><a href="<%=problemLink%>?problemCode=<%=problem.getCode()%>"><font color="blue"><%=problem.getCode()%></font></a></td>
+                        <td class="problemTitle"><a href="<%=problemLink%>?problemCode=<%=problem.getCode()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
+                        <% } %>
                         <%
                             int ac = statistics.getCount(i, 0);
                             int total = statistics.getProblemCount(i);

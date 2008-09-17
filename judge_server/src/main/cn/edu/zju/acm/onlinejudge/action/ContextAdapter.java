@@ -29,6 +29,7 @@ import cn.edu.zju.acm.onlinejudge.persistence.PersistenceException;
 import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
+import cn.edu.zju.acm.onlinejudge.util.ConfigManager 
 
 /**
  * ContextAdapter wraps configuration and session logic for the actions. It provides Java Bean like API to access
@@ -288,7 +289,14 @@ public class ContextAdapter {
             return (Problem) this.getAttribute("problem");
         }
         long problemId = -1;
+        String stringCode = this.request.getParameter("problemCode");
         String stringId = this.request.getParameter("problemId");
+        if(stringCode!=null)
+        {
+			long problemindex=Long.parseLong(stringCode)-1001;
+			stringId = ((Problem)(ContestManager.getInstance().getContestProblems(
+			ConfigManager.getDefaultProblemSetId()).get(problemindex))).getId().toString();
+        }
         this.setAttribute("problemId", stringId);
         if (stringId != null) {
             try {
