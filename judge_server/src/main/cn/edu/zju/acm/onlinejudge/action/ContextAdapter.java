@@ -294,8 +294,8 @@ public class ContextAdapter {
         if(stringCode!=null)
         {
 			int problemindex=Integer.parseInt(stringCode)-1001;
-                        List problems=ContestManager.getInstance().getContestProblems(ConfigManager.getDefaultProblemSetId());
-			if(!(problemindex>=0 && problemindex<problems.size() ))
+            List problems=ContestManager.getInstance().getContestProblems(ConfigManager.getDefaultProblemSetId());
+			if(problemindex>=0 && problemindex<problems.size())
 			{
 				problemId = ((Problem)(problems.get(problemindex))).getId();
 				stringId=""+problemId;
