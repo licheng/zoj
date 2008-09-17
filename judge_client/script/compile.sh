@@ -2,6 +2,7 @@
 if [[ $2 = */* ]]; then
     cd ${2%/*}
 fi
+LANG=en_US
 src=${2##*/}
 bin=${src%.*}
 case $1 in
