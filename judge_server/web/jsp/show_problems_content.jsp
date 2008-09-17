@@ -95,7 +95,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                         <td class="problemId">ID</td>
                         <td class="problemTitle">Title</td>
                         <%
-                         String headerPath=request.getContextPath() + "/" + showProblemsAction+"?contestId="+contest.getId()+"&pageNumber="+request.getParameter("pageNumber");
+                         String headerPath=request.getContextPath() + "/" + showProblemsAction+"?contestId="+contest.getId()+"&pageNumber=" + (String)request.getAttribute("pageNumber");
                          %>
                         <td class="problemStatus"><a href="<%=headerPath+"&order=ratio"%>">Ratio</a> (<a href="<%=headerPath+"&order=ac"%>">AC</a>/<a href="<%=headerPath+"&order=all"%>">All</n>)</td>
                         <% if (admin) { %>

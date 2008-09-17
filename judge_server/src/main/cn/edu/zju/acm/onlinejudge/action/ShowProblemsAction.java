@@ -160,6 +160,7 @@ public class ShowProblemsAction extends BaseAction {
         }
 
         context.setAttribute("problems", problems);
+        context.setAttribute("pageNumber", (new Long(pageNumber)).toString());
         context.setAttribute("ContestStatistics", contestStatistics);
         context.setAttribute("UserStatistics", userStatistics);
         context.setAttribute("totalPages", new Long(totalPages));
