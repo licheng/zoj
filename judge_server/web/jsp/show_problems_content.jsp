@@ -13,6 +13,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.security.UserSecurity" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.AbstractContest" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
 
 <%
     boolean isProblemset =  "Problems".equals(request.getAttribute("region"));    
