@@ -56,8 +56,8 @@
                         <td class="problemsetRanklistRank">Rank</td>
                         <td class="problemsetRanklistUser">Name</td>
                         <td class="problemsetRanklistPlan">Plan</td>
-                        <td class="problemsetRanklistSolved"><a href=<%=request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=AC"%>Solved</a></td>
-                        <td class="problemsetRanklistSubmitted"><a href=<%=request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=submit"%>Submitted</a></td>
+                        <td class="problemsetRanklistSolved"><a href="<%=request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=AC"%>">Solved</a></td>
+                        <td class="problemsetRanklistSubmitted"><a href="<%=request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&order=submit"%>">Submitted</a></td>
                         <td class="problemsetRanklistACRatio">AC Ratio</td>
                     </tr>
                     <%
