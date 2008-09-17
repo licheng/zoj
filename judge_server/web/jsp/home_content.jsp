@@ -1,4 +1,15 @@
 <%@ page contentType="text/html; charset=utf-8" language="java" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
+
+<%
+                String path = ConfigManager.getValue("home_page_content");
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+                String data = null;
+		while((data = br.readLine())!=null)
+		{
+			out.print(data); 
+		}
+%>
         <div id="content_title">ZOJ News</div>
         <div id="content_body">
                     2007.4.5<br>
