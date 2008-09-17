@@ -30,6 +30,7 @@ import cn.edu.zju.acm.onlinejudge.security.UserSecurity;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.PersistenceManager;
 import cn.edu.zju.acm.onlinejudge.util.ConfigManager;
+import cn.edu.zju.acm.onlinejudge.bean.request.ProblemCriteria;
 
 /**
  * ContextAdapter wraps configuration and session logic for the actions. It provides Java Bean like API to access
@@ -294,10 +295,14 @@ public class ContextAdapter {
         if(stringCode!=null)
         {
 			int problemindex=Integer.parseInt(stringCode)-1001;
-            List problems=ContestManager.getInstance().getContestProblems(ConfigManager.getDefaultProblemSetId());
-			if(problemindex>=0 && problemindex<problems.size())
+			ProblemCriteria pc=new ProblemCriteria();
+			pc.setContestId(new Long(getContest().getId()));
+			pc.setCode(stringCode);
+            List problems=ContestManager.getInstance().searchProblems(pc,0,1);
+			
+			if(problems.size()!=0)
 			{
-				problemId = ((Problem)(problems.get(problemindex))).getId();
+				problemId = ((Problem)(problems.get(0))).getId();
 				stringId=""+problemId;
 			}
         }

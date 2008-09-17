@@ -506,6 +506,9 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
         if (criteria.getContestId() != null) {
             sb.append(" AND " + DatabaseConstants.PROBLEM_CONTEST_ID + "=" + criteria.getContestId());
         }
+	if (criteria.getCode() != null) {
+            sb.append(" AND " + DatabaseConstants.PROBLEM_CODE + "='" + criteria.getContestId() +"'");
+        }
         sb.append(" ORDER BY " + DatabaseConstants.PROBLEM_CODE);
         sb.append(" LIMIT " + offset + "," + count);
         return sb.toString();

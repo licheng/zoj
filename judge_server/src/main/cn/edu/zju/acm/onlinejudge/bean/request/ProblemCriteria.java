@@ -41,6 +41,9 @@ public class ProblemCriteria {
      */
     private String title;
 
+
+    private String code;
+
     /**
      * <p>
      * Represents ...
@@ -96,6 +99,14 @@ public class ProblemCriteria {
 
     public void setContestId(Long contestId) {
         this.contestId = contestId;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Long getUserProfileId() {
