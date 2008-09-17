@@ -94,7 +94,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                         <% } %>                 
                         <td class="problemId">ID</td>
                         <td class="problemTitle">Title</td>
-                        <td class="problemStatus">Ratio (AC/All)</td>
+                        <td class="problemStatus"><a href="<%=actionPath%>?order=ratio">Ratio</a> (<a href="<%=actionPath%>?order=ac">AC</a>/<a href="<%=actionPath%>?order=all">All</n>)</td>
                         <% if (admin) { %>
                             <td class="problemAdmin">Admin</td>
                         <% } %>                     

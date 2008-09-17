@@ -17,6 +17,7 @@ package cn.edu.zju.acm.onlinejudge.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -102,12 +103,55 @@ public class ShowProblemsAction extends BaseAction {
                                                                 (int) ((pageNumber - 1) * problemsPerPage),
                                                                 (int) problemsPerPage);
 
+
         ContestStatistics contestStatistics = null;
         contestStatistics =
                 StatisticsManager.getInstance().getContestStatistics(contest.getId(),
                                                                      (int) ((pageNumber - 1) * problemsPerPage),
                                                                      (int) problemsPerPage);
-
+        for(int i=0;i<problems.size();++i)
+        {
+            Problem p = (Problem)problems.get(i);
+            int ac = contestStatistics.getCount(i, 0);
+            int total = contestStatistics.getProblemCount(i);
+            p.setTotal(total);
+            p.setAC(ac);
+            if(total==0)
+            {
+                p.setRatio(0);
+            }
+            else
+            {
+                p.setRatio((double)ac/(double)total);
+            }
+        }
+        String order=context.getRequest().getParameter("order");
+        if(order!=null)
+        {
+            if(order.equalsIgnoreCase("ratio"))
+            {
+				Collections.sort(problems, new Comparator() {
+  				public int compare(Object o1, Object o2) {
+  					return (((Problem)o2).getRatio() - ((Problem)o1).getRatio())>0? 1 : -1;
+  				}}
+  				);
+  		} else if(order.equalsIgnoreCase("ac"))
+            {
+				Collections.sort(problems, new Comparator() {
+  				public int compare(Object o1, Object o2) {
+  					return ((Problem)o2).getAC() - ((Problem)o1).getAC();
+  				}}
+  				);
+  		} else if(order.equalsIgnoreCase("all"))
+            {
+				Collections.sort(problems, new Comparator() {
+  				public int compare(Object o1, Object o2) {
+  					return ((Problem)o2).getTotal() - ((Problem)o1).getTotal();
+  				}}
+  				);
+  		}
+  	}
+  		
         UserStatistics userStatistics = null;
         if (context.getUserProfile() != null && problems.size() > 0) {
             userStatistics =

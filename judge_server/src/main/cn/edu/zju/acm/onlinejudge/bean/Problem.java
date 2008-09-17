@@ -103,6 +103,13 @@ public class Problem implements Comparable<Problem> {
      */
     private int revision = -1;
 
+    
+    private int total= -1;
+
+    private int ac= -1;
+
+    private double ratio= 0;
+
     /**
      * <p>
      * Empty constructor.
@@ -346,6 +353,30 @@ public class Problem implements Comparable<Problem> {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public int getTotal() {
+        return this.total;
+    }
+
+    public void setTotal(int total) {
+        this.total = total;
+    }
+
+    public int getAC() {
+        return this.ac;
+    }
+
+    public void setAC(int ac) {
+        this.ac = ac;
+    }
+
+    public double getRatio() {
+        return this.ratio;
+    }
+
+    public void setRatio(double ratio) {
+        this.ratio = ratio;
     }
 
     @Override
