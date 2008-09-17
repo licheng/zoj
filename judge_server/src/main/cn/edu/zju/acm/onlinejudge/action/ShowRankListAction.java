@@ -45,6 +45,7 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * 
  * 
  * @author Zhang, Zheng
+ * @author Chen, Zhengguang
  * @version 2.0
  */
 public class ShowRankListAction extends BaseAction {

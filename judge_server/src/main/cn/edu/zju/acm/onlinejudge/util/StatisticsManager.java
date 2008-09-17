@@ -135,6 +135,7 @@ public class StatisticsManager {
         key.add(contestId);
         key.add(offset);
         key.add(count);
+        key.add(sort);
 
         synchronized (this.problemsetRanklistCache) {
             ProblemsetRankList ranklist = this.problemsetRanklistCache.get(key);
