@@ -13,7 +13,7 @@ String line=null;
 line=inputText.readLine();  
 while(line!=null)
 {
-out.printline(line);
+out.println(line);
 }
 %>
 </div>
