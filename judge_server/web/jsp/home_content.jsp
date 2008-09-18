@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=utf-8" language="java" %>
 <%@ page import="java.io.*" %>
 <%@ page import="java.util.*" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
 <div id="content_title">
     ZOJ News</div>
 <div id="content_body">
