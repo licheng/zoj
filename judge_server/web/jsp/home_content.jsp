@@ -14,6 +14,7 @@ line=inputText.readLine();
 while(line!=null)
 {
 out.println(line);
+line=inputText.readLine();  
 }
 %>
 </div>
