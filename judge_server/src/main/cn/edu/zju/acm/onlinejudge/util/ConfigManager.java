@@ -58,6 +58,9 @@ public class ConfigManager {
         }
         return value.split(",");
     }
+    public static String getDefaultHomeContent() {
+        return ConfigManager.getValue("default_home_content");
+    }
 
     public static String getImagePath() {
         return ConfigManager.getValue("image_path");
