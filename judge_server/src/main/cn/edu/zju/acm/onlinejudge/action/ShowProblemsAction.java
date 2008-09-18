@@ -98,10 +98,12 @@ public class ShowProblemsAction extends BaseAction {
             totalPages = (problemsCount - 1) / problemsPerPage + 1;
         }
 
-        List<Problem> problems =
+        List<Problem> oproblems =
                 ContestManager.getInstance().getContestProblems(contest.getId(),
                                                                 (int) ((pageNumber - 1) * problemsPerPage),
                                                                 (int) problemsPerPage);
+        List<Problem> problems=new ArrayList<Problem>();
+        problems.addAll(oproblems);
 
 
         ContestStatistics contestStatistics = null;
