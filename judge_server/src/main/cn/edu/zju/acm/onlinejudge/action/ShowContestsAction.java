@@ -71,6 +71,9 @@ public class ShowContestsAction extends BaseAction {
         List<AbstractContest> contests = null;
         if (isProblemset) {
             contests = context.getAllProblemSets();
+            if(contests.size()==1) {
+            	return this.handleSuccess(mapping, context, "success_onlyone");
+            }
         } else {
             contests = context.getAllContests();
         }

@@ -205,7 +205,7 @@
                             value="<bean:write name="ProfileForm" property="addressLine1" />"
                         </logic:present>
                     >
-                    <span class="error">*
+                    <span class="error">
                         <logic:messagesPresent property="addressLine1">
                             <html:errors property="addressLine1"/>
                         </logic:messagesPresent>
@@ -231,7 +231,7 @@
                             value="<bean:write name="ProfileForm" property="city" />"
                         </logic:present>
                     >
-                    <span class="error">*
+                    <span class="error">
                         <logic:messagesPresent property="city">
                             <html:errors property="city"/>
                         </logic:messagesPresent>
@@ -246,7 +246,7 @@
                             value="<bean:write name="ProfileForm" property="state" />"
                         </logic:present>
                     >
-                    <span class="error">*
+                    <span class="error">
                         <logic:messagesPresent property="state">
                             <html:errors property="state"/>
                         </logic:messagesPresent>
@@ -272,7 +272,7 @@
                         </logic:iterate>
                     </select>
 
-                    <span class="error">*
+                    <span class="error">
                         <logic:messagesPresent property="country">
                             <html:errors property="country"/>
                         </logic:messagesPresent>
@@ -287,7 +287,7 @@
                             value="<bean:write name="ProfileForm" property="zipCode" />"
                         </logic:present>
                     >
-                    <span class="error">*
+                    <span class="error">
                         <logic:messagesPresent property="zipCode">
                             <html:errors property="zipCode"/>
                         </logic:messagesPresent>
@@ -302,7 +302,7 @@
                             value="<bean:write name="ProfileForm" property="phone" />"
                         </logic:present>
                     >
-                    <span class="error">*
+                    <span class="error">
                         <logic:messagesPresent property="phone">
                             <html:errors property="phone"/>
                         </logic:messagesPresent>

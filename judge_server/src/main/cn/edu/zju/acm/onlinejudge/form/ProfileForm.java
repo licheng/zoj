@@ -674,11 +674,11 @@ public class ProfileForm extends ActionForm implements Serializable {
 
         this.checkRequired(this.firstName, errors, "firstName", "ProfileForm.firstName.required");
         this.checkRequired(this.lastName, errors, "lastName", "ProfileForm.lastName.required");
-        this.checkRequired(this.addressLine1, errors, "addressLine1", "ProfileForm.addressLine1.required");
-        this.checkRequired(this.city, errors, "city", "ProfileForm.city.required");
-        this.checkRequired(this.state, errors, "state", "ProfileForm.state.required");
-        this.checkRequired(this.zipCode, errors, "zipCode", "ProfileForm.zipCode.required");
-        this.checkRequired(this.phone, errors, "phone", "ProfileForm.phone.required");
+        //this.checkRequired(this.addressLine1, errors, "addressLine1", "ProfileForm.addressLine1.required");
+        //this.checkRequired(this.city, errors, "city", "ProfileForm.city.required");
+        //this.checkRequired(this.state, errors, "state", "ProfileForm.state.required");
+        //this.checkRequired(this.zipCode, errors, "zipCode", "ProfileForm.zipCode.required");
+        //this.checkRequired(this.phone, errors, "phone", "ProfileForm.phone.required");
 
         this.checkBirthday(errors);
         this.checkCountry(errors);
@@ -772,16 +772,17 @@ public class ProfileForm extends ActionForm implements Serializable {
      *            the errors
      */
     private void checkCountry(ActionErrors errors) {
-        if (this.country == null || this.country.trim().length() == 0) {
-            errors.add("country", new ActionMessage("ProfileForm.country.required"));
+    	Country c = null;
+    	try {
+    	if (this.country == null || this.country.trim().length() == 0) {
+    		c = PersistenceManager.getInstance().getCountry("China");
+            //errors.add("country", new ActionMessage("ProfileForm.country.required"));
         } else {
-            Country c = null;
-            try {
-                c = PersistenceManager.getInstance().getCountry(this.country);
-            } catch (Exception e) {}
-            if (c == null) {
-                errors.add("country", new ActionMessage("ProfileForm.country.invalid"));
-            }
+            c = PersistenceManager.getInstance().getCountry(this.country);
+        }
+    	} catch (Exception e) {}
+        if (c == null) {
+            errors.add("country", new ActionMessage("ProfileForm.country.invalid"));
         }
     }
 

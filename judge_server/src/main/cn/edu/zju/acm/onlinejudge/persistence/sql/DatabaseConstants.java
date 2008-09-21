@@ -52,6 +52,11 @@ public class DatabaseConstants {
      * HANDLE column in USER_PROFILE table.
      */
     public static final String USER_PROFILE_HANDLE = "handle";
+    
+    /**
+     * NICKNAME column in USER_PROFILE table.
+     */
+    public static final String USER_PROFILE_NICKNAME = "nickname";
 
     /**
      * PASSWORD column in USER_PROFILE table.

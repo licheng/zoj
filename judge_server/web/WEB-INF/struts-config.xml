@@ -95,7 +95,8 @@
         <action path="/showProblemsets" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowContestsAction"
                 validate="false" scope="request" input="/show_contests.jsp">
             <forward name="success" path="/show_problemsets.jsp" redirect="false"/>
-        </action>        
+            <forward name="success_onlyone" path="/showProblems.do?contestId=1" redirect="false"/>
+        </action>
 
 
 
