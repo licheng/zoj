@@ -2,11 +2,10 @@
 <%@ page import="java.io.*" %>
 <%@ page import="java.util.*" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
-<div id="content_title">
-    ZOJ News</div>
-<div id="content_body">
 <% 
 File inputFile=new File(ConfigManager.getDefaultHomeContent());
+try
+{
 FileReader in=new FileReader(inputFile);
 BufferedReader inputText=new BufferedReader(in);
 String line=null;
@@ -16,5 +15,6 @@ while(line!=null)
 out.println(line);
 line=inputText.readLine();  
 }
+} catch (Exception e) {
+}
 %>
-</div>

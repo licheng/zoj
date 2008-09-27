@@ -134,7 +134,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 
     private static final String GET_SUBMISSION_PREFIX =
             "SELECT s.submission_id,s.problem_id,s.language_id,s.judge_reply_id,s.user_profile_id,s.time_consumption,"
-                + "s.memory_consumption,s.submission_date,s.judge_date,s.judge_comment,s.contest_id,s.contest_order,u.nickname,p.code";
+                + "s.memory_consumption,s.submission_date,s.judge_date,s.judge_comment,s.contest_id,s.contest_order,u.handle,u.nickname,p.code";
 
     private static final String GET_SUBMISSION_WITH_CONTENT_PREFIX =
             SubmissionPersistenceImpl.GET_SUBMISSION_PREFIX + ",s.content";
@@ -398,6 +398,9 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         submission.setMemoryConsumption(rs.getInt(DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION));
         submission.setTimeConsumption(rs.getInt(DatabaseConstants.SUBMISSION_TIME_CONSUMPTION));
         submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_NICKNAME));
+	 if(submission.getUserName().equals("")) {
+             submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_HANDLE));
+        }
         submission.setProblemCode(rs.getString(DatabaseConstants.PROBLEM_CODE));
         submission.setContestId(rs.getLong("contest_id"));
         submission.setContestOrder(rs.getLong("contest_order"));

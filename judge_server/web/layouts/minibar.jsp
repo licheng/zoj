@@ -13,7 +13,7 @@
                 | <a <logic:equal name="region" value="Contests">class="selected"</logic:equal> href="<%=request.getContextPath()%>/showContests.do">Contests</a>
                 <% } %>
                 <% if (Features.problemset()) {%>
-                | <a <logic:equal name="region" value="Problems">class="selected"</logic:equal> href="<%=request.getContextPath()%>//showProblemsets.do">Problems</a>
+                | <a <logic:equal name="region" value="Problems">class="selected"</logic:equal> href="<%=request.getContextPath()%>/showProblemsets.do">Problems</a>
                 <% } %>
                 | <a <logic:equal name="region" value="Forum">class="selected"</logic:equal> href="/forum/">Forum</a> 
                 <logic:present name="oj_security">
