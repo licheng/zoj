@@ -43,7 +43,7 @@ public class StatisticsManager {
 
     private final Cache<UserStatistics> solvedCache;
 
-    private final Cache<Object[]> submissionCache;
+    private final Cache<SubmissionCacheEntry> submissionCache;
 
     /**
      * StatisticsManager.
@@ -65,7 +65,7 @@ public class StatisticsManager {
         this.ranklistCache = new Cache<RankList>(10000, 20);
         this.problemsetRanklistCache = new Cache<ProblemsetRankList>(30000, 20);
         this.solvedCache = new Cache<UserStatistics>(10000, 50);
-        this.submissionCache = new Cache<Object[]>(10000, 50);
+        this.submissionCache = new Cache<SubmissionCacheEntry>(10000, 50);
     }
 
     /**
@@ -141,8 +141,9 @@ public class StatisticsManager {
             ProblemsetRankList ranklist = this.problemsetRanklistCache.get(key);
             if (ranklist == null) {
                 ranklist =
-                        PersistenceManager.getInstance().getSubmissionPersistence()
-                                          .getProblemsetRankList(contestId, offset, count, sort);
+                        PersistenceManager.getInstance().getSubmissionPersistence().getProblemsetRankList(contestId,
+                                                                                                          offset,
+                                                                                                          count, sort);
                 this.problemsetRanklistCache.put(key, ranklist);
             }
             return ranklist;
@@ -210,44 +211,21 @@ public class StatisticsManager {
         key.add(new Long(firstId));
         key.add(new Long(lastId));
         key.add(new Integer(count));
-        JudgingQueueIterator iter;
-        List<Submission> submissions;
+
+        SubmissionCacheEntry entry;
         synchronized (this.submissionCache) {
-            Object[] pair = this.submissionCache.get(key);
-            if (pair != null) {
-                iter = (JudgingQueueIterator) pair[0];
-                submissions = (List<Submission>) pair[1];
-            } else {
-                iter = JudgeService.getInstance().getJudgingQueueIterator();
-                submissions =
+            entry = this.submissionCache.get(key);
+            if (entry == null) {
+                JudgingQueueIterator iter = JudgeService.getInstance().getJudgingQueueIterator();
+                List<Submission> submissions =
                         PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(criteria,
                                                                                                       firstId, lastId,
                                                                                                       count);
-                pair = new Object[] {iter, submissions};
-                this.submissionCache.put(key, pair);
+                entry = new SubmissionCacheEntry(iter, submissions);
+                this.submissionCache.put(key, entry);
             }
         }
-        Map<Long, Submission> submissionMap = new HashMap<Long, Submission>();
-        for (;;) {
-            Submission submission = iter.next();
-            if (submission == null) {
-                break;
-            }
-            submissionMap.put(submission.getId(), submission);
-        }
-        for (int i = 0; i < submissions.size(); i++) {
-            Submission submission = submissions.get(i);
-            Submission t = submissionMap.get(submission.getId());
-            if (t != null) {
-                // CAVEAT: t.content can be set to null in JudgeClientJudgeThread.process.
-                //submissions.set(i, t);
-                submission.setTimeConsumption(t.getTimeConsumption());
-                submission.setMemoryConsumption(t.getMemoryConsumption());
-                submission.setJudgeComment(t.getJudgeComment());
-                submission.setJudgeReply(t.getJudgeReply());
-            }
-        }
-        return submissions;
+        return entry.getSubmissions();
     }
 
     public void refresh(long contestId) {
@@ -257,6 +235,41 @@ public class StatisticsManager {
         }
         synchronized (this.ranklistCache) {
             this.ranklistCache.remove(key);
+        }
+    }
+
+    private static class SubmissionCacheEntry {
+
+        private JudgingQueueIterator iter;
+
+        private List<Submission> submissions;
+
+        private Map<Long, Submission> submissionMap = new HashMap<Long, Submission>();
+
+        public SubmissionCacheEntry(JudgingQueueIterator iter, List<Submission> submissions) {
+            this.iter = iter;
+            this.submissions = submissions;
+        }
+        
+        public List<Submission> getSubmissions() {
+            for (;;) {
+                Submission submission = this.iter.next();
+                if (submission == null) {
+                    break;
+                }
+                this.submissionMap.put(submission.getId(), submission);
+            }
+            for (int i = 0; i < this.submissions.size(); i++) {
+                Submission submission = this.submissions.get(i);
+                Submission t = this.submissionMap.get(submission.getId());
+                if (t != null) {
+                    submission.setTimeConsumption(t.getTimeConsumption());
+                    submission.setMemoryConsumption(t.getMemoryConsumption());
+                    submission.setJudgeComment(t.getJudgeComment());
+                    submission.setJudgeReply(t.getJudgeReply());
+                }
+            }
+            return new ArrayList<Submission>(this.submissions);
         }
     }
 
