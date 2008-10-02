@@ -1,2 +1,2 @@
 #!/bin/bash
-killall -s SIGTERM judged
+kill -s SIGTERM `cat judge.pid`
