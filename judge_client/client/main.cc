@@ -45,7 +45,7 @@ DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to s
 
 DEFINE_OPTIONAL_ARG(int, max_judge_process, 50, "The maximal number of judge processes");
 
-void Daemonize() {
+void Daemonize(int lock_fd) {
     umask(0);
     int pid = fork();
     if (pid < 0) {
@@ -69,6 +69,11 @@ void Daemonize() {
     dup2(fd, 0);
     dup2(fd, 1);
     dup2(fd, 2);
+
+    ftruncate(lock_fd, 0);
+    char buffer[20];
+    sprintf(buffer, "%ld", (long)getpid());
+    write(lock_fd, buffer, strlen(buffer) + 1);
 }
 
 int Lock() {
@@ -257,7 +262,7 @@ int main(int argc, char* argv[]) {
         if (fd < 0) {
             return 1;
         }
-        Daemonize();
+        Daemonize(fd);
     }
 
     if (ARG_daemonize || !ARG_logtostderr) {
