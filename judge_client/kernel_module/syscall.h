@@ -96,7 +96,7 @@ static char syscall_filter_table[512] = {
     0, /*72, sigsuspend*/
     0, /*73, sigpending*/
     0, /*74, sethostname*/
-    0, /*75, setrlimit. It is safe. An unprivilleged process can not increase limit*/
+    1, /*75, setrlimit*/
     0, /*76, getrlimit*/
     0, /*77, getrusage*/
     0, /*78, gettimeofday*/
@@ -207,7 +207,7 @@ static char syscall_filter_table[512] = {
     0, /*183, getcwd*/
     0, /*184, capget*/
     0, /*185, capset*/
-    0, /*186, sigaltstack*/
+    1, /*186, sigaltstack*/
     1, /*187, sendfile*/
     1, /*188, getpmsg*/
     1, /*189, putpmsg*/
