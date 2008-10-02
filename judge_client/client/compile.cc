@@ -45,7 +45,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
     }
     StartupInfo info;
     info.fd_stderr = fd_pipe[1];
-    info.time_limit = 30;
+    info.time_limit = 10;
     TraceCallback callback;
     pid_t pid = CreateShellProcess(command.c_str(), info);
     close(fd_pipe[1]);
@@ -63,19 +63,26 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
         SendReply(sock, INTERNAL_ERROR);
         return -1;
     }
-    int status;
+    int status = 0;
+    if (count == sizeof(error_message)) {
+        kill(pid, SIGKILL);
+    }
     while (waitpid(pid, &status, 0) < 0) {
         if (errno != EINTR) {
             LOG(SYSCALL_ERROR);
             return INTERNAL_ERROR;
         }
     }
-    if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
-        SendReply(sock, INTERNAL_ERROR);
-        return -1;
+    if (count == sizeof(error_message)) {
+        status = 1;
+    } else {
+        if (WIFSIGNALED(status)) {
+            LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
+            SendReply(sock, INTERNAL_ERROR);
+            return -1;
+        }
+        status = WEXITSTATUS(status);
     }
-    status = WEXITSTATUS(status);
     if (status) {
         if (status >= 126) {
             LOG(INFO)<<"Running compile.sh failed";
