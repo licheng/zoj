@@ -71,7 +71,7 @@ int ReadMemoryConsumption(int pid) {
     if (fp == NULL) {
         return -1;
     }
-    int vmPeak = 0, vmSize = 0, vmExe = 0, vmLib = 0;
+    int vmPeak = 0, vmSize = 0, vmExe = 0, vmLib = 0, vmStack = 0;
     while (fgets(buffer, 32, fp)) {
         if (!strncmp(buffer, "VmPeak:", 7)) {
             sscanf(buffer + 7, "%d", &vmPeak);
@@ -81,12 +81,14 @@ int ReadMemoryConsumption(int pid) {
             sscanf(buffer + 6, "%d", &vmExe);
         } else if (!strncmp(buffer, "VmLib:", 6)) {
             sscanf(buffer + 6, "%d", &vmLib);
+        } else if (!strncmp(buffer, "VmStk:", 6)) {
+            sscanf(buffer + 6, "%d", &vmStack);
         }
     }
     if (vmPeak) {
         vmSize = vmPeak;
     }
-    return vmSize - vmExe - vmLib;
+    return vmSize - vmExe - vmLib - vmStack;
 }
 
 int CreateProcess(const char* commands[], const StartupInfo& process_info) {
