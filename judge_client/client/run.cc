@@ -141,6 +141,7 @@ int RunExe(int sock, int time_limit, int memory_limit, int output_limit, int uid
     info.time_limit = time_limit;
     info.memory_limit = memory_limit;
     info.output_limit = output_limit;
+    info.stack_limit = 8192; // Always set stack limit to 8M
     info.proc_limit = 1;
     info.file_limit = 5;
     info.trace = 1;

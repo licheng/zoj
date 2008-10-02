@@ -94,6 +94,9 @@ struct StartupInfo {
     // The maximum size of files that the child process may create, in kilobytes. If zero, no output limit is applied.
     int output_limit;
 
+    // The maximum size of the child process stack, in kilobytes. If zero, no stack limit is applied.
+    int stack_limit;
+
     // The maximum number of processes that can be created. If zero, no process limit is applied.
     int proc_limit;
 

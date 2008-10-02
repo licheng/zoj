@@ -145,6 +145,12 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
             raise(SIGKILL);
         }
     }
+    if (process_info.stack_limit) {
+        if (SetLimit(RLIMIT_STACK, process_info.stack_limit * 1024) == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to set stack limit to "<<process_info.file_limit<<'k';
+            raise(SIGKILL);
+        }
+    }
     if (process_info.file_limit) {
         if (SetLimit(RLIMIT_NOFILE, process_info.file_limit) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set file limit to "<<process_info.file_limit;
