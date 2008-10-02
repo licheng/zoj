@@ -27,7 +27,7 @@
 #include "test_util-inl.h"
 
 DECLARE_ARG(int, max_heart_beat_interval);
-DEFINE_OPTIONAL_ARG(string, compiler, "g++,gcc,fp", "");
+DEFINE_OPTIONAL_ARG(string, compiler, "g++,gcc,fpc", "");
 
 int ControlMain(const string& root, const string& queue_address, int queue_port, int port);
 
