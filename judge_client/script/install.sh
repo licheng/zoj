@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eu
 
 function CreateDir() {
     if [ -e "$1" ]; then
@@ -20,6 +20,7 @@ fi
 CreateDir "$dir" 755
 cp script/start.sh "$dir"
 cp script/stop.sh "$dir"
+cp script/rotate_log.sh "$dir"
 CreateDir "$dir/script" 755
 cp script/compile.sh "$dir"/script
 cp client/judged "$dir"
@@ -31,4 +32,10 @@ if [[ "`cat /etc/group | grep '^zoj:'`" == "" ]]; then
 fi
 if [[ "`cat /etc/passwd | grep '^zoj:'`" == "" ]]; then
     useradd -g zoj zoj
+fi
+read -p "Create a symlink to rotate_log.sh in /etc/cron.daily? [y/n]" choice
+if [ "$choice" == "y" ] || [ "$choice" == "" ]; then
+    ln -f -s "$dir"/rotate_log.sh /etc/cron.daily/rotate_zoj_log.sh
+else
+    echo "Remember to put rotate_log.sh in your cron jobs otherwise the log file will be too large"
 fi

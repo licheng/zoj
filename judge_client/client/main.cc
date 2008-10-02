@@ -217,6 +217,10 @@ void SIGCHLDHandler(int sig) {
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
+void SIGUSR1Handler(int sig) {
+    Log::Close();
+}
+
 int ControlMain(const string& root, const string& queue_address, int queueu_port, int port);
 int JudgeMain(const string& root, int sock, int uid, int gid);
 
@@ -244,6 +248,8 @@ int main(int argc, char* argv[]) {
     InstallSignalHandler(SIGPIPE, SIGPIPEHandler);
 
     InstallSignalHandler(SIGCHLD, SIGCHLDHandler);
+
+    InstallSignalHandler(SIGUSR1, SIGUSR1Handler);
 
     int port;
     int server_sock = CreateServerSocket(&port);

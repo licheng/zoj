@@ -60,23 +60,15 @@ void DiskLogFile::Write(const string& message) {
         this->CreateNewFile();
     }
     if (fd_ >= 0) {
-        if (size_ + message.size() > MAX_LOG_FILE_SIZE) {
-            close(fd_);
-            this->CreateNewFile();
-        }
         if (fd_ >= 0) {
-            size_ += message.size();
             Writen(fd_, message.c_str(), message.size());
         }
     }
 }
 
 void DiskLogFile::CreateNewFile() {
-    size_ = 0;
-    string filename = StringPrintf("%s%s.log",
-                                   log_root_.c_str(),
-                                   GetLocalTimeAsString("%Y-%m-%d-%H-%M-%S").c_str());
-    fd_ = open(filename.c_str(), O_RDWR | O_CREAT, 0600);
+    string filename = StringPrintf("%sjudge.log", log_root_.c_str());
+    fd_ = open(filename.c_str(), O_RDWR | O_CREAT | O_APPEND, 0600);
     if (fd_ < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);

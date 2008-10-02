@@ -47,7 +47,7 @@ class LogFile {
 
 class DiskLogFile: public LogFile {
     public:
-        DiskLogFile(const string& log_root) : log_root_(log_root), fd_(-1), size_(0) {
+        DiskLogFile(const string& log_root) : log_root_(log_root), fd_(-1) {
             if (log_root.empty() || log_root[log_root.size() - 1] != '/') {
                 log_root_ += '/';
             }
@@ -63,7 +63,6 @@ class DiskLogFile: public LogFile {
 
         string log_root_;
         int fd_;
-        int size_;
 };
 
 class UnixDomainSocketLogFile: public LogFile {
