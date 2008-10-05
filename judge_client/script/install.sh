@@ -35,7 +35,9 @@ if [[ "`cat /etc/passwd | grep '^zoj:'`" == "" ]]; then
 fi
 read -p "Create a symlink to rotate_log.sh in /etc/cron.daily? [y/n]" choice
 if [ "$choice" == "y" ] || [ "$choice" == "" ]; then
-    ln -f -s "$dir"/rotate_log.sh /etc/cron.daily/rotate_zoj_log
+    if ! [ ln -s "$dir"/rotate_log.sh /etc/cron.daily/rotate_zoj_log ]; then
+        echo "Fail to create the symlink. Please create it manually."
+    fi
 else
     echo "Remember to put rotate_log.sh in your cron jobs otherwise the log file will be too large"
 fi
