@@ -183,7 +183,7 @@ static char syscall_filter_table[512] = {
     0, /*159, sched_get_priority_max*/
     0, /*160, sched_get_priority_min*/
     0, /*161, sched_rr_get_interval*/
-    0, /*162, nanosleep*/
+    1, /*162, nanosleep*/
     0, /*163, mremap*/
     0, /*164, setresuid*/
     0, /*165, getresuid*/
