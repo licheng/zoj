@@ -180,8 +180,6 @@ int RunSpecialJudgeExe(int uid, string special_judge_filename) {
         special_judge_filename.c_str(),
         special_judge_filename.c_str(),
         "p.out",
-        "input",
-        "output",
         NULL};
     StartupInfo info;
     info.stdin_filename = "p.out";
