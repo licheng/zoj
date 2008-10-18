@@ -251,4 +251,23 @@ TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionOpen) {
     }
 }
 
+TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionInvalidOpen) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_invalid_open").c_str(), "p"));
+
+    ASSERT_EQUAL(1, Run());
+
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+        if (time < 0) {
+            ASSERT_EQUAL(RUNTIME_ERROR, reply);
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
 //TODO Add INTERNAL_ERROR unittest

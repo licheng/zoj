@@ -185,8 +185,9 @@ static void SIGKMMONHandler(int sig, siginfo_t* siginfo, void* context) {
             callback->OnError();
             kmmon_kill(pid);
         } else if (ReadStringFromTracedProcess(pid, address, buffer, sizeof(buffer)) < 0) {
-            LOG(ERROR)<<"Fail to read memory from traced process";
-            callback->OnError();
+            LOG(ERROR)<<"Fail to read memory with start address "<<address<<" from traced process";
+            // Don't call OnError so that it will be treated as Restricted Function.
+            // This error can occur when the traced program invokes open with an invalid address, for example, NULL.
             kmmon_kill(pid);
         } else if (callback->OnOpen(buffer, flags)) {
             kmmon_continue(pid);
