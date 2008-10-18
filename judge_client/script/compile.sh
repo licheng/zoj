@@ -7,7 +7,7 @@ src=${2##*/}
 bin=${src%.*}
 case $1 in
     gcc)
-        gcc -o $bin -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $src >/dev/null
+        gcc -o $bin -ansi -fno-asm -O2 -Wall --static -s -DONLINE_JUDGE $src -lm >/dev/null
         ;;
     g++)
         g++ -o $bin -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $src >/dev/null
