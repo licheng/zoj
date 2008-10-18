@@ -8,9 +8,13 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        cerr<<"Invalid number of arguments"<<endl;
+        return -1;
+    }
     int a, b;
     int result = 0;
-    ifstream fin(argv[2]);
+    ifstream fin("input");
     ifstream gin(argv[1]);
     while (fin>>a>>b) {
         string s;

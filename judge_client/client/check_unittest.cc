@@ -297,6 +297,7 @@ class DoCheckTest: public TestFixture {
         InstallHandlers();
         ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
+        ASSERT_EQUAL(0, symlink((TESTDIR + "/judge").c_str(), "judge"));
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
         output_ = judge_ = "";
     }
