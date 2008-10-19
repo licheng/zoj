@@ -23,7 +23,6 @@ port=${1##*:}
 
 root=`readlink /proc/$$/fd/255`
 root=${root%/*}
-cd "$root"
 
 if [ "`which unzip`" == "" ]; then
     echo "No unzip found!"
@@ -43,29 +42,29 @@ if [ "`which fpc`" != "" ]; then
 fi
 
 # Prepare /prob
-CreateDir prob 750
-CreateDir prob/0 750
-CreateDir prob/0/0 750
-if [ ! -f prob/0/0/1.in ]; then
-    echo -e "0 0\n1 2\n2 3" >prob/0/0/1.in
+CreateDir "$root/prob" 750
+CreateDir "$root/prob/0" 750
+CreateDir "$root/prob/0/0" 750
+if [ ! -f "$root/prob/0/0/1.in" ]; then
+    echo -e "0 0\n1 2\n2 3" > "$root/prob/0/0/1.in"
 fi
-if [ ! -f prob/0/0/1.out ]; then
-    echo -e "0\n3\n5" >prob/0/0/1.out
+if [ ! -f "$root/prob/0/0/1.out" ]; then
+    echo -e "0\n3\n5" > "$root/prob/0/0/1.out"
 fi
-chmod 750 prob/0/*
+chmod -R 750 "$root"/prob/0/*
 
 # Prepare /working
-CreateDir working 750
-rm -rf working/*
+CreateDir "$root/working" 750
+rm -rf "$root/working/*"
 
 # Prepare /log
-CreateDir log 750
+CreateDir "$root/log" 750
 
 if [ "`lsmod | grep kmmon`" == "" ]; then
-    insmod kmmon.ko
+    insmod "$root/kmmon.ko"
 fi
 
 ids=`cat /etc/passwd | grep zoj | awk -F ':' '{print "--uid=" $3, "--gid=" $4}'`
-cmd="./judged --compiler=\"$supported_source_file_types\" --daemonize --root=. --queue_address=\"$address\" --queue_port=$port $ids"
+cmd="$root/judged --compiler='$supported_source_file_types' --daemonize --root='$root' --queue_address='$address' --queue_port=$port $ids"
 echo $cmd
 eval $cmd
