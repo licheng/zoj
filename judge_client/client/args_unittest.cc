@@ -29,7 +29,7 @@ DEFINE_ARG(string, string, "");
 DEFINE_OPTIONAL_ARG(string, opt_string, "opt", "");
 
 TEST(ParseArgumentsAllValid) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--string=test"};
@@ -43,14 +43,14 @@ TEST(ParseArgumentsAllValid) {
 }
 
 TEST(ParseArgumentsNoInt) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--bool",
                     "--string=test"};
     ASSERT_EQUAL(-1, ParseArguments(3, argv));
 }
 
 TEST(ParseArgumentsInvalidInt) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=invalid",
                     "--bool",
                     "--string=test"};
@@ -58,7 +58,7 @@ TEST(ParseArgumentsInvalidInt) {
 }
 
 TEST(ParseArgumentsEmptyInt) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=",
                     "--bool",
                     "--string=test"};
@@ -66,14 +66,14 @@ TEST(ParseArgumentsEmptyInt) {
 }
 
 TEST(ParseArgumentsNoBool) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--string=test"};
     ASSERT_EQUAL(-1, ParseArguments(3, argv));
 }
 
 TEST(ParseArgumentsInvalidBool) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool=invalid",
                     "--string=test"};
@@ -81,7 +81,7 @@ TEST(ParseArgumentsInvalidBool) {
 }
 
 TEST(ParseArgumentsEmptyBool) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool=",
                     "--string=test"};
@@ -89,7 +89,7 @@ TEST(ParseArgumentsEmptyBool) {
 }
 
 TEST(ParseArgumentsValidBoolTrue) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool=true",
                     "--string=test"};
@@ -98,7 +98,7 @@ TEST(ParseArgumentsValidBoolTrue) {
 }
 
 TEST(ParseArgumentsValidBoolFalse) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool=false",
                     "--string=test"};
@@ -107,14 +107,14 @@ TEST(ParseArgumentsValidBoolFalse) {
 }
 
 TEST(ParseArgumentsNoString) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool"};
     ASSERT_EQUAL(-1, ParseArguments(3, argv));
 }
 
 TEST(ParseArgumentsEmptyString) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--string="};
@@ -123,7 +123,7 @@ TEST(ParseArgumentsEmptyString) {
 }
 
 TEST(ParseArgumentsOptionalInt) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--opt_int=1111",
                     "--bool",
@@ -133,7 +133,7 @@ TEST(ParseArgumentsOptionalInt) {
 }
 
 TEST(ParseArgumentsOptionalBool) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--opt_bool",
@@ -143,7 +143,7 @@ TEST(ParseArgumentsOptionalBool) {
 }
 
 TEST(ParseArgumentsOptionalString) {
-    char* argv[] = {"",
+    const char* argv[] = {"",
                     "--int=1234",
                     "--bool",
                     "--string=",

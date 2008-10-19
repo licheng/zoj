@@ -80,14 +80,14 @@ void PrintUsage() {
     }
 }
 
-int ParseArguments(int argc, char* argv[]) {
+int ParseArguments(int argc, const char* argv[]) {
     if (info_list == NULL) {
         info_list = new vector<ArgumentInfo*>;
     }
     vector<bool> assigned(info_list->size(), false);
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] == '-' && argv[i][1] == '-') {
-            char* p = argv[i] + 2;
+            const char* p = argv[i] + 2;
             while (*p && *p != '=') {
                 ++p;
             }

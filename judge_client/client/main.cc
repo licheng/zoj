@@ -224,7 +224,7 @@ void SIGUSR1Handler(int sig) {
 int ControlMain(const string& root, const string& queue_address, int queueu_port, int port);
 int JudgeMain(const string& root, int sock, int uid, int gid);
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
     if (ParseArguments(argc, argv) < 0) {
         return 1;
     }

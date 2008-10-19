@@ -61,6 +61,6 @@ class ArgumentInfo {
 #define DECLARE_ARG(type, name) extern type ARG_##name
 
 // Extracts parameter values from the passed-in arguments.
-int ParseArguments(int argc, char* argv[]);
+int ParseArguments(int argc, const char* argv[]);
 
 #endif
