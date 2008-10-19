@@ -850,6 +850,7 @@ class JudgeMainTest: public TestFixture {
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         buf_size_ = 0;
         global::terminated = false;
+        ARG_compiler = "g++";
     }
 
     virtual void TearDown() {
