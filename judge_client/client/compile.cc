@@ -29,6 +29,9 @@
 #include "trace.h"
 #include "util.h"
 
+const int COMPILATION_TIME_LIMIT = 10;
+const int COMPILATION_OUTPUT_LIMIT = 4096;
+
 int DoCompile(int sock, const string& root, int compiler, const string& source_filename) {
     LOG(INFO)<<"Compiling";
     SendReply(sock, COMPILING);
@@ -45,7 +48,8 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
     }
     StartupInfo info;
     info.fd_stderr = fd_pipe[1];
-    info.time_limit = 10;
+    info.time_limit = COMPILATION_TIME_LIMIT;
+    info.output_limit = COMPILATION_OUTPUT_LIMIT;
     TraceCallback callback;
     pid_t pid = CreateShellProcess(command.c_str(), info);
     close(fd_pipe[1]);
