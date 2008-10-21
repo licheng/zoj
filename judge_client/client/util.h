@@ -53,7 +53,7 @@ struct StartupInfo {
         : fd_stdin(0), fd_stdout(0), fd_stderr(0),
           stdin_filename(NULL), stdout_filename(NULL), stderr_filename(NULL),
           uid(0), gid(0),
-          time_limit(0), memory_limit(0), output_limit(0), proc_limit(0), file_limit(0),
+          time_limit(0), memory_limit(0), output_limit(0), stack_limit(0), proc_limit(0), file_limit(0),
           trace(0),
           working_dir(NULL) { }
 
