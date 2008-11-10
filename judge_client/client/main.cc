@@ -370,6 +370,9 @@ int main(int argc, const char* argv[]) {
                     }
                     close(server_sock);
                     close(log_server_sock);
+                    for (int i = 0; i < children.size(); ++i) {
+                        delete children[i];
+                    }
                     Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
                     exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
                 }

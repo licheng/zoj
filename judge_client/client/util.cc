@@ -85,6 +85,7 @@ int ReadMemoryConsumption(int pid) {
             sscanf(buffer + 6, "%d", &vmStack);
         }
     }
+    fclose(fp);
     if (vmPeak) {
         vmSize = vmPeak;
     }
