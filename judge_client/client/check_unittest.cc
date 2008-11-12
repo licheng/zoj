@@ -286,6 +286,8 @@ TEST_F(CompareTextFilesTest, PresentationErrorNormalized) {
     ASSERT_EQUAL(PRESENTATION_ERROR, Run());
 }
 
+DECLARE_ARG(int, special_judge_run_time_limit);
+
 class DoCheckTest: public TestFixture {
   protected:
     virtual void SetUp() {
@@ -300,6 +302,7 @@ class DoCheckTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/judge").c_str(), "judge"));
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
         output_ = judge_ = "";
+        ARG_special_judge_run_time_limit = 1;
     }
 
     virtual void TearDown() {
@@ -311,6 +314,7 @@ class DoCheckTest: public TestFixture {
             close(fd_[1]);
         }
         system(("rm -rf " + root_).c_str());
+        ARG_special_judge_run_time_limit = 10;
     }
 
     int Run() {
@@ -383,3 +387,23 @@ TEST_F(DoCheckTest, SpecialJudgePresentationError) {
     ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(PRESENTATION_ERROR, ReadLastUint32(fd_[0]));
 }
+
+TEST_F(DoCheckTest, SpecialJudgeTimeLimitExceeded) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(), "tle"));
+    output_ = "ac.out";
+    judge_ = "tle";
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    for (;;) {
+        int t = ReadUint32(fd_[0]);
+        if (t != JUDGING) {
+            ASSERT_EQUAL(INTERNAL_ERROR, t);
+            break;
+        }
+    }
+    char t;
+    ASSERT_EQUAL(0, Readn(fd_[0], &t, 1));
+}
+

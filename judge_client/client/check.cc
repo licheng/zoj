@@ -31,6 +31,10 @@
 #include "trace.h"
 #include "util.h"
 
+DEFINE_OPTIONAL_ARG(int, special_judge_run_time_limit, 10, "The run time limit of special judges in seconds");
+DEFINE_OPTIONAL_ARG(int, special_judge_memory_limit, 256 * 1024, "The memory limit of special judges in kb");
+DEFINE_OPTIONAL_ARG(int, special_judge_output_limit, 16, "The output limit of special judges in kb");
+
 TextFile::TextFile(const string& filename) : filename_(filename) {
     fd_ = open(filename.c_str(), O_RDONLY);
     if (fd_ < 0) {
@@ -172,7 +176,7 @@ int CompareTextFiles(const string& output_filename, const string& program_output
     }
 }
 
-int RunSpecialJudgeExe(int uid, string special_judge_filename) {
+int RunSpecialJudgeExe(int sock, int uid, string special_judge_filename) {
     LOG(INFO)<<"Running special judge "<<special_judge_filename;
     char path[PATH_MAX + 1];
     getcwd(path, sizeof(path));
@@ -184,9 +188,9 @@ int RunSpecialJudgeExe(int uid, string special_judge_filename) {
     StartupInfo info;
     info.stdin_filename = "p.out";
     info.uid = uid;
-    info.time_limit = 10;
-    info.memory_limit = 256 * 1024;
-    info.output_limit = 16;
+    info.time_limit = ARG_special_judge_run_time_limit;
+    info.memory_limit = ARG_special_judge_memory_limit;
+    info.output_limit = ARG_special_judge_output_limit;
     info.file_limit = 6; // stdin, stdout, stderr, input
     info.trace = 1;
     TraceCallback callback;
@@ -196,8 +200,15 @@ int RunSpecialJudgeExe(int uid, string special_judge_filename) {
         return INTERNAL_ERROR;
     }
     int status;
-    while (waitpid(pid, &status, 0) < 0) {
-        if (errno != EINTR) {
+    for (;;) {
+        int t = waitpid(pid, &status, WNOHANG);
+        if (t > 0) {
+            break;
+        } else if (t == 0) {
+            if (sleep(1) == 0) {
+                SendReply(sock, JUDGING);
+            }
+        } else if (t < 0 && errno != EINTR) {
             LOG(SYSCALL_ERROR);
             return INTERNAL_ERROR;
         }
@@ -221,7 +232,7 @@ int DoCheck(int sock, int special_judge_uid, const string& special_judge_filenam
     SendReply(sock, JUDGING);
     int result;
     if (access(special_judge_filename.c_str(), F_OK) == 0) {
-        result = RunSpecialJudgeExe(special_judge_uid, special_judge_filename);
+        result = RunSpecialJudgeExe(sock, special_judge_uid, special_judge_filename);
     } else {
         result = CompareTextFiles("output", "p.out");
     }

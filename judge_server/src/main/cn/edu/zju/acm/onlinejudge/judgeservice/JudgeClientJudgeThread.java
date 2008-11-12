@@ -261,7 +261,7 @@ public class JudgeClientJudgeThread extends Thread {
             this.logger.info("Running " + timeConsumption + " " + memoryConsumption);
             reply = this.readJudgeReply();
         }
-        if (reply == JudgeReply.JUDGING.getId()) {
+        while (reply == JudgeReply.JUDGING.getId()) {
             submission.setJudgeReply(JudgeReply.JUDGING);
             reply = this.readJudgeReply();
 
