@@ -27,8 +27,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "logging.h"
 #include "args.h"
+#include "common_io.h"
+#include "logging.h"
 #include "trace.h"
 #include "util.h"
 
@@ -166,7 +167,7 @@ int DoRun(int sock, int compiler, int time_limit, int memory_limit, int output_l
         return -1;
     }
     if (result) {
-        SendReply(sock, result);
+        WriteUint32(sock, result);
         if (result == INTERNAL_ERROR) {
             return -1;
         } else {

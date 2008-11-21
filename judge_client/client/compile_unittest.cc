@@ -25,7 +25,9 @@
 #include <fcntl.h>
 
 #include "args.h"
+#include "common_io.h"
 #include "compile.h"
+#include "environment.h"
 #include "global.h"
 #include "util.h"
 
@@ -44,6 +46,7 @@ class DoCompileTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/math.c").c_str(), "math.c"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
+        Environment::instance()->set_root(root_);
     }
 
     virtual void TearDown() {
@@ -62,7 +65,7 @@ class DoCompileTest: public TestFixture {
 };
 
 TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, COMPILER_GPP, "ac.cc"));
+    ASSERT_EQUAL(0, DoCompile(fd_[1], COMPILER_GPP, "ac.cc"));
     shutdown(fd_[1], SHUT_WR);
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
@@ -71,7 +74,7 @@ TEST_F(DoCompileTest, Success) {
 }
 
 TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce.cc"));
+    ASSERT_EQUAL(1, DoCompile(fd_[1], COMPILER_GPP, "ce.cc"));
     shutdown(fd_[1], SHUT_WR);
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
@@ -84,7 +87,7 @@ TEST_F(DoCompileTest, Failure) {
 }
 
 TEST_F(DoCompileTest, TooLongErrorMessage) {
-    ASSERT_EQUAL(1, DoCompile(fd_[1], root_, COMPILER_GPP, "ce_long_error.cc"));
+    ASSERT_EQUAL(1, DoCompile(fd_[1], COMPILER_GPP, "ce_long_error.cc"));
     shutdown(fd_[1], SHUT_WR);
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
@@ -97,7 +100,7 @@ TEST_F(DoCompileTest, TooLongErrorMessage) {
 }
 
 TEST_F(DoCompileTest, HugeOutput) {
-    ASSERT_EQUAL(1, DoCompile(fd_[1], root_, COMPILER_GCC, "ce_huge_output.c"));
+    ASSERT_EQUAL(1, DoCompile(fd_[1], COMPILER_GCC, "ce_huge_output.c"));
     shutdown(fd_[1], SHUT_WR);
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
@@ -110,7 +113,7 @@ TEST_F(DoCompileTest, HugeOutput) {
 }
 
 TEST_F(DoCompileTest, CCompilationWithLibMath) {
-    ASSERT_EQUAL(0, DoCompile(fd_[1], root_, COMPILER_GCC, "math.c"));
+    ASSERT_EQUAL(0, DoCompile(fd_[1], COMPILER_GCC, "math.c"));
     shutdown(fd_[1], SHUT_WR);
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));

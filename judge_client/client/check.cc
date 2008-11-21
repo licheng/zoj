@@ -25,6 +25,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "common_io.h"
 #include "global.h"
 #include "logging.h"
 #include "args.h"
@@ -206,7 +207,7 @@ int RunSpecialJudgeExe(int sock, int uid, string special_judge_filename) {
             break;
         } else if (t == 0) {
             if (sleep(1) == 0) {
-                SendReply(sock, JUDGING);
+                WriteUint32(sock, JUDGING);
             }
         } else if (t < 0 && errno != EINTR) {
             LOG(SYSCALL_ERROR);
@@ -229,14 +230,14 @@ int RunSpecialJudgeExe(int sock, int uid, string special_judge_filename) {
 
 int DoCheck(int sock, int special_judge_uid, const string& special_judge_filename) {
     LOG(INFO)<<"Judging";
-    SendReply(sock, JUDGING);
+    WriteUint32(sock, JUDGING);
     int result;
     if (access(special_judge_filename.c_str(), F_OK) == 0) {
         result = RunSpecialJudgeExe(sock, special_judge_uid, special_judge_filename);
     } else {
         result = CompareTextFiles("output", "p.out");
     }
-    SendReply(sock, result);
+    WriteUint32(sock, result);
     switch(result) {
         case ACCEPTED:
             LOG(INFO)<<"Accepted";

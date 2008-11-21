@@ -29,8 +29,10 @@
 #include <unistd.h>
 #include <stdarg.h>
 
+#include "common_io.h"
 #include "kmmon-lib.h"
 #include "logging.h"
+#include "strutil.h"
 #include "trace.h"
 #include "util.h"
 
@@ -202,52 +204,6 @@ int CreateShellProcess(const char* command, const StartupInfo& process_info) {
     return CreateProcess(commands, process_info);
 }
 
-ssize_t Readn(int fd, void* buffer, size_t count) {
-	char* p = (char*)buffer;
-	while (count > 0 && !global::terminated) {
-		ssize_t num = read(fd, p, count);
-		if (num == -1) {
-			if (errno == EINTR) {
-				// interrupted by a signals, read again
-				continue;
-			}
-			LOG(SYSCALL_ERROR)<<"Fail to read from file";
-			return -1;
-		}
-		if (num == 0) {
-			// EOF
-			break;
-		}
-		p += num;
-		count -= num;
-	}
-    if (global::terminated) {
-        LOG(INFO)<<"Terminated";
-        if (count > 0) {
-            return -1;
-        }
-    }
-	return p - (char*)buffer;
-}
-
-int Writen(int fd, const void* buffer, size_t count) {
-	const char*p = (const char*)buffer;
-	while (count > 0) {
-		int num = write(fd, p, count);
-		if (num == -1) {
-			if (errno == EINTR) {
-				// interrupted by a signals, write again
-				continue;
-			}
-			LOG(SYSCALL_ERROR)<<"Fail to write to file";
-			return -1;
-		}
-		p += num;
-		count -= num;
-	}
-	return 0;
-}
-
 sighandler_t InstallSignalHandler(int signal, sighandler_t handler) {
     return InstallSignalHandler(signal, handler, 0);
 }
@@ -267,39 +223,6 @@ sighandler_t InstallSignalHandler(int signal, sighandler_t handler, int flags, s
         return SIG_ERR;
     }
     return oact.sa_handler;
-}
-
-void SplitString(const string& str, char separator, vector<string>* output) {
-    int k = 0;
-    for (int i = 0; i < str.size(); ++i) {
-        if (str[i] == separator) {
-            if (i > k) {
-                output->push_back(str.substr(k, i - k));
-            }
-            k = i + 1;
-        }
-    }
-    if (k < str.size()) {
-        output->push_back(str.substr(k, str.size() - k));
-    }
-}
-
-string StringPrintf(const char* format, ...) {
-    va_list args;
-    char buffer[1024];
-    va_start(args, format);
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-    return buffer;
-}
-
-int LockFile(int fd, int cmd) {
-    struct flock lock;
-    lock.l_type = F_WRLCK;
-    lock.l_start = 0;
-    lock.l_whence = SEEK_SET;
-    lock.l_len = 0;
-    return fcntl(fd, cmd, &lock);
 }
 
 string GetLocalTimeAsString(const char* format) {
@@ -349,54 +272,3 @@ int ConnectTo(const string& address, int port, int timeout) {
     return sock;
 }
 
-// Reads the file content from the given file descriptor and writes the file
-// specified by output_filename. Creates the file if not exists.
-//
-// Return 0 if success, or -1 if any error occurs.
-int SaveFile(int sock, const string& output_filename, size_t size) {
-    int fd = open(output_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0640);
-    if (fd == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to create file "<<output_filename;
-        return -1;
-    }
-    static char buffer[4096];
-    while (size && !global::terminated) {
-        int count = min(size, sizeof(buffer));
-        count = Readn(sock, buffer, count);
-        if (count <= 0) {
-            LOG(ERROR)<<"Fail to read file";
-            close(fd);
-            return -1;
-        }
-        if (Writen(fd, buffer, count) == -1) {
-            LOG(ERROR)<<"Fail to write to "<<output_filename;
-            close(fd);
-            return -1;
-        }
-        size -= count;
-    }
-    close(fd);
-    if (size) {
-        LOG(ERROR)<<"Terminated";
-        return -1;
-    }
-    return 0;
-}
-
-int ChangeToWorkingDir(const string& root, string* working_root) {
-    string working_dir = StringPrintf("%s/working/%u", root.c_str(), getpid());
-    if (mkdir(working_dir.c_str(), 0777) < 0) {
-        if (errno != EEXIST) {
-            LOG(SYSCALL_ERROR)<<"Fail to create dir "<<working_dir;
-            return -1;
-        }
-    }
-    if (chdir(working_dir.c_str()) < 0) {
-        LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<working_dir;
-        return 1;
-    }
-    if (working_root) {
-        *working_root = working_dir;
-    }
-    return 0;
-}

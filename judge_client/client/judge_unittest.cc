@@ -23,8 +23,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "trace.h"
+#include "environment.h"
 #include "test_util-inl.h"
+#include "trace.h"
 
 DECLARE_ARG(string, compiler);
 
@@ -58,7 +59,7 @@ TEST_F(IsSupportedCompilerTest, ThreeSupported) {
     ASSERT(IsSupportedCompiler("fp"));
 }
 
-int ExecJudgeCommand(int sock, const string& root, int* problem_id, int* revision);
+int ExecJudgeCommand(int sock, int* problem_id, int* revision);
 
 class ExecJudgeCommandTest: public TestFixture {
   protected:
@@ -100,7 +101,8 @@ class ExecJudgeCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = ExecJudgeCommand(fd_[1], root_, &problem_id_output_, &revision_output_);
+        Environment::instance()->set_root(root_);
+        int ret = ExecJudgeCommand(fd_[1], &problem_id_output_, &revision_output_);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
@@ -154,7 +156,7 @@ TEST_F(ExecJudgeCommandTest, Success) {
 
 
 
-int ExecCompileCommand(int sock, const string& root, const string& working_root, int* compiler);
+int ExecCompileCommand(int sock, int* compiler);
 
 class ExecCompileCommandTest: public TestFixture {
   protected:
@@ -207,7 +209,8 @@ class ExecCompileCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = ExecCompileCommand(fd_[1], root_, root_, &compiler_);
+        Environment::instance()->set_root(root_);
+        int ret = ExecCompileCommand(fd_[1], &compiler_);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
@@ -304,7 +307,7 @@ TEST_F(ExecCompileCommandTest, CompilationError) {
 }
 
 
-int ExecTestCaseCommand(int sock, const string& root, int problem_id, int revision, int compiler, int uid, int gid);
+int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, int uid, int gid);
 
 class ExecTestCaseCommandTest: public TestFixture {
   protected:
@@ -360,7 +363,8 @@ class ExecTestCaseCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = ExecTestCaseCommand(fd_[1], root_, problem_id_, revision_, compiler_, 0, 0);
+        Environment::instance()->set_root(root_);
+        int ret = ExecTestCaseCommand(fd_[1], problem_id_, revision_, compiler_, 0, 0);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
@@ -475,7 +479,7 @@ TEST_F(ExecTestCaseCommandTest, ExistingSymlinkInputOutput) {
 
 
 
-int CheckData(int sock, const string& root, const string& data_dir);
+int CheckData(int sock, const string& data_dir);
 
 class CheckDataTest: public TestFixture {
   protected:
@@ -508,7 +512,8 @@ class CheckDataTest: public TestFixture {
     }
 
     int Run() {
-        int ret = CheckData(fd_[1], root_, root_ + "/data");
+        Environment::instance()->set_root(root_);
+        int ret = CheckData(fd_[1], root_ + "/data");
         close(fd_[1]);
         return ret;
     }
@@ -654,7 +659,7 @@ TEST_F(CheckDataTest, SuccessHasJudge) {
 }
 
 
-int ExecDataCommand(int sock, const string& root, unsigned int problem_id, unsigned int revision);
+int ExecDataCommand(int sock, unsigned int problem_id, unsigned int revision);
 
 class ExecDataCommandTest: public TestFixture {
   protected:
@@ -703,7 +708,8 @@ class ExecDataCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = ExecDataCommand(fd_[1], root_, 0, 0);
+        Environment::instance()->set_root(root_);
+        int ret = ExecDataCommand(fd_[1], 0, 0);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
@@ -834,7 +840,7 @@ TEST_F(ExecDataCommandTest, Success) {
 }
 
 
-int JudgeMain(const string& root, int sock, int uid, int gid);
+int JudgeMain(int sock, int uid, int gid);
 
 class JudgeMainTest: public TestFixture {
   protected:
@@ -956,7 +962,8 @@ class JudgeMainTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        return JudgeMain(root_, fd_[1], 0, 0);
+        Environment::instance()->set_root(root_);
+        return JudgeMain(fd_[1], 0, 0);
     }
 
     int fd_[2];

@@ -23,15 +23,18 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "common_io.h"
+#include "environment.h"
 #include "global.h"
 #include "logging.h"
+#include "strutil.h"
 #include "util.h"
 
 DECLARE_ARG(string, compiler);
 DEFINE_OPTIONAL_ARG(int, max_heart_beat_interval, 60000, "The max heart beat interval in milliseconds");
 
-int ControlMain(const string& root, const string& queue_address, int queue_port, int port) {
-    if (ChangeToWorkingDir(root, NULL) < 0) {
+int ControlMain(const string& queue_address, int queue_port, int port) {
+    if (Environment::instance()->ChangeToWorkingDir() < 0) {
         return 1;
     }
 
@@ -72,7 +75,7 @@ int ControlMain(const string& root, const string& queue_address, int queue_port,
             LOG(ERROR)<<"Fail to read command";
             global::socket_closed = true;
         } else if (command == CMD_PING) {
-            SendReply(sock, READY);
+            WriteUint32(sock, READY);
         } else if (command == CMD_INFO) {
             uint32_t buf[128] = {port, supported_compiler_ids.size()};
             int n = 2;
@@ -86,7 +89,7 @@ int ControlMain(const string& root, const string& queue_address, int queue_port,
             Writen(sock, buf, n * sizeof(buf[0]));
         } else {
             LOG(ERROR)<<"Invalid command "<<command;
-            SendReply(sock, INVALID_INPUT);
+            WriteUint32(sock, INVALID_INPUT);
             global::socket_closed = true;
         }
     }

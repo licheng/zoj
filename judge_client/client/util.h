@@ -120,77 +120,16 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info);
 // function above, just like CreateProcess({"/bin/sh", "-c", command}, process_info)
 int CreateShellProcess(const char* command, const StartupInfo& process_info);
 
-// Reads from the specified file descriptor into buffer. count is the maximum number of bytes to read.
-// Returns the number of bytes actually read, or -1 if any error occurs.
-ssize_t Readn(int fd, void* buffer, size_t count);
-
-static inline int ReadUint32(int fd, uint32_t* var) {
-    if (Readn(fd, var, sizeof(*var)) < (int) sizeof(*var)) {
-        return -1;
-    }
-    *var = ntohl(*var);
-    return 0;
-}
-
-// Writes bytes in the buffer to the specified file descriptor. count is the number of bytes to write.
-// Returns 0 if success, or -1 if any error occurs.
-int Writen(int fd, const void* buffer, size_t count);
-
-// Sends 1 byte code back to the queue services. Return 0 if success, or -1 if any error occurs.
-static inline int SendReply(int sock, uint32_t reply) {
-    reply = htonl(reply);
-    return Writen(sock, &reply, sizeof(reply));
-}
-
-static inline int SendMessage(int sock, const string& message) {
-    uint32_t len = message.size();
-    len = htonl(len);
-    if (Writen(sock, &len, sizeof(len)) < 0) {
-        return -1;
-    }
-    return Writen(sock, message.c_str(), message.size());
-}
-
 sighandler_t InstallSignalHandler(int signal, sighandler_t handler);
 
 sighandler_t InstallSignalHandler(int signum, sighandler_t handler, int flags);
 
 sighandler_t InstallSignalHandler(int signum, sighandler_t handler, int flags, sigset_t mask);
 
-void SplitString(const string& str, char separator, vector<string>* output);
-
-string StringPrintf(const char *format, ...);
-
-static inline bool StringStartsWith(const string& s, const string& prefix) {
-    return prefix.size() <= s.size() && s.substr(0, prefix.size()) == prefix;
-}
-
-static inline bool StringEndsWith(const string& s, const string& suffix) {
-    return suffix.size() <= s.size() && s.substr(s.size() - suffix.size()) == suffix;
-}
-
-// Locks the specified file. cmd can be F_GETLK, F_SETLK or F_SETLKW.
-// Returns 0 on success, -1 otherwise.
-int LockFile(int fd, int cmd);
-
-// Returns the string representation of the current local time in the specified format. The format string the same as
-// the one used in strftime().
-string GetLocalTimeAsString(const char* format);
-
-// Returns true if the address represents the localhost
-static inline bool IsLocalHost(const string& address) {
-    return false;
-    return address == "127.0.0.1" || address == "localhost";
-}
-
 static inline int CheckSum(int value) {
     return (value & 0xff) + ((value >> 8) & 0xff) + ((value >> 16) & 0xff) + ((value >> 24) & 0xff);
 }
 
 int ConnectTo(const string& address, int port, int timeout);
-
-int SaveFile(int sock, const string& output_filename, size_t size);
-
-int ChangeToWorkingDir(const string& root, string* working_root);
 
 #endif

@@ -17,11 +17,14 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "logging.h"
+
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "logging.h"
 #include "args.h"
+#include "common_io.h"
+#include "strutil.h"
 #include "util.h"
 
 LogFile* Log::log_ = NULL;
@@ -87,8 +90,11 @@ void DiskLogFile::Close() {
     }
 }
 
-UnixDomainSocketLogFile::UnixDomainSocketLogFile(const string& root)
-    : root_(root), sock_(-1), prefix_(StringPrintf("[%d] ", getpid())) {
+UnixDomainSocketLogFile::UnixDomainSocketLogFile(const string& server_sock_name, const string& client_sock_name)
+    : server_sock_name_(server_sock_name),
+      client_sock_name_(client_sock_name),
+      sock_(-1),
+      prefix_(StringPrintf("[%d] ", getpid())) {
 }
 
 UnixDomainSocketLogFile::~UnixDomainSocketLogFile() {
@@ -123,9 +129,8 @@ void UnixDomainSocketLogFile::Connect() {
     struct sockaddr_un un;
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX; 
-    string client_sock_name = StringPrintf("%s/working/%d/log.sock", root_.c_str(), getpid());
-    unlink(client_sock_name.c_str());
-    strcpy(un.sun_path, client_sock_name.c_str());
+    unlink(client_sock_name_.c_str());
+    strcpy(un.sun_path, client_sock_name_.c_str());
     if (bind(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path)) < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
@@ -140,9 +145,8 @@ void UnixDomainSocketLogFile::Connect() {
     }
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX; 
-    string server_sock_name = root_ + "/working/log.sock";
-    strcpy(un.sun_path, server_sock_name.c_str());
-    if (connect(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + server_sock_name.size()) < 0) {
+    strcpy(un.sun_path, server_sock_name_.c_str());
+    if (connect(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + server_sock_name_.size()) < 0) {
         string error_message = strerror(errno);
         openlog("ZOJ Judge Client", 0, LOG_USER);
         syslog(LOG_ERR, "Fail to connect: %s", error_message.c_str());

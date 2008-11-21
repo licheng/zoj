@@ -19,6 +19,7 @@
 #ifndef __TEST_UTIL_INL_H
 #define __TEST_UTIL_INL_H
 
+#include "common_io.h"
 #include "util.h"
 
 static inline int TryReadUint32(int fd) {

@@ -24,9 +24,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "args.h"
+#include "environment.h"
 #include "global.h"
 #include "logging.h"
-#include "args.h"
 #include "util.h"
 
 DEFINE_ARG(string, root, "The root directory of the client");
@@ -44,6 +45,8 @@ DEFINE_ARG(int, queue_port, "The port of the queue service to which this client 
 DEFINE_OPTIONAL_ARG(bool, logtostderr, true, "If true, all logs are written to stderr as well");
 
 DEFINE_OPTIONAL_ARG(int, max_judge_process, 50, "The maximal number of judge processes");
+
+namespace {
 
 void Daemonize(int lock_fd) {
     umask(0);
@@ -76,6 +79,17 @@ void Daemonize(int lock_fd) {
     write(lock_fd, buffer, strlen(buffer) + 1);
 }
 
+// Locks the specified file. cmd can be F_GETLK, F_SETLK or F_SETLKW.
+// Returns 0 on success, -1 otherwise.
+int LockFile(int fd, int cmd) {
+    struct flock lock;
+    lock.l_type = F_WRLCK;
+    lock.l_start = 0;
+    lock.l_whence = SEEK_SET;
+    lock.l_len = 0;
+    return fcntl(fd, cmd, &lock);
+}
+
 int Lock() {
     int fd = open((ARG_root + "/judge.pid").c_str(), O_RDWR | O_CREAT, 0640);
     if (fd < 0) {
@@ -98,8 +112,6 @@ int Lock() {
     write(fd, buffer, strlen(buffer) + 1);
     return fd;
 }
-
-int ControlMain(const string& root, const string& queue_address, int queue_port, int uid, int gid);
 
 int CreateServerSocket(int* port) {
     int sock = socket(PF_INET, SOCK_STREAM, 6);
@@ -148,7 +160,7 @@ int CreateUnixDomainServerSocket() {
     struct sockaddr_un un;
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX;
-    string sock_name = ARG_root + "/working/log.sock";
+    string sock_name = Environment::instance()->GetServerSockName();
     unlink(sock_name.c_str());
     strcpy(un.sun_path, sock_name.c_str());
     if (bind(server_sock, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + sock_name.size()) < 0) {
@@ -161,7 +173,6 @@ int CreateUnixDomainServerSocket() {
     }
     return server_sock;
 }
-
 
 class JudgeProcess {
   public:
@@ -221,8 +232,10 @@ void SIGUSR1Handler(int sig) {
     Log::Close();
 }
 
-int ControlMain(const string& root, const string& queue_address, int queueu_port, int port);
-int JudgeMain(const string& root, int sock, int uid, int gid);
+}
+
+int ControlMain(const string& queue_address, int queueu_port, int port);
+int JudgeMain(int sock, int uid, int gid);
 
 int main(int argc, const char* argv[]) {
     if (ParseArguments(argc, argv) < 0) {
@@ -240,7 +253,7 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    ARG_root = path;
+    Environment::instance()->set_root(path);
 
     InstallSignalHandler(SIGTERM, SIGTERMHandler);
 
@@ -285,11 +298,12 @@ int main(int argc, const char* argv[]) {
         }
         close(server_sock);
         close(log_server_sock);
-        Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
-        exit(ControlMain(ARG_root, ARG_queue_address, ARG_queue_port, port));
+        Log::SetLogFile(new UnixDomainSocketLogFile(Environment::instance()->GetServerSockName(),
+                                                    Environment::instance()->GetClientSockName()));
+        exit(ControlMain(ARG_queue_address, ARG_queue_port, port));
     }
 
-    Log::SetLogFile(new DiskLogFile(ARG_root + "/log/"));
+    Log::SetLogFile(new DiskLogFile(Environment::instance()->GetLogDir()));
     vector<JudgeProcess*> children;
     while (!global::terminated) {
         int nfds = max(log_server_sock, server_sock);
@@ -373,8 +387,9 @@ int main(int argc, const char* argv[]) {
                     for (int i = 0; i < children.size(); ++i) {
                         delete children[i];
                     }
-                    Log::SetLogFile(new UnixDomainSocketLogFile(ARG_root));
-                    exit(JudgeMain(ARG_root, sock, ARG_uid, ARG_gid));
+                    Log::SetLogFile(new UnixDomainSocketLogFile(Environment::instance()->GetServerSockName(),
+                                                                Environment::instance()->GetClientSockName()));
+                    exit(JudgeMain(sock, ARG_uid, ARG_gid));
                 }
             }
             close(sock);

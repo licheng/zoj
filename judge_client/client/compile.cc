@@ -25,25 +25,28 @@
 #include <sys/wait.h>
 
 #include "args.h"
+#include "environment.h"
+#include "common_io.h"
 #include "logging.h"
+#include "strutil.h"
 #include "trace.h"
 #include "util.h"
 
 const int COMPILATION_TIME_LIMIT = 10;
 const int COMPILATION_OUTPUT_LIMIT = 4096;
 
-int DoCompile(int sock, const string& root, int compiler, const string& source_filename) {
+int DoCompile(int sock, int compiler, const string& source_filename) {
     LOG(INFO)<<"Compiling";
-    SendReply(sock, COMPILING);
-    string command = StringPrintf("%s/script/compile.sh '%s' '%s'",
-                                  root.c_str(),
+    WriteUint32(sock, COMPILING);
+    string command = StringPrintf("%s '%s' '%s'",
+                                  Environment::instance()->GetCompilationScript().c_str(),
                                   global::COMPILER_LIST[compiler].compiler,
                                   source_filename.c_str());
     LOG(INFO)<<"Command: "<<command;
     int fd_pipe[2];
     if (pipe(fd_pipe) < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to create pipe";
-        SendReply(sock, INTERNAL_ERROR);
+        WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
     StartupInfo info;
@@ -56,7 +59,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
     if (pid < 0) {
         LOG(INFO)<<"Compilation failed";
         close(fd_pipe[0]);
-        SendReply(sock, INTERNAL_ERROR);
+        WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
     static signed char error_message[4096];
@@ -64,7 +67,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
     close(fd_pipe[0]);
     if (count < 0) {
         LOG(ERROR)<<"Fail to read error messages";
-        SendReply(sock, INTERNAL_ERROR);
+        WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
     int status = 0;
@@ -82,7 +85,7 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
     } else {
         if (WIFSIGNALED(status)) {
             LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
-            SendReply(sock, INTERNAL_ERROR);
+            WriteUint32(sock, INTERNAL_ERROR);
             return -1;
         }
         status = WEXITSTATUS(status);
@@ -90,11 +93,11 @@ int DoCompile(int sock, const string& root, int compiler, const string& source_f
     if (status) {
         if (status >= 126) {
             LOG(INFO)<<"Running compile.sh failed";
-            SendReply(sock, INTERNAL_ERROR);
+            WriteUint32(sock, INTERNAL_ERROR);
             return -1;
         } else {
             LOG(INFO)<<"Compilation error";
-            SendReply(sock, COMPILATION_ERROR);
+            WriteUint32(sock, COMPILATION_ERROR);
             uint32_t len = htonl(count);
             Writen(sock, &len, sizeof(len));
             for (int i = 0; i < count; ++i) {

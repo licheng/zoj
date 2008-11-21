@@ -25,6 +25,6 @@
 using namespace std;
 
 // Compiles the specified source file. Returns 0 if compilation succeeded, or -1 on error.
-int DoCompile(int sock, const string& root, int compiler, const string& source_filename);
+int DoCompile(int sock, int compiler, const string& source_filename);
 
 #endif

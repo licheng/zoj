@@ -67,7 +67,7 @@ class DiskLogFile: public LogFile {
 
 class UnixDomainSocketLogFile: public LogFile {
     public:
-        UnixDomainSocketLogFile(const string& root);
+        UnixDomainSocketLogFile(const string& server_sock_name, const string& client_sock_name);
         virtual ~UnixDomainSocketLogFile();
 
         virtual void Write(const string& message);
@@ -77,7 +77,8 @@ class UnixDomainSocketLogFile: public LogFile {
     private:
         void Connect();
 
-        string root_;
+        string server_sock_name_;
+        string client_sock_name_;
         int sock_;
         string prefix_;
 };

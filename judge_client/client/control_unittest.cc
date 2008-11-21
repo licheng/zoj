@@ -23,13 +23,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "environment.h"
 #include "trace.h"
 #include "test_util-inl.h"
 
 DECLARE_ARG(int, max_heart_beat_interval);
 DEFINE_OPTIONAL_ARG(string, compiler, "g++,gcc,fpc", "");
 
-int ControlMain(const string& root, const string& queue_address, int queue_port, int port);
+int ControlMain(const string& queue_address, int queue_port, int port);
 
 class ControlMainTest: public TestFixture {
     protected:
@@ -97,7 +98,8 @@ class ControlMainTest: public TestFixture {
             }
             if (pid_ == 0) {
                 close(server_sock_);
-                exit(ControlMain(root_, address_, port_, port_));
+                Environment::instance()->set_root(root_);
+                exit(ControlMain(address_, port_, port_));
             }
         }
 

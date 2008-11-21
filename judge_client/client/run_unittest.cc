@@ -27,6 +27,7 @@
 #include "args.h"
 #include "global.h"
 #include "run.h"
+#include "strutil.h"
 #include "test_util-inl.h"
 #include "trace.h"
 #include "util.h"
