@@ -47,7 +47,7 @@ int SetLimit(int resource, unsigned int limit) {
     return 0;
 }
 
-int ReadTimeConsumption(int pid) {
+int ReadTimeConsumption(pid_t pid) {
     char buffer[64];
     sprintf(buffer, "/proc/%d/stat", pid);
     FILE* fp = fopen(buffer, "r");
@@ -66,7 +66,7 @@ int ReadTimeConsumption(int pid) {
     return int((utime + stime + 0.0) / clktck * 1000);
 }
 
-int ReadMemoryConsumption(int pid) {
+int ReadMemoryConsumption(pid_t pid) {
     char buffer[64];
     sprintf(buffer, "/proc/%d/status", pid);
     FILE* fp = fopen(buffer, "r");
@@ -223,15 +223,6 @@ sighandler_t InstallSignalHandler(int signal, sighandler_t handler, int flags, s
         return SIG_ERR;
     }
     return oact.sa_handler;
-}
-
-string GetLocalTimeAsString(const char* format) {
-    time_t t = time(NULL);
-    struct tm tm;
-    localtime_r(&t, &tm);
-    char buf[1024];
-    strftime(buf, sizeof(buf), format, &tm);
-    return buf;
 }
 
 int ConnectTo(const string& address, int port, int timeout) {

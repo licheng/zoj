@@ -17,8 +17,8 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __UTIL_H
-#define __UTIL_H
+#ifndef __UTIL_H__
+#define __UTIL_H__
 
 #include <sstream>
 #include <string>
@@ -132,4 +132,4 @@ static inline int CheckSum(int value) {
 
 int ConnectTo(const string& address, int port, int timeout);
 
-#endif
+#endif // __UTIL_H__

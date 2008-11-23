@@ -18,20 +18,16 @@
  */
 
 #include "unittest.h"
+#include "compiler.h"
 
-#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
 
-#include <arpa/inet.h>
-#include <fcntl.h>
-
-#include "args.h"
 #include "common_io.h"
-#include "compile.h"
 #include "environment.h"
-#include "global.h"
-#include "util.h"
+#include "protocol.h"
 
-class DoCompileTest: public TestFixture {
+class CompilerTest: public TestFixture {
   protected:
     virtual void SetUp() {
         root_ = tmpnam(NULL);
@@ -39,14 +35,13 @@ class DoCompileTest: public TestFixture {
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         ASSERT_EQUAL(0, mkdir("script", 0700));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.cc").c_str(), "ac.cc"));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(), "ce.cc"));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_long_error.cc").c_str(), "ce_long_error.cc"));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_huge_output.c").c_str(), "ce_huge_output.c"));
-        ASSERT_EQUAL(0, symlink((TESTDIR + "/math.c").c_str(), "math.c"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         Environment::instance()->set_root(root_);
+        compiler_id_ = 2;
+        compiler_name_ = "g++";
+        source_file_extension_ = "cc";
+        source_filename_ = "p.cc";
     }
 
     virtual void TearDown() {
@@ -59,23 +54,39 @@ class DoCompileTest: public TestFixture {
         system(("rm -rf " + root_).c_str());
     }
 
+    int Run() {
+        Compiler compiler(compiler_id_, compiler_name_, source_file_extension_);
+        int ret = compiler.Compile(fd_[1], source_filename_);
+        ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
+        return ret;
+    }
+
     int fd_[2];
     char buf_[1024 * 16];
     string root_;
+    int compiler_id_;
+    string compiler_name_;
+    string source_file_extension_;
+    string source_filename_;
+    Compiler* compiler_;
 };
 
-TEST_F(DoCompileTest, Success) {
-    ASSERT_EQUAL(0, DoCompile(fd_[1], COMPILER_GPP, "ac.cc"));
-    shutdown(fd_[1], SHUT_WR);
+TEST_F(CompilerTest, Success) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.cc").c_str(), "p.cc"));
+
+    ASSERT_EQUAL(0, Run());
+
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
     ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
 }
 
-TEST_F(DoCompileTest, Failure) {
-    ASSERT_EQUAL(1, DoCompile(fd_[1], COMPILER_GPP, "ce.cc"));
-    shutdown(fd_[1], SHUT_WR);
+TEST_F(CompilerTest, Failure) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.cc").c_str(), "p.cc"));
+
+    ASSERT_EQUAL(1, Run());
+
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
@@ -86,9 +97,11 @@ TEST_F(DoCompileTest, Failure) {
     ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 
-TEST_F(DoCompileTest, TooLongErrorMessage) {
-    ASSERT_EQUAL(1, DoCompile(fd_[1], COMPILER_GPP, "ce_long_error.cc"));
-    shutdown(fd_[1], SHUT_WR);
+TEST_F(CompilerTest, TooLongErrorMessage) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_long_error.cc").c_str(), "p.cc"));
+
+    ASSERT_EQUAL(1, Run());
+
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
@@ -99,9 +112,15 @@ TEST_F(DoCompileTest, TooLongErrorMessage) {
     ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 
-TEST_F(DoCompileTest, HugeOutput) {
-    ASSERT_EQUAL(1, DoCompile(fd_[1], COMPILER_GCC, "ce_huge_output.c"));
-    shutdown(fd_[1], SHUT_WR);
+TEST_F(CompilerTest, HugeOutput) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_huge_output.c").c_str(), "p.cc"));
+    compiler_id_ = 1;
+    compiler_name_ = "gcc";
+    source_file_extension_ = "c";
+    source_filename_ = "p.c";
+
+    ASSERT_EQUAL(1, Run());
+
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
@@ -112,9 +131,15 @@ TEST_F(DoCompileTest, HugeOutput) {
     ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 
-TEST_F(DoCompileTest, CCompilationWithLibMath) {
-    ASSERT_EQUAL(0, DoCompile(fd_[1], COMPILER_GCC, "math.c"));
-    shutdown(fd_[1], SHUT_WR);
+TEST_F(CompilerTest, CCompilationWithLibMath) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/math.c").c_str(), "p.c"));
+    compiler_id_ = 1;
+    compiler_name_ = "gcc";
+    source_file_extension_ = "c";
+    source_filename_ = "p.c";
+
+    ASSERT_EQUAL(0, Run());
+
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);

@@ -24,11 +24,12 @@
 #include <unistd.h>
 
 #include "environment.h"
-#include "trace.h"
+#include "protocol.h"
 #include "test_util-inl.h"
+#include "trace.h"
 
 DECLARE_ARG(int, max_heart_beat_interval);
-DEFINE_OPTIONAL_ARG(string, compiler, "g++,gcc,fpc", "");
+DECLARE_ARG(string, compiler);
 
 int ControlMain(const string& queue_address, int queue_port, int port);
 
@@ -74,6 +75,7 @@ class ControlMainTest: public TestFixture {
             buf_size_ = 0;
             global::terminated = false;
             ARG_max_heart_beat_interval = 100;
+            ARG_compiler = "gcc,g++,fpc";
         }
 
         virtual void TearDown() {
@@ -241,7 +243,7 @@ TEST_F(ControlMainTest, InfoSuccess) {
     SendCommand();
     ASSERT_EQUAL(port_, ReadUint32(client_socks_.back()));
     ASSERT_EQUAL(3, ReadUint32(client_socks_.back()));
-    ASSERT_EQUAL(global::COMPILER_LIST[COMPILER_GCC].id, ReadUint32(client_socks_.back()));
-    ASSERT_EQUAL(global::COMPILER_LIST[COMPILER_GPP].id, ReadUint32(client_socks_.back()));
-    ASSERT_EQUAL(global::COMPILER_LIST[COMPILER_FREE_PASCAL].id, ReadUint32(client_socks_.back()));
+    ASSERT_EQUAL(1, ReadUint32(client_socks_.back()));
+    ASSERT_EQUAL(2, ReadUint32(client_socks_.back()));
+    ASSERT_EQUAL(3, ReadUint32(client_socks_.back()));
 }

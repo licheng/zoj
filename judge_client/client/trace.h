@@ -17,8 +17,8 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRACE_H
-#define __TRACE_H
+#ifndef __TRACE_H__
+#define __TRACE_H__
 
 #include <string>
 #include <vector>
@@ -92,4 +92,4 @@ class TraceCallback {
 void InstallHandlers();
 void UninstallHandlers();
 
-#endif
+#endif // __TRACE_H__

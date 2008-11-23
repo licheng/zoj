@@ -29,6 +29,7 @@
 #include "global.h"
 #include "kmmon-lib.h"
 #include "logging.h"
+#include "protocol.h"
 #include "strutil.h"
 #include "util.h"
 

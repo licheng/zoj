@@ -17,20 +17,17 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GLOBAL_H__
-#define __GLOBAL_H__
+#ifndef __CHECKER_H__
+#define __CHECKER_H__
 
-#include <string>
+class Checker {
+  public:
+    virtual ~Checker();
 
-using namespace std;
+    int Check(int sock);
 
-#define MAX_JOBS 100
-#define MAX_LOG_FILE_SIZE 262144 // 256KB
-#define MAX_DATA_FILE_SIZE 16 * 1024 * 1024 // 16MB
+  protected:
+    virtual int InternalCheck(int sock) = 0;
+};
 
-namespace global {
-    extern int terminated;
-    extern int socket_closed;
-}
-
-#endif // __GLOGAL_H__
+#endif // __CHECKER_H__

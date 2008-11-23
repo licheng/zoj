@@ -17,17 +17,17 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CHECK_H
-#define __CHECK_H
+#ifndef __TEXT_FILE_READER_H__
+#define __TEXT_FILE_READER_H__
 
 #include <string>
 
 using namespace std;
 
-class TextFile {
+class TextFileReader {
   public:
-    TextFile(const string& filename);
-    ~TextFile();
+    TextFileReader(const string& filename);
+    ~TextFileReader();
 
     // Returns the next character in the file. Returns 0 if EOF is reached, -1 if any error occurs.
     int Read();
@@ -60,8 +60,4 @@ class TextFile {
     const string filename_;
 };
 
-int CompareTextFiles(const string& output_filename, const string& program_output_filename);
-
-int DoCheck(int sock, int special_judge_uid, const string& special_judge_filename);
-
-#endif
+#endif // __TEXT_FILE_READER_H___

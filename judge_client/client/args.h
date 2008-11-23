@@ -17,8 +17,8 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ARGS_H
-#define __ARGS_H
+#ifndef __ARGS_H__
+#define __ARGS_H__
 
 #include <string>
 #include <vector>
@@ -63,4 +63,4 @@ class ArgumentInfo {
 // Extracts parameter values from the passed-in arguments.
 int ParseArguments(int argc, const char* argv[]);
 
-#endif
+#endif // __ARGS_H__

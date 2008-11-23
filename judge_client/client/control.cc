@@ -24,13 +24,14 @@
 #include <unistd.h>
 
 #include "common_io.h"
+#include "compiler.h"
 #include "environment.h"
 #include "global.h"
 #include "logging.h"
+#include "protocol.h"
 #include "strutil.h"
 #include "util.h"
 
-DECLARE_ARG(string, compiler);
 DEFINE_OPTIONAL_ARG(int, max_heart_beat_interval, 60000, "The max heart beat interval in milliseconds");
 
 int ControlMain(const string& queue_address, int queue_port, int port) {
@@ -38,18 +39,10 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
         return 1;
     }
 
+    vector<const Compiler*> supported_compilers = CompilerManager::GetInstance()->GetAllSupportedCompilers();
+
     int sock = -1;
     global::socket_closed = true;
-    vector<string> supported_compilers;
-    SplitString(ARG_compiler, ',', &supported_compilers);
-    set<int> supported_compiler_ids;
-    for (int i = 0; i < supported_compilers.size(); ++i) {
-        for (int j = 0; j < global::COMPILER_NUM; ++j) {
-            if (supported_compilers[i] == global::COMPILER_LIST[j].compiler) {
-                supported_compiler_ids.insert(global::COMPILER_LIST[j].id);
-            }
-        }
-    }
     // Loops until SIGTERM is received.
     while (!global::terminated) {
         if (global::socket_closed) {
@@ -77,11 +70,10 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
         } else if (command == CMD_PING) {
             WriteUint32(sock, READY);
         } else if (command == CMD_INFO) {
-            uint32_t buf[128] = {port, supported_compiler_ids.size()};
+            uint32_t buf[128] = {port, supported_compilers.size()};
             int n = 2;
-            for (set<int>::iterator it = supported_compiler_ids.begin();
-                 it != supported_compiler_ids.end(); ++it) {
-                buf[n++] = *it;
+            for (int i = 0; i < supported_compilers.size(); ++i) {
+                buf[n++] = supported_compilers[i]->id();
             }
             for (int i = 0; i < n; ++i) {
                 buf[i] = htonl(buf[i]);

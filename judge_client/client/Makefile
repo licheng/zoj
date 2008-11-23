@@ -33,12 +33,16 @@ endif
 judged: $(OBJS) -lkmmon
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(UNITTESTS): %_unittest : %.o %_unittest.o global.o -lcppunit args.o common_io.o strutil.o util.o trace.o logging.o -lkmmon
+$(UNITTESTS): %_unittest : %.o %_unittest.o global.o -lcppunit args.o common_io.o logging.o strutil.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-compile_unittest: environment.o
-judge_unittest: compile.o run.o check.o environment.o
-control_unittest: compile.o run.o check.o environment.o
+text_checker_unittest: text_file_reader.o checker.o
+special_checker_unittest: checker.o trace.o util.o -lkmmon
+native_runner_unittest: runner.o trace.o util.o -lkmmon
+compiler_unittest: environment.o trace.o util.o -lkmmon
+judge_unittest: compiler.o runner.o checker.o native_runner.o text_checker.o special_checker.o environment.o util.o trace.o text_file_reader.o -lkmmon
+control_unittest: compiler.o environment.o trace.o util.o -lkmmon
+util_unittest: -lkmmon
 main_unittest: $(filter-out main.o main_stub.o,$(OBJS))
 
 testdata:
@@ -46,7 +50,7 @@ testdata:
 
 $(UNITTEST_RUNS): %.run : % testdata
 	@echo -n "Running $<: "
-	@-./$<
+	@./$<
 	@echo "******************************************************************************"
 	@echo
 

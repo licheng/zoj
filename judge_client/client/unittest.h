@@ -17,8 +17,8 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __UNITTEST_H
-#define __UNITTEST_H
+#ifndef __UNITTEST_H__
+#define __UNITTEST_H__
 
 #include <iostream>
 #include <string>
@@ -117,8 +117,7 @@ int main() {
     CPPUNIT_NS::TestFactoryRegistry &registry =
         CPPUNIT_NS::TestFactoryRegistry::getRegistry("alltest");
     runner.addTest(registry.makeTest());
-    runner.run();
-    return 0;
+    return !runner.run();
 }
 
-#endif
+#endif // __UNITTEST_H__

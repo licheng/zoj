@@ -19,25 +19,18 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-#include "check.h"
+#include "text_checker.h"
+#include "special_checker.h"
 #include "common_io.h"
+#include "compiler.h"
 #include "environment.h"
 #include "global.h"
-#include "compile.h"
 #include "logging.h"
-#include "run.h"
+#include "protocol.h"
+#include "native_runner.h"
 #include "strutil.h"
 #include "trace.h"
 #include "util.h"
-
-DEFINE_ARG(string, compiler, "All compilers supported by this client");
-
-// Returns true if the specified file type is supported by the server
-bool IsSupportedCompiler(const string& compiler) {
-    vector<string> supported_compilers;
-    SplitString(ARG_compiler, ',', &supported_compilers);
-    return find(supported_compilers.begin(), supported_compilers.end(), compiler) != supported_compilers.end();
-}
 
 // Reads the file content from the given file descriptor and writes the file
 // specified by output_filename. Creates the file if not exists.
@@ -113,45 +106,40 @@ int ExecJudgeCommand(int sock, int* problem_id, int* revision) {
     }
 }
 
-int ExecCompileCommand(int sock, int* compiler) {
-    uint32_t compiler_id;
+int ExecCompileCommand(int sock, int* compiler_id) {
+    uint32_t id;
     uint32_t source_file_size;
     uint32_t checksum;
-    if (ReadUint32(sock, &compiler_id) == -1 ||
+    if (ReadUint32(sock, &id) == -1 ||
         ReadUint32(sock, &source_file_size) == -1 ||
         ReadUint32(sock, &checksum) == -1) {
         return -1;
     }
     LOG(INFO)<<StringPrintf("Compiler:%u", (unsigned int)compiler_id);
     if (CheckSum(CMD_COMPILE) +
-        CheckSum(compiler_id) +
+        CheckSum(id) +
         CheckSum(source_file_size) != checksum) {
         LOG(ERROR)<<"Invalid checksum "<<checksum;
         WriteUint32(sock, INVALID_INPUT);
         return -1;
     }
-    *compiler = -1;
-    for (int i = 0; i < global::COMPILER_NUM; ++i) {
-        if (compiler_id == global::COMPILER_LIST[i].id) {
-            *compiler = i;
-            break;
-        }
-    }
-    if (*compiler < 0 || !IsSupportedCompiler(global::COMPILER_LIST[*compiler].compiler)) {
-        LOG(ERROR)<<"Invalid compiler "<<(int)compiler_id;
+    const Compiler* compiler = CompilerManager::GetInstance()->GetCompiler(id);
+    if (compiler == NULL) {
+        LOG(ERROR)<<"Invalid compiler "<<(int)id;
         WriteUint32(sock, INVALID_INPUT);
         return -1;
     }
-    LOG(INFO)<<"Compiler:"<<global::COMPILER_LIST[*compiler].compiler;
+    *compiler_id = id;
+    LOG(INFO)<<"Compiler:"<<compiler->compiler_name();
     WriteUint32(sock, READY);
-    string source_filename = StringPrintf("p.%s", global::COMPILER_LIST[*compiler].source_file_type);
+    const string& source_filename = "p." + compiler->source_file_extension();
     LOG(INFO)<<"Saving source file "<<source_filename<<". Length:"<<source_file_size;
     if (SaveFile(sock, source_filename.c_str(), source_file_size) == -1) {
         WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
 
-    switch (DoCompile(sock, *compiler, source_filename)) {
+    switch (compiler->Compile(sock, source_filename)) {
         case -1:
             return -1;
         case 0:
@@ -224,7 +212,9 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
-    int result = DoRun(sock, compiler, time_limit, memory_limit, output_limit, uid, gid);
+    int result;
+    NativeRunner runner;
+    result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
     if (result) {
         return result == -1 ? -1 : 0;
     }
@@ -233,7 +223,13 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
-    return DoCheck(sock, uid, special_judge_filename);
+    if (access(special_judge_filename.c_str(), F_OK) == 0) {
+        SpecialChecker checker(special_judge_filename);
+        return checker.Check(sock);
+    } else {
+        TextChecker checker;
+        return checker.Check(sock);
+    }
 }
 
 int CheckData(int sock, const string& data_dir) {
@@ -246,7 +242,7 @@ int CheckData(int sock, const string& data_dir) {
     int ret = 0;
     vector<int> in, out;
     string judge;
-    int compiler = -1;
+    const Compiler* judge_compiler = NULL;
     for (;;) {
         struct dirent* entry = readdir(dir);
         if (entry == NULL) {
@@ -280,17 +276,10 @@ int CheckData(int sock, const string& data_dir) {
             }
             out.push_back(index);
         } else if (StringStartsWith(entry->d_name, "judge.")) {
-            string source_file_type = entry->d_name + 6;
-            for (int i = 0; i < sizeof(global::COMPILER_LIST) / sizeof(global::COMPILER_LIST[0]); ++i) {
-                if (global::COMPILER_LIST[i].source_file_type == source_file_type) {
-                    if (IsSupportedCompiler(global::COMPILER_LIST[i].compiler)) {
-                        compiler = i;
-                    }
-                    break;
-                }
-            }
-            if (compiler < 0) {
-                LOG(ERROR)<<"Unsupported judge source file type "<<source_file_type;
+            string source_file_extension = entry->d_name + 6;
+            judge_compiler = CompilerManager::GetInstance()->GetCompilerByExtension(source_file_extension);
+            if (judge_compiler == NULL) {
+                LOG(ERROR)<<"Unsupported judge source file type "<<source_file_extension;
                 ret = -1;
                 break;
             }
@@ -310,7 +299,7 @@ int CheckData(int sock, const string& data_dir) {
         }
         sort(in.begin(), in.end());
         sort(out.begin(), out.end());
-        if (judge.empty()) {
+        if (judge_compiler == NULL) {
             for (int i = 0; i < in.size(); ++i) {
                 if (i >= out.size() || in[i] < out[i]) {
                     LOG(ERROR)<<"No "<<in[i]<<".out found for "<<in[i]<<".in";
@@ -326,7 +315,7 @@ int CheckData(int sock, const string& data_dir) {
                 LOG(ERROR)<<"No "<<out[in.size()]<<".in found for "<<out[in.size()]<<".out";
                 ret = -1;
             }
-        } else if (DoCompile(sock, compiler, data_dir + "/" + judge) == -1) {
+        } else if (judge_compiler->Compile(sock, data_dir + "/" + judge) == -1) {
             return -1;
         }
     }

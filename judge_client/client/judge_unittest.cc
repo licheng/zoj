@@ -23,41 +23,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "compiler.h"
 #include "environment.h"
+#include "protocol.h"
 #include "test_util-inl.h"
 #include "trace.h"
 
+DEFINE_OPTIONAL_ARG(int, uid, 0, "");
 DECLARE_ARG(string, compiler);
-
-bool IsSupportedCompiler(const string& sourceFileType);
-
-class IsSupportedCompilerTest : public TestFixture {
-};
-
-TEST_F(IsSupportedCompilerTest, NoneSupported) {
-    ARG_compiler = "";
-    ASSERT(!IsSupportedCompiler("g++"));
-}
-
-TEST_F(IsSupportedCompilerTest, OneSupported) {
-    ARG_compiler = "g++";
-    ASSERT(IsSupportedCompiler("g++"));
-    ASSERT(!IsSupportedCompiler("gcc"));
-}
-
-TEST_F(IsSupportedCompilerTest, TwoSupported) {
-    ARG_compiler = "g++,gcc";
-    ASSERT(IsSupportedCompiler("g++"));
-    ASSERT(IsSupportedCompiler("gcc"));
-    ASSERT(!IsSupportedCompiler("fp"));
-}
-
-TEST_F(IsSupportedCompilerTest, ThreeSupported) {
-    ARG_compiler = "g++,gcc,fp";
-    ASSERT(IsSupportedCompiler("g++"));
-    ASSERT(IsSupportedCompiler("gcc"));
-    ASSERT(IsSupportedCompiler("fp"));
-}
 
 int ExecJudgeCommand(int sock, int* problem_id, int* revision);
 
@@ -168,7 +141,7 @@ class ExecCompileCommandTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         fd_[0] = fd_[1] = temp_fd_ = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
-        compiler_id_ = global::COMPILER_LIST[COMPILER_GPP].id;
+        compiler_id_ = 2;
         source_filename_ = TESTDIR + "/ac.cc";
         struct stat stat; 
         lstat(source_filename_.c_str(), &stat);
@@ -177,6 +150,10 @@ class ExecCompileCommandTest: public TestFixture {
                     CheckSum(compiler_id_) +
                     CheckSum(source_file_size_);
         ARG_compiler = "g++";
+        if (CompilerManager::instance_) {
+            delete CompilerManager::instance_;
+            CompilerManager::instance_ = NULL;
+        }
     }
 
     virtual void TearDown() {
@@ -334,7 +311,7 @@ class ExecTestCaseCommandTest: public TestFixture {
                     CheckSum(output_limit_);
         InstallHandlers();
         problem_id_ = revision_ = 0;
-        compiler_ = COMPILER_GPP;
+        compiler_ = 2;
     }
 
     virtual void TearDown() {
@@ -499,6 +476,10 @@ class CheckDataTest: public TestFixture {
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, pipe(fd_));
         ARG_compiler = "g++";
+        if (CompilerManager::instance_) {
+            delete CompilerManager::instance_;
+            CompilerManager::instance_ = NULL;
+        }
     }
 
     virtual void TearDown() {
@@ -925,7 +906,7 @@ class JudgeMainTest: public TestFixture {
         int source_file_size = stat.st_size;
         buf_size_ = 0;
         AppendUint32(CMD_COMPILE);
-        AppendUint32(global::COMPILER_LIST[COMPILER_GPP].id);
+        AppendUint32(2);
         AppendUint32(source_file_size);
         AppendCheckSum();
         AppendFile(source_filename, source_file_size);

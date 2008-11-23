@@ -17,20 +17,21 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GLOBAL_H__
-#define __GLOBAL_H__
+#include "runner.h"
 
-#include <string>
+#include "common_io.h"
+#include "logging.h"
+#include "protocol.h"
 
-using namespace std;
-
-#define MAX_JOBS 100
-#define MAX_LOG_FILE_SIZE 262144 // 256KB
-#define MAX_DATA_FILE_SIZE 16 * 1024 * 1024 // 16MB
-
-namespace global {
-    extern int terminated;
-    extern int socket_closed;
+Runner::~Runner() {
 }
 
-#endif // __GLOGAL_H__
+int Runner::SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption) {
+    if (WriteUint32(sock, RUNNING) == -1 ||
+        WriteUint32(sock, time_consumption) == -1 ||
+        WriteUint32(sock, memory_consumption) == -1) {
+        LOG(ERROR)<<"Fail to send running message";
+        return -1;
+    }
+    return 0;
+}

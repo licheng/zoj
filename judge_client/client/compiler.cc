@@ -17,9 +17,10 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "compile.h"
+#include "compiler.h"
 
 #include <string>
+#include <vector>
 
 #include <arpa/inet.h>
 #include <sys/wait.h>
@@ -28,20 +29,87 @@
 #include "environment.h"
 #include "common_io.h"
 #include "logging.h"
+#include "protocol.h"
 #include "strutil.h"
 #include "trace.h"
 #include "util.h"
 
-const int COMPILATION_TIME_LIMIT = 10;
-const int COMPILATION_OUTPUT_LIMIT = 4096;
+DEFINE_ARG(string, compiler, "All compilers supported by this client");
+DEFINE_OPTIONAL_ARG(int, compilation_time_limit, 10, "The time limit of compilers in seconds");
+DEFINE_OPTIONAL_ARG(int, compilation_output_limit, 4096, "The output limit of compilers in kb");
 
-int DoCompile(int sock, int compiler, const string& source_filename) {
+namespace {
+
+struct CompilerInfo {
+    int id;
+    const char* compiler;
+    const char* source_file_extension;
+} COMPILER_LIST[] = {
+    {1, "gcc", "c"},
+    {2, "g++", "cc"},
+    {3, "fpc", "pas"},
+    {4, "javac", "java"}
+};
+
+}
+
+CompilerManager* CompilerManager::instance_ = NULL;
+
+const CompilerManager* CompilerManager::GetInstance() {
+    if (instance_ == NULL) {
+        instance_ = new CompilerManager(ARG_compiler);
+    }
+    return instance_;
+}
+
+CompilerManager::CompilerManager(const string& supported_compilers) {
+    vector<string> t;
+    SplitString(supported_compilers, ',', &t);
+    for (int i = 0; i < sizeof(COMPILER_LIST) / sizeof(COMPILER_LIST[0]); ++i) {
+        for (int j = 0; j < t.size(); ++j) {
+            if (COMPILER_LIST[i].compiler == t[j]) {
+                compiler_map_[COMPILER_LIST[i].id] = new Compiler(COMPILER_LIST[i].id,
+                                                                  COMPILER_LIST[i].compiler,
+                                                                  COMPILER_LIST[i].source_file_extension);
+                break;
+            }
+        }
+    }
+}
+
+vector<const Compiler*> CompilerManager::GetAllSupportedCompilers() const {
+    vector<const Compiler*> ret;
+    for (map<int, const Compiler*>::const_iterator it = compiler_map_.begin(); it != compiler_map_.end(); ++it) {
+        ret.push_back(it->second);
+    }
+    return ret;
+}
+
+const Compiler* CompilerManager::GetCompiler(int compiler) const {
+    map<int, const Compiler*>::const_iterator it = compiler_map_.find(compiler);
+    if (it == compiler_map_.end()) {
+        return NULL;
+    } else {
+        return it->second;
+    }
+}
+
+const Compiler* CompilerManager::GetCompilerByExtension(const string& extension) const {
+    for (map<int, const Compiler*>::const_iterator it = compiler_map_.begin(); it != compiler_map_.end(); ++it) {
+        if (it->second->source_file_extension() == extension) {
+            return it->second;
+        }
+    }
+    return NULL;
+}
+
+int Compiler::Compile(int sock, const string& source_file_name) const {
     LOG(INFO)<<"Compiling";
     WriteUint32(sock, COMPILING);
     string command = StringPrintf("%s '%s' '%s'",
                                   Environment::instance()->GetCompilationScript().c_str(),
-                                  global::COMPILER_LIST[compiler].compiler,
-                                  source_filename.c_str());
+                                  this->compiler_name_.c_str(),
+                                  source_file_name.c_str());
     LOG(INFO)<<"Command: "<<command;
     int fd_pipe[2];
     if (pipe(fd_pipe) < 0) {
@@ -51,8 +119,8 @@ int DoCompile(int sock, int compiler, const string& source_filename) {
     }
     StartupInfo info;
     info.fd_stderr = fd_pipe[1];
-    info.time_limit = COMPILATION_TIME_LIMIT;
-    info.output_limit = COMPILATION_OUTPUT_LIMIT;
+    info.time_limit = ARG_compilation_time_limit;
+    info.output_limit = ARG_compilation_output_limit;
     TraceCallback callback;
     pid_t pid = CreateShellProcess(command.c_str(), info);
     close(fd_pipe[1]);

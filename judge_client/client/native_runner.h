@@ -17,14 +17,21 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __COMPILE_H
-#define __COMPILE_H
+#ifndef __NATIVE_RUNNER_H__
+#define __NATIVE_RUNNER_H__
 
-#include <string>
+#include "runner.h"
 
-using namespace std;
+class TraceCallback;
 
-// Compiles the specified source file. Returns 0 if compilation succeeded, or -1 on error.
-int DoCompile(int sock, int compiler, const string& source_filename);
+class NativeRunner : public Runner {
+  public:
+    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid);
 
-#endif
+  private:
+    int Monitor(int sock, pid_t pid, int time_limit, int memory_limit, TraceCallback* callback);
+
+  friend class NativeRunnerTest;    
+};
+
+#endif // __NATIVE_RUNNER_H__

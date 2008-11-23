@@ -17,20 +17,22 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GLOBAL_H__
-#define __GLOBAL_H__
+#ifndef __RUNNER_H__
+#define __RUNNER_H__
 
 #include <string>
 
 using namespace std;
 
-#define MAX_JOBS 100
-#define MAX_LOG_FILE_SIZE 262144 // 256KB
-#define MAX_DATA_FILE_SIZE 16 * 1024 * 1024 // 16MB
+class Runner {
+  public:
+    virtual ~Runner();
 
-namespace global {
-    extern int terminated;
-    extern int socket_closed;
-}
+    // Runs the specified program. Returns 0 if execution succeeded, or -1 on error.
+    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) = 0;
 
-#endif // __GLOGAL_H__
+  protected:
+    static int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption);
+};
+
+#endif // __RUNNER_H__

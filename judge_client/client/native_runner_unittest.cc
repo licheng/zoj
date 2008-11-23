@@ -18,37 +18,32 @@
  */
 
 #include "unittest.h"
+#include "native_runner.h"
 
-#include <stdio.h>
-
-#include <fcntl.h>
-#include <unistd.h>
-
-#include "args.h"
-#include "global.h"
-#include "run.h"
+#include "protocol.h"
 #include "strutil.h"
 #include "test_util-inl.h"
 #include "trace.h"
-#include "util.h"
 
-class DoRunTest: public TestFixture {
+class NativeRunnerTest : public TestFixture {
   protected:
     virtual void SetUp() {
+        runner_ = new NativeRunner();
         root_ = tmpnam(NULL);
-        fn_ = root_ + "/output";
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         InstallHandlers();
-        compiler_ = COMPILER_GPP;
         time_limit_ = 10;
         memory_limit_ = output_limit_ = 1000;
     }
-    
+
     virtual void TearDown() {
+        if (runner_) {
+            delete runner_;
+        }
         UninstallHandlers();
         if (fd_[0] >= 0) {
             close(fd_[0]);
@@ -57,27 +52,24 @@ class DoRunTest: public TestFixture {
             close(fd_[1]);
         }
         system(("rm -rf " + root_).c_str());
-        chdir(CURRENT_WORKING_DIR.c_str());
     }
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = DoRun(fd_[1], compiler_, time_limit_, memory_limit_, output_limit_, 0, 0);
+        int ret = runner_->Run(fd_[1], time_limit_, memory_limit_, output_limit_, 0, 0);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
 
-    int fd_[2];
-    string fn_;
-    char buf_[32];
+    NativeRunner* runner_;
     string root_;
-    int compiler_;
+    int fd_[2];
     int time_limit_;
     int memory_limit_;
     int output_limit_;
 };
 
-TEST_F(DoRunTest, Success) {
+TEST_F(NativeRunnerTest, Success) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/ac").c_str(), "p"));
 
     ASSERT_EQUAL(0, Run());
@@ -96,7 +88,7 @@ TEST_F(DoRunTest, Success) {
     }
 }
 
-TEST_F(DoRunTest, TimeLimitExceeded) {
+TEST_F(NativeRunnerTest, TimeLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(), "p"));
     time_limit_ = 1;
 
@@ -116,7 +108,7 @@ TEST_F(DoRunTest, TimeLimitExceeded) {
     }
 }
 
-TEST_F(DoRunTest, MemoryLimitExceeded) {
+TEST_F(NativeRunnerTest, MemoryLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/mle").c_str(), "p"));
     memory_limit_ = 1;
 
@@ -136,7 +128,7 @@ TEST_F(DoRunTest, MemoryLimitExceeded) {
     }
 }
 
-TEST_F(DoRunTest, MemoryLimitExceededMMap) {
+TEST_F(NativeRunnerTest, MemoryLimitExceededMMap) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/mle_mmap").c_str(), "p"));
     memory_limit_ = 100000;
 
@@ -156,7 +148,7 @@ TEST_F(DoRunTest, MemoryLimitExceededMMap) {
     }
 }
 
-TEST_F(DoRunTest, OutputLimitExceeded) {
+TEST_F(NativeRunnerTest, OutputLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/ole").c_str(), "p"));
     output_limit_ = 1;
 
@@ -176,7 +168,7 @@ TEST_F(DoRunTest, OutputLimitExceeded) {
     }
 }
 
-TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
+TEST_F(NativeRunnerTest, SegmentationFaultSIGSEGV) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/sigsegv").c_str(), "p"));
 
     ASSERT_EQUAL(1, Run());
@@ -195,7 +187,7 @@ TEST_F(DoRunTest, SegmentationFaultSIGSEGV) {
     }
 }
 
-TEST_F(DoRunTest, FloatingPointError) {
+TEST_F(NativeRunnerTest, FloatingPointError) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/fpe").c_str(), "p"));
 
     ASSERT_EQUAL(1, Run());
@@ -214,7 +206,7 @@ TEST_F(DoRunTest, FloatingPointError) {
     }
 }
 
-TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
+TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionLink) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_link").c_str(), "p"));
 
     ASSERT_EQUAL(1, Run());
@@ -233,7 +225,7 @@ TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionLink) {
     }
 }
 
-TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionOpen) {
+TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionOpen) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_open").c_str(), "p"));
 
     ASSERT_EQUAL(1, Run());
@@ -252,7 +244,7 @@ TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionOpen) {
     }
 }
 
-TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionInvalidOpen) {
+TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionInvalidOpen) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_invalid_open").c_str(), "p"));
 
     ASSERT_EQUAL(1, Run());
@@ -270,5 +262,3 @@ TEST_F(DoRunTest, RuntimeErrorRestrictedFunctionInvalidOpen) {
         ASSERT(memory >= 0);
     }
 }
-
-//TODO Add INTERNAL_ERROR unittest
