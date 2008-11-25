@@ -58,7 +58,6 @@ public class AuthorizationPersistenceImpl implements AuthorizationPersistence {
      * @throws PersistenceException
      *             wrapping a persistence implementation specific exception
      */
-    @Override
     public void createRole(RoleSecurity role, long user) throws PersistenceException {
         Connection conn = null;
         try {

@@ -25,7 +25,6 @@ public class NegationTest implements Test {
         this.test = test;
     }
 
-    @Override
     public boolean test(Submission submission, int priority) {
         return !this.test.test(submission, priority);
     }

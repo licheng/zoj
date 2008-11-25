@@ -124,7 +124,6 @@ class JudgingQueue {
         /**
          * See JudgingQueueIterator.next
          */
-        @Override
         public Submission next() {
             Submission ret = this.head.submission;
             if (ret != null) {

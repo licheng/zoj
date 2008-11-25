@@ -31,7 +31,6 @@ public class LanguageTest implements Test {
         }
     }
 
-    @Override
     public boolean test(Submission submission, int priority) {
         return this.supportedLanguageIds.contains(submission.getLanguage().getId());
     }

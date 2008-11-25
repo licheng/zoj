@@ -90,7 +90,6 @@ public class RankListEntry implements Comparable<RankListEntry> {
         return this.submitted;
     }
 
-    @Override
     public int compareTo(RankListEntry obj) {
         RankListEntry entry = obj;
         if (entry.solved == this.solved) {

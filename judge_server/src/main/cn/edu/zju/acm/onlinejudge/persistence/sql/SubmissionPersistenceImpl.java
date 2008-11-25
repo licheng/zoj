@@ -351,7 +351,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }
     }
 
-    @Override
     public String getSubmissionSource(long id) throws PersistenceException {
         Connection conn = null;
         try {
@@ -653,7 +652,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         return conn.prepareStatement(queryString);
     }
 
-    @Override
     public ContestStatistics getContestStatistics(List<Problem> problems) throws PersistenceException {
         Connection conn = null;
         ContestStatistics statistics = new ContestStatistics(problems);
@@ -1059,7 +1057,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         }
     }
 
-    @Override
     public List<Submission> getQueueingSubmissions(long maxSubmissionId, int count) throws PersistenceException {
         Connection conn = null;
         try {

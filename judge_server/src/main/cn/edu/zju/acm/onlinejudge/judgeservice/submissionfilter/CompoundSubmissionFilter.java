@@ -27,7 +27,6 @@ public class CompoundSubmissionFilter implements SubmissionFilter {
         this.submissionFilterList.add(submissionFilter);
     }
 
-    @Override
     public int filter(Submission submission, int priority) {
         for (SubmissionFilter submissionFilter : this.submissionFilterList) {
             if (submissionFilter != null) {

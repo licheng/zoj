@@ -136,7 +136,6 @@ class SubmissionQueue {
             }
         }
 
-        @Override
         public synchronized Submission poll(JudgeClientJudgeThread judgeThread) throws InterruptedException,
                 PersistenceException {
             for (;;) {

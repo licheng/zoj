@@ -28,7 +28,6 @@ public class SimpleSubmissionFilter implements SubmissionFilter {
         this.delta = delta;
     }
 
-    @Override
     public int filter(Submission submission, int priority) {
         if (this.test.test(submission, priority)) {
             return this.delta;
