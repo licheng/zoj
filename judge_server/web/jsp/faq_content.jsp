@@ -73,23 +73,20 @@ end.
 Here is a sample solution for problem 1001 using Java:<br>
 <pre>
 <font color="20B000" size=5>
-import java.io.PrintWriter;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-public class P {
+public class Main {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-        PrintWriter out = new PrintWriter(System.out);
         try {
             for (;;) {
                 int a = in.nextInt();
                 int b = in.nextInt();
-                out.println(a + b);
+                System.out.println(a + b);
             }
         } catch (NoSuchElementException e) {
         }
-        out.close();
     }
 }
 </font>
@@ -138,7 +135,7 @@ public class P {
 <font color=blue>Runtime Error</font> : See FAQ below<br>
 <hr>
 <font color=green>Q</font>:How to submit a Java solution?<br>
-<font color=red>A</font>: See the sample solution above. Basically you should submit a single source file which contains a <font color=blue>public class P</font> and it should have a method with signature "<font color=blue>public static void main(String[] args)</font>" which is the entry of your program.<br>
+<font color=red>A</font>: See the sample solution above. Basically you should submit a single source file which contains a <font color=blue>public class Main</font> and it should have a method with signature "<font color=blue>public static void main(String[] args)</font>" which is the entry of your program.<br>
 <hr>
 <font color=green>Q</font>:Which Java classes can I use?<br>
 <font color=red>A</font>: You can only use classes in those packages: java.lang, java.io, java.nio, java.math, java.util, java.text and java.net. You are not allowed to catch any Error in your try-catch, read, write or create any file, or create Socket, etc. In one word, don't do anything other than solving the problem.<br>
