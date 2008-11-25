@@ -98,6 +98,7 @@ int JavaRunner::Run(int sock, int time_limit, int memory_limit, int output_limit
               case MEMORY_LIMIT_EXCEEDED:
               case RUNTIME_ERROR:
                 WriteUint32(sock, status);
+                LogResult(status);
                 return 1;
               default:
                 if (status != INTERNAL_ERROR) {

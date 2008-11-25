@@ -32,6 +32,8 @@ class Runner {
     virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) = 0;
 
     static int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption);
+
+    static void LogResult(int result);
 };
 
 #endif // __RUNNER_H__

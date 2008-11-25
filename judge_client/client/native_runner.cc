@@ -131,6 +131,7 @@ int NativeRunner::Run(int sock, int time_limit, int memory_limit, int output_lim
     }
     int result = Monitor(sock, pid, time_limit, memory_limit, &callback);
     if (result) {
+        LogResult(result);
         WriteUint32(sock, result);
         if (result == INTERNAL_ERROR) {
             return -1;
