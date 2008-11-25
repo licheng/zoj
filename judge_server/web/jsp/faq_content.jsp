@@ -3,14 +3,16 @@
 <div id="content_body">
 <hr>
 <font color=green>Q</font>:What is the compiler the judge is using and what are the compiler options?<br>
-<font color=red>A</font>:The online judge system is running on Linux. We are using <a href="http://gcc.gnu.org">GNU GCC/G++</a> for C/C++ compile and <a href="http://www.freepascal.org">Free Pascal</a> for pascal compile. The compile options are:<br>
+<font color=red>A</font>:The online judge system is running on Linux. We are using <a href="http://gcc.gnu.org">GNU GCC/G++</a> for C/C++, <a href="http://www.freepascal.org">Free Pascal</a> for Pascal and <a href="http://java.sun.com/javase/downloads/index.jsp">Sun JDK 1.6</a> for Java. The compile options are:<br>
 C: <font color=blue>gcc foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DONLINE_JUDGE</font><br>
 C++: <font color=blue>g++ foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DONLINE_JUDGE</font><br>
 Free Pascal(FPC): <font color=blue>fpc -Sd -O2 -Op2 -dONLINE_JUDGE</font><br>
+Java: <font color=blue>No special options</font><br>
 Our compiler software version:<br>
 <font color=blue>gcc/g++ 4.1.2 (Ubuntu 4.1.2-0ubuntu4)</font><br>
 <font color=blue>glibc 2.6.1</font><br>
 <font color=blue>Free Pascal Compiler version 2.0.4 [2007/02/02] for i386</font><br>
+<font color=blue>java version "1.6.0_06"</font><br>
 <hr>
 <font color=green>Q</font>:Free Pascal Runtime Error Numbers<br>
 <font color=red>A</font>:Refer to here <a href="http://www.freepascal.org/docs-html/user/node16.html">http://www.freepascal.org/docs-html/user/node16.html</a> for detailed runtime error informations.<br>
@@ -68,6 +70,30 @@ begin
 end.
 </font>
 </pre>
+Here is a sample solution for problem 1001 using Java:<br>
+<pre>
+<font color="20B000" size=5>
+import java.io.PrintWriter;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+public class P {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        PrintWriter out = new PrintWriter(System.out);
+        try {
+            for (;;) {
+                int a = in.nextInt();
+                int b = in.nextInt();
+                out.println(a + b);
+            }
+        } catch (NoSuchElementException e) {
+        }
+        out.close();
+    }
+}
+</font>
+</pre>
 <hr>
 <font color=green>Q</font>:Why did I get a Compile Error? It's well done!<br>
 <font color=red>A</font>:There are some differences between GNU and MS-VC++, such as:<br>
@@ -109,6 +135,16 @@ end.
 <br>
 <font color=blue>Floating Point Error</font> : Divide by 0<br>
 <br>
-<font color=blue>Runtime Error</font> : Your program executed a forbidden operation, like invoking privileged syscall, file operation, etc. Notice that buffer overflow and stack overflow can also lead to this error.<br>
+<font color=blue>Runtime Error</font> : See FAQ below<br>
 <hr>
+<font color=green>Q</font>:How to submit a Java solution?<br>
+<font color=red>A</font>: See the sample solution above. Basically you should submit a single source file which contains a <font color=blue>public class P</font> and it should have a method with signature "<font color=blue>public static void main(String[] args)</font>" which is the entry of your program.<br>
+<hr>
+<font color=green>Q</font>:Which Java classes can I use?<br>
+<font color=red>A</font>: You can only use classes in those packages: java.lang, java.io, java.nio, java.math, java.util, java.text and java.net. You are not allowed to catch any Error in your try-catch, read, write or create any file, or create Socket, etc. In one word, don't do anything other than solving the problem.<br>
+<hr>
+<font color=green>Q</font>:What does Runtime Error mean?<br>
+<font color=red>A</font>: If you are using Java, please check the class signature as well as the main method signature, and don't use any class which is not allowed. If you are using other languages, your program may have executed a forbidden operation, like invoking privileged syscalls, file operation, etc. Notice that buffer overflow and stack overflow can also lead to this error.<br>
+<hr>
+
 </div>
