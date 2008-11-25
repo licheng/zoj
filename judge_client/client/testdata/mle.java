@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class P {
+public class Main {
     public static void main(String[] args) {
         ArrayList<Object> lst = new ArrayList<Object>();
         for (int i = 0; i < 100; ++i) {

@@ -48,7 +48,7 @@ class E6 {}
 class E7 {}
 class E8 {}
 class E9 {}
-class P {
+public class Main {
     public static void main(String[] args) {
     }
 }

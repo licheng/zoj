@@ -296,7 +296,7 @@ TEST_F(ExecCompileCommandTest, Java) {
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadLastUint32(fd_[0]));
-    ASSERT_EQUAL(0, access("P.class", F_OK));
+    ASSERT_EQUAL(0, access("Main.class", F_OK));
 }
 
 int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, int uid, int gid);
@@ -481,7 +481,7 @@ class JavaExecTestCaseCommandTest : public ExecTestCaseCommandTest {
 };
 
 TEST_F(JavaExecTestCaseCommandTest, Success) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.class").c_str(), "Main.class"));
     SendCommand();
 
     compiler_ = 4;
@@ -502,7 +502,7 @@ TEST_F(JavaExecTestCaseCommandTest, Success) {
 
 
 TEST_F(JavaExecTestCaseCommandTest, RunFailure) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte.class").c_str(), "Main.class"));
     SendCommand();
 
     compiler_ = 4;
@@ -523,7 +523,7 @@ TEST_F(JavaExecTestCaseCommandTest, RunFailure) {
 }
 
 TEST_F(JavaExecTestCaseCommandTest, CheckFailure) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.class").c_str(), "Main.class"));
     SendCommand();
 
     compiler_ = 4;

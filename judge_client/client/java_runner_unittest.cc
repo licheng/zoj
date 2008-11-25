@@ -76,7 +76,7 @@ class JavaRunnerTest : public TestFixture {
 };
 
 TEST_F(JavaRunnerTest, Success) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(0, Run());
 
@@ -95,8 +95,8 @@ TEST_F(JavaRunnerTest, Success) {
 }
 
 TEST_F(JavaRunnerTest, SuccessMultipleClasses) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_multiple_classes.class").c_str(), "P.class"));
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_multiple_classes$1.class").c_str(), "P$1.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_multiple_classes.class").c_str(), "Main.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_multiple_classes$1.class").c_str(), "Main$1.class"));
 
     ASSERT_EQUAL(0, Run());
 
@@ -115,7 +115,7 @@ TEST_F(JavaRunnerTest, SuccessMultipleClasses) {
 }
 
 TEST_F(JavaRunnerTest, TimeLimitExceeded) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle.class").c_str(), "Main.class"));
     time_limit_ = 1;
 
     ASSERT_EQUAL(1, Run());
@@ -135,7 +135,7 @@ TEST_F(JavaRunnerTest, TimeLimitExceeded) {
 }
 
 TEST_F(JavaRunnerTest, TimeLimitExceededStaticInitializer) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle_static_initializer.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle_static_initializer.class").c_str(), "Main.class"));
     time_limit_ = 1;
 
     ASSERT_EQUAL(1, Run());
@@ -155,7 +155,7 @@ TEST_F(JavaRunnerTest, TimeLimitExceededStaticInitializer) {
 }
 
 TEST_F(JavaRunnerTest, TimeLimitExceededMultipleClassesStaticInitializer) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle_multiple_classes_static_initializer.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/tle_multiple_classes_static_initializer.class").c_str(), "Main.class"));
     ASSERT_EQUAL(0, symlink((TESTDIR + "/tle_multiple_classes_static_initializer_T.class").c_str(), "T.class"));
     time_limit_ = 1;
 
@@ -176,7 +176,7 @@ TEST_F(JavaRunnerTest, TimeLimitExceededMultipleClassesStaticInitializer) {
 }
 
 TEST_F(JavaRunnerTest, MemoryLimitExceeded) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -195,7 +195,7 @@ TEST_F(JavaRunnerTest, MemoryLimitExceeded) {
 }
 
 TEST_F(JavaRunnerTest, OutputLimitExceeded) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ole.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ole.class").c_str(), "Main.class"));
     output_limit_ = 1;
 
     ASSERT_EQUAL(1, Run());
@@ -215,7 +215,7 @@ TEST_F(JavaRunnerTest, OutputLimitExceeded) {
 }
 
 TEST_F(JavaRunnerTest, RuntimeError) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -234,7 +234,7 @@ TEST_F(JavaRunnerTest, RuntimeError) {
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorInvalidMain) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_invalid_main.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_invalid_main.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -253,7 +253,7 @@ TEST_F(JavaRunnerTest, RuntimeErrorInvalidMain) {
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorNonStaticMain) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_nonstatic_main.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_nonstatic_main.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -272,7 +272,7 @@ TEST_F(JavaRunnerTest, RuntimeErrorNonStaticMain) {
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorHasPackage) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_has_package.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_has_package.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -291,7 +291,7 @@ TEST_F(JavaRunnerTest, RuntimeErrorHasPackage) {
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorWait) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_wait.class").c_str(), "P.class"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_wait.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 

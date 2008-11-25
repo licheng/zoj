@@ -2,7 +2,7 @@ import java.io.PrintWriter;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-public class P {
+public class Main {
     public static void main(String[] args) {
         final Scanner in = new Scanner(System.in);
         final PrintWriter out = new PrintWriter(System.out);

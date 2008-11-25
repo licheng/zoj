@@ -49,7 +49,7 @@ struct CompilerInfo {
     {1, "gcc", "p.c"},
     {2, "g++", "p.cc"},
     {3, "fpc", "p.pas"},
-    {4, "javac", "P.java"}
+    {4, "javac", "Main.java"}
 };
 
 }

@@ -232,7 +232,7 @@ public class Sandbox {
                 String name = f.getName();
                 if (name.endsWith(".class")) {
                     Class<?> c = Class.forName(name.substring(0, name.length() - 6), false, sandboxClassLoader);
-                    if (name.equals("P.class")) {
+                    if (name.equals("Main.class")) {
                         targetClass = c;
                     }
                 }
@@ -254,7 +254,7 @@ public class Sandbox {
             halt(JudgeReply.RUNTIME_ERROR);
         }
         if (targetClass == null) {
-            logError("No P.class found");
+            logError("No Main.class found");
             halt(JudgeReply.JUDGE_INTERNAL_ERROR);
         }
         Method mainMethod = null;

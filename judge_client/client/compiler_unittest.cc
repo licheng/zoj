@@ -157,12 +157,12 @@ class JavaCompilerTest : public CompilerTest {
         CompilerTest::SetUp();
         compiler_id_ = 4;
         compiler_name_ = "javac";
-        source_filename_ = "P.java";
+        source_filename_ = "Main.java";
     }
 };
 
 TEST_F(JavaCompilerTest, Success) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.java").c_str(), "P.java"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.java").c_str(), "Main.java"));
 
     ASSERT_EQUAL(0, Run());
 
@@ -173,7 +173,7 @@ TEST_F(JavaCompilerTest, Success) {
 }
 
 TEST_F(JavaCompilerTest, Failure) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.java").c_str(), "P.java"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.java").c_str(), "Main.java"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -190,41 +190,7 @@ TEST_F(JavaCompilerTest, Failure) {
 }
 
 TEST_F(JavaCompilerTest, FailureInvalidClassName) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_invalid_class_name.java").c_str(), "P.java"));
-
-    ASSERT_EQUAL(1, Run());
-
-    uint32_t t;
-    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
-    ASSERT_EQUAL(COMPILING, (int)t);
-    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
-    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
-    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
-    ASSERT((int)t);
-    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
-    buf_[t] = 0;
-    LOG(INFO)<<buf_;
-}
-
-TEST_F(JavaCompilerTest, FailureNoPClass) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_no_P_class.java").c_str(), "P.java"));
-
-    ASSERT_EQUAL(1, Run());
-
-    uint32_t t;
-    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
-    ASSERT_EQUAL(COMPILING, (int)t);
-    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
-    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
-    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
-    ASSERT((int)t);
-    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
-    buf_[t] = 0;
-    LOG(INFO)<<buf_;
-}
-
-TEST_F(JavaCompilerTest, FailurePackage) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_package.java").c_str(), "P.java"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_invalid_class_name.java").c_str(), "Main.java"));
 
     ASSERT_EQUAL(1, Run());
 
@@ -241,7 +207,7 @@ TEST_F(JavaCompilerTest, FailurePackage) {
 }
 
 TEST_F(JavaCompilerTest, FailureTooManyClasses) {
-    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_too_many_classes.java").c_str(), "P.java"));
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_too_many_classes.java").c_str(), "Main.java"));
 
     ASSERT_EQUAL(1, Run());
 

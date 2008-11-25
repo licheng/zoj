@@ -32,8 +32,8 @@ case $1 in
         if ! javac -cp . $src >/dev/null ; then
             exit 1
         fi
-        if ! [[ -f $bin.class ]]; then
-            echo "No public class P found" 1>&2
+        if ! [[ -f Main.class ]]; then
+            echo "No public class Main found" 1>&2
             exit 1
         fi
         exit 0
