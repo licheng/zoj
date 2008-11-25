@@ -26,11 +26,13 @@
 #include "compiler.h"
 #include "environment.h"
 #include "protocol.h"
+#include "strutil.h"
 #include "test_util-inl.h"
 #include "trace.h"
 
 DEFINE_OPTIONAL_ARG(int, uid, 0, "");
 DECLARE_ARG(string, compiler);
+DEFINE_ARG(string, root, "");
 
 int ExecJudgeCommand(int sock, int* problem_id, int* revision);
 
@@ -127,8 +129,6 @@ TEST_F(ExecJudgeCommandTest, Success) {
     ASSERT_EQUAL(101, revision_output_);
 }
 
-
-
 int ExecCompileCommand(int sock, int* compiler);
 
 class ExecCompileCommandTest: public TestFixture {
@@ -143,12 +143,8 @@ class ExecCompileCommandTest: public TestFixture {
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         compiler_id_ = 2;
         source_filename_ = TESTDIR + "/ac.cc";
-        struct stat stat; 
-        lstat(source_filename_.c_str(), &stat);
-        source_file_size_ = stat.st_size;
-        checksum_ = CheckSum(CMD_COMPILE) +
-                    CheckSum(compiler_id_) +
-                    CheckSum(source_file_size_);
+        checksum_ = 0;
+        source_file_size_ = 0;
         ARG_compiler = "g++";
         if (CompilerManager::instance_) {
             delete CompilerManager::instance_;
@@ -173,7 +169,17 @@ class ExecCompileCommandTest: public TestFixture {
 
     void SendCommand() {
         compiler_id_ = htonl(compiler_id_);
+        if (source_file_size_ == 0) {
+            struct stat stat; 
+            lstat(source_filename_.c_str(), &stat);
+            source_file_size_ = stat.st_size;
+        }
         source_file_size_ = htonl(source_file_size_);
+        if (checksum_ == 0) {
+            checksum_ = CheckSum(CMD_COMPILE) +
+                        CheckSum(compiler_id_) +
+                        CheckSum(source_file_size_);
+        }
         checksum_ = htonl(checksum_);
         Writen(fd_[0], &compiler_id_, sizeof(compiler_id_)); 
         Writen(fd_[0], &source_file_size_, sizeof(source_file_size_));
@@ -212,7 +218,7 @@ TEST_F(ExecCompileCommandTest, ReadCommandFailure) {
 }
 
 TEST_F(ExecCompileCommandTest, InvalidCheckSum) {
-    checksum_ = 0;
+    checksum_ = 10000000;
     SendCommand();
 
     ASSERT_EQUAL(-1, Run());
@@ -222,9 +228,6 @@ TEST_F(ExecCompileCommandTest, InvalidCheckSum) {
 
 TEST_F(ExecCompileCommandTest, InvalidCompiler) {
     compiler_id_ = 255;
-    checksum_ = CheckSum(CMD_COMPILE) +
-                CheckSum(compiler_id_) +
-                CheckSum(source_file_size_);
     SendCommand();
 
     ASSERT_EQUAL(-1, Run());
@@ -234,9 +237,6 @@ TEST_F(ExecCompileCommandTest, InvalidCompiler) {
 
 TEST_F(ExecCompileCommandTest, UnsupportedCompiler) {
     ARG_compiler = "";
-    checksum_ = CheckSum(CMD_COMPILE) +
-                CheckSum(compiler_id_) +
-                CheckSum(source_file_size_);
     SendCommand();
 
     ASSERT_EQUAL(-1, Run());
@@ -245,6 +245,7 @@ TEST_F(ExecCompileCommandTest, UnsupportedCompiler) {
 }
 
 TEST_F(ExecCompileCommandTest, SaveFailure) {
+    source_file_size_ = 100;
     source_filename_ = "";
     SendCommand();
 
@@ -270,9 +271,6 @@ TEST_F(ExecCompileCommandTest, CompilationError) {
     struct stat stat;
     lstat(source_filename_.c_str(), &stat);
     source_file_size_ = stat.st_size;
-    checksum_ = CheckSum(CMD_COMPILE) +
-                CheckSum(compiler_id_) +
-                CheckSum(source_file_size_);
     SendCommand();
 
     ASSERT_EQUAL(0, Run());
@@ -285,6 +283,19 @@ TEST_F(ExecCompileCommandTest, CompilationError) {
     ASSERT_EQUAL(len, Readn(fd_[0], buf_, len + 1));
 }
 
+TEST_F(ExecCompileCommandTest, Java) {
+    ARG_compiler = "javac";
+    compiler_id_ = 4;
+    source_filename_ = TESTDIR + "/ac.java";
+    SendCommand();
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadLastUint32(fd_[0]));
+    ASSERT_EQUAL(0, access("P.class", F_OK));
+}
 
 int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, int uid, int gid);
 
@@ -456,7 +467,77 @@ TEST_F(ExecTestCaseCommandTest, ExistingSymlinkInputOutput) {
     ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
 }
 
+class JavaExecTestCaseCommandTest : public ExecTestCaseCommandTest {
+  protected:
+    virtual void SetUp() {
+        ExecTestCaseCommandTest::SetUp();
+        ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/JavaSandbox.jar").c_str(), "JavaSandbox.jar"));
+        ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/libsandbox.so").c_str(), "libsandbox.so"));
+        ARG_root = root_;
+    }
+};
 
+TEST_F(JavaExecTestCaseCommandTest, Success) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.class").c_str(), "P.class"));
+    SendCommand();
+
+    compiler_ = 4;
+    ASSERT_EQUAL(0, Run());
+
+    for (;;) {
+        int t = ReadUint32(fd_[0]);
+        if (t == RUNNING) {
+            ReadUint32(fd_[0]);
+            ReadUint32(fd_[0]);
+        } else {
+            ASSERT_EQUAL(JUDGING, t);
+            break;
+        }
+    }
+    ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
+}
+
+
+TEST_F(JavaExecTestCaseCommandTest, RunFailure) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte.class").c_str(), "P.class"));
+    SendCommand();
+
+    compiler_ = 4;
+    ASSERT_EQUAL(0, Run());
+
+    for (;;) {
+        int t = ReadUint32(fd_[0]);
+        if (t == RUNNING) {
+            ReadUint32(fd_[0]);
+            ReadUint32(fd_[0]);
+        } else {
+            ASSERT_EQUAL(RUNTIME_ERROR, t);
+            char ch;
+            ASSERT_EQUAL(0, read(fd_[0], &ch, 1));
+            break;
+        }
+    }
+}
+
+TEST_F(JavaExecTestCaseCommandTest, CheckFailure) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/wa.class").c_str(), "P.class"));
+    SendCommand();
+
+    compiler_ = 4;
+    ASSERT_EQUAL(0, Run());
+
+    for (;;) {
+        int t = ReadUint32(fd_[0]);
+        if (t == RUNNING) {
+            ReadUint32(fd_[0]);
+            ReadUint32(fd_[0]);
+        } else {
+            ASSERT_EQUAL(JUDGING, t);
+            break;
+        }
+    }
+    ASSERT_EQUAL(WRONG_ANSWER, ReadLastUint32(fd_[0]));
+}
 
 int CheckData(int sock, const string& data_dir);
 
@@ -835,11 +916,18 @@ class JudgeMainTest: public TestFixture {
         ASSERT_EQUAL(0, mkdir("script", 0750));
         ASSERT_EQUAL(0, mkdir("prob", 0750));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
+        ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/JavaSandbox.jar").c_str(), "JavaSandbox.jar"));
+        ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/libsandbox.so").c_str(), "libsandbox.so"));
         temp_fd_ = fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         buf_size_ = 0;
         global::terminated = false;
-        ARG_compiler = "g++";
+        ARG_compiler = "g++,javac";
+        ARG_root = root_;
+        if (CompilerManager::instance_) {
+            delete CompilerManager::instance_;
+            CompilerManager::instance_ = NULL;
+        }
     }
 
     virtual void TearDown() {
@@ -908,7 +996,11 @@ class JudgeMainTest: public TestFixture {
         int source_file_size = stat.st_size;
         buf_size_ = 0;
         AppendUint32(CMD_COMPILE);
-        AppendUint32(2);
+        if (StringEndsWith(source_filename, ".java")) {
+            AppendUint32(4);
+        } else {
+            AppendUint32(2);
+        }
         AppendUint32(source_file_size);
         AppendCheckSum();
         AppendFile(source_filename, source_file_size);
@@ -1086,6 +1178,12 @@ TEST_F(JudgeMainTest, Success) {
     SendJudgeCommand(0, 0);
     SendCompileCommand(TESTDIR + "/wa.cc");
     SendTestCaseCommand(3, 10, 1000, 1000);
+    SendJudgeCommand(0, 0);
+    SendCompileCommand(TESTDIR + "/ac.java");
+    SendTestCaseCommand(1, 10, 1000, 1000);
+    SendJudgeCommand(0, 0);
+    SendCompileCommand(TESTDIR + "/rte.java");
+    SendTestCaseCommand(1, 10, 1000, 1000);
 
     ASSERT_EQUAL(1, Run());
 
@@ -1138,6 +1236,7 @@ TEST_F(JudgeMainTest, Success) {
     ASSERT_EQUAL(len, Readn(fd_[0], buf_, len));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
@@ -1147,4 +1246,41 @@ TEST_F(JudgeMainTest, Success) {
     ReadUint32(fd_[0]);
     ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(WRONG_ANSWER, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
+    for (;;) {
+        int t = ReadUint32(fd_[0]);
+        if (t == RUNNING) {
+            ReadUint32(fd_[0]);
+            ReadUint32(fd_[0]);
+        } else {
+            ASSERT_EQUAL(JUDGING, t);
+            break;
+        }
+    }
+    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
+
+    for (;;) {
+        int t = ReadUint32(fd_[0]);
+        if (t == RUNNING) {
+            ReadUint32(fd_[0]);
+            ReadUint32(fd_[0]);
+        } else {
+            ASSERT_EQUAL(RUNTIME_ERROR, t);
+            break;
+        }
+    }
 }
+
+

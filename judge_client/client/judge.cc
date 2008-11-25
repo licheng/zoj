@@ -25,6 +25,7 @@
 #include "compiler.h"
 #include "environment.h"
 #include "global.h"
+#include "java_runner.h"
 #include "logging.h"
 #include "protocol.h"
 #include "native_runner.h"
@@ -115,7 +116,7 @@ int ExecCompileCommand(int sock, int* compiler_id) {
         ReadUint32(sock, &checksum) == -1) {
         return -1;
     }
-    LOG(INFO)<<StringPrintf("Compiler:%u", (unsigned int)compiler_id);
+    LOG(INFO)<<StringPrintf("Compiler:%u", (unsigned int)id);
     if (CheckSum(CMD_COMPILE) +
         CheckSum(id) +
         CheckSum(source_file_size) != checksum) {
@@ -132,7 +133,7 @@ int ExecCompileCommand(int sock, int* compiler_id) {
     *compiler_id = id;
     LOG(INFO)<<"Compiler:"<<compiler->compiler_name();
     WriteUint32(sock, READY);
-    const string& source_filename = "p." + compiler->source_file_extension();
+    const string& source_filename = compiler->source_filename();
     LOG(INFO)<<"Saving source file "<<source_filename<<". Length:"<<source_file_size;
     if (SaveFile(sock, source_filename.c_str(), source_file_size) == -1) {
         WriteUint32(sock, INTERNAL_ERROR);
@@ -144,6 +145,9 @@ int ExecCompileCommand(int sock, int* compiler_id) {
             return -1;
         case 0:
             WriteUint32(sock, READY);
+            break;
+        default:
+            *compiler_id = -1;
     }
     return 0;
 }
@@ -213,8 +217,13 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         return -1;
     }
     int result;
-    NativeRunner runner;
-    result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
+    if (compiler == 4) {
+        JavaRunner runner;
+        result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
+    } else {
+        NativeRunner runner;
+        result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
+    }
     if (result) {
         switch (result) {
           case TIME_LIMIT_EXCEEDED:

@@ -28,8 +28,8 @@ using namespace std;
 
 class Compiler {
   public:
-    Compiler(int id, const string& compiler_name, const string& source_file_extension)
-        : id_(id), compiler_name_(compiler_name), source_file_extension_(source_file_extension) {
+    Compiler(int id, const string& compiler_name, const string& source_filename)
+        : id_(id), compiler_name_(compiler_name), source_filename_(source_filename) {
     }
 
     int id() const {
@@ -40,8 +40,8 @@ class Compiler {
         return compiler_name_;
     }
 
-    const string& source_file_extension() const {
-        return source_file_extension_;
+    const string& source_filename() const {
+        return source_filename_;
     }
 
     int Compile(int sock, const string& source_file_name) const;
@@ -49,7 +49,7 @@ class Compiler {
   private:
     int id_;
     string compiler_name_;
-    string source_file_extension_;
+    string source_filename_;
 };
 
 class CompilerManager {
@@ -70,6 +70,7 @@ class CompilerManager {
 
   friend class ExecCompileCommandTest;
   friend class CheckDataTest;
+  friend class JudgeMainTest;
 };
 
 #endif

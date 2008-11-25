@@ -55,7 +55,7 @@ special_checker_unittest: checker.o trace.o util.o -lkmmon
 native_runner_unittest: runner.o trace.o util.o -lkmmon
 java_runner_unittest: runner.o libsandbox.so JavaSandbox.jar trace.o util.o net_util.o -lkmmon
 compiler_unittest: environment.o trace.o util.o -lkmmon
-judge_unittest: compiler.o runner.o checker.o native_runner.o text_checker.o special_checker.o environment.o util.o trace.o text_file_reader.o -lkmmon
+judge_unittest: compiler.o runner.o checker.o java_runner.o native_runner.o text_checker.o special_checker.o environment.o util.o trace.o text_file_reader.o -lkmmon libsandbox.so JavaSandbox.jar net_util.o
 control_unittest: compiler.o environment.o trace.o util.o -lkmmon
 util_unittest: -lkmmon
 main_unittest: $(filter-out main.o main_stub.o,$(OBJS))

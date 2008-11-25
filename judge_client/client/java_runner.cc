@@ -115,7 +115,7 @@ int JavaRunner::Run(int sock, int time_limit, int memory_limit, int output_limit
                StringPrintf("-Xmx%dk", memory_limit + 150).c_str(),
                StringPrintf("-Djava.library.path=%s", ARG_root.c_str()).c_str(),
                "-Djava.class.path=",
-               "-jar", "JavaSandbox.jar",
+               "-jar", StringPrintf("%s/JavaSandbox.jar", ARG_root.c_str()).c_str(),
                StringPrintf("%d", port).c_str(),
                StringPrintf("%d", time_limit).c_str(),
                StringPrintf("%d", memory_limit).c_str(),

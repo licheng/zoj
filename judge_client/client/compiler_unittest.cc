@@ -42,7 +42,6 @@ class CompilerTest: public TestFixture {
         Environment::instance()->set_root(root_);
         compiler_id_ = 2;
         compiler_name_ = "g++";
-        source_file_extension_ = "cc";
         source_filename_ = "p.cc";
         InstallHandlers();
     }
@@ -59,7 +58,7 @@ class CompilerTest: public TestFixture {
     }
 
     int Run() {
-        Compiler compiler(compiler_id_, compiler_name_, source_file_extension_);
+        Compiler compiler(compiler_id_, compiler_name_, source_filename_);
         int ret = compiler.Compile(fd_[1], source_filename_);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
@@ -70,7 +69,6 @@ class CompilerTest: public TestFixture {
     string root_;
     int compiler_id_;
     string compiler_name_;
-    string source_file_extension_;
     string source_filename_;
     Compiler* compiler_;
 };
@@ -122,7 +120,6 @@ class CCompilerTest : public CompilerTest {
         CompilerTest::SetUp();
         compiler_id_ = 1;
         compiler_name_ = "gcc";
-        source_file_extension_ = "c";
         source_filename_ = "p.c";
     }
 };
@@ -159,7 +156,6 @@ class JavaCompilerTest : public CompilerTest {
         CompilerTest::SetUp();
         compiler_id_ = 4;
         compiler_name_ = "javac";
-        source_file_extension_ = "java";
         source_filename_ = "P.java";
     }
 };

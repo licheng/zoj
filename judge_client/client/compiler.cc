@@ -44,12 +44,12 @@ namespace {
 struct CompilerInfo {
     int id;
     const char* compiler;
-    const char* source_file_extension;
+    const char* source_filename;
 } COMPILER_LIST[] = {
-    {1, "gcc", "c"},
-    {2, "g++", "cc"},
-    {3, "fpc", "pas"},
-    {4, "javac", "java"}
+    {1, "gcc", "p.c"},
+    {2, "g++", "p.cc"},
+    {3, "fpc", "p.pas"},
+    {4, "javac", "P.java"}
 };
 
 }
@@ -71,7 +71,7 @@ CompilerManager::CompilerManager(const string& supported_compilers) {
             if (COMPILER_LIST[i].compiler == t[j]) {
                 compiler_map_[COMPILER_LIST[i].id] = new Compiler(COMPILER_LIST[i].id,
                                                                   COMPILER_LIST[i].compiler,
-                                                                  COMPILER_LIST[i].source_file_extension);
+                                                                  COMPILER_LIST[i].source_filename);
                 break;
             }
         }
@@ -97,7 +97,7 @@ const Compiler* CompilerManager::GetCompiler(int compiler) const {
 
 const Compiler* CompilerManager::GetCompilerByExtension(const string& extension) const {
     for (map<int, const Compiler*>::const_iterator it = compiler_map_.begin(); it != compiler_map_.end(); ++it) {
-        if (it->second->source_file_extension() == extension) {
+        if (StringEndsWith(it->second->source_filename(), "." + extension)) {
             return it->second;
         }
     }
