@@ -177,7 +177,6 @@ TEST_F(JavaRunnerTest, TimeLimitExceededMultipleClassesStaticInitializer) {
 
 TEST_F(JavaRunnerTest, MemoryLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/mle.class").c_str(), "P.class"));
-    memory_limit_ = 1;
 
     ASSERT_EQUAL(1, Run());
 

@@ -112,7 +112,8 @@ int JavaRunner::Run(int sock, int time_limit, int memory_limit, int output_limit
         close(server_sock);
         Log::Close();
         execlp("java",
-               StringPrintf("-Xmx%dk", memory_limit + 150).c_str(),
+               StringPrintf("-Xms%dk", memory_limit / 2 + 190).c_str(),
+               StringPrintf("-Xmx%dk", memory_limit + 190).c_str(),
                StringPrintf("-Djava.library.path=%s", ARG_root.c_str()).c_str(),
                "-Djava.class.path=",
                "-jar", StringPrintf("%s/JavaSandbox.jar", ARG_root.c_str()).c_str(),
