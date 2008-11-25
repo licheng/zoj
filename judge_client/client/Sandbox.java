@@ -98,6 +98,7 @@ public class Sandbox {
                 mainMethod.invoke(null, targetArguments);
                 SandboxSecurityManager.targetThread = null;
                 updateConsumptions();
+                System.out.close();
             } catch (InvocationTargetException e) {
                 SandboxSecurityManager.targetThread = null;
                 Throwable targetException = e.getTargetException();
