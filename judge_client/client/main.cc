@@ -31,8 +31,6 @@
 #include "logging.h"
 #include "util.h"
 
-DEFINE_ARG(string, root, "The root directory of the client");
-
 DEFINE_ARG(int, uid, "The uid for executing the program to be judged");
 
 DEFINE_ARG(int, gid, "The uid for executing the program to be judged");
@@ -67,7 +65,6 @@ void Daemonize(int lock_fd) {
         LOG(SYSCALL_ERROR)<<"Fail to ignore SIGHUP";
         exit(1);
     }
-
     // attach file descriptor 0, 1, 2 to /dev/null
     int fd = open("/dev/null", O_RDWR);
     dup2(fd, 0);
@@ -92,7 +89,7 @@ int LockFile(int fd, int cmd) {
 }
 
 int Lock() {
-    int fd = open((ARG_root + "/judge.pid").c_str(), O_RDWR | O_CREAT, 0640);
+    int fd = open((Environment::GetInstance()->root() + "/judge.pid").c_str(), O_RDWR | O_CREAT, 0640);
     if (fd < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to open judge.pid";
         return -1;
@@ -123,7 +120,7 @@ int CreateUnixDomainServerSocket() {
     struct sockaddr_un un;
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX;
-    string sock_name = Environment::instance()->GetServerSockName();
+    string sock_name = Environment::GetInstance()->GetServerSockName();
     unlink(sock_name.c_str());
     strcpy(un.sun_path, sock_name.c_str());
     if (bind(server_sock, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + sock_name.size()) < 0) {
@@ -205,18 +202,10 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    if (chdir(ARG_root.c_str()) < 0) {
-        LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<ARG_root<<endl;
+    if (chdir(Environment::GetInstance()->root().c_str()) < 0) {
+        LOG(SYSCALL_ERROR)<<"Fail to change working dir to "<<Environment::GetInstance()->root()<<endl;
         return 1;
     }
-
-    char path[PATH_MAX + 1];
-    if (getcwd(path, sizeof(path)) == NULL) {
-        LOG(SYSCALL_ERROR)<<"Fail to get the current working dir";
-        return 1;
-    }
-
-    Environment::instance()->set_root(path);
 
     InstallSignalHandler(SIGTERM, SIGTERMHandler);
 
@@ -226,6 +215,8 @@ int main(int argc, const char* argv[]) {
     InstallSignalHandler(SIGCHLD, SIGCHLDHandler);
 
     InstallSignalHandler(SIGUSR1, SIGUSR1Handler);
+
+    Log::SetLogFile(new DiskLogFile(Environment::GetInstance()->GetLogDir()));
 
     int port;
     int server_sock = CreateServerSocket(&port);
@@ -262,12 +253,11 @@ int main(int argc, const char* argv[]) {
         }
         close(server_sock);
         close(log_server_sock);
-        Log::SetLogFile(new UnixDomainSocketLogFile(Environment::instance()->GetServerSockName(),
-                                                    Environment::instance()->GetClientSockName()));
+        Log::SetLogFile(new UnixDomainSocketLogFile(Environment::GetInstance()->GetServerSockName(),
+                                                    Environment::GetInstance()->GetClientSockName()));
         exit(ControlMain(ARG_queue_address, ARG_queue_port, port));
     }
 
-    Log::SetLogFile(new DiskLogFile(Environment::instance()->GetLogDir()));
     vector<JudgeProcess*> children;
     while (!global::terminated) {
         int nfds = max(log_server_sock, server_sock);
@@ -351,8 +341,8 @@ int main(int argc, const char* argv[]) {
                     for (int i = 0; i < children.size(); ++i) {
                         delete children[i];
                     }
-                    Log::SetLogFile(new UnixDomainSocketLogFile(Environment::instance()->GetServerSockName(),
-                                                                Environment::instance()->GetClientSockName()));
+                    Log::SetLogFile(new UnixDomainSocketLogFile(Environment::GetInstance()->GetServerSockName(),
+                                                                Environment::GetInstance()->GetClientSockName()));
                     exit(JudgeMain(sock, ARG_uid, ARG_gid));
                 }
             }

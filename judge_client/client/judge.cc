@@ -92,7 +92,7 @@ int ExecJudgeCommand(int sock, int* problem_id, int* revision) {
         WriteUint32(sock, INVALID_INPUT);
         return -1;
     }
-    string problem_dir = Environment::instance()->GetProblemDir(*problem_id, *revision);
+    string problem_dir = Environment::GetInstance()->GetProblemDir(*problem_id, *revision);
     if (access(problem_dir.c_str(), F_OK) == 0) {
         WriteUint32(sock, READY);
         return 0;
@@ -179,7 +179,7 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         WriteUint32(sock, INVALID_INPUT);
         return -1;
     }
-    string problem_dir = Environment::instance()->GetProblemDir(problem_id, revision);
+    string problem_dir = Environment::GetInstance()->GetProblemDir(problem_id, revision);
     if (access(problem_dir.c_str(), F_OK) == -1) {
         LOG(SYSCALL_ERROR)<<"Fail to access "<<problem_dir;
         if (errno != ENOENT) {
@@ -373,7 +373,7 @@ int ExecDataCommand(int sock, unsigned int problem_id, unsigned int revision) {
         return -1;
     }
 
-    string revision_dir = Environment::instance()->GetProblemDir(problem_id, revision);
+    string revision_dir = Environment::GetInstance()->GetProblemDir(problem_id, revision);
     string problem_dir = revision_dir.substr(0, revision_dir.rfind('/'));
     string tempDir = StringPrintf("%s.%u.%s",
                                   revision_dir.c_str(),
@@ -434,7 +434,7 @@ int ExecDataCommand(int sock, unsigned int problem_id, unsigned int revision) {
 }
 
 int JudgeMain(int sock, int uid, int gid) {
-    if (Environment::instance()->ChangeToWorkingDir() == -1) {
+    if (Environment::GetInstance()->ChangeToWorkingDir() == -1) {
         WriteUint32(sock, INTERNAL_ERROR);
         close(sock);
         return 1;
@@ -471,7 +471,7 @@ int JudgeMain(int sock, int uid, int gid) {
                 data_ready = false;
             }
             compiler = -1;
-            Environment::instance()->ClearWorkingDir();
+            Environment::GetInstance()->ClearWorkingDir();
         } else if (command == CMD_DATA) {
             if (problem_id < 0) {
                 LOG(ERROR)<<"No problem specified.";
@@ -526,6 +526,6 @@ int JudgeMain(int sock, int uid, int gid) {
         }
     }
     close(sock);
-    Environment::instance()->ClearWorkingDir();
+    Environment::GetInstance()->ClearWorkingDir();
     return ret;
 }

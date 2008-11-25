@@ -39,7 +39,8 @@ class CompilerTest: public TestFixture {
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         compiler_id_ = 2;
         compiler_name_ = "g++";
         source_filename_ = "p.cc";

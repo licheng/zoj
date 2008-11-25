@@ -23,8 +23,10 @@ cp script/stop.sh "$dir"
 cp script/rotate_log.sh "$dir"
 CreateDir "$dir/script" 755
 cp script/compile.sh "$dir"/script
-cp client/judged "$dir"
-cp kernel_module/kmmon.ko "$dir"
+cp -f client/judged "$dir"
+cp -f client/JavaSandbox.jar "$dir"
+cp -f client/libsandbox.so "$dir"
+cp -f kernel_module/kmmon.ko "$dir"
 chmod +x "$dir"/*.sh
 chmod +x "$dir"/script/compile.sh
 if [[ "`cat /etc/group | grep '^zoj:'`" == "" ]]; then

@@ -22,16 +22,26 @@
 #include <sys/stat.h>
 #include "unistd.h"
 
+#include "args.h"
 #include "logging.h"
 #include "strutil.h"
 
-Environment* Environment::instance_ = new Environment();
+DEFINE_ARG(string, root, "The root directory of the client");
 
-string Environment::GetWorkingDir() {
+Environment* Environment::instance_ = NULL;
+
+const Environment* Environment::GetInstance() {
+    if (instance_ == NULL) {
+        instance_ = new Environment(ARG_root);
+    }
+    return instance_;
+}
+
+string Environment::GetWorkingDir() const {
     return StringPrintf("%s/working/%u", root_.c_str(), getpid());
 }
 
-int Environment::ChangeToWorkingDir() {
+int Environment::ChangeToWorkingDir() const {
     const string& working_dir = this->GetWorkingDir();
     if (mkdir(working_dir.c_str(), 0777) < 0) {
         if (errno != EEXIST) {
@@ -46,26 +56,26 @@ int Environment::ChangeToWorkingDir() {
     return 0;
 }
 
-void Environment::ClearWorkingDir() {
+void Environment::ClearWorkingDir() const {
     system(StringPrintf("rm -f %s/*", this->GetWorkingDir().c_str()).c_str());
 }
 
-string Environment::GetProblemDir(int problem_id, int revision) {
+string Environment::GetProblemDir(int problem_id, int revision) const {
     return StringPrintf("%s/prob/%u/%u", root_.c_str(), problem_id, revision);
 }
 
-string Environment::GetCompilationScript() {
+string Environment::GetCompilationScript() const {
     return root_ + "/script/compile.sh";
 }
 
-string Environment::GetLogDir() {
+string Environment::GetLogDir() const {
     return root_ + "/log";
 }
 
-string Environment::GetServerSockName() {
+string Environment::GetServerSockName() const {
     return StringPrintf("%s/working/server_log.sock", root_.c_str());
 }
 
-string Environment::GetClientSockName() {
+string Environment::GetClientSockName() const {
     return StringPrintf("%s/client_log.sock", this->GetWorkingDir().c_str());
 }

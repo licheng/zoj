@@ -32,7 +32,7 @@
 
 DEFINE_OPTIONAL_ARG(int, uid, 0, "");
 DECLARE_ARG(string, compiler);
-DEFINE_ARG(string, root, "");
+DECLARE_ARG(string, root);
 
 int ExecJudgeCommand(int sock, int* problem_id, int* revision);
 
@@ -76,7 +76,8 @@ class ExecJudgeCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         int ret = ExecJudgeCommand(fd_[1], &problem_id_output_, &revision_output_);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
@@ -194,7 +195,8 @@ class ExecCompileCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         int ret = ExecCompileCommand(fd_[1], &compiler_);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
@@ -353,7 +355,8 @@ class ExecTestCaseCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         int ret = ExecTestCaseCommand(fd_[1], problem_id_, revision_, compiler_, 0, 0);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
@@ -576,7 +579,8 @@ class CheckDataTest: public TestFixture {
     }
 
     int Run() {
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         int ret = CheckData(fd_[1], root_ + "/data");
         close(fd_[1]);
         return ret;
@@ -772,7 +776,8 @@ class ExecDataCommandTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         int ret = ExecDataCommand(fd_[1], 0, 0);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
@@ -1037,7 +1042,8 @@ class JudgeMainTest: public TestFixture {
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        Environment::instance()->set_root(root_);
+        Environment::GetInstance();
+        Environment::instance_->root_ = root_;
         return JudgeMain(fd_[1], 0, 0);
     }
 

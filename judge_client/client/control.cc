@@ -35,12 +35,11 @@
 DEFINE_OPTIONAL_ARG(int, max_heart_beat_interval, 60000, "The max heart beat interval in milliseconds");
 
 int ControlMain(const string& queue_address, int queue_port, int port) {
-    if (Environment::instance()->ChangeToWorkingDir() < 0) {
+    if (Environment::GetInstance()->ChangeToWorkingDir() < 0) {
         return 1;
     }
 
     vector<const Compiler*> supported_compilers = CompilerManager::GetInstance()->GetAllSupportedCompilers();
-
     int sock = -1;
     global::socket_closed = true;
     // Loops until SIGTERM is received.

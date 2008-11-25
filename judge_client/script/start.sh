@@ -41,6 +41,10 @@ if [ "`which fpc`" != "" ]; then
     supported_source_file_types=$supported_source_file_types,fpc
 fi
 
+if [[ "`which java`" != "" && "`which javac`" != "" ]]; then
+    supported_source_file_types=$supported_source_file_types,javac
+fi
+
 # Prepare /prob
 CreateDir "$root/prob" 750
 CreateDir "$root/prob/0" 750
@@ -55,7 +59,7 @@ chmod -R 750 "$root"/prob/0/*
 
 # Prepare /working
 CreateDir "$root/working" 750
-rm -rf "$root/working/*"
+rm -rf "$root"/working/*
 
 # Prepare /log
 CreateDir "$root/log" 750

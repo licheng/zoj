@@ -100,7 +100,8 @@ class ControlMainTest: public TestFixture {
             }
             if (pid_ == 0) {
                 close(server_sock_);
-                Environment::instance()->set_root(root_);
+                Environment::GetInstance();
+                Environment::instance_->root_ = root_;
                 exit(ControlMain(address_, port_, port_));
             }
         }

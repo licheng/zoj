@@ -26,41 +26,44 @@ using namespace std;
 
 class Environment {
   public:
-    static Environment* instance() {
-        return instance_;
-    }
+    static const Environment* GetInstance();
 
-    const string& root() {
+    const string& root() const {
         return root_;
     }
 
-    void set_root(const string& root) {
-        root_ = root;
-    }
+    string GetWorkingDir() const;
 
-    string GetWorkingDir();
+    int ChangeToWorkingDir() const;
 
-    int ChangeToWorkingDir();
+    void ClearWorkingDir() const;
 
-    void ClearWorkingDir();
+    string GetProblemDir(int problem_id, int revision) const;
 
-    string GetProblemDir(int problem_id, int revision);
+    string GetCompilationScript() const;
 
-    string GetCompilationScript();
+    string GetLogDir() const;
 
-    string GetLogDir();
+    string GetServerSockName() const;
 
-    string GetServerSockName();
-
-    string GetClientSockName();
+    string GetClientSockName() const;
 
   private:
-    Environment() {
+    Environment(const string& root) : root_(root) {
     }
     
     static Environment* instance_;
 
     string root_;
+
+  friend class CompilerTest;
+  friend class ControlMainTest;
+  friend class ExecJudgeCommandTest;
+  friend class ExecCompileCommandTest;
+  friend class ExecTestCaseCommandTest;
+  friend class CheckDataTest;
+  friend class ExecDataCommandTest;
+  friend class JudgeMainTest;
 };
 
 #endif // __ENVIRONMENT_H__

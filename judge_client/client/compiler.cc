@@ -141,7 +141,7 @@ int Compiler::Compile(int sock, const string& source_file_name) const {
     LOG(INFO)<<"Compiling";
     WriteUint32(sock, COMPILING);
     string command = StringPrintf("%s '%s' '%s'",
-                                  Environment::instance()->GetCompilationScript().c_str(),
+                                  Environment::GetInstance()->GetCompilationScript().c_str(),
                                   this->compiler_name_.c_str(),
                                   source_file_name.c_str());
     LOG(INFO)<<"Command: "<<command;

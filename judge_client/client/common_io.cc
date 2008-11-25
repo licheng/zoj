@@ -24,7 +24,7 @@
 
 int Readn(int fd, void* buffer, size_t count) {
     char* p = (char*)buffer;
-    while (count > 0 && !global::terminated && !global::socket_closed) {
+    while (count > 0 && !global::terminated) {
         ssize_t num = read(fd, p, count);
         if (num == -1) {
             if (errno == EINTR) {
@@ -47,16 +47,12 @@ int Readn(int fd, void* buffer, size_t count) {
             return -1;
         }
     }
-    if (global::socket_closed) {
-        LOG(ERROR)<<"Socket error";
-        return -1;
-    }
     return p - (char*)buffer;
 }
 
 int Writen(int fd, const void* buffer, size_t count) {
     const char*p = (const char*)buffer;
-    while (count > 0 && !global::terminated && !global::socket_closed) {
+    while (count > 0 && !global::terminated) {
         int num = write(fd, p, count);
         if (num == -1) {
             if (errno == EINTR) {
@@ -74,10 +70,6 @@ int Writen(int fd, const void* buffer, size_t count) {
         if (count > 0) {
             return -1;
         }
-    }
-    if (global::socket_closed) {
-        LOG(ERROR)<<"Socket error";
-        return -1;
     }
     return 0;
 }
