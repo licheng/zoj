@@ -5,8 +5,8 @@
  *
  * ZOJ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
+ * the Free Software Foundation; either revision 3 of the License, or
+ * (at your option) any later revision.
  *
  * ZOJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,21 +17,9 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RUNNER_H__
-#define __RUNNER_H__
+#ifndef __NET_UTIL_H__
+#define __NET_UTIL_H__
 
-#include <string>
+int CreateServerSocket(int* port);
 
-using namespace std;
-
-class Runner {
-  public:
-    virtual ~Runner();
-
-    // Runs the specified program. Returns 0 if execution succeeded, or -1 on error.
-    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) = 0;
-
-    static int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption);
-};
-
-#endif // __RUNNER_H__
+#endif // __NET_UTIL_H__

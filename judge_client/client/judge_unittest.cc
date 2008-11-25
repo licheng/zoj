@@ -154,9 +154,11 @@ class ExecCompileCommandTest: public TestFixture {
             delete CompilerManager::instance_;
             CompilerManager::instance_ = NULL;
         }
+        InstallHandlers();
     }
 
     virtual void TearDown() {
+        UninstallHandlers();
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }

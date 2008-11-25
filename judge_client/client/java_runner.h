@@ -17,21 +17,14 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RUNNER_H__
-#define __RUNNER_H__
+#ifndef __JAVA_RUNNER_H__
+#define __JAVA_RUNNER_H__
 
-#include <string>
+#include "runner.h"
 
-using namespace std;
-
-class Runner {
+class JavaRunner : public Runner {
   public:
-    virtual ~Runner();
-
-    // Runs the specified program. Returns 0 if execution succeeded, or -1 on error.
-    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) = 0;
-
-    static int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption);
+    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid);
 };
 
-#endif // __RUNNER_H__
+#endif // __JAVA_RUNNER_H__

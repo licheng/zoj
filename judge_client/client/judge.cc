@@ -216,6 +216,26 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
     NativeRunner runner;
     result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
     if (result) {
+        switch (result) {
+          case TIME_LIMIT_EXCEEDED:
+            LOG(INFO)<<"Time limit exceeded";
+            break;
+          case OUTPUT_LIMIT_EXCEEDED:
+            LOG(INFO)<<"Output limit exceeded";
+            break;
+          case MEMORY_LIMIT_EXCEEDED:
+            LOG(INFO)<<"Memory limit exceeded";
+            break;
+          case RUNTIME_ERROR:
+            LOG(INFO)<<"Runtime error";
+            break;
+          case FLOATING_POINT_ERROR:
+            LOG(INFO)<<"Floating point error";
+            break;
+          case SEGMENTATION_FAULT:
+            LOG(INFO)<<"Segmentation fault";
+            break;
+        }
         return result == -1 ? -1 : 0;
     }
     if (symlink(output_filename.c_str(), "output") == -1) {

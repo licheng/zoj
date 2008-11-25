@@ -62,6 +62,10 @@ void TraceCallback::OnError() {
     result_ = INTERNAL_ERROR;
 }
 
+bool TraceCallback::OnOtherSyscall(int syscall) {
+    return false;
+}
+
 bool TraceCallback::OnOpen(const string& path, int flags) {
     if ((flags & O_WRONLY) == O_WRONLY ||
         (flags & O_RDWR) == O_RDWR ||
@@ -92,24 +96,19 @@ void TraceCallback::ProcessResult(int status) {
         case RUNNING:
             switch (WTERMSIG(status)) {
                 case SIGXCPU:
-                    LOG(INFO)<<"Time limit exceeded";
                     result_ = TIME_LIMIT_EXCEEDED;
                     break;
                 case SIGSEGV:
                 case SIGBUS:
-                    LOG(INFO)<<"Segmentation fault";
                     result_ = SEGMENTATION_FAULT;
                     break;
                 case SIGXFSZ:
-                    LOG(INFO)<<"Output limit exceeded";
                     result_ = OUTPUT_LIMIT_EXCEEDED;
                     break;
                 case SIGFPE:
-                    LOG(INFO)<<"Floating point error";
                     result_ = FLOATING_POINT_ERROR;
                     break;
                 case SIGKILL:
-                    LOG(INFO)<<"Runtime error";
                     result_ = RUNTIME_ERROR;
                     break;
                 default:
@@ -118,7 +117,6 @@ void TraceCallback::ProcessResult(int status) {
             }
             break;
         case MEMORY_LIMIT_EXCEEDED:
-            LOG(INFO)<<"Memory limit exceeded";
             break;
     }
 }
@@ -196,6 +194,8 @@ static void SIGKMMONHandler(int sig, siginfo_t* siginfo, void* context) {
         } else {
             kmmon_kill(pid);
         }
+    } else if (callback->OnOtherSyscall(syscall)) {
+        kmmon_continue(pid);
     } else {
         LOG(INFO)<<"Restricted syscall "<<syscall;
         kmmon_kill(pid);

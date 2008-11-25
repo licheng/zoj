@@ -52,6 +52,7 @@ Log::~Log() {
     }
     if (log_to_stderr_) {
         fprintf(stderr, "%s", message.c_str());
+        fflush(stderr);
     }
 }
 

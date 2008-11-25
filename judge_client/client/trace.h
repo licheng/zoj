@@ -53,6 +53,8 @@ class TraceCallback {
 
         virtual void OnError();
 
+        virtual bool OnOtherSyscall(int syscall);
+
         void ProcessResult(int status);
 
         int GetResult() const {

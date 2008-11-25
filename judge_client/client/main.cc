@@ -26,6 +26,7 @@
 
 #include "args.h"
 #include "environment.h"
+#include "net_util.h"
 #include "global.h"
 #include "logging.h"
 #include "util.h"
@@ -111,44 +112,6 @@ int Lock() {
     sprintf(buffer, "%ld", (long)getpid());
     write(fd, buffer, strlen(buffer) + 1);
     return fd;
-}
-
-int CreateServerSocket(int* port) {
-    int sock = socket(PF_INET, SOCK_STREAM, 6);
-    if (sock == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to create socket";
-        return -1;
-    }
-    int optionValue = 1;
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue)) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to set socket option";
-        close(sock);
-        return -1;
-    }
-    sockaddr_in address;
-    memset(&address, 0, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(INADDR_ANY); 
-    address.sin_port = 0;
-    if (bind(sock, (struct sockaddr*)&address, sizeof(address)) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to bind";
-        close(sock);
-        return -1;
-    }
-    if (listen(sock, 32) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to listen";
-        close(sock);
-        return -1;
-    }
-    socklen_t len = sizeof(address);
-    if (getsockname(sock, (struct sockaddr*)&address, &len) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to get socket port";
-        close(sock);
-        return -1;
-    }
-    *port = ntohs(address.sin_port);
-    LOG(INFO)<<"Listening on port "<<*port;
-    return sock;
 }
 
 int CreateUnixDomainServerSocket() {
@@ -269,6 +232,7 @@ int main(int argc, const char* argv[]) {
     if (server_sock < 0) {
         return 1;
     }
+    LOG(INFO)<<"Listening on port "<<port;
 
     int log_server_sock = CreateUnixDomainServerSocket();
     if (log_server_sock < 0) {
@@ -346,8 +310,8 @@ int main(int argc, const char* argv[]) {
             }
         }
         if (FD_ISSET(log_server_sock, &read_fdset)) {
-            socklen_t len;
             struct sockaddr_un un;
+            socklen_t len = sizeof(un);
             int client_sock = accept(log_server_sock, (struct sockaddr*)&un, &len);
             if (client_sock < 0) {
                 LOG(SYSCALL_ERROR)<<"Fail to accept";

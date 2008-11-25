@@ -25,7 +25,9 @@
 
 #include "common_io.h"
 #include "environment.h"
+#include "logging.h"
 #include "protocol.h"
+#include "trace.h"
 
 class CompilerTest: public TestFixture {
   protected:
@@ -42,9 +44,11 @@ class CompilerTest: public TestFixture {
         compiler_name_ = "g++";
         source_file_extension_ = "cc";
         source_filename_ = "p.cc";
+        InstallHandlers();
     }
 
     virtual void TearDown() {
+        UninstallHandlers();
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
@@ -112,12 +116,19 @@ TEST_F(CompilerTest, TooLongErrorMessage) {
     ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 
-TEST_F(CompilerTest, HugeOutput) {
+class CCompilerTest : public CompilerTest {
+  protected:
+    virtual void SetUp() {
+        CompilerTest::SetUp();
+        compiler_id_ = 1;
+        compiler_name_ = "gcc";
+        source_file_extension_ = "c";
+        source_filename_ = "p.c";
+    }
+};
+
+TEST_F(CCompilerTest, HugeOutput) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_huge_output.c").c_str(), "p.cc"));
-    compiler_id_ = 1;
-    compiler_name_ = "gcc";
-    source_file_extension_ = "c";
-    source_filename_ = "p.c";
 
     ASSERT_EQUAL(1, Run());
 
@@ -131,12 +142,8 @@ TEST_F(CompilerTest, HugeOutput) {
     ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
 }
 
-TEST_F(CompilerTest, CCompilationWithLibMath) {
+TEST_F(CCompilerTest, LibMath) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/math.c").c_str(), "p.c"));
-    compiler_id_ = 1;
-    compiler_name_ = "gcc";
-    source_file_extension_ = "c";
-    source_filename_ = "p.c";
 
     ASSERT_EQUAL(0, Run());
 
@@ -144,6 +151,113 @@ TEST_F(CompilerTest, CCompilationWithLibMath) {
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
     ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
+}
+
+class JavaCompilerTest : public CompilerTest {
+  protected:
+    virtual void SetUp() {
+        CompilerTest::SetUp();
+        compiler_id_ = 4;
+        compiler_name_ = "javac";
+        source_file_extension_ = "java";
+        source_filename_ = "P.java";
+    }
+};
+
+TEST_F(JavaCompilerTest, Success) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac.java").c_str(), "P.java"));
+
+    ASSERT_EQUAL(0, Run());
+
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
+}
+
+TEST_F(JavaCompilerTest, Failure) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce.java").c_str(), "P.java"));
+
+    ASSERT_EQUAL(1, Run());
+
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
+    buf_[t] = 0;
+    LOG(INFO)<<buf_;
+}
+
+TEST_F(JavaCompilerTest, FailureInvalidClassName) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_invalid_class_name.java").c_str(), "P.java"));
+
+    ASSERT_EQUAL(1, Run());
+
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
+    buf_[t] = 0;
+    LOG(INFO)<<buf_;
+}
+
+TEST_F(JavaCompilerTest, FailureNoPClass) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_no_P_class.java").c_str(), "P.java"));
+
+    ASSERT_EQUAL(1, Run());
+
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
+    buf_[t] = 0;
+    LOG(INFO)<<buf_;
+}
+
+TEST_F(JavaCompilerTest, FailurePackage) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_package.java").c_str(), "P.java"));
+
+    ASSERT_EQUAL(1, Run());
+
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
+    buf_[t] = 0;
+    LOG(INFO)<<buf_;
+}
+
+TEST_F(JavaCompilerTest, FailureTooManyClasses) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ce_too_many_classes.java").c_str(), "P.java"));
+
+    ASSERT_EQUAL(1, Run());
+
+    uint32_t t;
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILING, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT_EQUAL(COMPILATION_ERROR, (int)t);
+    ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
+    ASSERT((int)t);
+    ASSERT_EQUAL((ssize_t)t, read(fd_[0], buf_, t + 1));
+    buf_[t] = 0;
+    LOG(INFO)<<buf_;
 }
 
 // TODO add a unittest for invalid chars
