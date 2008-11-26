@@ -92,6 +92,7 @@ public class Sandbox {
             if (setLimits(timeLimit, outputLimit, 6, uid, gid) < 0) {
                 halt(JudgeReply.JUDGE_INTERNAL_ERROR);
             }
+            mainMethod.setAccessible(true);
             System.setSecurityManager(sandboxSecurityManager);
             SandboxSecurityManager.targetThread = this;
             try {

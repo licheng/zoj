@@ -94,6 +94,25 @@ TEST_F(JavaRunnerTest, Success) {
     }
 }
 
+TEST_F(JavaRunnerTest, SuccessNonPublicClass) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_non_public_class.class").c_str(), "Main.class"));
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT(!system(StringPrintf("diff p.out %s/1.out", TESTDIR.c_str()).c_str()));
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+        if (reply == -1) {
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
 TEST_F(JavaRunnerTest, SuccessMultipleClasses) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_multiple_classes.class").c_str(), "Main.class"));
     ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_multiple_classes$1.class").c_str(), "Main$1.class"));
@@ -336,4 +355,3 @@ TEST_F(JavaRunnerTest, RuntimeErrorSleep) {
         ASSERT(memory >= 0);
     }
 }
-
