@@ -120,14 +120,17 @@ TEST_F(JavaRunnerTest, TimeLimitExceeded) {
 
     ASSERT_EQUAL(1, Run());
 
+    int last_time = -1;
     for (;;) {
         int reply = TryReadUint32(fd_[0]);
         int time = TryReadUint32(fd_[0]);
         int memory = TryReadUint32(fd_[0]);
         if (time < 0) {
             ASSERT_EQUAL(TIME_LIMIT_EXCEEDED, reply);
+            ASSERT_EQUAL(1001, last_time);
             break;
         }
+        last_time = time;
         ASSERT_EQUAL(RUNNING, reply);
         ASSERT(time >= 0);
         ASSERT(memory >= 0);
@@ -140,14 +143,17 @@ TEST_F(JavaRunnerTest, TimeLimitExceededStaticInitializer) {
 
     ASSERT_EQUAL(1, Run());
 
+    int last_time = -1;
     for (;;) {
         int reply = TryReadUint32(fd_[0]);
         int time = TryReadUint32(fd_[0]);
         int memory = TryReadUint32(fd_[0]);
         if (time < 0) {
             ASSERT_EQUAL(TIME_LIMIT_EXCEEDED, reply);
+            ASSERT_EQUAL(1001, last_time);
             break;
         }
+        last_time = time;
         ASSERT_EQUAL(RUNNING, reply);
         ASSERT(time >= 0);
         ASSERT(memory >= 0);
@@ -161,14 +167,17 @@ TEST_F(JavaRunnerTest, TimeLimitExceededMultipleClassesStaticInitializer) {
 
     ASSERT_EQUAL(1, Run());
 
+    int last_time = -1;
     for (;;) {
         int reply = TryReadUint32(fd_[0]);
         int time = TryReadUint32(fd_[0]);
         int memory = TryReadUint32(fd_[0]);
         if (time < 0) {
             ASSERT_EQUAL(TIME_LIMIT_EXCEEDED, reply);
+            ASSERT_EQUAL(1001, last_time);
             break;
         }
+        last_time = time;
         ASSERT_EQUAL(RUNNING, reply);
         ASSERT(time >= 0);
         ASSERT(memory >= 0);
@@ -292,6 +301,25 @@ TEST_F(JavaRunnerTest, RuntimeErrorHasPackage) {
 
 TEST_F(JavaRunnerTest, RuntimeErrorWait) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_wait.class").c_str(), "Main.class"));
+
+    ASSERT_EQUAL(1, Run());
+
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+        if (time < 0) {
+            ASSERT_EQUAL(RUNTIME_ERROR, reply);
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
+TEST_F(JavaRunnerTest, RuntimeErrorSleep) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_sleep.class").c_str(), "Main.class"));
 
     ASSERT_EQUAL(1, Run());
 

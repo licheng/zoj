@@ -74,7 +74,7 @@ public class Sandbox {
                 public void handle(Signal sig) {
                     if (SandboxSecurityManager.targetThread != null) {
                         SandboxSecurityManager.targetThread = null;
-                        timeConsumption = timeLimit + 1;
+                        timeConsumption = timeLimit * 1000 + 1;
                         halt(JudgeReply.TIME_LIMIT_EXCEEDED);
                     }
                 }
@@ -213,7 +213,7 @@ public class Sandbox {
                 t /= 1000000;
                 if (t > timeConsumption) {
                     timeConsumption = (int) t;
-                }
+               }
             }
         }
     }
