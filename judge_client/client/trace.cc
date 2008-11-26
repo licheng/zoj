@@ -109,6 +109,7 @@ void TraceCallback::ProcessResult(int status) {
                     result_ = FLOATING_POINT_ERROR;
                     break;
                 case SIGKILL:
+                case SIGILL:
                     result_ = RUNTIME_ERROR;
                     break;
                 default:
