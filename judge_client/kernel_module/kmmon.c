@@ -210,8 +210,8 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
         case KMMON_CLEAR_ORPHANS:
             for_each_process(p) {
                 if (p->flags & KMMON_MASK) {
+                    struct task_struct* q = p->parent;
                     for (;;) {
-                        struct task_struct* q = p->parent;
                         if (q == NULL || q->pid == 1) {
                             if (p->state & TASK_STOPPED) {
                                 p->exit_code = request == KMMON_KILL;
@@ -224,6 +224,7 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                         if (!(q->flags & KMMON_MASK)) {
                             break;
                         }
+                        q = q->parent;
                     }
                 }
             }
