@@ -221,25 +221,37 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
                 struct page* page;
                 struct mm_struct* mm;
                 struct vm_area_struct* vma;
-                int offset, len, tmp;
+                int len = sizeof(data);
+                unsigned long tmp;
+                char* buf = (char*)&tmp;
                 mm = get_task_mm(p);
                 if (mm == NULL) {
                     printk(KERN_ERR "Fail to get mm: %ld\n", pid);
                     ret = -1;
                     break;
                 }
-                if (get_user_pages(p, mm, addr, 1, 0, 1, &page, &vma) <= 0) {
-                    printk(KERN_ERR "Fail to get user pages: %ld, %lx\n", pid, addr);
-                    ret = -1;
-                    break;
+                while (len > 0) {
+                    int count;
+                    int offset;
+                    if (get_user_pages(p, mm, addr, 1, 0, 1, &page, &vma) <= 0) {
+                        printk(KERN_ERR "Fail to get user pages: %ld, %lx\n", pid, addr);
+                        ret = -1;
+                        break;
+                    }
+                    offset = addr & (PAGE_SIZE - 1);
+                    if (PAGE_SIZE - offset < len) {
+                        count = PAGE_SIZE - offset;
+                    } else {
+                        count = len;
+                    }
+                    copy_from_user_page(vma, page, addr, buf,
+                                        kmap(page) + offset, count);
+                    len -= count;
+                    addr += count;
+                    buf += count;
+                    kunmap(page);
+                    put_page(page);
                 }
-                offset = addr & (PAGE_SIZE - 1);
-                len = sizeof(data) > PAGE_SIZE - offset ? PAGE_SIZE - offset
-                                                        : sizeof(data);
-                copy_from_user_page(vma, page, addr, &tmp,
-                                    kmap(page) + offset, sizeof(tmp));
-                kunmap(page);
-                put_page(page);
                 put_user(tmp, (unsigned long*)data);
                 mmput(mm);
             } else if (request == KMMON_GETREG) {
@@ -424,4 +436,4 @@ void cleanup(void) {
 module_init(init);
 module_exit(cleanup);
 
-MODULE_LICENSE("GPL v2");
+MODULE_LICENSE("GPL");
