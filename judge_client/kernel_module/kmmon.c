@@ -103,7 +103,7 @@ int notify_tracer(int syscall) {
         schedule();
     }
     if (current->exit_code) {
-        send_sig(SIGKILL, current, 1);
+        force_sig(SIGKILL, current);
         return -1;
     } else {
         return syscall;
@@ -206,6 +206,27 @@ asmlinkage unsigned long kmmon(int request, unsigned long pid, unsigned long add
     switch (request) {
         case KMMON_TRACEME:
             current->flags |= KMMON_MASK;
+            break;
+        case KMMON_CLEAR_ORPHANS:
+            for_each_process(p) {
+                if (p->flags & KMMON_MASK) {
+                    for (;;) {
+                        struct task_struct* q = p->parent;
+                        if (q == NULL || q->pid == 1) {
+                            if (p->state & TASK_STOPPED) {
+                                p->exit_code = request == KMMON_KILL;
+                                wake_up_process(p);
+                            } else {
+                                force_sig(SIGKILL, p);
+                            }
+                            break;
+                        }
+                        if (!(q->flags & KMMON_MASK)) {
+                            break;
+                        }
+                    }
+                }
+            }
             break;
         case KMMON_CONTINUE:
         case KMMON_KILL:

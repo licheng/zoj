@@ -34,6 +34,8 @@ int kmmon_continue(pid_t pid);
 
 int kmmon_kill(pid_t pid);
 
+int kmmon_clear_orphans(void);
+
 int kmmon_getreg(pid_t pid, int regno, int* value);
 
 int kmmon_readmem(pid_t pid, unsigned long addr, int* value);

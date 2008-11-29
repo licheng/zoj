@@ -28,6 +28,7 @@
 #define KMMON_KILL 2
 #define KMMON_READMEM 3
 #define KMMON_GETREG 4
+#define KMMON_CLEAR_ORPHANS 5
 #define KMMON_SIG 51
 
 #endif

@@ -38,6 +38,10 @@ int kmmon_kill(pid_t pid) {
     return kmmon(KMMON_KILL, pid, 0, 0);
 }
 
+int kmmon_clear_orphans(void) {
+    return kmmon(KMMON_CLEAR_ORPHANS, 0, 0, 0);
+}
+
 int kmmon_getreg(pid_t pid, int regno, int* value) {
     return kmmon(KMMON_GETREG, pid, regno, (unsigned long)value);
 }

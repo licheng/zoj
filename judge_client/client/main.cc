@@ -26,6 +26,7 @@
 
 #include "args.h"
 #include "environment.h"
+#include "kmmon-lib.h"
 #include "net_util.h"
 #include "global.h"
 #include "logging.h"
@@ -198,6 +199,7 @@ int ControlMain(const string& queue_address, int queueu_port, int port);
 int JudgeMain(int sock, int uid, int gid);
 
 int main(int argc, const char* argv[]) {
+    kmmon_clear_orphans();
     if (ParseArguments(argc, argv) < 0) {
         return 1;
     }
