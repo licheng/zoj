@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!DOCTYPE web-app PUBLIC
-          "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
-          "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
-
-<web-app>
-    <display-name>Struts Blank Application</display-name>
-    <servlet>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+ <servlet>
         <servlet-name>action</servlet-name>
         <servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
         <init-param>
@@ -32,27 +27,28 @@
         <servlet-name>action</servlet-name>
         <url-pattern>*.do</url-pattern>
     </servlet-mapping>
-     <filter> 
-        <filter-name>BaseFilter</filter-name> 
-        <filter-class>cn.edu.zju.acm.onlinejudge.filter.BaseFilter</filter-class> 
-     </filter> 
-     <filter> 
-        <filter-name>CookieFilter</filter-name> 
-        <filter-class>cn.edu.zju.acm.onlinejudge.filter.CookieFilter</filter-class> 
-     </filter> 
-     <filter-mapping> 
-        <filter-name>BaseFilter</filter-name> 
-        <url-pattern>/*</url-pattern> 
-    </filter-mapping>  
-    <filter-mapping> 
-        <filter-name>CookieFilter</filter-name> 
-        <url-pattern>/*</url-pattern> 
-    </filter-mapping>
-
-    <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
-    </welcome-file-list> 
-    
+ <filter>
+  <filter-name>BaseFilter</filter-name>
+  <filter-class>cn.edu.zju.acm.onlinejudge.filter.BaseFilter</filter-class>
+ </filter>
+ <filter>
+  <filter-name>CookieFilter</filter-name>
+  <filter-class>cn.edu.zju.acm.onlinejudge.filter.CookieFilter</filter-class>
+ </filter>
+ <filter-mapping>
+  <filter-name>BaseFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+ </filter-mapping>
+ <filter-mapping>
+  <filter-name>CookieFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+ </filter-mapping>
+ <welcome-file-list>
+  <welcome-file>index.jsp</welcome-file>
+ </welcome-file-list>
+     <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
     <taglib>
         <taglib-uri>/tags/struts-bean</taglib-uri>
         <taglib-location>/WEB-INF/struts-bean.tld</taglib-location>
@@ -73,9 +69,4 @@
         <taglib-uri>/tags/struts-tiles</taglib-uri>
         <taglib-location>/WEB-INF/struts-tiles.tld</taglib-location>
     </taglib>
-    
-    <session-config>
-        <session-timeout>30</session-timeout>
-    </session-config>
-    
 </web-app>

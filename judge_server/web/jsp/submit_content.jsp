@@ -23,10 +23,16 @@
 <script language="JavaScript">
 
 function checkProblemFile(submitForm) {
-
     var message = "";
-    if (submitForm.languageId.value == '') {
-        message = 'Language should be selected.';
+    var languagelist=submitForm.languageId;
+    var flag=false;
+	for(i = 0; i<languagelist.length; i++)
+	{
+		if(languagelist[i].checked)
+			flag=true;
+    }
+    if(!flag){
+    	message = 'Language should be selected.';
     }
     if (submitForm.source.value == '') {
         message += '\nSource cannot be empty';
@@ -61,13 +67,12 @@ function checkProblemFile(submitForm) {
                         <tr>
                           <td>&nbsp;</td>
                           <td height="25"> <div align="right">Language&nbsp;&nbsp;</div></td>
-                          <td> <select name="languageId">
-                              <option value=''>--select Language--</option>
+                          <td>
                             <%
                                 for (Iterator it = ((AbstractContest) request.getAttribute("contest")).getLanguages().iterator(); it.hasNext();) {
                                     Language language = (Language) it.next();
                             %>
-                              <option value="<%=language.getId()%>" <%=("" +language.getId()).equals(request.getParameter("languageId")) ? "selected" : ""%> ><%=language.getName()%></option>
+                              <input type="radio" name="languageId" value="<%=language.getId() %>" <%=("" +language.getId()).equals(request.getParameter("languageId")) ? "checked" : ""%>><%=language.getName()%>
                             <%
                             }
                             %>

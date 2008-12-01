@@ -441,7 +441,7 @@
     </action>
     </action-mappings>
 
-    <controller tempDir="c:/tmp"
+    <controller tempDir="/tmp"
                 maxFileSize="256M"
                 bufferSize="4096"
                 contentType="text/html;charset=UTF-8" 

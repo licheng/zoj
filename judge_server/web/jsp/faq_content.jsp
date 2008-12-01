@@ -73,21 +73,17 @@ end.
 Here is a sample solution for problem 1001 using Java:<br>
 <pre>
 <font color="20B000" size=5>
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        try {
-            for (;;) {
-                int a = in.nextInt();
-                int b = in.nextInt();
-                System.out.println(a + b);
-            }
-        } catch (NoSuchElementException e) {
-        }
-    }
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		while (in.hasNextInt()) {
+			int a = in.nextInt();
+			int b = in.nextInt();
+			System.out.println(a + b);
+		}
+	}
 }
 </font>
 </pre>
