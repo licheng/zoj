@@ -20,6 +20,8 @@
     String actionName = isProblemset ? "Problem" : "ContestProblem";
     String actionPath = request.getContextPath() + "/show" 
         + (isProblemset ? "Problems" : "ContestProblems") + ".do";
+    String searchactionPath = request.getContextPath() + "/search" 
+        + actionName + ".do";
     String problemLink = request.getContextPath() + "/show" + actionName + ".do";
     String runsLink = request.getContextPath() + "/show" + (isProblemset ? "Runs" : "ContestRuns") + ".do";
     String showProblemsAction = isProblemset ? "showProblems.do" : "showContestProblems.do";
@@ -150,6 +152,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                     %>
                 </table>
                 <% if (admin) { %>
+
                 <blockquote>
                 <a href="<%=request.getContextPath()%>/add<%=actionName%>.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Add Problem</font></a>&nbsp;&nbsp;&nbsp;
                 <a href="<%=request.getContextPath()%>/export<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Export Problems</font></a>&nbsp;&nbsp;&nbsp;
@@ -158,6 +161,12 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                 <% } %>   
                 
             </form>
+            <% if (admin) { %>
+                <form action="<%=searchactionPath %>">
+                	<input type="hidden" name="contestId" value="<bean:write name="contest" property="id"/>">
+                	<input type="text" name="query" /> <input type="submit" value="Search"/>
+                <form>
+                <% } %> 
             
             <logic:present name="CheckMessages">
                 <font color=green>Check Results:</font><br>

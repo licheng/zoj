@@ -201,13 +201,13 @@ public class EditProblemAction extends BaseAction {
         }
 
         List<Problem> problems = ContestManager.getInstance().getContestProblems(context.getContest().getId());
-        for (Object obj : problems) {
+        /*for (Object obj : problems) {
             Problem p = (Problem) obj;
             if (!form.getProblemId().equals("" + p.getId()) && p.getTitle().equals(name)) {
                 errors.add("name", new ActionMessage("ProblemForm.name.used"));
                 break;
             }
-        }
+        }*/
         for (Object obj : problems) {
             Problem p = (Problem) obj;
             if (!form.getProblemId().equals("" + p.getId()) && p.getCode().equals(code)) {

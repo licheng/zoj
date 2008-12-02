@@ -439,6 +439,12 @@
     <action path="/showUserStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowUserStatusAction">
       <forward name="success" path="/show_user_status.jsp" />
     </action>
+     <action path="/searchProblem" type="cn.edu.zju.acm.onlinejudge.action.SearchProblemAction">
+      <forward name="success" path="/search_result.jsp" />
+    </action>
+     <action path="/searchContestProblem" type="cn.edu.zju.acm.onlinejudge.action.SearchProblemAction">
+      <forward name="success" path="/contest_search_result.jsp" />
+    </action>
     </action-mappings>
 
     <controller tempDir="/tmp"

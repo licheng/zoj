@@ -9,9 +9,9 @@ C++: <font color=blue>g++ foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DO
 Free Pascal(FPC): <font color=blue>fpc -Sd -O2 -Op2 -dONLINE_JUDGE</font><br>
 Java: <font color=blue>No special options</font><br>
 Our compiler software version:<br>
-<font color=blue>gcc/g++ 4.1.2 (Ubuntu 4.1.2-0ubuntu4)</font><br>
-<font color=blue>glibc 2.6.1</font><br>
-<font color=blue>Free Pascal Compiler version 2.0.4 [2007/02/02] for i386</font><br>
+<font color=blue>gcc/g++ (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)</font><br>
+<font color=blue>glibc 2.7.1</font><br>
+<font color=blue>Free Pascal Compiler version 2.2.0 [2008/04/01] for i386</font><br>
 <font color=blue>java version "1.6.0_06"</font><br>
 <hr>
 <font color=green>Q</font>:Free Pascal Runtime Error Numbers<br>

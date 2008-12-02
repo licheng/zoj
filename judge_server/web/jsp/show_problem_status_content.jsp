@@ -85,7 +85,7 @@
                         <td class="runLanguage"><%=submission.getLanguage()%></td>
                         <td class="runTime"><%=submission.getTimeConsumption()%></td>
                         <td class="runMemory"><%=submission.getMemoryConsumption()%></td>
-                        <td class="runUserName"><a href="<%=userStatusPath + "?handle=" + submission.getUserName()%>"><font color="db6d00"><%=submission.getUserName()%></font></a></td>                      
+                        <td class="runUserName"><a href="<%=userStatusPath + "?userId=" + submission.getUserProfileId()%>"><font color="db6d00"><%=submission.getUserName()%></font></a></td>                      
                     </tr>
                     <%
                     }

@@ -170,12 +170,12 @@ public class AddProblemAction extends BaseAction {
         }
 
         List<Problem> problems = ContestManager.getInstance().getContestProblems(context.getContest().getId());
-        for (Object problem : problems) {
+        /*for (Object problem : problems) {
             if (((Problem) problem).getTitle().equals(name)) {
                 errors.add("name", new ActionMessage("ProblemForm.name.used"));
                 break;
             }
-        }
+        }*/
         for (Object problem : problems) {
             if (((Problem) problem).getCode().equals(code)) {
                 errors.add("code", new ActionMessage("ProblemForm.code.used"));

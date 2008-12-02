@@ -61,7 +61,7 @@
 					for (int i = 0; i < roles.size(); ++i) {
 						RoleSecurity r = (RoleSecurity) roles.get(i);
 					%>
-		            <a href="<%=request.getContextPath()%>/showContestRankList.do?contestId=<bean:write name="contest" property="id"/>&roleId=<%=r.getId()%>"><%=r.getDescription()%></a>
+		            <a href="<%=request.getContextPath()%>/showContestRankList.do?contestId=<bean:write name="contest" property="id"/>&roleId=<%=r.getId()%>"><%=r.getName()%></a>
 					<%
 					}
 					%>
