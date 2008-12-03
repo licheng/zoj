@@ -27,38 +27,36 @@
 #include "common_io.h"
 #include "protocol.h"
 #include "test_util-inl.h"
-#include "trace.h"
 
 DEFINE_OPTIONAL_ARG(int, uid, 0, "");
 DECLARE_ARG(int, special_judge_run_time_limit);
 
 class SpecialCheckerTest : public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         checker_ = NULL;
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
-        InstallHandlers();
         ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/1.out").c_str(), "output"));
-        ARG_special_judge_run_time_limit = 1;
+        ARG_special_judge_run_time_limit = 2;
     }
 
-    virtual void TearDown() {
+    void TearDown() {
         if (checker_) {
             delete checker_;
         }
-        UninstallHandlers();
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     int Run() {

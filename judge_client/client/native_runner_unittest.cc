@@ -20,48 +20,46 @@
 #include "unittest.h"
 #include "native_runner.h"
 
+#include <stdlib.h>
+
+#include <signal.h>
+
 #include "protocol.h"
 #include "strutil.h"
 #include "test_util-inl.h"
-#include "trace.h"
 
-class NativeRunnerTest : public TestFixture {
+class NativeRunnerTest {
   protected:
-    virtual void SetUp() {
-        runner_ = new NativeRunner();
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/1.in").c_str(), "input"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
-        InstallHandlers();
         time_limit_ = 10;
         memory_limit_ = output_limit_ = 1000;
     }
 
-    virtual void TearDown() {
-        if (runner_) {
-            delete runner_;
-        }
-        UninstallHandlers();
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = runner_->Run(fd_[1], time_limit_, memory_limit_, output_limit_, 0, 0);
+        NativeRunner runner(fd_[1], time_limit_, memory_limit_, output_limit_, 0, 0);
+        int ret = runner.Run();
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
 
-    NativeRunner* runner_;
     string root_;
     int fd_[2];
     int time_limit_;
@@ -90,7 +88,7 @@ TEST_F(NativeRunnerTest, Success) {
 
 TEST_F(NativeRunnerTest, TimeLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(), "p"));
-    time_limit_ = 1;
+    time_limit_ = 2;
 
     ASSERT_EQUAL(1, Run());
 
@@ -110,7 +108,7 @@ TEST_F(NativeRunnerTest, TimeLimitExceeded) {
 
 TEST_F(NativeRunnerTest, MemoryLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/mle").c_str(), "p"));
-    memory_limit_ = 1;
+    memory_limit_ = 100;
 
     ASSERT_EQUAL(1, Run());
 
@@ -130,7 +128,7 @@ TEST_F(NativeRunnerTest, MemoryLimitExceeded) {
 
 TEST_F(NativeRunnerTest, MemoryLimitExceededMMap) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/mle_mmap").c_str(), "p"));
-    memory_limit_ = 100000;
+    memory_limit_ = 10000;
 
     ASSERT_EQUAL(1, Run());
 

@@ -1,6 +1,4 @@
-#include <string>
-
-using namespace std;
+#include <string.h>
 
 int main() {
     char* p = 0;

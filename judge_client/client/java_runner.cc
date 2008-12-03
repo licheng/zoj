@@ -35,24 +35,41 @@ using namespace std;
 #include "net_util.h"
 #include "protocol.h"
 #include "strutil.h"
-#include "trace.h"
 
 DECLARE_ARG(string, root);
 
-int JavaRunner::Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) {
-    TraceCallback callback;
+namespace {
+void sigchld_handler(int) {
+}
+
+int HandleSIGCHLD() {
+    struct sigaction act;
+    act.sa_handler = sigchld_handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGCHLD, &act, NULL);
+    return 0;
+}
+
+}
+
+int __to_install_sigchld_handler = HandleSIGCHLD();
+
+void JavaRunner::InternalRun() {
     LOG(INFO)<<"Running";
     int port;
     int server_sock = CreateServerSocket(&port);
     if (server_sock < 0) {
-        return -1;
+        result_ = INTERNAL_ERROR;
+        return;
     }
-    pid_t pid = fork();
-    if (pid < 0) {
+    pid_ = fork();
+    if (pid_ < 0) {
         LOG(SYSCALL_ERROR)<<"Fail to fork";
-        return -1;
+        result_ = INTERNAL_ERROR;
+        return;
     }
-    if (pid > 0) {
+    if (pid_ > 0) {
         int status;
         for (;;) {
             struct sockaddr_un un;
@@ -62,70 +79,67 @@ int JavaRunner::Run(int sock, int time_limit, int memory_limit, int output_limit
                 if (errno != EINTR) {
                     LOG(SYSCALL_ERROR)<<"Fail to accept";
                     close(server_sock);
-                    WriteUint32(sock, INTERNAL_ERROR);
-                    return -1;
-                } else if (callback.HasExited()) {
+                    result_ = INTERNAL_ERROR;
+                    return;
+                } else if (waitpid(pid_, &status, WNOHANG) > 0) {
                     break;
                 }
             } else {
-                uint32_t time_consumption;
-                uint32_t memory_consumption;
-                while (ReadUint32(client_sock, &time_consumption) >= 0 &&
-                       ReadUint32(client_sock, &memory_consumption) >= 0) {
-                    SendRunningMessage(sock, time_consumption, memory_consumption);
+                uint32_t ts, ms;
+                while (ReadUint32(client_sock, &ts) >= 0 &&
+                       ReadUint32(client_sock, &ms) >= 0) {
+                    DLOG<<ts<<' '<<ms;
+                    time_consumption_ = ts;
+                    memory_consumption_ = ms;
+                    SendRunningMessage();
+                }
+                close(client_sock);
+                while (waitpid(pid_, &status, 0) < 0 && errno != ECHILD) {
                 }
                 break;
             }
         }
-        while (waitpid(pid, &status, 0) < 0) {
-            if (errno != EINTR) {
-                LOG(SYSCALL_ERROR)<<"Fail to waitpid";
-                kill(pid, SIGKILL);
-                WriteUint32(sock, INTERNAL_ERROR);
-                return -1;
-            }
-        }
+        close(server_sock);
         if (WIFSIGNALED(status)) {
             LOG(ERROR)<<"Terminated by signal "<<WTERMSIG(status);
-            return -1;
+            result_ = INTERNAL_ERROR;
+            return;
         } else {
-            status = WEXITSTATUS(status);
-            switch (status) {
+            result_ = WEXITSTATUS(status);
+            switch (result_) {
               case 0:
-                return 0;
               case TIME_LIMIT_EXCEEDED:
               case OUTPUT_LIMIT_EXCEEDED:
               case MEMORY_LIMIT_EXCEEDED:
               case RUNTIME_ERROR:
-                WriteUint32(sock, status);
-                LogResult(status);
-                return 1;
+                return;
               default:
                 if (status != INTERNAL_ERROR) {
                     LOG(ERROR)<<"Invalid exit status "<<status;
                 }
-                WriteUint32(sock, INTERNAL_ERROR);
-                return -1;
+                result_ = INTERNAL_ERROR;
+                return;
             }
         }
     } else {
-        close(sock);
+        close(sock_);
         close(server_sock);
         Log::Close();
         execlp("java",
-               StringPrintf("-Xms%dk", memory_limit / 2 + 190).c_str(),
-               StringPrintf("-Xmx%dk", memory_limit + 190).c_str(),
+               StringPrintf("-Xms%dk", memory_limit_ / 2 + 190).c_str(),
+               StringPrintf("-Xmx%dk", memory_limit_ + 190).c_str(),
                StringPrintf("-Djava.library.path=%s", ARG_root.c_str()).c_str(),
                "-Djava.class.path=",
                "-jar", StringPrintf("%s/JavaSandbox.jar", ARG_root.c_str()).c_str(),
                StringPrintf("%d", port).c_str(),
-               StringPrintf("%d", time_limit).c_str(),
-               StringPrintf("%d", memory_limit).c_str(),
-               StringPrintf("%d", output_limit).c_str(),
-               StringPrintf("%d", uid).c_str(),
-               StringPrintf("%d", gid).c_str(),
+               StringPrintf("%d", time_limit_).c_str(),
+               StringPrintf("%d", memory_limit_).c_str(),
+               StringPrintf("%d", output_limit_).c_str(),
+               StringPrintf("%d", uid_).c_str(),
+               StringPrintf("%d", gid_).c_str(),
                NULL);
         LOG(SYSCALL_ERROR)<<"Fail to run java";
-        return -1;
+        exit(-1);
+        return;
     }
 }

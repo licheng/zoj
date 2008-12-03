@@ -17,6 +17,7 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <string>
 
 #include <errno.h>
@@ -26,7 +27,6 @@
 
 #include "args.h"
 #include "environment.h"
-#include "kmmon-lib.h"
 #include "net_util.h"
 #include "global.h"
 #include "logging.h"
@@ -72,10 +72,12 @@ void Daemonize(int lock_fd) {
     dup2(fd, 1);
     dup2(fd, 2);
 
-    ftruncate(lock_fd, 0);
+    if (ftruncate(lock_fd, 0)) {
+    }
     char buffer[20];
     sprintf(buffer, "%ld", (long)getpid());
-    write(lock_fd, buffer, strlen(buffer) + 1);
+    if (write(lock_fd, buffer, strlen(buffer) + 1)) {
+    }
 }
 
 // Locks the specified file. cmd can be F_GETLK, F_SETLK or F_SETLKW.
@@ -105,10 +107,12 @@ int Lock() {
             return -1;
         }
     }
-    ftruncate(fd, 0);
+    if (ftruncate(fd, 0)) {
+    }
     char buffer[20];
     sprintf(buffer, "%ld", (long)getpid());
-    write(fd, buffer, strlen(buffer) + 1);
+    if (write(fd, buffer, strlen(buffer) + 1)) {
+    }
     return fd;
 }
 
@@ -185,10 +189,6 @@ void SIGPIPEHandler(int sig) {
     global::socket_closed = 1;
 }
 
-void SIGCHLDHandler(int sig) {
-    while (waitpid(-1, NULL, WNOHANG) > 0);
-}
-
 void SIGUSR1Handler(int sig) {
     Log::Close();
 }
@@ -199,7 +199,6 @@ int ControlMain(const string& queue_address, int queueu_port, int port);
 int JudgeMain(int sock, int uid, int gid);
 
 int main(int argc, const char* argv[]) {
-    kmmon_clear_orphans();
     if (ParseArguments(argc, argv) < 0) {
         return 1;
     }
@@ -213,8 +212,6 @@ int main(int argc, const char* argv[]) {
 
     // prevents SIGPIPE to terminate the processes.
     InstallSignalHandler(SIGPIPE, SIGPIPEHandler);
-
-    InstallSignalHandler(SIGCHLD, SIGCHLDHandler);
 
     InstallSignalHandler(SIGUSR1, SIGUSR1Handler);
 
@@ -262,6 +259,7 @@ int main(int argc, const char* argv[]) {
 
     vector<JudgeProcess*> children;
     while (!global::terminated) {
+        while (waitpid(-1, NULL, WNOHANG) > 0);
         int nfds = max(log_server_sock, server_sock);
         fd_set read_fdset;
         fd_set except_fdset;

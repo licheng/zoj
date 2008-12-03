@@ -20,6 +20,8 @@
 #include "args.h"
 
 #include <iostream>
+#include <stdlib.h>
+
 #include <getopt.h>
 
 #include "util.h"

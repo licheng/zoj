@@ -29,7 +29,15 @@ case $1 in
         exit 1
         ;;
     javac)
-        if ! javac -cp . $src >/dev/null ; then
+        root=`ps -o cmd $$ | tail -n 1`
+        root=${root#* }
+        root=${root%/script/*}
+        java_home=`which javac`
+        while [ -L "$java_home" ]; do
+            java_home=`readlink $java_home`
+        done
+        java_home=${java_home%/javac}
+        if ! $java_home/java -cp $root CustomJavaCompiler $src >/dev/null ; then
             exit 1
         fi
         if ! [[ -f Main.class ]]; then

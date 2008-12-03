@@ -26,7 +26,7 @@ cp script/compile.sh "$dir"/script
 cp -f client/judged "$dir"
 cp -f client/JavaSandbox.jar "$dir"
 cp -f client/libsandbox.so "$dir"
-cp -f kernel_module/kmmon.ko "$dir"
+cp -f client/CustomJavaCompiler*.class "$dir"
 chmod +x "$dir"/*.sh
 chmod +x "$dir"/script/compile.sh
 if [[ "`cat /etc/group | grep '^zoj:'`" == "" ]]; then

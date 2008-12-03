@@ -25,13 +25,13 @@
 
 class CheckerTest : public TestFixture, public Checker {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
     }
 
-    virtual void TearDown() {
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }

@@ -44,4 +44,31 @@ static inline int ReadLastUint32(int fd) {
     return (int)t;
 }
 
+extern int ReadUntilNotRunning(int fd) {
+    for (;;) {
+        int reply = TryReadUint32(fd);
+        if (reply != RUNNING) {
+            return reply;
+        }
+        int time = ReadUint32(fd);
+        int memory = ReadUint32(fd);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
+extern int ReadUntilNotJudging(int fd) {
+    for (;;) {
+        int reply = ReadUint32(fd);
+        if (reply != JUDGING) {
+            return reply;
+        }
+    }
+}
+
+extern inline int Eof(int fd) {
+    char ch;
+    return !read(fd, &ch, 1);
+}
+
 #endif

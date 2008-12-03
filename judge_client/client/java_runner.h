@@ -24,7 +24,12 @@
 
 class JavaRunner : public Runner {
   public:
-    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid);
+    JavaRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid)
+        : Runner(sock, time_limit, memory_limit, output_limit, uid, gid) {
+    }
+
+  private:
+    virtual void InternalRun();
 };
 
 #endif // __JAVA_RUNNER_H__

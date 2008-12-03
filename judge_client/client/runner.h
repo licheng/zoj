@@ -26,14 +26,40 @@ using namespace std;
 
 class Runner {
   public:
+    Runner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid)
+        : sock_(sock),
+          time_limit_(time_limit),
+          memory_limit_(memory_limit),
+          output_limit_(output_limit),
+          uid_(uid),
+          gid_(gid),
+          pid_(-1),
+          result_(-1),
+          time_consumption_(0),
+          memory_consumption_(0) {
+    }
+
     virtual ~Runner();
 
     // Runs the specified program. Returns 0 if execution succeeded, or -1 on error.
-    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) = 0;
+    int Run();
 
-    static int SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption);
 
-    static void LogResult(int result);
+  protected:
+    virtual void InternalRun() = 0;
+
+    int SendRunningMessage();
+
+    int sock_;
+    int time_limit_;
+    int memory_limit_;
+    int output_limit_;
+    int uid_;
+    int gid_;
+    pid_t pid_;
+    int result_;
+    int time_consumption_;
+    int memory_consumption_;
 };
 
 #endif // __RUNNER_H__

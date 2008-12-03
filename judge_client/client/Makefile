@@ -1,6 +1,5 @@
 CC=$(CXX)
-CXXFLAGS=-I ../kernel_module -L ../kernel_module -Wall -Werror -Wno-sign-compare -ansi -O3 -MD
-VPATH=../kernel_module
+CXXFLAGS=-I ../zunit -Wall -Werror -Wno-sign-compare -ansi -O3 -MD
 ALL_SOURCES:=$(filter-out Sandbox.cc, $(wildcard *.cc))
 UNITTEST_SOURCES:=$(wildcard *_unittest.cc)
 SOURCES=$(filter-out $(UNITTEST_SOURCES),$(ALL_SOURCES))
@@ -14,7 +13,7 @@ UNITTEST_RUNS:=$(patsubst %.cc,%.run,$(UNITTEST_SOURCES))
 all: judged JavaSandbox.jar Sandbox.h libsandbox.so
 
 clean:
-	rm -f $(ALL_OBJS) $(ALL_DEPS) judged *.jar $(UNITTESTS) *.so Sandbox.h *.class
+	rm -f *.o *.d judged *.jar $(UNITTESTS) *.so Sandbox.h *.class
 	@make -C testdata clean
 
 rebuild: clean all
@@ -30,7 +29,7 @@ endif
 
 -include $(ALL_DEPS)
 
-judged: $(OBJS) -lkmmon
+judged: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 JavaSandbox.jar: Sandbox.java SandboxClassLoader.java SandboxSecurityManager.java ../../judge_server/src/main/cn/edu/zju/acm/onlinejudge/bean/enumeration/JudgeReply.java
@@ -42,22 +41,28 @@ JavaSandbox.jar: Sandbox.java SandboxClassLoader.java SandboxSecurityManager.jav
 	jar cfe $$CWD/JavaSandbox.jar Sandbox * && \
 	rm -rf $$DIR
 
+CustomJavaCompiler.class: CustomJavaCompiler.java
+	javac CustomJavaCompiler.java
+
 Sandbox.h: JavaSandbox.jar
 
 libsandbox.so: Sandbox.h Sandbox.cc args.o logging.o util.o runner.o strutil.o common_io.o global.o
-	$(CXX) $(CXXFLAGS) -o libsandbox.so -shared -Wl,-soname,libsandbox.so -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux $^ -static -lc -lkmmon
+	JAVA_HOME=`which javac`; \
+	while [ -L "$$JAVA_HOME" ]; do JAVA_HOME=`readlink $$JAVA_HOME`; done; \
+	JAVA_HOME=$${JAVA_HOME%/bin/javac}; \
+	$(CXX) $(CXXFLAGS) -o libsandbox.so -shared -Wl,-soname,libsandbox.so -I$$JAVA_HOME/include -I$$JAVA_HOME/include/linux $^ -fPIC -lc
 
-$(UNITTESTS): %_unittest : %.o %_unittest.o global.o -lcppunit args.o common_io.o logging.o strutil.o
-	$(CXX) $(CXXFLAGS) -o $@ $(filter-out libsandbox.so JavaSandbox.jar, $^)
+$(UNITTESTS): %_unittest : %.o %_unittest.o global.o args.o common_io.o logging.o strutil.o
+	$(CXX) $(CXXFLAGS) -L ../zunit -lzunit -DDEBUG -o $@ $(filter-out libsandbox.so JavaSandbox.jar CustomJavaCompiler.class, $^)
 
 text_checker_unittest: text_file_reader.o checker.o
-special_checker_unittest: checker.o trace.o util.o -lkmmon
-native_runner_unittest: runner.o trace.o util.o -lkmmon
-java_runner_unittest: runner.o libsandbox.so JavaSandbox.jar trace.o util.o net_util.o -lkmmon
-compiler_unittest: environment.o trace.o util.o -lkmmon
-judge_unittest: compiler.o runner.o checker.o java_runner.o native_runner.o text_checker.o special_checker.o environment.o util.o trace.o text_file_reader.o -lkmmon libsandbox.so JavaSandbox.jar net_util.o
-control_unittest: compiler.o environment.o trace.o util.o -lkmmon
-util_unittest: -lkmmon
+special_checker_unittest: checker.o util.o tracer.o
+native_runner_unittest: runner.o util.o tracer.o
+java_runner_unittest: runner.o libsandbox.so JavaSandbox.jar tracer.o util.o net_util.o
+compiler_unittest: environment.o util.o CustomJavaCompiler.class
+judge_unittest: compiler.o runner.o checker.o java_runner.o native_runner.o text_checker.o special_checker.o environment.o util.o tracer.o text_file_reader.o libsandbox.so JavaSandbox.jar net_util.o
+control_unittest: compiler.o environment.o tracer.o util.o
+util_unittest:
 main_unittest: $(filter-out main.o main_stub.o,$(OBJS))
 
 testdata:
@@ -65,7 +70,7 @@ testdata:
 
 $(UNITTEST_RUNS): %.run : % testdata
 	@echo -n "Running $<: "
-	@./$<
+	@env LD_LIBRARY_PATH="$$LD_LIBRARY_PATH:../zunit" ./$<
 	@echo "******************************************************************************"
 	@echo
 

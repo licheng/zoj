@@ -26,7 +26,7 @@
 
 class TextCheckerTest : public TestFixture, public TextChecker {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -42,8 +42,9 @@ class TextCheckerTest : public TestFixture, public TextChecker {
         lines_[1] = lines_[0];
     }
 
-    virtual void TearDown() {
-        system(("rm -rf " + root_).c_str());
+    void TearDown() {
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     void MakeFile(const string& filename, const vector<string>& lines) {

@@ -53,7 +53,7 @@ struct StartupInfo {
         : fd_stdin(0), fd_stdout(0), fd_stderr(0),
           stdin_filename(NULL), stdout_filename(NULL), stderr_filename(NULL),
           uid(0), gid(0),
-          time_limit(0), memory_limit(0), output_limit(0), stack_limit(0), proc_limit(0), file_limit(0),
+          time_limit(0), memory_limit(0), vm_limit(0), output_limit(0), stack_limit(0), proc_limit(0), file_limit(0),
           trace(0),
           working_dir(NULL) { }
 
@@ -90,6 +90,9 @@ struct StartupInfo {
 
     // The maximum size of the child process's data segment, in kilobytes. If zero, no memory limit is applied.
     int memory_limit;
+
+    // The maximum size of the child process's virtual memory, in kilobytes. If zero, no virtual memory limit is applied.
+    int vm_limit;
 
     // The maximum size of files that the child process may create, in kilobytes. If zero, no output limit is applied.
     int output_limit;

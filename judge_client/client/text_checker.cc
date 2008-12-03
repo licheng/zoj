@@ -47,7 +47,7 @@ int TextChecker::InternalCheck(int sock) {
         // Compare the current line.
         for (;;) {
             // Read until 2 files return a space or 0 together.
-            while (!isspace(c1) && c1 || !isspace(c2) && c2) {
+            while ((!isspace(c1) && c1) || (!isspace(c2) && c2)) {
                 if (c1 < 0 || c2 < 0) {
                     return -1;
                 }
@@ -59,7 +59,7 @@ int TextChecker::InternalCheck(int sock) {
                 c2 = f2.Read();
             }
             // Find the next non-space character or \n.
-            while (isspace(c1) && c1 != '\n' || isspace(c2) && c2 != '\n') {
+            while ((isspace(c1) && c1 != '\n') || (isspace(c2) && c2 != '\n')) {
                 if (c1 != c2) {
                     ret = PRESENTATION_ERROR;
                 }

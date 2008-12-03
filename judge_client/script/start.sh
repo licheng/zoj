@@ -64,10 +64,6 @@ rm -rf "$root"/working/*
 # Prepare /log
 CreateDir "$root/log" 750
 
-if [ "`lsmod | grep kmmon`" == "" ]; then
-    insmod "$root/kmmon.ko"
-fi
-
 ids=`cat /etc/passwd | grep zoj | awk -F ':' '{print "--uid=" $3, "--gid=" $4}'`
 cmd="$root/judged --compiler='$supported_source_file_types' --daemonize --root='$root' --queue_address='$address' --queue_port=$port $ids"
 echo $cmd

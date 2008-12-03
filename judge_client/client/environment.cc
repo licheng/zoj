@@ -19,8 +19,9 @@
 
 #include "environment.h"
 
+#include <stdlib.h>
 #include <sys/stat.h>
-#include "unistd.h"
+#include <unistd.h>
 
 #include "args.h"
 #include "logging.h"
@@ -57,7 +58,8 @@ int Environment::ChangeToWorkingDir() const {
 }
 
 void Environment::ClearWorkingDir() const {
-    system(StringPrintf("rm -f %s/*", this->GetWorkingDir().c_str()).c_str());
+    if (system(StringPrintf("rm -f %s/*", this->GetWorkingDir().c_str()).c_str())) {
+    }
 }
 
 string Environment::GetProblemDir(int problem_id, int revision) const {

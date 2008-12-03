@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <algorithm>
+#include <string.h>
+
 #include <dirent.h>
 #include <sys/types.h>
 
@@ -30,7 +34,6 @@
 #include "protocol.h"
 #include "native_runner.h"
 #include "strutil.h"
-#include "trace.h"
 #include "util.h"
 
 // Reads the file content from the given file descriptor and writes the file
@@ -140,7 +143,7 @@ int ExecCompileCommand(int sock, int* compiler_id) {
         return -1;
     }
 
-    switch (compiler->Compile(sock, source_filename)) {
+    switch (compiler->Compile(sock)) {
         case -1:
             return -1;
         case 0:
@@ -218,11 +221,12 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
     }
     int result;
     if (compiler == 4) {
-        JavaRunner runner;
-        result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
+        result = INTERNAL_ERROR;
+        JavaRunner runner(sock, time_limit, memory_limit, output_limit, uid, gid);
+        result = runner.Run();
     } else {
-        NativeRunner runner;
-        result = runner.Run(sock, time_limit, memory_limit, output_limit, uid, gid);
+        NativeRunner runner(sock, time_limit, memory_limit, output_limit, uid, gid);
+        result = runner.Run();
     }
     if (result) {
         return result == -1 ? -1 : 0;
@@ -303,29 +307,47 @@ int CheckData(int sock, const string& data_dir) {
     if (ret == 0) {
         if (in.empty()) {
             LOG(ERROR)<<"Empty directory "<<data_dir;
-            WriteUint32(sock, INVALID_INPUT);
-            return -1;
-        }
-        sort(in.begin(), in.end());
-        sort(out.begin(), out.end());
-        if (judge_compiler == NULL) {
-            for (int i = 0; i < in.size(); ++i) {
-                if (i >= out.size() || in[i] < out[i]) {
-                    LOG(ERROR)<<"No "<<in[i]<<".out found for "<<in[i]<<".in";
+            ret = -1;
+        } else {
+            sort(in.begin(), in.end());
+            sort(out.begin(), out.end());
+            if (judge_compiler == NULL) {
+                for (int i = 0; i < in.size(); ++i) {
+                    if (i >= out.size() || in[i] < out[i]) {
+                        LOG(ERROR)<<"No "<<in[i]<<".out found for "<<in[i]<<".in";
+                        ret = -1;
+                        break;
+                    } else if (in[i] > out[i]) {
+                        LOG(ERROR)<<"No "<<out[i]<<".in found for "<<out[i]<<".out";
+                        ret = -1;
+                        break;
+                    }
+                }
+                if (out.size() > in.size()) {
+                    LOG(ERROR)<<"No "<<out[in.size()]<<".in found for "<<out[in.size()]<<".out";
                     ret = -1;
-                    break;
-                } else if (in[i] > out[i]) {
-                    LOG(ERROR)<<"No "<<out[i]<<".in found for "<<out[i]<<".out";
+                }
+            } else {
+                if (symlink((data_dir + "/" + judge).c_str(), judge_compiler->source_filename().c_str()) == -1) {
+                    LOG(SYSCALL_ERROR)<<"Symlink failed";
+                    WriteUint32(sock, INTERNAL_ERROR);
                     ret = -1;
-                    break;
+                } else {
+                    int result = judge_compiler->Compile(sock);
+                    if (result == -1) {
+                        ret = -1;
+                    } else if (result == 0 && rename("p", (data_dir + "/judge").c_str()) == -1) {
+                        LOG(SYSCALL_ERROR)<<"Fail to rename";
+                        WriteUint32(sock, INTERNAL_ERROR);
+                        ret = -1;
+                    }
+                    if (unlink(judge_compiler->source_filename().c_str())) {
+                    }
+                }
+                if (ret < 0) {
+                    return -1;
                 }
             }
-            if (out.size() > in.size()) {
-                LOG(ERROR)<<"No "<<out[in.size()]<<".in found for "<<out[in.size()]<<".out";
-                ret = -1;
-            }
-        } else if (judge_compiler->Compile(sock, data_dir + "/" + judge) == -1) {
-            return -1;
         }
     }
     if (ret < 0) {
@@ -392,8 +414,8 @@ int ExecDataCommand(int sock, unsigned int problem_id, unsigned int revision) {
     LOG(INFO)<<"Unzipping data file";
     string command = StringPrintf("unzip '%s/data.zip' -d '%s'", tempDir.c_str(), tempDir.c_str());
     int result = system(command.c_str());
-    if (result) {
-        LOG(ERROR)<<"Fail to unzip data file. Command: "<<command;
+    if (result == -1) {
+        LOG(SYSCALL_ERROR)<<"Fail to unzip data file. Command: "<<command;
         WriteUint32(sock, INVALID_INPUT);
         return -1;
     }
@@ -402,7 +424,8 @@ int ExecDataCommand(int sock, unsigned int problem_id, unsigned int revision) {
         return -1;
     }
     if (rename(tempDir.c_str(), revision_dir.c_str()) == -1) {
-        system(StringPrintf("rm -rf '%s'", tempDir.c_str()).c_str());
+        if (system(StringPrintf("rm -rf '%s'", tempDir.c_str()).c_str())) {
+        }
         LOG(SYSCALL_ERROR)<<"Fail to rename "<<tempDir<<" to "<<revision_dir;
         if (errno != ENOTEMPTY && errno != EEXIST) {
             WriteUint32(sock, INTERNAL_ERROR);
@@ -419,9 +442,6 @@ int JudgeMain(int sock, int uid, int gid) {
         close(sock);
         return 1;
     }
-
-    // installs handlers for tracing.
-    InstallHandlers();
 
     int ret = 0;
     int problem_id = -1;

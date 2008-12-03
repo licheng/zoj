@@ -19,25 +19,31 @@
 
 #include "runner.h"
 
+#include <signal.h>
+#include <unistd.h>
+
 #include "common_io.h"
 #include "logging.h"
 #include "protocol.h"
 
 Runner::~Runner() {
+    killpg(pid_, SIGTERM);
 }
 
-int Runner::SendRunningMessage(int sock, uint32_t time_consumption, uint32_t memory_consumption) {
-    if (WriteUint32(sock, RUNNING) == -1 ||
-        WriteUint32(sock, time_consumption) == -1 ||
-        WriteUint32(sock, memory_consumption) == -1) {
+int Runner::SendRunningMessage() {
+    if (WriteUint32(sock_, RUNNING) == -1 ||
+        WriteUint32(sock_, time_consumption_) == -1 ||
+        WriteUint32(sock_, memory_consumption_) == -1) {
         LOG(ERROR)<<"Fail to send running message";
         return -1;
     }
     return 0;
 }
 
-void Runner::LogResult(int result) {
-    switch (result) {
+int Runner::Run() {
+    LOG(INFO)<<"Running";
+    InternalRun();
+    switch (result_) {
       case TIME_LIMIT_EXCEEDED:
         LOG(INFO)<<"Time limit exceeded";
         break;
@@ -56,5 +62,14 @@ void Runner::LogResult(int result) {
       case SEGMENTATION_FAULT:
         LOG(INFO)<<"Segmentation fault";
         break;
+    }
+    if (result_ == 0) {
+        return 0;
+    }
+    WriteUint32(sock_, result_);
+    if (result_ == INTERNAL_ERROR) {
+        return -1;
+    } else {
+        return 1;
     }
 }

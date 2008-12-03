@@ -18,11 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// 0: enable
-// 1: notify tracer
-static char syscall_filter_table[512] = {
+#ifndef __DISABLED_SYSCALL_H__
+#define __DISABLED_SYSCALL_H__
+
+const bool disabled_syscall[512] = {
     0, /*0, restart_syscall*/
-    1, /*1, exit*/
+    0, /*1, exit*/
     1, /*2, fork*/
     0, /*3, read*/
     0, /*4, write*/
@@ -273,7 +274,7 @@ static char syscall_filter_table[512] = {
     1, /*249, io_cancel*/
     1, /*250, fadvise64*/
     1, /*251, unused*/
-    1, /*252, exit_group*/
+    0, /*252, exit_group*/
     1, /*253, lookup_dcookie*/
     1, /*254, epoll_create*/
     1, /*255, epoll_ctl*/
@@ -340,3 +341,5 @@ static char syscall_filter_table[512] = {
 	1, /*316, vmsplice*/
 	1, /*317, move_pages*/
 };
+
+#endif // __DISABLED_SYSCALL_H__

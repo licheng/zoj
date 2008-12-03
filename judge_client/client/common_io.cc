@@ -79,7 +79,7 @@ int Copy(int from, int to) {
     int count;
     do {
         count = Readn(from, buf, sizeof(buf));
-        if (count < 0 || count > 0 && Writen(to, buf, count) < 0) {
+        if (count < 0 || (count > 0 && Writen(to, buf, count) < 0)) {
             return -1;
         }
     } while (count == sizeof(buf));

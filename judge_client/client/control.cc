@@ -19,6 +19,7 @@
 #include <set>
 
 #include <dirent.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -40,6 +41,7 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
     }
 
     vector<const Compiler*> supported_compilers = CompilerManager::GetInstance()->GetAllSupportedCompilers();
+    int wait_time  = 1;
     int sock = -1;
     global::socket_closed = true;
     // Loops until SIGTERM is received.
@@ -47,8 +49,11 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
         if (global::socket_closed) {
             if (sock >= 0) {
                 close(sock);
+                LOG(INFO)<<"Sleep "<<wait_time<<" second(s)";
+                sleep(wait_time);
+                wait_time *= 2;
             }
-            for (int i = 1; ; i *= 2) {
+            for (;;) {
                 sock = ConnectTo(queue_address, queue_port, ARG_max_heart_beat_interval);
                 if (sock >= 0) {
                     global::socket_closed = false;
@@ -56,10 +61,12 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
                 } else if (global::terminated) {
                     return 0;
                 }
-                if (i > 64) {
-                    i = 64;
+                if (wait_time > 64) {
+                    wait_time = 64;
                 }
-                sleep(i);
+                LOG(INFO)<<"Sleep "<<wait_time<<" seconds";
+                sleep(wait_time);
+                wait_time *= 2;
             }
         }
         uint32_t command;
@@ -68,6 +75,7 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
             global::socket_closed = true;
         } else if (command == CMD_PING) {
             WriteUint32(sock, READY);
+            wait_time = 1;
         } else if (command == CMD_INFO) {
             uint32_t buf[128] = {port, supported_compilers.size()};
             int n = 2;
@@ -78,6 +86,7 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
                 buf[i] = htonl(buf[i]);
             }
             Writen(sock, buf, n * sizeof(buf[0]));
+            wait_time = 1;
         } else {
             LOG(ERROR)<<"Invalid command "<<command;
             WriteUint32(sock, INVALID_INPUT);

@@ -19,14 +19,16 @@
 
 #include "unittest.h"
 
+#include <string.h>
+
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #include "environment.h"
+#include "logging.h"
 #include "protocol.h"
 #include "test_util-inl.h"
-#include "trace.h"
 
 DECLARE_ARG(int, max_heart_beat_interval);
 DECLARE_ARG(string, compiler);
@@ -35,7 +37,7 @@ int ControlMain(const string& queue_address, int queue_port, int port);
 
 class ControlMainTest: public TestFixture {
     protected:
-        virtual void SetUp() {
+        void SetUp() {
             root_ = tmpnam(NULL);
             ASSERT_EQUAL(0, mkdir(root_.c_str(), 0755));
             ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -74,14 +76,13 @@ class ControlMainTest: public TestFixture {
             address_ = "127.0.0.1";
             buf_size_ = 0;
             global::terminated = false;
-            ARG_max_heart_beat_interval = 100;
+            ARG_max_heart_beat_interval = 200;
             ARG_compiler = "gcc,g++,fpc";
         }
 
-        virtual void TearDown() {
-            UninstallHandlers();
+        void TearDown() {
             if (pid_ > 0) {
-                kill(pid_, SIGKILL);
+                kill(-pid_, SIGKILL);
                 waitpid(pid_, NULL, 0);
             }
             if (server_sock_ >= 0) {
@@ -90,7 +91,8 @@ class ControlMainTest: public TestFixture {
             for (int i = 0; i < client_socks_.size(); ++i) {
                 close(client_socks_[i]);
             }
-            system(("rm -rf " + root_).c_str());
+            if (system(("rm -rf " + root_).c_str())) {
+            }
         }
 
         void RunControlMain() {
@@ -100,6 +102,7 @@ class ControlMainTest: public TestFixture {
             }
             if (pid_ == 0) {
                 close(server_sock_);
+                setsid();
                 Environment::GetInstance();
                 Environment::instance_->root_ = root_;
                 exit(ControlMain(address_, port_, port_));
@@ -110,7 +113,7 @@ class ControlMainTest: public TestFixture {
             sockaddr_in address;
             size_t len = sizeof(address);
             int sock = -1;
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 30; ++i) {
                 sock = accept(server_sock_, (struct sockaddr*)&address, &len);
                 if (sock >= 0) {
                     break;
@@ -135,7 +138,6 @@ class ControlMainTest: public TestFixture {
         int WaitForTermination() {
             int status;
             ASSERT_EQUAL(pid_, waitpid(pid_, &status, 0));
-            pid_ = -1;
             ASSERT(WIFEXITED(status));
             return WEXITSTATUS(status);
         }

@@ -44,7 +44,7 @@ class Compiler {
         return source_filename_;
     }
 
-    int Compile(int sock, const string& source_file_name) const;
+    int Compile(int sock) const;
 
   private:
     int id_;

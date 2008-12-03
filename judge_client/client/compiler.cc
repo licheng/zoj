@@ -19,6 +19,7 @@
 
 #include "compiler.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -31,7 +32,6 @@
 #include "logging.h"
 #include "protocol.h"
 #include "strutil.h"
-#include "trace.h"
 #include "util.h"
 
 DEFINE_ARG(string, compiler, "All compilers supported by this client");
@@ -104,46 +104,13 @@ const Compiler* CompilerManager::GetCompilerByExtension(const string& extension)
     return NULL;
 }
 
-namespace {
-
-class CompilerTraceCallback : public TraceCallback {
-  public:
-    CompilerTraceCallback() : open_create_count_(0) {
-    }
-
-    bool TooManyFiles() {
-        return open_create_count_ > ARG_max_output_file_number;
-    }
-
-    virtual bool OnExecve() {
-        return true;
-    }
-
-    virtual bool OnClone() {
-        return true;
-    }
-
-    virtual bool OnOpen(const string& path, int flags) {
-        return (flags & O_CREAT) != O_CREAT || ++open_create_count_ <= ARG_max_output_file_number;
-    }
-
-    virtual bool OnOtherSyscall(int syscall) {
-        return true;
-    }
-
-  private:
-    int open_create_count_;
-};
-
-}
-
-int Compiler::Compile(int sock, const string& source_file_name) const {
+int Compiler::Compile(int sock) const {
     LOG(INFO)<<"Compiling";
     WriteUint32(sock, COMPILING);
     string command = StringPrintf("%s '%s' '%s'",
                                   Environment::GetInstance()->GetCompilationScript().c_str(),
                                   this->compiler_name_.c_str(),
-                                  source_file_name.c_str());
+                                  source_filename_.c_str());
     LOG(INFO)<<"Command: "<<command;
     int fd_pipe[2];
     if (pipe(fd_pipe) < 0) {
@@ -155,8 +122,7 @@ int Compiler::Compile(int sock, const string& source_file_name) const {
     info.fd_stderr = fd_pipe[1];
     info.time_limit = ARG_compilation_time_limit;
     info.output_limit = ARG_compilation_output_limit;
-    info.trace = 1;
-    CompilerTraceCallback callback;
+    info.trace = 0;
     pid_t pid = CreateShellProcess(command.c_str(), info);
     close(fd_pipe[1]);
     if (pid < 0) {
@@ -201,10 +167,6 @@ int Compiler::Compile(int sock, const string& source_file_name) const {
         } else {
             LOG(INFO)<<"Compilation error";
             WriteUint32(sock, COMPILATION_ERROR);
-            if (callback.TooManyFiles()) {
-                strcpy((char*)error_message, "The compiler generates too many files");
-                count = strlen((char*)error_message);
-            }
             uint32_t len = htonl(count);
             Writen(sock, &len, sizeof(len));
             for (int i = 0; i < count; ++i) {

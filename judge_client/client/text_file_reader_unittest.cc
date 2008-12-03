@@ -20,18 +20,21 @@
 #include "unittest.h"
 #include "text_file_reader.h"
 
+#include <string.h>
+
 #include <fcntl.h>
 
 class TextFileReaderTest : public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         filename_ = tmpnam(NULL);
         make_file_ = 1;
     }
 
-    virtual void TearDown() {
+    void TearDown() {
         delete file_;
-        system(("rm -f " + filename_).c_str());
+        if (system(("rm -f " + filename_).c_str())) {
+        }
     }
 
     void MakeFile(const string& content) {

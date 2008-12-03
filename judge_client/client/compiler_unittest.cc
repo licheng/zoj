@@ -27,16 +27,19 @@
 #include "environment.h"
 #include "logging.h"
 #include "protocol.h"
-#include "trace.h"
 
 class CompilerTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         ASSERT_EQUAL(0, mkdir("script", 0700));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
+        ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/CustomJavaCompiler.class").c_str(),
+                                "CustomJavaCompiler.class"));
+        ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/CustomJavaCompiler$CustomJavaFileManager.class").c_str(),
+                                "CustomJavaCompiler$CustomJavaFileManager.class"));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         Environment::GetInstance();
@@ -44,23 +47,22 @@ class CompilerTest: public TestFixture {
         compiler_id_ = 2;
         compiler_name_ = "g++";
         source_filename_ = "p.cc";
-        InstallHandlers();
     }
 
-    virtual void TearDown() {
-        UninstallHandlers();
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     int Run() {
         Compiler compiler(compiler_id_, compiler_name_, source_filename_);
-        int ret = compiler.Compile(fd_[1], source_filename_);
+        int ret = compiler.Compile(fd_[1]);
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }

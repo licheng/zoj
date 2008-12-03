@@ -17,23 +17,25 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
 #include <string>
+
+using namespace std;
 
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <signal.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/ptrace.h>
 #include <sys/times.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdarg.h>
 
 #include "common_io.h"
-#include "kmmon-lib.h"
 #include "logging.h"
 #include "strutil.h"
-#include "trace.h"
 #include "util.h"
 
 int SetLimit(int resource, unsigned int limit) {
@@ -57,7 +59,10 @@ int ReadTimeConsumption(pid_t pid) {
     int utime, stime;
     while (fgetc(fp) != ')');
     fgetc(fp);
-    fscanf(fp, "%*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %d %d", &utime, &stime);
+    if (fscanf(fp, "%*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %d %d", &utime, &stime) < 2) {
+        fclose(fp);
+        return -1;
+    }
     fclose(fp);
     static int clktck = 0;
     if (clktck == 0) {
@@ -144,6 +149,12 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
             raise(SIGKILL);
         }
     }
+    if (process_info.vm_limit) {
+        if (SetLimit(RLIMIT_AS, process_info.vm_limit * 1024) == -1) {
+            LOG(SYSCALL_ERROR)<<"Fail to set memory limit to "<<process_info.memory_limit<<'k';
+            raise(SIGKILL);
+        }
+    }
     if (process_info.output_limit) {
         if (SetLimit(RLIMIT_FSIZE, process_info.output_limit * 1024) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set output limit to "<<process_info.output_limit<<'k';
@@ -187,15 +198,14 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
         }
     }
     if (process_info.trace) {
-        if (kmmon_traceme() == -1) {
+        if (ptrace(PTRACE_TRACEME, 0, 0, 0) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to trace";
             raise(SIGKILL);
         }
     }
-    if (execv(commands[0], (char**)(commands + 1)) == -1) {
-        LOG(SYSCALL_ERROR)<<"Fail to execute command '"<<commands[0]<<"'";
-        raise(SIGKILL);
-    }
+    execv(commands[0], (char**)(commands + 1));
+    LOG(SYSCALL_ERROR)<<"Fail to execute command '"<<commands[0]<<"'";
+    raise(SIGKILL);
     return -1;
 }
 
@@ -262,4 +272,3 @@ int ConnectTo(const string& address, int port, int timeout) {
     LOG(INFO)<<"Connected";
     return sock;
 }
-

@@ -21,6 +21,13 @@
 
 #include "args.h"
 
+#include <map>
+#include <vector>
+
+#include "strutil.h"
+
+using namespace std;
+
 DEFINE_ARG(int, int, "");
 DEFINE_OPTIONAL_ARG(int, opt_int, 1001, "");
 DEFINE_ARG(bool, bool, "");
@@ -28,12 +35,38 @@ DEFINE_OPTIONAL_ARG(bool, opt_bool, false, "");
 DEFINE_ARG(string, string, "");
 DEFINE_OPTIONAL_ARG(string, opt_string, "opt", "");
 
-TEST(ParseArgumentsAllValid) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool",
-                    "--string=test"};
-    ASSERT_EQUAL(0, ParseArguments(4, argv));
+class ParseArgumentsTest : public TestFixture {
+  protected:
+    void SetUp() {
+        args_["int"] = "1234";
+        args_["bool"] = 0;
+        args_["string"] = "test";
+    }
+
+    int Run() {
+        vector<string> t;
+        t.push_back("");
+        for (map<const char*, const char*>::iterator it = args_.begin();
+             it != args_.end(); ++it) {
+            if (it->second) {
+                t.push_back(StringPrintf("--%s=%s", it->first, it->second));
+            } else {
+                t.push_back(StringPrintf("--%s", it->first));
+            }
+        }
+        const char* argv[10];
+        for (int i = 0; i < t.size(); ++i) {
+            argv[i] = t[i].c_str();
+        }
+        return ParseArguments(t.size(), argv);
+    }
+
+    map<const char*, const char*> args_;
+};
+
+TEST_F(ParseArgumentsTest, AllValid) {
+    ASSERT_EQUAL(0, Run());
+
     ASSERT_EQUAL(1234, ARG_int);
     ASSERT_EQUAL(true, ARG_bool);
     ASSERT_EQUAL(string("test"), ARG_string);
@@ -42,112 +75,79 @@ TEST(ParseArgumentsAllValid) {
     ASSERT_EQUAL(string("opt"), ARG_opt_string);
 }
 
-TEST(ParseArgumentsNoInt) {
-    const char* argv[] = {"",
-                    "--bool",
-                    "--string=test"};
-    ASSERT_EQUAL(-1, ParseArguments(3, argv));
+TEST_F(ParseArgumentsTest, NoInt) {
+    args_.erase("int");
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsInvalidInt) {
-    const char* argv[] = {"",
-                    "--int=invalid",
-                    "--bool",
-                    "--string=test"};
-    ASSERT_EQUAL(-1, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, InvalidInt) {
+    args_["int"] = "invalid";
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsEmptyInt) {
-    const char* argv[] = {"",
-                    "--int=",
-                    "--bool",
-                    "--string=test"};
-    ASSERT_EQUAL(-1, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, EmptyInt) {
+    args_["int"] = "";
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsNoBool) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--string=test"};
-    ASSERT_EQUAL(-1, ParseArguments(3, argv));
+TEST_F(ParseArgumentsTest, NoBool) {
+    args_.erase("bool");
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsInvalidBool) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool=invalid",
-                    "--string=test"};
-    ASSERT_EQUAL(-1, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, InvalidBool) {
+    args_["bool"] = "invalid";
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsEmptyBool) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool=",
-                    "--string=test"};
-    ASSERT_EQUAL(-1, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, EmptyBool) {
+    args_["bool"] = "";
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsValidBoolTrue) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool=true",
-                    "--string=test"};
-    ASSERT_EQUAL(0, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, ValidBoolTrue) {
+    args_["bool"] = "true";
+    ASSERT_EQUAL(0, Run());
+
     ASSERT_EQUAL(true, ARG_bool);
 }
 
-TEST(ParseArgumentsValidBoolFalse) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool=false",
-                    "--string=test"};
-    ASSERT_EQUAL(0, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, ValidBoolFalse) {
+    args_["bool"] = "false";
+    ASSERT_EQUAL(0, Run());
+
     ASSERT_EQUAL(false, ARG_bool);
 }
 
-TEST(ParseArgumentsNoString) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool"};
-    ASSERT_EQUAL(-1, ParseArguments(3, argv));
+TEST_F(ParseArgumentsTest, NoString) {
+    args_.erase("string");
+    ASSERT_EQUAL(-1, Run());
 }
 
-TEST(ParseArgumentsEmptyString) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool",
-                    "--string="};
-    ASSERT_EQUAL(0, ParseArguments(4, argv));
+TEST_F(ParseArgumentsTest, EmptyString) {
+    args_["string"] = "";
+    ASSERT_EQUAL(0, Run());
+
     ASSERT(ARG_string.empty());
 }
 
-TEST(ParseArgumentsOptionalInt) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--opt_int=1111",
-                    "--bool",
-                    "--string="};
-    ASSERT_EQUAL(0, ParseArguments(5, argv));
+TEST_F(ParseArgumentsTest, OptionalInt) {
+    args_["opt_int"] = "1111";
+    ASSERT_EQUAL(0, Run());
+
     ASSERT_EQUAL(1111, ARG_opt_int);
 }
 
-TEST(ParseArgumentsOptionalBool) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool",
-                    "--opt_bool",
-                    "--string="};
-    ASSERT_EQUAL(0, ParseArguments(5, argv));
+TEST_F(ParseArgumentsTest, OptionalBool) {
+    args_["opt_bool"] = 0;
+    ASSERT_EQUAL(0, Run());
+
     ASSERT_EQUAL(true, ARG_opt_bool);
 }
 
-TEST(ParseArgumentsOptionalString) {
-    const char* argv[] = {"",
-                    "--int=1234",
-                    "--bool",
-                    "--string=",
-                    "--opt_string=test"};
-    ASSERT_EQUAL(0, ParseArguments(5, argv));
+TEST_F(ParseArgumentsTest, OptionalString) {
+    args_["opt_string"] = "test";
+    ASSERT_EQUAL(0, Run());
+
     ASSERT_EQUAL(string("test"), ARG_opt_string);
 }

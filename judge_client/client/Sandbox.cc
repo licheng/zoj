@@ -32,11 +32,11 @@ using namespace std;
 
 JNIEXPORT jint JNICALL Java_Sandbox_setLimits(
         JNIEnv* env, jclass jcls, jint time_limit, jint output_limit, jint file_limit, jint uid, jint gid) {
-    if (time_limit && SetLimit(RLIMIT_CPU, time_limit) < 0 ||
-        output_limit && SetLimit(RLIMIT_FSIZE, output_limit) < 0 ||
-        file_limit && SetLimit(RLIMIT_NOFILE, file_limit) ||
-        gid && setgid(gid) == -1 ||
-        uid && setuid(uid) == -1) {
+    if ((time_limit && SetLimit(RLIMIT_CPU, time_limit) < 0) ||
+        (output_limit && SetLimit(RLIMIT_FSIZE, output_limit) < 0) ||
+        (file_limit && SetLimit(RLIMIT_NOFILE, file_limit)) ||
+        (gid && setgid(gid) == -1) ||
+        (uid && setuid(uid) == -1)) {
         return -1;
     }
     return 0;

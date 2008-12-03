@@ -36,6 +36,11 @@ using namespace std;
 #define RAW 6
 #define LOG(level) Log(__FILE__, __LINE__, level).GetStream()
 
+#ifdef DEBUG
+#define DLOG LOG(DEBUG)
+#else
+#define DLOG if(0)LOG(DEBUG)
+#endif
 class LogFile {
     public:
         virtual ~LogFile();

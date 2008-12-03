@@ -26,10 +26,14 @@ class TraceCallback;
 
 class NativeRunner : public Runner {
   public:
-    virtual int Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid);
+    NativeRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid)
+        : Runner(sock, time_limit, memory_limit, output_limit, uid, gid) {
+    }
+
+    void UpdateStatus();
 
   private:
-    int Monitor(int sock, pid_t pid, int time_limit, int memory_limit, TraceCallback* callback);
+    virtual void InternalRun();
 
   friend class NativeRunnerTest;    
 };

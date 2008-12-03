@@ -21,123 +21,132 @@
 
 #include <string>
 
+#include <signal.h>
+#include <sys/ptrace.h>
+#include <sys/syscall.h>
+#include <sys/user.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #include "common_io.h"
+#include "disabled_syscall.h"
 #include "logging.h"
 #include "protocol.h"
-#include "trace.h"
+#include "tracer.h"
 #include "util.h"
 
-int NativeRunner::Monitor(int sock, pid_t pid, int time_limit, int memory_limit, TraceCallback* callback) {
-    int result = -1;
-    int time_consumption = 0;
-    int memory_consumption = 0;
-    time_limit *= 1000;
-    while (result < 0 && !callback->HasExited()) {
-        struct timespec request, remain;
-        request.tv_sec = 1;
-        request.tv_nsec = 0;
-        while (result < 0 && !callback->HasExited() && nanosleep(&request, &remain) < 0) {
-            if (errno != EINTR) {
-                LOG(SYSCALL_ERROR)<<"Fail to sleep";
-                result = INTERNAL_ERROR;
-            }
-            request = remain;
-        }
-        int ts;
-        int ms;
-        if (result < 0 && !callback->HasExited()) {
-            ts = ReadTimeConsumption(pid);
-            ms = ReadMemoryConsumption(pid);
-            if (ts > time_consumption) {
-                time_consumption = ts;
-            }
-            if (ms > memory_consumption) {
-                memory_consumption = ms;
-            }
-            if (time_consumption > time_limit) {
-                result = TIME_LIMIT_EXCEEDED;
-            }
-            if (result == TIME_LIMIT_EXCEEDED) {
-                time_consumption = time_limit + 1;
-            }
-            if (memory_consumption > memory_limit) {
-                result = MEMORY_LIMIT_EXCEEDED;
-            }
-            if (result == MEMORY_LIMIT_EXCEEDED) {
-                memory_consumption = memory_limit + 1;
-            }
-            if (SendRunningMessage(sock,
-                                   time_consumption,
-                                   memory_consumption) == -1) {
-                result = INTERNAL_ERROR;
-            }
-        }
+void NativeRunner::UpdateStatus() {
+    int ts = ReadTimeConsumption(pid_);
+    int ms = ReadMemoryConsumption(pid_);
+    if (ts > time_consumption_) {
+        time_consumption_ = ts;
     }
-    if (result >= 0) {
-    } else {
-        int status;
-        while (waitpid(pid, &status, 0) < 0) {
-            if (errno != EINTR) {
-                LOG(SYSCALL_ERROR);
-                return INTERNAL_ERROR;
-            }
-        }
-        if (callback->GetResult() == 0) {
-            time_consumption = callback->GetTimeConsumption();
-            memory_consumption = callback->GetMemoryConsumption();
-        }
-        callback->ProcessResult(status);
-        result = callback->GetResult();
-        if (memory_consumption > memory_limit) {
-            result = MEMORY_LIMIT_EXCEEDED;
-        }
-        if (result == TIME_LIMIT_EXCEEDED) {
-            time_consumption = time_limit + 1;
-        }
-        if (result == MEMORY_LIMIT_EXCEEDED) {
-            memory_consumption = memory_limit + 1;
-        }
-        if (SendRunningMessage(sock, time_consumption, memory_consumption) == -1) {
-            result = INTERNAL_ERROR;
-        }
+    if (ms > memory_consumption_) {
+        memory_consumption_ = ms;
     }
-    return result;
+    if (time_consumption_ > time_limit_ * 1000) {
+        result_ = TIME_LIMIT_EXCEEDED;
+    }
+    if (result_ == TIME_LIMIT_EXCEEDED && time_consumption_ <= time_limit_ * 1000) {
+        time_consumption_ = time_limit_ * 1000 + 1;
+    }
+    if (memory_consumption_ > memory_limit_) {
+        result_ = MEMORY_LIMIT_EXCEEDED;
+    }
+    if (result_ == MEMORY_LIMIT_EXCEEDED && memory_consumption_ <= memory_limit_) {
+        memory_consumption_ = memory_limit_ + 1;
+    }
+    DLOG<<time_consumption_<<' '<<memory_consumption_;
+    if (SendRunningMessage() == -1) {
+        result_ = INTERNAL_ERROR;
+    }
 }
 
-int NativeRunner::Run(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid) {
-    LOG(INFO)<<"Running";
+namespace {
+
+class NativeTracer : public Tracer {
+  public:
+    NativeTracer(pid_t pid, NativeRunner* runner) : Tracer(pid), runner_(runner) {
+    }
+
+  protected:
+    virtual void OnExit() {
+        runner_->UpdateStatus();
+    }
+
+  private:
+    NativeRunner* runner_;
+};
+
+}
+
+void NativeRunner::InternalRun() {
     const char* commands[] = {"p", "p", NULL};
     StartupInfo info;
     info.stdin_filename = "input";
     info.stdout_filename = "p.out";
-    info.uid = uid;
-    info.gid = gid;
-    info.time_limit = time_limit;
-    info.memory_limit = memory_limit;
-    info.output_limit = output_limit;
+    info.uid = uid_;
+    info.gid = gid_;
+    info.time_limit = time_limit_;
+    info.memory_limit = memory_limit_;
+    info.vm_limit = memory_limit_ + 10 * 1024;
+    info.output_limit = output_limit_;
     info.stack_limit = 8192; // Always set stack limit to 8M
     info.proc_limit = 1;
     info.file_limit = 5;
     info.trace = 1;
-    TraceCallback callback;
-    pid_t pid = CreateProcess(commands, info);
-    if (pid == -1) {
+    pid_ = CreateProcess(commands, info);
+    if (pid_ == -1) {
         LOG(ERROR)<<"Fail to execute the program";
-        WriteUint32(sock, INTERNAL_ERROR);
-        return -1;
+        result_ = INTERNAL_ERROR;
+        return;
     }
-    int result = Monitor(sock, pid, time_limit, memory_limit, &callback);
-    if (result) {
-        LogResult(result);
-        WriteUint32(sock, result);
-        if (result == INTERNAL_ERROR) {
-            return -1;
-        } else {
-            return 1;
+    NativeTracer tracer(pid_, this);
+    for (;;) {
+        alarm(1);
+        tracer.Trace();
+        if (tracer.HasExited()) {
+            break;
+        }
+        UpdateStatus();
+        if (result_ >= 0) {
+            kill(pid_, SIGKILL);
         }
     }
-    return 0;
+    if (result_ < 0) {
+        if (tracer.IsMemoryLimitExceeded()) {
+            result_ = MEMORY_LIMIT_EXCEEDED;
+        } else if (tracer.IsRestrictedSyscall()) {
+            result_ = RUNTIME_ERROR;
+        } else {
+            int status = tracer.GetStatus();
+            if (WIFEXITED(status)) {
+                result_ = 0;
+            } else {
+                switch (WTERMSIG(status)) {
+                    case SIGXCPU:
+                        result_ = TIME_LIMIT_EXCEEDED;
+                        break;
+                    case SIGSEGV:
+                    case SIGBUS:
+                        result_ = SEGMENTATION_FAULT;
+                        break;
+                    case SIGXFSZ:
+                        result_ = OUTPUT_LIMIT_EXCEEDED;
+                        break;
+                    case SIGFPE:
+                        result_ = FLOATING_POINT_ERROR;
+                        break;
+                    case SIGILL:
+                        result_ = RUNTIME_ERROR;
+                        break;
+                    default:
+                        LOG(ERROR)<<"Unexpected signal "<<WTERMSIG(status);
+                        result_ = INTERNAL_ERROR;
+                }
+            }
+        }
+    }
+    UpdateStatus();
 }
+

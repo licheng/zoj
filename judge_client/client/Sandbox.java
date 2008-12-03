@@ -195,6 +195,7 @@ public class Sandbox {
                 break;
             }
         }
+        closeSocket();
     }
 
     private static native int setLimits(int timeLimit, int outputLimit, int fileLimit, int uid, int gid);
@@ -212,7 +213,7 @@ public class Sandbox {
             long t = threadBean.getThreadCpuTime(targetThread.getId());
             if (t >= 0) {
                 t /= 1000000;
-                if (t > timeConsumption) {
+                if (t > timeConsumption && t <= 1000000) {
                     timeConsumption = (int) t;
                }
             }
@@ -280,12 +281,22 @@ public class Sandbox {
         return sw.toString();
     }
 
+    private static void closeSocket() {
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+        }
+    }
+
     private synchronized static void halt(JudgeReply result) {
         updateConsumptions();
         try {
             sendRunningMessage(timeConsumption, memoryConsumption);
         } catch (IOException e) {
         }
+        closeSocket();
         Runtime.getRuntime().halt((int) result.getId());
     }
 }

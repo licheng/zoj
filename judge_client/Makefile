@@ -1,18 +1,17 @@
 default: all
 
-all: .kernel_module .server
+all: .server .zunit
 
 clean:
-	@make -C kernel_module clean
 	@make -C server clean
+	@make -C zunit clean
 
 install: all
 	@chmod +x script/install.sh
 	@script/install.sh
 
-.kernel_module:
-	@make -C kernel_module
-
-.server: .kernel_module
+.server: .zunit
 	@make -C client
 
+.zunit:
+	@make -C zunit

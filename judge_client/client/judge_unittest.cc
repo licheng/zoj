@@ -28,7 +28,6 @@
 #include "protocol.h"
 #include "strutil.h"
 #include "test_util-inl.h"
-#include "trace.h"
 
 DEFINE_OPTIONAL_ARG(int, uid, 0, "");
 DECLARE_ARG(string, compiler);
@@ -38,7 +37,7 @@ int ExecJudgeCommand(int sock, int* problem_id, int* revision);
 
 class ExecJudgeCommandTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -53,14 +52,15 @@ class ExecJudgeCommandTest: public TestFixture {
                     CheckSum(revision_);
     }
 
-    virtual void TearDown() {
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     void SendCommand() {
@@ -134,7 +134,7 @@ int ExecCompileCommand(int sock, int* compiler);
 
 class ExecCompileCommandTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -151,11 +151,9 @@ class ExecCompileCommandTest: public TestFixture {
             delete CompilerManager::instance_;
             CompilerManager::instance_ = NULL;
         }
-        InstallHandlers();
     }
 
-    virtual void TearDown() {
-        UninstallHandlers();
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
@@ -165,7 +163,8 @@ class ExecCompileCommandTest: public TestFixture {
         if (temp_fd_ >= 0) {
             close(temp_fd_);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     void SendCommand() {
@@ -186,7 +185,7 @@ class ExecCompileCommandTest: public TestFixture {
         Writen(fd_[0], &source_file_size_, sizeof(source_file_size_));
         Writen(fd_[0], &checksum_, sizeof(checksum_));
         if (!source_filename_.empty()) {
-            temp_fd_ = open(source_filename_.c_str(), O_RDONLY);
+            temp_fd_ = open(source_filename_.c_str(), O_RDONLY, 0750);
             ASSERT(temp_fd_ != -1);
             int size = Readn(temp_fd_, buf_, sizeof(buf_));
             Writen(fd_[0], buf_, size);
@@ -286,6 +285,10 @@ TEST_F(ExecCompileCommandTest, CompilationError) {
 }
 
 TEST_F(ExecCompileCommandTest, Java) {
+    ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/CustomJavaCompiler.class").c_str(),
+                            "CustomJavaCompiler.class"));
+    ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/CustomJavaCompiler$CustomJavaFileManager.class").c_str(),
+                            "CustomJavaCompiler$CustomJavaFileManager.class"));
     ARG_compiler = "javac";
     compiler_id_ = 4;
     source_filename_ = TESTDIR + "/ac.java";
@@ -303,7 +306,7 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
 
 class ExecTestCaseCommandTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -324,20 +327,19 @@ class ExecTestCaseCommandTest: public TestFixture {
                     CheckSum(time_limit_) +
                     CheckSum(memory_limit_) +
                     CheckSum(output_limit_);
-        InstallHandlers();
         problem_id_ = revision_ = 0;
         compiler_ = 2;
     }
 
-    virtual void TearDown() {
-        UninstallHandlers();
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     void SendCommand() {
@@ -424,10 +426,8 @@ TEST_F(ExecTestCaseCommandTest, RunFailure) {
 
     ASSERT_EQUAL(0, Run());
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(FLOATING_POINT_ERROR, ReadLastUint32(fd_[0]));
+    ASSERT_EQUAL(FLOATING_POINT_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(ExecTestCaseCommandTest, CheckFailure) {
@@ -437,10 +437,7 @@ TEST_F(ExecTestCaseCommandTest, CheckFailure) {
 
     ASSERT_EQUAL(0, Run());
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
     ASSERT_EQUAL(WRONG_ANSWER, ReadLastUint32(fd_[0]));
 }
 
@@ -449,10 +446,7 @@ TEST_F(ExecTestCaseCommandTest, Success) {
 
     ASSERT_EQUAL(0, Run());
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
     ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
 }
 
@@ -463,16 +457,13 @@ TEST_F(ExecTestCaseCommandTest, ExistingSymlinkInputOutput) {
 
     ASSERT_EQUAL(0, Run());
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
     ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
 }
 
 class JavaExecTestCaseCommandTest : public ExecTestCaseCommandTest {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         ExecTestCaseCommandTest::SetUp();
         ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/JavaSandbox.jar").c_str(), "JavaSandbox.jar"));
         ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/libsandbox.so").c_str(), "libsandbox.so"));
@@ -487,16 +478,7 @@ TEST_F(JavaExecTestCaseCommandTest, Success) {
     compiler_ = 4;
     ASSERT_EQUAL(0, Run());
 
-    for (;;) {
-        int t = ReadUint32(fd_[0]);
-        if (t == RUNNING) {
-            ReadUint32(fd_[0]);
-            ReadUint32(fd_[0]);
-        } else {
-            ASSERT_EQUAL(JUDGING, t);
-            break;
-        }
-    }
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
     ASSERT_EQUAL(ACCEPTED, ReadLastUint32(fd_[0]));
 }
 
@@ -508,18 +490,8 @@ TEST_F(JavaExecTestCaseCommandTest, RunFailure) {
     compiler_ = 4;
     ASSERT_EQUAL(0, Run());
 
-    for (;;) {
-        int t = ReadUint32(fd_[0]);
-        if (t == RUNNING) {
-            ReadUint32(fd_[0]);
-            ReadUint32(fd_[0]);
-        } else {
-            ASSERT_EQUAL(RUNTIME_ERROR, t);
-            char ch;
-            ASSERT_EQUAL(0, read(fd_[0], &ch, 1));
-            break;
-        }
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaExecTestCaseCommandTest, CheckFailure) {
@@ -529,16 +501,7 @@ TEST_F(JavaExecTestCaseCommandTest, CheckFailure) {
     compiler_ = 4;
     ASSERT_EQUAL(0, Run());
 
-    for (;;) {
-        int t = ReadUint32(fd_[0]);
-        if (t == RUNNING) {
-            ReadUint32(fd_[0]);
-            ReadUint32(fd_[0]);
-        } else {
-            ASSERT_EQUAL(JUDGING, t);
-            break;
-        }
-    }
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
     ASSERT_EQUAL(WRONG_ANSWER, ReadLastUint32(fd_[0]));
 }
 
@@ -546,19 +509,19 @@ int CheckData(int sock, const string& data_dir);
 
 class CheckDataTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
         ASSERT_EQUAL(0, mkdir("script", 0700));
         ASSERT_EQUAL(0, symlink((TESTDIR + "/../../script/compile.sh").c_str(), "script/compile.sh"));
         ASSERT_EQUAL(0, mkdir("data", 0700));
-        ASSERT_EQUAL(0, close(open("data/1.in", O_RDWR | O_CREAT)));
-        ASSERT_EQUAL(0, close(open("data/2.in", O_RDWR | O_CREAT)));
-        ASSERT_EQUAL(0, close(open("data/3.in", O_RDWR | O_CREAT)));
-        ASSERT_EQUAL(0, close(open("data/1.out", O_RDWR | O_CREAT)));
-        ASSERT_EQUAL(0, close(open("data/2.out", O_RDWR | O_CREAT)));
-        ASSERT_EQUAL(0, close(open("data/3.out", O_RDWR | O_CREAT)));
+        ASSERT_EQUAL(0, close(open("data/1.in", O_RDWR | O_CREAT, 0750)));
+        ASSERT_EQUAL(0, close(open("data/2.in", O_RDWR | O_CREAT, 0750)));
+        ASSERT_EQUAL(0, close(open("data/3.in", O_RDWR | O_CREAT, 0750)));
+        ASSERT_EQUAL(0, close(open("data/1.out", O_RDWR | O_CREAT, 0750)));
+        ASSERT_EQUAL(0, close(open("data/2.out", O_RDWR | O_CREAT, 0750)));
+        ASSERT_EQUAL(0, close(open("data/3.out", O_RDWR | O_CREAT, 0750)));
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, pipe(fd_));
         ARG_compiler = "g++";
@@ -568,14 +531,15 @@ class CheckDataTest: public TestFixture {
         }
     }
 
-    virtual void TearDown() {
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     int Run() {
@@ -609,7 +573,7 @@ TEST_F(CheckDataTest, EmptyDir) {
 
 TEST_F(CheckDataTest, NonRegularFile) {
     ASSERT_EQUAL(0, mkdir("data/4.in", 0700));
-    ASSERT_EQUAL(0, close(open("data/4.out", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/4.out", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -617,7 +581,7 @@ TEST_F(CheckDataTest, NonRegularFile) {
 }
 
 TEST_F(CheckDataTest, InvalidName1) {
-    ASSERT_EQUAL(0, close(open("data/test", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/test", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -625,8 +589,8 @@ TEST_F(CheckDataTest, InvalidName1) {
 }
 
 TEST_F(CheckDataTest, InvalidName2) {
-    ASSERT_EQUAL(0, close(open("data/a.in", O_RDWR | O_CREAT)));
-    ASSERT_EQUAL(0, close(open("data/a.out", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/a.in", O_RDWR | O_CREAT, 0750)));
+    ASSERT_EQUAL(0, close(open("data/a.out", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -634,7 +598,7 @@ TEST_F(CheckDataTest, InvalidName2) {
 }
 
 TEST_F(CheckDataTest, InvalidName3) {
-    ASSERT_EQUAL(0, close(open("data/judge", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/judge", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -642,8 +606,8 @@ TEST_F(CheckDataTest, InvalidName3) {
 }
 
 TEST_F(CheckDataTest, InvalidName4) {
-    ASSERT_EQUAL(0, close(open("data/.in", O_RDWR | O_CREAT)));
-    ASSERT_EQUAL(0, close(open("data/.out", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/.in", O_RDWR | O_CREAT, 0750)));
+    ASSERT_EQUAL(0, close(open("data/.out", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -669,7 +633,7 @@ TEST_F(CheckDataTest, JudgeOnly) {
 }
 
 TEST_F(CheckDataTest, UnmatchedTestcase1) {
-    ASSERT_EQUAL(0, close(open("data/4.in", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/4.in", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -677,7 +641,7 @@ TEST_F(CheckDataTest, UnmatchedTestcase1) {
 }
 
 TEST_F(CheckDataTest, UnmatchedTestcase2) {
-    ASSERT_EQUAL(0, close(open("data/4.out", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/4.out", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(-1, Run());
 
@@ -711,7 +675,7 @@ TEST_F(CheckDataTest, SuccessNoJudge) {
 }
 
 TEST_F(CheckDataTest, SuccessHasDataZip) {
-    ASSERT_EQUAL(0, close(open("data/data.zip", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("data/data.zip", O_RDWR | O_CREAT, 0750)));
 
     ASSERT_EQUAL(0, Run());
     
@@ -731,7 +695,7 @@ int ExecDataCommand(int sock, unsigned int problem_id, unsigned int revision);
 
 class ExecDataCommandTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -748,7 +712,7 @@ class ExecDataCommandTest: public TestFixture {
         checksum_ = CheckSum(CMD_DATA) + CheckSum(data_file_size_);
     }
 
-    virtual void TearDown() {
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
@@ -758,7 +722,8 @@ class ExecDataCommandTest: public TestFixture {
         if (temp_fd_ >= 0) {
             close(temp_fd_);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     void SendCommand() {
@@ -767,7 +732,7 @@ class ExecDataCommandTest: public TestFixture {
         Writen(fd_[0], &data_file_size_, sizeof(data_file_size_));
         Writen(fd_[0], &checksum_, sizeof(checksum_));
         if (!data_filename_.empty()) {
-            temp_fd_ = open(data_filename_.c_str(), O_RDONLY);
+            temp_fd_ = open(data_filename_.c_str(), O_RDONLY, 0750);
             ASSERT(temp_fd_ != -1);
             int size = Readn(temp_fd_, buf_, sizeof(buf_));
             Writen(fd_[0], buf_, size);
@@ -828,7 +793,7 @@ TEST_F(ExecDataCommandTest, CannotCreateProblemDir) {
 
 TEST_F(ExecDataCommandTest, CannotCreateTempDir) {
     ASSERT_EQUAL(0, rmdir("prob"));
-    ASSERT_EQUAL(0, close(open("prob", O_RDWR | O_CREAT)));
+    ASSERT_EQUAL(0, close(open("prob", O_RDWR | O_CREAT, 0750)));
     SendCommand();
 
     ASSERT_EQUAL(-1, Run());
@@ -913,7 +878,7 @@ int JudgeMain(int sock, int uid, int gid);
 
 class JudgeMainTest: public TestFixture {
   protected:
-    virtual void SetUp() {
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0755));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -935,8 +900,7 @@ class JudgeMainTest: public TestFixture {
         }
     }
 
-    virtual void TearDown() {
-        UninstallHandlers();
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
@@ -946,7 +910,8 @@ class JudgeMainTest: public TestFixture {
         if (temp_fd_ >= 0) {
             close(temp_fd_);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     void AppendCheckSum() {
@@ -969,7 +934,7 @@ class JudgeMainTest: public TestFixture {
         if (temp_fd_ >= 0) {
             close(temp_fd_);
         }
-        temp_fd_ = open(filename.c_str(), O_RDONLY);
+        temp_fd_ = open(filename.c_str(), O_RDONLY, 0750);
         ASSERT(temp_fd_ >= 0);
         ASSERT_EQUAL(size, Readn(temp_fd_, buf_ + buf_size_, size));
         buf_size_ += size;
@@ -1169,6 +1134,10 @@ TEST_F(JudgeMainTest, Ping) {
 }
 
 TEST_F(JudgeMainTest, Success) {
+    ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/CustomJavaCompiler.class").c_str(),
+                            "CustomJavaCompiler.class"));
+    ASSERT_EQUAL(0, symlink((CURRENT_WORKING_DIR + "/CustomJavaCompiler$CustomJavaFileManager.class").c_str(),
+                            "CustomJavaCompiler$CustomJavaFileManager.class"));
     SendPingCommand();
     SendJudgeCommand(0, 0);
     SendDataCommand(TESTDIR + "/data.zip");
@@ -1207,31 +1176,19 @@ TEST_F(JudgeMainTest, Success) {
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
     
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUntilNotJudging(fd_[0]));
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUntilNotJudging(fd_[0]));
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUntilNotJudging(fd_[0]));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUntilNotJudging(fd_[0]));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
@@ -1247,11 +1204,8 @@ TEST_F(JudgeMainTest, Success) {
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
-    ASSERT_EQUAL(RUNNING, ReadUint32(fd_[0]));
-    ReadUint32(fd_[0]);
-    ReadUint32(fd_[0]);
-    ASSERT_EQUAL(JUDGING, ReadUint32(fd_[0]));
-    ASSERT_EQUAL(WRONG_ANSWER, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
+    ASSERT_EQUAL(WRONG_ANSWER, ReadUntilNotJudging(fd_[0]));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
@@ -1259,17 +1213,8 @@ TEST_F(JudgeMainTest, Success) {
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
-    for (;;) {
-        int t = ReadUint32(fd_[0]);
-        if (t == RUNNING) {
-            ReadUint32(fd_[0]);
-            ReadUint32(fd_[0]);
-        } else {
-            ASSERT_EQUAL(JUDGING, t);
-            break;
-        }
-    }
-    ASSERT_EQUAL(ACCEPTED, ReadUint32(fd_[0]));
+    ASSERT_EQUAL(JUDGING, ReadUntilNotRunning(fd_[0]));
+    ASSERT_EQUAL(ACCEPTED, ReadUntilNotJudging(fd_[0]));
 
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
@@ -1277,16 +1222,7 @@ TEST_F(JudgeMainTest, Success) {
     ASSERT_EQUAL(COMPILING, ReadUint32(fd_[0]));
     ASSERT_EQUAL(READY, ReadUint32(fd_[0]));
 
-    for (;;) {
-        int t = ReadUint32(fd_[0]);
-        if (t == RUNNING) {
-            ReadUint32(fd_[0]);
-            ReadUint32(fd_[0]);
-        } else {
-            ASSERT_EQUAL(RUNTIME_ERROR, t);
-            break;
-        }
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
 }
 
 

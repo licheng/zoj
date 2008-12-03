@@ -24,14 +24,12 @@
 #include "protocol.h"
 #include "strutil.h"
 #include "test_util-inl.h"
-#include "trace.h"
 
 DEFINE_ARG(string, root, "");
 
 class JavaRunnerTest : public TestFixture {
   protected:
-    virtual void SetUp() {
-        runner_ = new JavaRunner();
+    void SetUp() {
         root_ = tmpnam(NULL);
         ASSERT_EQUAL(0, mkdir(root_.c_str(), 0700));
         ASSERT_EQUAL(0, chdir(root_.c_str()));
@@ -43,31 +41,27 @@ class JavaRunnerTest : public TestFixture {
         time_limit_ = 10;
         memory_limit_ = output_limit_ = 1000;
         ARG_root = root_;
-        InstallHandlers();
     }
 
-    virtual void TearDown() {
-        if (runner_) {
-            delete runner_;
-        }
-        UninstallHandlers();
+    void TearDown() {
         if (fd_[0] >= 0) {
             close(fd_[0]);
         }
         if (fd_[1] >= 0) {
             close(fd_[1]);
         }
-        system(("rm -rf " + root_).c_str());
+        if (system(("rm -rf " + root_).c_str())) {
+        }
     }
 
     int Run() {
         ASSERT_EQUAL(0, shutdown(fd_[0], SHUT_WR));
-        int ret = runner_->Run(fd_[1], time_limit_, memory_limit_, output_limit_, 0, 0);
+        JavaRunner runner(fd_[1], time_limit_, memory_limit_, output_limit_, 0, 0);
+        int ret = runner.Run();
         ASSERT_EQUAL(0, shutdown(fd_[1], SHUT_WR));
         return ret;
     }
 
-    JavaRunner* runner_;
     string root_;
     int fd_[2];
     int time_limit_;
@@ -81,17 +75,7 @@ TEST_F(JavaRunnerTest, Success) {
     ASSERT_EQUAL(0, Run());
 
     ASSERT(!system(StringPrintf("diff p.out %s/1.out", TESTDIR.c_str()).c_str()));
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (reply == -1) {
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(-1, ReadUntilNotRunning(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, SuccessNonPublicClass) {
@@ -100,17 +84,7 @@ TEST_F(JavaRunnerTest, SuccessNonPublicClass) {
     ASSERT_EQUAL(0, Run());
 
     ASSERT(!system(StringPrintf("diff p.out %s/1.out", TESTDIR.c_str()).c_str()));
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (reply == -1) {
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(-1, ReadUntilNotRunning(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, SuccessMultipleClasses) {
@@ -120,17 +94,7 @@ TEST_F(JavaRunnerTest, SuccessMultipleClasses) {
     ASSERT_EQUAL(0, Run());
 
     ASSERT(!system(StringPrintf("diff p.out %s/1.out", TESTDIR.c_str()).c_str()));
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (reply == -1) {
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(-1, ReadUntilNotRunning(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, TimeLimitExceeded) {
@@ -208,18 +172,8 @@ TEST_F(JavaRunnerTest, MemoryLimitExceeded) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(MEMORY_LIMIT_EXCEEDED, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(MEMORY_LIMIT_EXCEEDED, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, OutputLimitExceeded) {
@@ -228,18 +182,8 @@ TEST_F(JavaRunnerTest, OutputLimitExceeded) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(OUTPUT_LIMIT_EXCEEDED, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(OUTPUT_LIMIT_EXCEEDED, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, RuntimeError) {
@@ -247,18 +191,8 @@ TEST_F(JavaRunnerTest, RuntimeError) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(RUNTIME_ERROR, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorInvalidMain) {
@@ -266,18 +200,8 @@ TEST_F(JavaRunnerTest, RuntimeErrorInvalidMain) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(RUNTIME_ERROR, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorNonStaticMain) {
@@ -285,18 +209,8 @@ TEST_F(JavaRunnerTest, RuntimeErrorNonStaticMain) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(RUNTIME_ERROR, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorHasPackage) {
@@ -304,18 +218,8 @@ TEST_F(JavaRunnerTest, RuntimeErrorHasPackage) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(RUNTIME_ERROR, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorWait) {
@@ -323,18 +227,8 @@ TEST_F(JavaRunnerTest, RuntimeErrorWait) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(RUNTIME_ERROR, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
 
 TEST_F(JavaRunnerTest, RuntimeErrorSleep) {
@@ -342,16 +236,6 @@ TEST_F(JavaRunnerTest, RuntimeErrorSleep) {
 
     ASSERT_EQUAL(1, Run());
 
-    for (;;) {
-        int reply = TryReadUint32(fd_[0]);
-        int time = TryReadUint32(fd_[0]);
-        int memory = TryReadUint32(fd_[0]);
-        if (time < 0) {
-            ASSERT_EQUAL(RUNTIME_ERROR, reply);
-            break;
-        }
-        ASSERT_EQUAL(RUNNING, reply);
-        ASSERT(time >= 0);
-        ASSERT(memory >= 0);
-    }
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
 }
