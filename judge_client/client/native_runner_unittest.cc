@@ -146,6 +146,26 @@ TEST_F(NativeRunnerTest, MemoryLimitExceededMMap) {
     }
 }
 
+TEST_F(NativeRunnerTest, MemoryLimitExceededStaticData) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/mle_static_data").c_str(), "p"));
+    memory_limit_ = 10000;
+
+    ASSERT_EQUAL(1, Run());
+
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+        if (time < 0) {
+            ASSERT_EQUAL(MEMORY_LIMIT_EXCEEDED, reply);
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
 TEST_F(NativeRunnerTest, OutputLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/ole").c_str(), "p"));
     output_limit_ = 1;

@@ -10,7 +10,7 @@ UNITTEST_RUNS:=$(patsubst %.cc,%.run,$(UNITTEST_SOURCES))
 
 .PHONY: all clean rebuild $(UNITTEST_RUNS) test testdata
 
-all: judged JavaSandbox.jar Sandbox.h libsandbox.so
+all: judged JavaSandbox.jar Sandbox.h libsandbox.so CustomJavaCompiler.class
 
 clean:
 	rm -f *.o *.d judged *.jar $(UNITTESTS) *.so Sandbox.h *.class
@@ -53,7 +53,7 @@ libsandbox.so: Sandbox.h Sandbox.cc args.o logging.o util.o runner.o strutil.o c
 	$(CXX) $(CXXFLAGS) -o libsandbox.so -shared -Wl,-soname,libsandbox.so -I$$JAVA_HOME/include -I$$JAVA_HOME/include/linux $^ -fPIC -lc
 
 $(UNITTESTS): %_unittest : %.o %_unittest.o global.o args.o common_io.o logging.o strutil.o
-	$(CXX) $(CXXFLAGS) -L ../zunit -lzunit -DDEBUG -o $@ $(filter-out libsandbox.so JavaSandbox.jar CustomJavaCompiler.class, $^)
+	$(CXX) $(CXXFLAGS) -L ../zunit -lzunit -DENABLE_DLOG -o $@ $(filter-out libsandbox.so JavaSandbox.jar CustomJavaCompiler.class, $^)
 
 text_checker_unittest: text_file_reader.o checker.o
 special_checker_unittest: checker.o util.o tracer.o

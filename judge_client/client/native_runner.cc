@@ -140,6 +140,9 @@ void NativeRunner::InternalRun() {
                     case SIGILL:
                         result_ = RUNTIME_ERROR;
                         break;
+                    case SIGKILL:
+                        result_ = MEMORY_LIMIT_EXCEEDED;
+                        break;
                     default:
                         LOG(ERROR)<<"Unexpected signal "<<WTERMSIG(status);
                         result_ = INTERNAL_ERROR;

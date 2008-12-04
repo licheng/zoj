@@ -1,16 +1,16 @@
 default: all
 
-all: .server .zunit
+all: .judged .zunit
 
 clean:
-	@make -C server clean
+	@make -C client clean
 	@make -C zunit clean
 
 install: all
 	@chmod +x script/install.sh
 	@script/install.sh
 
-.server: .zunit
+.judged: .zunit
 	@make -C client
 
 .zunit:
