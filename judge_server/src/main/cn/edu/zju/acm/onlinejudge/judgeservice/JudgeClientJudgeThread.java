@@ -249,10 +249,9 @@ public class JudgeClientJudgeThread extends Thread {
         }
         Limit limit = problem.getLimit();
         reply = this.sendTestcaseCommand(1, limit.getTimeLimit(), limit.getMemoryLimit(), limit.getOutputLimit());
-        if (reply != JudgeReply.RUNNING.getId()) {
-            throw new JudgeClientErrorException();
-        }
         submission.setJudgeReply(JudgeReply.RUNNING);
+        submission.setTimeConsumption(0);
+        submission.setMemoryConsumption(0);
         while (reply == JudgeReply.RUNNING.getId()) {
             int timeConsumption = this.in.readInt();
             int memoryConsumption = this.in.readInt();
