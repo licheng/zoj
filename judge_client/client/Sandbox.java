@@ -35,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
+import java.util.GregorianCalendar;
 import java.util.Scanner;
 
 import sun.misc.Signal;
@@ -139,6 +140,8 @@ public class Sandbox {
             logError("Invalid args length: " + args.length);
             halt(JudgeReply.JUDGE_INTERNAL_ERROR);
         }
+
+        GregorianCalendar gc = new GregorianCalendar();
 
         try {
             // The purpose of Scaner here is to preload this class so that the target class can use it directly.

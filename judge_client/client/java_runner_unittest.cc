@@ -97,6 +97,15 @@ TEST_F(JavaRunnerTest, SuccessMultipleClasses) {
     ASSERT_EQUAL(-1, ReadUntilNotRunning(fd_[0]));
 }
 
+TEST_F(JavaRunnerTest, GregorianCalendar) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ac_gregorian_calendar.class").c_str(), "Main.class"));
+
+    ASSERT_EQUAL(0, Run());
+
+    ASSERT(!system(StringPrintf("diff p.out %s/1.out", TESTDIR.c_str()).c_str()));
+    ASSERT_EQUAL(-1, ReadUntilNotRunning(fd_[0]));
+}
+
 TEST_F(JavaRunnerTest, TimeLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/tle.class").c_str(), "Main.class"));
     time_limit_ = 1;
