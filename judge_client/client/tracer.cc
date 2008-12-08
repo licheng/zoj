@@ -156,7 +156,9 @@ void Tracer::Trace() {
             break;
           case SYS_open:
             if (before_syscall_) {
-                ReadStringFromTracedProcess(pid_, regs.EBX, path_, sizeof(path_));
+                if (ReadStringFromTracedProcess(pid_, regs.EBX, path_, sizeof(path_)) < 0) {
+                    break;
+                }
                 DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.ECX;
                 if (!AllowedToOpen(path_, regs.ECX)) {
                     break;
