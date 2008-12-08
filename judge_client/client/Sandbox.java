@@ -38,9 +38,6 @@ import java.net.Socket;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
 
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
-
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 
 public class Sandbox {
@@ -69,27 +66,6 @@ public class Sandbox {
 
         public void run() {
             closeLog();
-            Signal.handle(new Signal("XCPU"), new SignalHandler() {
-
-                @Override
-                public void handle(Signal sig) {
-                    if (SandboxSecurityManager.targetThread != null) {
-                        SandboxSecurityManager.targetThread = null;
-                        timeConsumption = timeLimit * 1000 + 1;
-                        halt(JudgeReply.TIME_LIMIT_EXCEEDED);
-                    }
-                }
-            });
-            Signal.handle(new Signal("XFSZ"), new SignalHandler() {
-
-                @Override
-                public void handle(Signal sig) {
-                    if (SandboxSecurityManager.targetThread != null) {
-                        SandboxSecurityManager.targetThread = null;
-                        halt(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
-                    }
-                }
-            });
             if (setLimits(timeLimit, outputLimit, 6, uid, gid) < 0) {
                 halt(JudgeReply.JUDGE_INTERNAL_ERROR);
             }
@@ -98,9 +74,9 @@ public class Sandbox {
             SandboxSecurityManager.targetThread = this;
             try {
                 mainMethod.invoke(null, targetArguments);
+                System.out.close();
                 SandboxSecurityManager.targetThread = null;
                 updateConsumptions();
-                System.out.close();
             } catch (InvocationTargetException e) {
                 SandboxSecurityManager.targetThread = null;
                 Throwable targetException = e.getTargetException();
@@ -157,7 +133,31 @@ public class Sandbox {
             out = new DataOutputStream(socket.getOutputStream());
 
             System.setIn(new BufferedInputStream(new FileInputStream("input")));
-            System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("p.out"))));
+            System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("p.out") {
+                public void write(int b) throws IOException {
+                    try {
+                        super.write(b);
+                    } catch (IOException e) {
+                        if (e.getMessage().equals("File too large")) {
+                            SandboxSecurityManager.targetThread = null;
+                            halt(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
+                        }
+                        throw e;
+                    }
+                }
+
+                public void write(byte[] b, int off, int len) throws IOException {
+                    try {
+                        super.write(b, off, len);
+                    } catch (IOException e) {
+                        if (e.getMessage().equals("File too large")) {
+                            SandboxSecurityManager.targetThread = null;
+                            halt(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
+                        }
+                        throw e;
+                    }
+                }
+            })));
             System.setErr(new PrintStream(new BufferedOutputStream(new FileOutputStream("/dev/null"))));
         } catch (Exception e) {
             logError(printError(e));
@@ -223,7 +223,7 @@ public class Sandbox {
         }
     }
 
-    private static void sendRunningMessage(int timeConsumption, int memoryConsumption) throws IOException {
+    private synchronized static void sendRunningMessage(int timeConsumption, int memoryConsumption) throws IOException {
         if (out != null) {
             out.writeInt(timeConsumption);
             out.writeInt(memoryConsumption);
@@ -288,6 +288,7 @@ public class Sandbox {
         try {
             if (socket != null) {
                 socket.close();
+                socket = null;
             }
         } catch (IOException e) {
         }

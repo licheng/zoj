@@ -35,6 +35,7 @@ using namespace std;
 #include "net_util.h"
 #include "protocol.h"
 #include "strutil.h"
+#include "util.h"
 
 DECLARE_ARG(string, root);
 
@@ -101,24 +102,29 @@ void JavaRunner::InternalRun() {
         }
         close(server_sock);
         if (WIFSIGNALED(status)) {
-            LOG(ERROR)<<"Terminated by signal "<<WTERMSIG(status);
-            result_ = INTERNAL_ERROR;
-            return;
+            switch (WTERMSIG(status)) {
+              case SIGXCPU:
+                result_ = TIME_LIMIT_EXCEEDED;
+                time_consumption_ = time_limit_ * 1000 + 1;
+                SendRunningMessage();
+                break;
+              default:
+                LOG(ERROR)<<"Terminated by signal "<<WTERMSIG(status);
+                result_ = INTERNAL_ERROR;
+            }
         } else {
             result_ = WEXITSTATUS(status);
             switch (result_) {
               case 0:
-              case TIME_LIMIT_EXCEEDED:
               case OUTPUT_LIMIT_EXCEEDED:
               case MEMORY_LIMIT_EXCEEDED:
               case RUNTIME_ERROR:
-                return;
+                break;
               default:
                 if (status != INTERNAL_ERROR) {
                     LOG(ERROR)<<"Invalid exit status "<<status;
                 }
                 result_ = INTERNAL_ERROR;
-                return;
             }
         }
     } else {
@@ -140,6 +146,5 @@ void JavaRunner::InternalRun() {
                NULL);
         LOG(SYSCALL_ERROR)<<"Fail to run java";
         exit(-1);
-        return;
     }
 }

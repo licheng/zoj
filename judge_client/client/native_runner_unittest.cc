@@ -86,6 +86,25 @@ TEST_F(NativeRunnerTest, Success) {
     }
 }
 
+TEST_F(NativeRunnerTest, SuccessOnOutputLimitExceededBoundary) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/ole_boundary").c_str(), "p"));
+    output_limit_ = 1;
+
+    ASSERT_EQUAL(0, Run());
+
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+        if (time < 0) {
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
 TEST_F(NativeRunnerTest, TimeLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/tle").c_str(), "p"));
     time_limit_ = 2;
