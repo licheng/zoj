@@ -127,12 +127,12 @@ function addPermissionTable(permisisonType, cid, pid, cText, pText) {
                     for (int i = 0; i < roleForm.getSelectedContestIds().length; ++i) {
                         String cid = roleForm.getSelectedContestIds()[i];
                         String pid = roleForm.getContestPermissions()[i];
-                        String cText = (String) contestNames.get(Long.valueOf(cid));
+                        String cText = ((String) contestNames.get(Long.valueOf(cid)));
                         String pText = PermissionLevel.findById(Long.parseLong(pid)).getDescription();
 						if(cText != null)
 						{
                     %>
-                    addPermissionTable('contest', '<%=cid%>', '<%=pid%>', '<%=cText%>', '<%=pText%>');
+                    addPermissionTable('contest', '<%=cid%>', '<%=pid%>', "<%=cText%>", '<%=pText%>');
                     <%
 						}
                     }                    
