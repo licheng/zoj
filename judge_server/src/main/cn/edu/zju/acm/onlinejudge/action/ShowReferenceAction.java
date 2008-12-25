@@ -66,9 +66,17 @@ public class ShowReferenceAction extends BaseAction {
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
         HttpServletResponse response = context.getResponse();
-        if (!context.isAdmin()) {
+        if (context.getUserSecurity()==null) {
             response.sendError(404);
             return null;
+        }
+        try {
+	        if (!context.getUserSecurity().canAdminContest(context.getContest().getId())) {
+	            response.sendError(404);
+	            return null;
+	        }
+        } catch (Exception e) {
+        	
         }
 
         long id = Utility.parseLong(context.getRequest().getParameter("referenceId"));

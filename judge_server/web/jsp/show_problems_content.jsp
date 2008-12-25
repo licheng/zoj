@@ -161,12 +161,13 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                 <% } %>   
                 
             </form>
-            <% if (admin) { %>
                 <form action="<%=searchactionPath %>">
                 	<input type="hidden" name="contestId" value="<bean:write name="contest" property="id"/>">
-                	<input type="text" name="query" /> <input type="submit" value="Search"/>
+                	<input type="hidden" name="titlefrom" value="0">
+                	<input type="hidden" name="authorfrom" value="0">
+                	<input type="hidden" name="sourcefrom" value="0">
+                	Search Problems: <input type="text" name="query" /> <input type="submit" value="Search"/>
                 <form>
-                <% } %> 
             
             <logic:present name="CheckMessages">
                 <font color=green>Check Results:</font><br>

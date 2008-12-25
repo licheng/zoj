@@ -481,7 +481,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
             conn = Database.createConnection();
             PreparedStatement ps = null;
             try {
-                ps = conn.prepareStatement("select count(*) from problem where contest_id=?");
+                ps = conn.prepareStatement("select count(*) from problem where contest_id=? and active=1");
                 ps.setLong(1, contestId);
                 ResultSet rs = ps.executeQuery();
 
