@@ -166,7 +166,7 @@ public class ProblemImportAction extends BaseAction {
                                                 ProblemManager.INPUT_FILE, null);
             ProblemImportAction.createReference(ReferenceType.OUTPUT, problems[i].getOutput(), problemId, 0,
                                                 ProblemManager.OUTPUT_FILE, null);
-            ProblemImportAction.createReference(ReferenceType.CHECKER, problems[i].getChecker(), problemId, 0,
+            ProblemImportAction.createReference(ReferenceType.HEADER, problems[i].getChecker(), problemId, 0,
                                                 ProblemManager.CHECKER_FILE, null);
             ProblemImportAction.createReference(ReferenceType.CHECKER_SOURCE, problems[i].getCheckerSource(),
                                                 problemId, 0, ProblemManager.CHECKER_SOURCE_FILE,

@@ -109,7 +109,7 @@ public class AddProblemAction extends BaseAction {
         this.createReference(ReferenceType.DESCRIPTION, problemForm.getDescription(), problem.getId(), userId);
         this.createReference(ReferenceType.INPUT, problemForm.getInputData(), problem.getId(), userId);
         this.createReference(ReferenceType.OUTPUT, problemForm.getOutputData(), problem.getId(), userId);
-        this.createReference(ReferenceType.CHECKER, problemForm.getChecker(), problem.getId(), userId);
+        this.createReference(ReferenceType.HEADER, problemForm.getChecker(), problem.getId(), userId);
         this.createReference(ReferenceType.CHECKER_SOURCE, problemForm.getCheckerSource(), problem.getId(), userId);
         this.createReference(ReferenceType.JUDGE_SOLUTION, problemForm.getJudgeSolution(), problem.getId(), userId);
 

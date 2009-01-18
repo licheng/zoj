@@ -61,7 +61,7 @@ public class ReferenceType {
      * Represents CHECKER static instance.
      * </p>
      */
-    public static final ReferenceType CHECKER = new ReferenceType(5, "Checker");
+    public static final ReferenceType HEADER = new ReferenceType(5, "Header");
 
     /**
      * <p>
@@ -161,7 +161,7 @@ public class ReferenceType {
         list.add(ReferenceType.INPUT);
         list.add(ReferenceType.OUTPUT);
         list.add(ReferenceType.AUXILIARY);
-        list.add(ReferenceType.CHECKER);
+        list.add(ReferenceType.HEADER);
         list.add(ReferenceType.CHECKER_SOURCE);
         list.add(ReferenceType.JUDGE_SOLUTION);
         list.add(ReferenceType.DOWNLOAD);
@@ -188,8 +188,8 @@ public class ReferenceType {
             return ReferenceType.OUTPUT;
         } else if (ReferenceType.AUXILIARY.id == id) {
             return ReferenceType.AUXILIARY;
-        } else if (ReferenceType.CHECKER.id == id) {
-            return ReferenceType.CHECKER;
+        } else if (ReferenceType.HEADER.id == id) {
+            return ReferenceType.HEADER;
         } else if (ReferenceType.CHECKER_SOURCE.id == id) {
             return ReferenceType.CHECKER_SOURCE;
         } else if (ReferenceType.JUDGE_SOLUTION.id == id) {
@@ -222,8 +222,8 @@ public class ReferenceType {
             return ReferenceType.OUTPUT;
         } else if (ReferenceType.AUXILIARY.description.equalsIgnoreCase(name)) {
             return ReferenceType.AUXILIARY;
-        } else if (ReferenceType.CHECKER.description.equalsIgnoreCase(name)) {
-            return ReferenceType.CHECKER;
+        } else if (ReferenceType.HEADER.description.equalsIgnoreCase(name)) {
+            return ReferenceType.HEADER;
         } else if (ReferenceType.CHECKER_SOURCE.description.equalsIgnoreCase(name)) {
             return ReferenceType.CHECKER_SOURCE;
         } else if (ReferenceType.JUDGE_SOLUTION.description.equalsIgnoreCase(name)) {

@@ -347,17 +347,18 @@ function deleteProblem(problemId) {
                 </logic:present>  
                 <td> 
             </tr>
-            <%--
+
             <tr>
-                <td align="right">Checker</td>
+                <td align="right">Header</td>
                 <td>
                     <input name="checker" type="file"/><br>                  
-                <logic:present name="CheckerRef">                    
-                    <a href="<%=request.getContextPath()%>/showReference.do?referenceId=<bean:write name="CheckerRef" property="id"/>&code=<%=problemForm.getCode()%>&download=true" target="_blank">Download</a>
+                <logic:present name="HeaderRef">    
+                	<a href="<%=request.getContextPath()%>/showReference.do?referenceId=<bean:write name="HeaderRef" property="id"/>&code=<%=problemForm.getCode()%>" target="_blank">View</a>                
+                    <a href="<%=request.getContextPath()%>/showReference.do?referenceId=<bean:write name="HeaderRef" property="id"/>&code=<%=problemForm.getCode()%>&download=true" target="_blank">Download</a>
                 </logic:present>  
                 <td> 
             </tr>
-            --%>
+
              
             <tr>
                 <td align="right">Checker Source</td>

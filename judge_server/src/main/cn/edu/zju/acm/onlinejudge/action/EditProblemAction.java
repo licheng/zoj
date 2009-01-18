@@ -90,7 +90,7 @@ public class EditProblemAction extends BaseAction {
             this.setReference("InputRef", ReferenceType.INPUT, problem.getId(), context);
             this.setReference("OutputRef", ReferenceType.OUTPUT, problem.getId(), context);
             this.setReference("JudgeSolutionRef", ReferenceType.JUDGE_SOLUTION, problem.getId(), context);
-            this.setReference("CheckerRef", ReferenceType.CHECKER, problem.getId(), context);
+            this.setReference("HeaderRef", ReferenceType.HEADER, problem.getId(), context);
             this.setReference("CheckerSourceRef", ReferenceType.CHECKER_SOURCE, problem.getId(), context);
             return this.handleSuccess(mapping, context, "failure");
         }
@@ -117,7 +117,7 @@ public class EditProblemAction extends BaseAction {
         this.updateReference(ReferenceType.DESCRIPTION, problemForm.getDescription(), problem.getId(), userId);
         this.updateReference(ReferenceType.INPUT, problemForm.getInputData(), problem.getId(), userId);
         this.updateReference(ReferenceType.OUTPUT, problemForm.getOutputData(), problem.getId(), userId);
-        this.updateReference(ReferenceType.CHECKER, problemForm.getChecker(), problem.getId(), userId);
+        this.updateReference(ReferenceType.HEADER, problemForm.getChecker(), problem.getId(), userId);
         this.updateReference(ReferenceType.CHECKER_SOURCE, problemForm.getCheckerSource(), problem.getId(), userId);
         this.updateReference(ReferenceType.JUDGE_SOLUTION, problemForm.getJudgeSolution(), problem.getId(), userId);
 

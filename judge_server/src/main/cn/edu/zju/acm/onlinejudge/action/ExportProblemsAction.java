@@ -100,7 +100,7 @@ public class ExportProblemsAction extends BaseAction {
                 this.zipReference(p, "input", ReferenceType.INPUT, out);
                 this.zipReference(p, "output", ReferenceType.OUTPUT, out);
                 this.zipReference(p, "solution", ReferenceType.JUDGE_SOLUTION, out);
-                this.zipReference(p, "checker", ReferenceType.CHECKER, out);
+                this.zipReference(p, "checker", ReferenceType.HEADER, out);
                 this.zipReference(p, "checker", ReferenceType.CHECKER_SOURCE, out);
 
                 
