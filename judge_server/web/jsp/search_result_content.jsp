@@ -41,7 +41,7 @@
     	<input type="hidden" name="sourcefrom" id="sourcefrom" value=<%=sourcefrom%>>
     	<input type="hidden" name="query" value="<%=query %>" />
 
-<div id="content_title"> Search by Tilte (from <%=titlefrom*50+1 %> to <%=(titlefrom*50+49 >TitleQueryResultCount)?TitleQueryResultCount:titlefrom*50+49+1 %> result in all <%=TitleQueryResultCount %> ) </div>
+<div id="content_title"> Search by Title (from <%=titlefrom*50+1 %> to <%=(titlefrom*50+49 >TitleQueryResultCount)?TitleQueryResultCount:titlefrom*50+49+1 %> result in all <%=TitleQueryResultCount %> ) </div>
 <table class="list">
     <%
     List problems = (List) request.getAttribute("TitleQueryResult");
@@ -97,8 +97,8 @@
         <% } %>                     
     </tr>
     <%
-    for (int i = 0; i < problems.size(); ++i) {
-         Problem problem = (Problem) problems.get(i);
+    for (int k = 0; k < problems.size(); ++k) {
+         Problem problem = (Problem) problems.get(k);
     %>
     <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">  
         <% if(contest.getId()!=ConfigManager.getDefaultProblemSetId()) { %>
@@ -174,4 +174,4 @@
 <input type="submit" onclick="document.all['sourcefrom'].value='<%=sourcefrom+1 %>'" value="Next Page"/>
 <%} %>
 
-<form>
+</form>
