@@ -161,7 +161,7 @@ public class SubmitAction extends BaseAction {
             submissionPersistence.createSubmission(submission, user.getId());
             JudgeService.getInstance().judge(submission, Priority.NORMAL);
         }
-        context.setAttribute("submissionId", submission.getId());
+        context.setAttribute("contestOrder", submission.getContestOrder());
         if (submitCache != null) {
         	submitCache.put(user.getId(), user.getId());
         }

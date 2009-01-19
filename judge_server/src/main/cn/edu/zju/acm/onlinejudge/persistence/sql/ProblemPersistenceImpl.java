@@ -129,6 +129,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                                                                     DatabaseConstants.PROBLEM_REVISION,
                                                                     DatabaseConstants.PROBLEM_TABLE,
                                                                     DatabaseConstants.PROBLEM_ACTIVE,
+                                                                    DatabaseConstants.PROBLEM_COLOR,
                                                                     DatabaseConstants.PROBLEM_SCORE});
     /*
      * The query to search problems.
@@ -138,17 +139,24 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                                  "SELECT {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, p.{9}, {10}, {11}, {12}, {13}, {17} "
                                      + "FROM {14} p LEFT JOIN {15} l ON p.{9} = l.{9} WHERE {16}=1 ",
                                  new Object[] {DatabaseConstants.PROBLEM_PROBLEM_ID,
-                                               DatabaseConstants.PROBLEM_CONTEST_ID, DatabaseConstants.PROBLEM_TITLE,
-                                               DatabaseConstants.PROBLEM_CODE, DatabaseConstants.PROBLEM_AUTHOR,
-                                               DatabaseConstants.PROBLEM_SOURCE, DatabaseConstants.PROBLEM_CONTEST,
-                                               DatabaseConstants.PROBLEM_CHECKER, DatabaseConstants.PROBLEM_REVISION,
+                                               DatabaseConstants.PROBLEM_CONTEST_ID,
+                                               DatabaseConstants.PROBLEM_TITLE,
+                                               DatabaseConstants.PROBLEM_CODE,
+                                               DatabaseConstants.PROBLEM_AUTHOR,
+                                               DatabaseConstants.PROBLEM_SOURCE,
+                                               DatabaseConstants.PROBLEM_CONTEST,
+                                               DatabaseConstants.PROBLEM_CHECKER,
+                                               DatabaseConstants.PROBLEM_REVISION,
                                                DatabaseConstants.PROBLEM_LIMITS_ID,
                                                DatabaseConstants.LIMITS_TIME_LIMIT,
                                                DatabaseConstants.LIMITS_MEMORY_LIMIT,
                                                DatabaseConstants.LIMITS_OUTPUT_LIMIT,
                                                DatabaseConstants.LIMITS_SUBMISSION_LIMIT,
-                                               DatabaseConstants.PROBLEM_TABLE, DatabaseConstants.LIMITS_TABLE,
-                                               DatabaseConstants.PROBLEM_ACTIVE, DatabaseConstants.PROBLEM_COLOR});
+                                               DatabaseConstants.PROBLEM_TABLE,
+                                               DatabaseConstants.LIMITS_TABLE,
+                                               DatabaseConstants.PROBLEM_ACTIVE,
+                                               DatabaseConstants.PROBLEM_COLOR,
+                                               DatabaseConstants.PROBLEM_SCORE});
 
     /**
      * The statement to create a Limit.

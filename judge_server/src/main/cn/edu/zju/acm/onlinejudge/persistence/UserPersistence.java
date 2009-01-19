@@ -242,4 +242,16 @@ public interface UserPersistence {
      */
     // TODO(xuchuan): move this to a CountryPersistence
     List<Country> getAllCountries() throws PersistenceException;
+    
+    /**
+     * <p>
+     * Get a teacher's all student.
+     * </p>
+     * @param userId the teacher
+     * @return
+     * @throws PersistenceException
+     */
+    List getStudents(long userId) throws PersistenceException;
+    
+    long getCreateUser(long userId) throws PersistenceException;
 }

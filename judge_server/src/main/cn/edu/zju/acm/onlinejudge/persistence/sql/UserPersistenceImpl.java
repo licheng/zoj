@@ -89,11 +89,14 @@ public class UserPersistenceImpl implements UserPersistence {
                                                DatabaseConstants.USER_PROFILE_GRADUATE_STUDENT,
                                                DatabaseConstants.USER_PROFILE_GRADUATION_YEAR,
                                                DatabaseConstants.USER_PROFILE_STUDENT_NUMBER,
-                                               DatabaseConstants.USER_PROFILE_CONFIRMED, DatabaseConstants.CREATE_USER,
-                                               DatabaseConstants.CREATE_DATE, DatabaseConstants.LAST_UPDATE_USER,
+                                               DatabaseConstants.USER_PROFILE_CONFIRMED,
+                                               DatabaseConstants.CREATE_USER,
+                                               DatabaseConstants.CREATE_DATE,
+                                               DatabaseConstants.LAST_UPDATE_USER,
                                                DatabaseConstants.LAST_UPDATE_DATE,
                                                DatabaseConstants.USER_PROFILE_SUPER_ADMIN,
-                                               DatabaseConstants.USER_PROFILE_ACTIVE, "nickname"});
+                                               DatabaseConstants.USER_PROFILE_ACTIVE,
+                                               "nickname"});
 
     /**
      * The statement to update a user.
@@ -123,8 +126,10 @@ public class UserPersistenceImpl implements UserPersistence {
                                                DatabaseConstants.USER_PROFILE_GRADUATION_YEAR,
                                                DatabaseConstants.USER_PROFILE_STUDENT_NUMBER,
                                                DatabaseConstants.USER_PROFILE_CONFIRMED,
-                                               DatabaseConstants.LAST_UPDATE_USER, DatabaseConstants.LAST_UPDATE_DATE,
-                                               "nickname", DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
+                                               DatabaseConstants.LAST_UPDATE_USER,
+                                               DatabaseConstants.LAST_UPDATE_DATE,
+                                               "nickname",
+                                               DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
 
     /**
      * The statement to update a user without password.
@@ -153,8 +158,10 @@ public class UserPersistenceImpl implements UserPersistence {
                                                DatabaseConstants.USER_PROFILE_GRADUATION_YEAR,
                                                DatabaseConstants.USER_PROFILE_STUDENT_NUMBER,
                                                DatabaseConstants.USER_PROFILE_CONFIRMED,
-                                               DatabaseConstants.LAST_UPDATE_USER, DatabaseConstants.LAST_UPDATE_DATE,
-                                               "nickname", DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
+                                               DatabaseConstants.LAST_UPDATE_USER,
+                                               DatabaseConstants.LAST_UPDATE_DATE,
+                                               "nickname",
+                                               DatabaseConstants.USER_PROFILE_USER_PROFILE_ID});
 
     /**
      * The statement to delete a thread.
@@ -208,6 +215,12 @@ public class UserPersistenceImpl implements UserPersistence {
      */
     private static final String GET_USER_BY_HANDLE =
             UserPersistenceImpl.GET_USER + " WHERE " + DatabaseConstants.USER_PROFILE_HANDLE + "=?";
+    
+    /**
+     * The query to get a user profile by create user.
+     */
+    private static final String GET_USER_BY_CREATE_USER =
+            UserPersistenceImpl.GET_USER + " WHERE " + DatabaseConstants.CREATE_USER + "=?";
 
     /**
      * The query to login a user.
@@ -1158,4 +1171,48 @@ public class UserPersistenceImpl implements UserPersistence {
         profile.setOldEmail(rs.getString("old_email"));
         return profile;
     }
+
+	public long getCreateUser(long userId) throws PersistenceException {
+		Connection conn = Database.createConnection();        	
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement("select create_user from user_profile where user_profile_id=?");
+
+	    	ps.setLong(1, userId);
+	    	ResultSet row = ps.executeQuery();
+	    	if(!row.next())
+	    	{
+	    		return 0;
+	    	}
+	    	return row.getLong("create_user");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public List getStudents(long userId) throws PersistenceException {
+		Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps = conn.prepareStatement(UserPersistenceImpl.GET_USER_BY_CREATE_USER);
+                ps.setLong(1, userId);
+                ResultSet rs = ps.executeQuery();
+                List<UserProfile> users = new ArrayList<UserProfile>();
+                while (rs.next()) {
+                    users.add(this.populateUserProfile(rs));
+                }
+                return users;
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the user profile with create user " + userId, e);
+        } finally {
+            Database.dispose(conn);
+        }
+	}
 }
