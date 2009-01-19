@@ -102,6 +102,7 @@ public class ProblemForm extends ActionForm implements Serializable {
     private boolean specialJudge = false;
 
     private String color = null;
+    private int score = 0;
 
     private FormFile description = null;
     private FormFile inputData = null;
@@ -415,6 +416,7 @@ public class ProblemForm extends ActionForm implements Serializable {
         this.submissionLimit = String.valueOf(limit.getSubmissionLimit());
         this.outputLimit = String.valueOf(limit.getOutputLimit());
         this.color = problem.getColor();
+        this.score = problem.getScore();
 
     }
 
@@ -445,6 +447,7 @@ public class ProblemForm extends ActionForm implements Serializable {
         problem.setChecker(this.specialJudge);
 
         problem.setColor(this.color);
+        problem.setScore(this.score);
         return problem;
     }
 
@@ -455,5 +458,12 @@ public class ProblemForm extends ActionForm implements Serializable {
     public void setColor(String color) {
         this.color = color;
     }
+    
+    public int getScore() {
+        return this.score;
+    }
 
+    public void setScore(int score) {
+        this.score = score;
+    }
 }

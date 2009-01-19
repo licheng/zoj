@@ -16,6 +16,7 @@
 package cn.edu.zju.acm.onlinejudge.action;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -25,10 +26,12 @@ import org.apache.struts.action.ActionMessages;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
+import cn.edu.zju.acm.onlinejudge.bean.Reference;
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.JudgeReply;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
+import cn.edu.zju.acm.onlinejudge.bean.enumeration.ReferenceType;
 import cn.edu.zju.acm.onlinejudge.judgeservice.JudgeService;
 import cn.edu.zju.acm.onlinejudge.judgeservice.Priority;
 import cn.edu.zju.acm.onlinejudge.persistence.SubmissionPersistence;
@@ -110,6 +113,12 @@ public class SubmitAction extends BaseAction {
             return this.handleSuccess(mapping, context, "submit");
         }
         
+        List refrance = PersistenceManager.getInstance().getReferencePersistence().getProblemReferences(problem.getId(), ReferenceType.HEADER);
+        if(refrance.size()!=0) {
+        	Reference r = (Reference)refrance.get(0);
+        	String percode = new String(r.getContent());
+        	source=percode+"\n"+source;
+        }
         
         UserProfile user = context.getUserProfile();
         if (submitCache != null && submitCache.contains(user.getId())) {

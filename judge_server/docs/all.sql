@@ -222,7 +222,9 @@ CREATE TABLE problem (
     create_user         BIGINT          NOT NULL,
     create_date         DATETIME        NOT NULL,
     last_update_user    BIGINT          NOT NULL,
-    last_update_date    DATETIME        NOT NULL
+    last_update_date    DATETIME        NOT NULL,
+    
+    score    INT        NOT NULL DEFAULT 0
 ) ENGINE = InnoDb;
 
 CREATE TABLE submission (

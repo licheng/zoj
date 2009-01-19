@@ -173,6 +173,20 @@ function deleteProblem(problemId) {
                     </span>
                 <td> 
             </tr>
+            
+            <tr>
+                <td align="right">Score</td>
+                <td>
+                    <input name="score" type="text"
+                        value="<bean:write name="ProblemForm" property="score" />"
+                    >
+                    <span class="error">
+                        <logic:messagesPresent property="score">
+                            <html:errors property="score"/>
+                        </logic:messagesPresent>
+                    </span>
+                <td> 
+            </tr>
 
             
             <tr>

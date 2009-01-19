@@ -103,6 +103,13 @@ public class Problem implements Comparable<Problem> {
      */
     private int revision = -1;
 
+    /**
+     * <p>
+     * Represents score.
+     * </p>
+     */
+    private int score = 0;
+
     
     private int total= -1;
 
@@ -377,6 +384,14 @@ public class Problem implements Comparable<Problem> {
 
     public void setRatio(double ratio) {
         this.ratio = ratio;
+    }
+    
+    public int getScore() {
+        return this.score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     @Override

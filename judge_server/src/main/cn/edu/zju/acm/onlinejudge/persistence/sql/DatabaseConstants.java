@@ -509,6 +509,11 @@ public class DatabaseConstants {
     public static final String PROBLEM_COLOR = "color";
 
     /**
+     * score column in PROBLEM table.
+     */
+    public static final String PROBLEM_SCORE = "score";
+
+    /**
      * SUBMISSION table.
      */
     public static final String SUBMISSION_TABLE = "submission";

@@ -461,5 +461,4 @@ public class Submission {
     public void setContestOrder(long contestOrder) {
         this.contestOrder = contestOrder;
     }
-
 }

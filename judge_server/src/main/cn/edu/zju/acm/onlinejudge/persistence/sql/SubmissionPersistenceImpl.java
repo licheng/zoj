@@ -100,7 +100,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                                                DatabaseConstants.SUBMISSION_SUBMISSION_DATE,
                                                DatabaseConstants.SUBMISSION_JUDGE_DATE,
                                                DatabaseConstants.SUBMISSION_JUDGE_COMMENT,
-                                               DatabaseConstants.LAST_UPDATE_USER, DatabaseConstants.LAST_UPDATE_DATE,
+                                               DatabaseConstants.LAST_UPDATE_USER,
+                                               DatabaseConstants.LAST_UPDATE_DATE,
                                                DatabaseConstants.SUBMISSION_CONTENT,
                                                DatabaseConstants.SUBMISSION_SUBMISSION_ID});
 

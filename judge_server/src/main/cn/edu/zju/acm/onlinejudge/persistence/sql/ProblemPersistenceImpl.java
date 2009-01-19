@@ -64,8 +64,8 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
      */
     private static final String INSERT_PROBLEM =
             MessageFormat.format(
-                                 "INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15})"
-                                     + " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)",
+                                 "INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16})"
+                                     + " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)",
                                  new Object[] {DatabaseConstants.PROBLEM_TABLE, DatabaseConstants.PROBLEM_CONTEST_ID,
                                                DatabaseConstants.PROBLEM_TITLE, DatabaseConstants.PROBLEM_CODE,
                                                DatabaseConstants.PROBLEM_LIMITS_ID, DatabaseConstants.PROBLEM_AUTHOR,
@@ -73,22 +73,31 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                                                DatabaseConstants.PROBLEM_CHECKER, DatabaseConstants.PROBLEM_REVISION,
                                                DatabaseConstants.CREATE_USER, DatabaseConstants.CREATE_DATE,
                                                DatabaseConstants.LAST_UPDATE_USER, DatabaseConstants.LAST_UPDATE_DATE,
-                                               DatabaseConstants.CONTEST_ACTIVE, DatabaseConstants.PROBLEM_COLOR});
+                                               DatabaseConstants.CONTEST_ACTIVE, DatabaseConstants.PROBLEM_COLOR,
+                                               DatabaseConstants.PROBLEM_SCORE});
 
     /**
      * The statement to update a Problem.
      */
     private static final String UPDATE_PROBLEM =
             MessageFormat.format("UPDATE {0} SET {1}=?, {2}=?, {3}=?, {4}=?, {5}=?, {6}=?, {7}=?, {8}=?, "
-                + "{9}={9}+1, {10}=?, {11}=?, {12}={12}+1, {13}=? WHERE {14}=?",
-                                 new Object[] {DatabaseConstants.PROBLEM_TABLE, DatabaseConstants.PROBLEM_CONTEST_ID,
-                                               DatabaseConstants.PROBLEM_TITLE, DatabaseConstants.PROBLEM_CODE,
-                                               DatabaseConstants.PROBLEM_LIMITS_ID, DatabaseConstants.PROBLEM_AUTHOR,
-                                               DatabaseConstants.PROBLEM_SOURCE, DatabaseConstants.PROBLEM_CONTEST,
-                                               DatabaseConstants.PROBLEM_CHECKER, DatabaseConstants.PROBLEM_REVISION,
-                                               DatabaseConstants.LAST_UPDATE_USER, DatabaseConstants.LAST_UPDATE_DATE,
-                                               DatabaseConstants.PROBLEM_REVISION, DatabaseConstants.PROBLEM_COLOR,
-                                               DatabaseConstants.PROBLEM_PROBLEM_ID});
+                + "{9}={9}+1, {10}=?, {11}=?, {12}={12}+1, {13}=?, {15}=? WHERE {14}=?",
+                                 new Object[] {DatabaseConstants.PROBLEM_TABLE,
+                							   DatabaseConstants.PROBLEM_CONTEST_ID,
+                                               DatabaseConstants.PROBLEM_TITLE,
+                                               DatabaseConstants.PROBLEM_CODE,
+                                               DatabaseConstants.PROBLEM_LIMITS_ID,
+                                               DatabaseConstants.PROBLEM_AUTHOR,
+                                               DatabaseConstants.PROBLEM_SOURCE,
+                                               DatabaseConstants.PROBLEM_CONTEST,
+                                               DatabaseConstants.PROBLEM_CHECKER,
+                                               DatabaseConstants.PROBLEM_REVISION,
+                                               DatabaseConstants.LAST_UPDATE_USER,
+                                               DatabaseConstants.LAST_UPDATE_DATE,
+                                               DatabaseConstants.PROBLEM_REVISION,
+                                               DatabaseConstants.PROBLEM_COLOR,
+                                               DatabaseConstants.PROBLEM_PROBLEM_ID,
+                                               DatabaseConstants.PROBLEM_SCORE});
 
     /**
      * The statement to delete a problem.
@@ -107,7 +116,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
      * The query to get a problem.
      */
     private static final String GET_PROBLEM =
-            MessageFormat.format("SELECT {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {12} "
+            MessageFormat.format("SELECT {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {12}, {13} "
                 + "FROM {10} WHERE {11}=1 AND {0}=?", new Object[] {DatabaseConstants.PROBLEM_PROBLEM_ID,
                                                                     DatabaseConstants.PROBLEM_CONTEST_ID,
                                                                     DatabaseConstants.PROBLEM_TITLE,
@@ -120,7 +129,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                                                                     DatabaseConstants.PROBLEM_REVISION,
                                                                     DatabaseConstants.PROBLEM_TABLE,
                                                                     DatabaseConstants.PROBLEM_ACTIVE,
-                                                                    DatabaseConstants.PROBLEM_COLOR});
+                                                                    DatabaseConstants.PROBLEM_SCORE});
     /*
      * The query to search problems.
      */
@@ -225,6 +234,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                 ps.setLong(12, user);
                 ps.setTimestamp(13, new Timestamp(new Date().getTime()));
                 ps.setString(14, problem.getColor());
+                ps.setInt(15, problem.getScore());
                 ps.executeUpdate();
                 problem.setId(Database.getLastId(conn));
             } finally {
@@ -297,7 +307,8 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
                 ps.setLong(9, user);
                 ps.setTimestamp(10, new Timestamp(new Date().getTime()));
                 ps.setString(11, problem.getColor());
-                ps.setLong(12, problem.getId());
+                ps.setInt(12, problem.getScore());
+                ps.setLong(13, problem.getId());
                 ps.executeUpdate();
             } finally {
                 Database.dispose(ps);
@@ -410,6 +421,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
         problem.setChecker(rs.getBoolean(DatabaseConstants.PROBLEM_CHECKER));
         problem.setRevision(rs.getInt(DatabaseConstants.PROBLEM_REVISION));
         problem.setColor(rs.getString(DatabaseConstants.PROBLEM_COLOR));
+        problem.setScore(rs.getInt(DatabaseConstants.PROBLEM_SCORE));
         return problem;
     }
 
