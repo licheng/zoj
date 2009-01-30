@@ -4,7 +4,7 @@
 
 <bean:define id="pageId" value="AddProblem" toScope="request" />
 <bean:define id="menuId" value="Problem Sets" toScope="request" />
-<bean:define id="region" value="Course" toScope="request" />
+<bean:define id="region" value="Courses" toScope="request" />
 
 <tiles:insert definition="course.default" flush="true" >
     <tiles:put name="title" value="ZOJ :: Course :: Add Problem" />

@@ -98,6 +98,9 @@ public class EditRoleAction extends BaseAction {
             for (AbstractContest contest : ContestManager.getInstance().getAllProblemsets()) {
                 contestNames.put(contest.getId(), contest.getTitle());
             }
+            for (AbstractContest contest : ContestManager.getInstance().getAllCourses()) {
+                contestNames.put(contest.getId(), contest.getTitle());
+            }
             context.setAttribute("ContestNames", contestNames);
 
             // TODO add forums

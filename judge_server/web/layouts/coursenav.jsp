@@ -31,10 +31,10 @@
                 if (userSecurity.canAdminContest(contest.getId())) {
                 %>
                 <tr><td class="<%="EditContest".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
-                    <a href="<%=request.getContextPath()%>/editContest.do?contestId=<bean:write name="contest" property="id"/>">Edit Contest</a>
+                    <a href="<%=request.getContextPath()%>/editCourse.do?contestId=<bean:write name="contest" property="id"/>">Edit Course</a>
                 </td></tr>
                 <tr><td class="<%="AddProblem".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
-                    <a href="<%=request.getContextPath()%>/addContestProblem.do?contestId=<bean:write name="contest" property="id"/>">Add Problem</a>
+                    <a href="<%=request.getContextPath()%>/addCourseProblem.do?contestId=<bean:write name="contest" property="id"/>">Add Problem</a>
                 </td></tr>
                 <%
                 }

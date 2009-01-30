@@ -8,8 +8,9 @@
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problem" %>
 
 <%
-    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));    
-    String submitPath = isProblemset ? "submit.do" : "contestSubmit.do";
+    boolean isProblemset =  "Problems".equals(request.getAttribute("region")); 
+    boolean isCourse =  "Courses".equals(request.getAttribute("region"));    
+    String submitPath = isProblemset ? "submit.do" : (isCourse? "courseSubmit.do":"contestSubmit.do");
     
 %>
         <logic:messagesPresent property="error">
@@ -45,11 +46,13 @@
             </logic:notEmpty>
             <center>
                 <a href="<%=request.getContextPath() + "/" + submitPath%>?problemId=<bean:write name="problem" property="id"/>"><font color="blue">Submit</font></a>
+                <% if(!isCourse){ %>
                 &nbsp;&nbsp;
                 <a href="<%=request.getContextPath() + (isProblemset ? "/showProblemStatus.do" : "/showContestProblemStatus.do")%>?problemId=<bean:write name="problem" property="id"/>"><font color="blue">Status</font></a>
                 <%--
                 &nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">Status</font>
                 --%>
+                <%} %>
             </center>
         </div>
         </logic:messagesNotPresent>

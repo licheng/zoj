@@ -30,6 +30,11 @@
         actionPath = request.getContextPath() + "/editProblemset.do";
         submitName = "Edit Problemset";
         importOrExport = "Export Problemset";
+    } if ("EditCourse".equals(request.getAttribute("pageId"))) {
+        title = "Edit Course";
+        actionPath = request.getContextPath() + "/editcourse.do";
+        submitName = "Edit Course";
+        importOrExport = "Export Course";
     }
 
     boolean isProblemset = "EditProblemset".equals(request.getAttribute("pageId"));
