@@ -29,6 +29,7 @@ import java.util.Map;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Contest;
+import cn.edu.zju.acm.onlinejudge.bean.Course;
 import cn.edu.zju.acm.onlinejudge.bean.Limit;
 import cn.edu.zju.acm.onlinejudge.bean.Problemset;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
@@ -310,7 +311,14 @@ public class ContestPersistenceImpl implements ContestPersistence {
                 } else {
                     ps.setLong(6, limit.getId());
                 }
-                ps.setBoolean(7, contest instanceof Problemset);
+                int contesttype=0;
+                if(contest instanceof Problemset) {
+                	contesttype=1;
+                }
+                if(contest instanceof Course) {
+                	contesttype=2;
+                }
+                ps.setInt(7, contesttype);
                 ps.setLong(8, user);
                 ps.setTimestamp(9, new Timestamp(new Date().getTime()));
                 ps.setLong(10, user);
@@ -513,7 +521,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      *             wrapping a persistence implementation specific exception
      */
     public AbstractContest getContest(long id) throws PersistenceException {
-        Connection conn = null;
+    	Connection conn = null;
         try {
             conn = Database.createConnection();
             PreparedStatement ps = null;
@@ -587,11 +595,14 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @throws SQLException
      */
     private AbstractContest populateContest(ResultSet rs) throws SQLException {
-        AbstractContest contest = null;
-        if (rs.getBoolean(DatabaseConstants.CONTEST_PROBLEMSET)) {
+    	AbstractContest contest = null;
+        int contestType=rs.getInt(DatabaseConstants.CONTEST_PROBLEMSET);
+        if (contestType==1) {
             contest = new Problemset();
-        } else {
+        } else if (contestType==0) {
             contest = new Contest();
+        } else {
+            contest = new Course();
         }
         if (rs.getTimestamp(DatabaseConstants.CONTEST_START_TIME) != null) {
             contest.setStartTime(new Date(rs.getTimestamp(DatabaseConstants.CONTEST_START_TIME).getTime()));
@@ -626,7 +637,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      *             wrapping a persistence implementation specific exception
      */
     public List<AbstractContest> getAllContests() throws PersistenceException {
-        return this.getContests(false);
+        return this.getContests(0);
     }
 
     /**
@@ -639,7 +650,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      *             wrapping a persistence implementation specific exception
      */
     public List<AbstractContest> getAllProblemsets() throws PersistenceException {
-        return this.getContests(true);
+        return this.getContests(1);
     }
 
     /**
@@ -652,7 +663,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
      * @throws PersistenceException
      *             wrapping a persistence implementation specific exception
      */
-    private List<AbstractContest> getContests(boolean isProblemset) throws PersistenceException {
+    private List<AbstractContest> getContests(int contestType) throws PersistenceException {
         Connection conn = null;
         try {
             conn = Database.createConnection();
@@ -661,7 +672,7 @@ public class ContestPersistenceImpl implements ContestPersistence {
             try {
                 ps =
                         conn.prepareStatement(ContestPersistenceImpl.GET_CONTEST + " AND " +
-                            DatabaseConstants.CONTEST_PROBLEMSET + "=" + (isProblemset ? 1 : 0) +
+                            DatabaseConstants.CONTEST_PROBLEMSET + "=" + contestType +
                             " ORDER BY start_time DESC");
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -770,4 +781,9 @@ public class ContestPersistenceImpl implements ContestPersistence {
             Database.dispose(conn);
         }
     }
+
+	@Override
+	public List<AbstractContest> getAllCourses() throws PersistenceException {
+		return this.getContests(2);
+	}
 }

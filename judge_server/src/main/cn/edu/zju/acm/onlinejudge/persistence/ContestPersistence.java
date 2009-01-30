@@ -126,6 +126,17 @@ public interface ContestPersistence {
      */
     List<AbstractContest> getAllProblemsets() throws PersistenceException;
 
+    /**
+     * <p>
+     * Gets all Course in persistence layer.
+     * </p>
+     * 
+     * @return a list of Course instances containing all Course in persistence layer
+     * @throws PersistenceException
+     *             wrapping a persistence implementation specific exception
+     */
+    List<AbstractContest> getAllCourses() throws PersistenceException;
+
     String getLastSubmitIP(long userId, long contestId) throws PersistenceException;
 
     void setLastSubmitIP(long userId, long contestId, String ip) throws PersistenceException;

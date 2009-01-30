@@ -339,6 +339,10 @@ public class ContextAdapter {
     protected List<AbstractContest> getAllContests() throws PersistenceException {
         return this.getCheckedContests(ContestManager.getInstance().getAllContests());
     }
+    
+    protected List<AbstractContest> getAllCourses() throws PersistenceException {
+        return this.getCheckedContests(ContestManager.getInstance().getAllCourses());
+    }
 
     protected List<AbstractContest> getCheckedContests(List<AbstractContest> contests) throws PersistenceException {
         UserSecurity userSecurity = this.getUserSecurity();

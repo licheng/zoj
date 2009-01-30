@@ -17,6 +17,10 @@
                 <% } %>
                 | <a <logic:equal name="region" value="Forum">class="selected"</logic:equal> href="/forum/">Forum</a> 
                 <logic:present name="oj_security">
+                <logic:equal name="oj_security" property="hasCourses" value="true" scope="session">
+                | <a <logic:equal name="region" value="Courses">class="selected"</logic:equal>
+                href="<%=request.getContextPath()%>/showCourses.do">Course</a>
+                </logic:equal>
                 <logic:equal name="oj_security" property="superAdmin" value="true" scope="session">
                 | <a <logic:equal name="region" value="Admin">class="selected"</logic:equal>
                 href="<%=request.getContextPath()%>/showActionDashboard.do">Admin</a>

@@ -67,6 +67,7 @@ public class ShowContestsAction extends BaseAction {
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
 
         boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblemsets.do");
+        boolean isCourses = context.getRequest().getRequestURI().endsWith("showCourses.do");
 
         List<AbstractContest> contests = null;
         if (isProblemset) {
@@ -74,6 +75,8 @@ public class ShowContestsAction extends BaseAction {
             if(contests.size()==1) {
             	return this.handleSuccess(mapping, context, "success_onlyone");
             }
+        } else if (isCourses) {
+            contests = context.getAllCourses();
         } else {
             contests = context.getAllContests();
         }

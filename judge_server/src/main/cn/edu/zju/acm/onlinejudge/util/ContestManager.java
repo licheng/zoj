@@ -89,23 +89,29 @@ public class ContestManager {
     }
 
     public List<AbstractContest> getAllContests() throws PersistenceException {
-        return this.getContests(false);
+        return this.getContests(0);
     }
 
     public List<AbstractContest> getAllProblemsets() throws PersistenceException {
-        return this.getContests(true);
+        return this.getContests(1);
     }
 
-    public List<AbstractContest> getContests(boolean isProblemset) throws PersistenceException {
-        Object key = new Boolean(isProblemset);
+    public List<AbstractContest> getAllCourses() throws PersistenceException {
+        return this.getContests(2);
+    }
+
+    public List<AbstractContest> getContests(int contestType) throws PersistenceException {
+        Object key = new Integer(contestType);
         synchronized (this.contestsCache) {
             List<AbstractContest> contests = this.contestsCache.get(key);
             if (contests == null) {
                 ContestPersistence contestPersistence = PersistenceManager.getInstance().getContestPersistence();
-                if (isProblemset) {
+                if (contestType==1) {
                     contests = contestPersistence.getAllProblemsets();
-                } else {
+                } else if (contestType==0) {
                     contests = contestPersistence.getAllContests();
+                } else {
+                    contests = contestPersistence.getAllCourses();
                 }
                 this.contestsCache.put(key, contests);
             }

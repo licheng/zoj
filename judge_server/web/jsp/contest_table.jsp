@@ -190,17 +190,19 @@ function checkLocalProblemFile(pform) {
             if ("ManageContests".equals(request.getAttribute("pageId"))) {
             %>
             <tr>
-                <td align="right">Problemset</td>
+                <td align="right">Contest Type</td>
                 <td>
-                    <input type="checkbox" name="problemset"
-                    <%=contestForm.isProblemset() ? "checked" : "" %>
-                    >
+                <select name="contestType">
+                            <option value="0" >Contest</option>
+                            <option value="1" >Problem Set</option>
+                            <option value="2" >Course</option>
+                    </select>
                 </td>
             </tr>
             <%
             } else {
             %>
-              <input type="hidden" name="problemset" value="<%=contestForm.isProblemset()%>">
+              <input type="hidden" name="contestType" value="<%=contestForm.getContestType()%>">
             <%
             }
             %>

@@ -53,6 +53,13 @@ public class UserSecurity extends AbstractSecurity {
 
     /**
      * <p>
+     * has Course flag.
+     * </p>
+     */
+    private boolean hasCourse = false;
+
+    /**
+     * <p>
      * Constructor with id.
      * </p>
      * 
@@ -261,5 +268,13 @@ public class UserSecurity extends AbstractSecurity {
      */
     public void setSuperAdmin(boolean superAdmin) {
         this.superAdmin = superAdmin;
+    }
+    
+    public boolean isHasCourses() {
+    	return this.hasCourse;
+    }
+    
+    public void setHasCourses(boolean hasCourse) {
+    	this.hasCourse = hasCourse;
     }
 }

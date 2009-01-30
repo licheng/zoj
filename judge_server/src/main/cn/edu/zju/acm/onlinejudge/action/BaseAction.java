@@ -33,6 +33,7 @@ import org.apache.struts.action.RedirectingActionForward;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Contest;
+import cn.edu.zju.acm.onlinejudge.bean.Course;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.PermissionLevel;
@@ -466,7 +467,7 @@ public abstract class BaseAction extends Action {
                                                    boolean checkStart, PermissionLevel level) throws Exception {
         // get the contest
         AbstractContest contest = context.getContest();
-        if (contest == null || isProblemset != null && contest instanceof Contest == isProblemset.booleanValue()) {
+        if (contest == null || isProblemset != null && (contest instanceof Contest || contest instanceof Course) == isProblemset.booleanValue()) {
             context.setAttribute("contest", null);
             ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showcontest.nocontestid"));
@@ -538,7 +539,7 @@ public abstract class BaseAction extends Action {
         }
 
         if (problem == null || contest == null || isProblemset != null &&
-            contest instanceof Contest == isProblemset.booleanValue()) {
+            (contest instanceof Contest || contest instanceof Course) == isProblemset.booleanValue()) {
             ActionMessages messages = new ActionMessages();
             messages.add("message", new ActionMessage("onlinejudge.showproblem.noproblemid"));
             this.saveErrors(context.getRequest(), messages);

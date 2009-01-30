@@ -97,7 +97,10 @@
             <forward name="success" path="/show_problemsets.jsp" redirect="false"/>
             <forward name="success_onlyone" path="/showProblems.do?contestId=1" redirect="false"/>
         </action>
-
+		<action path="/showCourses" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowContestsAction"
+                validate="false" scope="request" input="/show_contests.jsp">
+            <forward name="success" path="/show_courses.jsp" redirect="false"/>
+        </action>
 
 
         <!--  Problemset Region  -->
@@ -168,6 +171,11 @@
             <forward name="success" path="/problemset_info.jsp" redirect="false"/>
             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
         </action> 
+        <action path="/courseInfo" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ContestInfoAction"
+                validate="false" scope="request">
+            <forward name="success" path="/course_info.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
         
         <action path="/editContest" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditContestAction"
                 validate="true" name="ContestForm" scope="request" input="/edit_contest.jsp">
@@ -209,6 +217,11 @@
             <forward name="success" path="/show_problems.jsp" redirect="false"/>
             <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+        <action path="/showCourseProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemsAction">
+            <forward name="success" path="/show_course_problems.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
         </action>        
         
         <action path="/showContestProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemAction">
@@ -221,6 +234,11 @@
             <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
         </action>
+        <action path="/showCourseProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemAction">
+            <forward name="success" path="/show_course_problem.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
 
         <action path="/contestSubmit" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.SubmitAction">
             <forward name="success" path="/contest_submit_success.jsp" redirect="false"/>
@@ -229,7 +247,7 @@
             <forward name="login" path="/login.jsp" redirect="false"/>
             <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
         </action>
-        <action path="/submit" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.SubmitAction">
+        <action path="/submit" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.TestSubmitAction">
             <forward name="success" path="/problem_submit_success.jsp" redirect="false"/>
             <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
             <forward name="submit" path="/problem_submit.jsp" redirect="false"/>
@@ -261,7 +279,13 @@
             <forward name="success" path="/show_runs.jsp" redirect="false"/>
             <forward name="failure" path="/show_runs.jsp" redirect="false"/>
             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
-        </action>        
+        </action>
+        <action path="/showCourseRuns" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRunsAction"
+            validate="false" name="SubmissionSearchForm" scope="request" input="/show_runs.jsp">
+            <forward name="success" path="/show_course_runs.jsp" redirect="false"/>
+            <forward name="failure" path="/show_course_runs.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>      
 
         <action path="/showContestStatistics" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowStatisticsAction">
             <forward name="success" path="/show_contest_statistics.jsp" redirect="false"/>
@@ -300,6 +324,12 @@
                 validate="true" name="ProblemForm" scope="request" input="/add_problem.jsp">
             <forward name="success" path="/showProblems.do" redirect="true"/>
             <forward name="failure" path="/add_problem.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action> 
+        <action path="/addCourseProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/add_problem.jsp">
+            <forward name="success" path="/showProblems.do" redirect="true"/>
+            <forward name="failure" path="/add_course_problem.jsp" redirect="false"/>
             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
         </action> 
         

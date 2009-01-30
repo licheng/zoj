@@ -30,6 +30,7 @@ import org.apache.struts.action.ActionMessage;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Contest;
+import cn.edu.zju.acm.onlinejudge.bean.Course;
 import cn.edu.zju.acm.onlinejudge.bean.Limit;
 import cn.edu.zju.acm.onlinejudge.bean.Problemset;
 import cn.edu.zju.acm.onlinejudge.bean.enumeration.Language;
@@ -105,7 +106,7 @@ public class ContestForm extends ActionForm implements Serializable {
     /**
      * The problemset.
      */
-    private boolean problemset = false;
+    private int contestType = 0;
 
     /**
      * The checkIp.
@@ -327,8 +328,8 @@ public class ContestForm extends ActionForm implements Serializable {
      * 
      * @prama problemset the problemset to set.
      */
-    public void setProblemset(boolean problemset) {
-        this.problemset = problemset;
+    public void setContestType(int contestType) {
+        this.contestType = contestType;
     }
 
     /**
@@ -336,8 +337,8 @@ public class ContestForm extends ActionForm implements Serializable {
      * 
      * @return the problemset.
      */
-    public boolean isProblemset() {
-        return this.problemset;
+    public int getContestType() {
+        return this.contestType;
     }
 
     public boolean isCheckIp() {
@@ -395,7 +396,7 @@ public class ContestForm extends ActionForm implements Serializable {
         }
 
         if (this.startTime == null || this.startTime.trim().length() == 0) {
-            if (!this.problemset || this.contestLength != null && this.contestLength.trim().length() > 0) {
+            if (this.contestType == 0 || this.contestLength != null && this.contestLength.trim().length() > 0) {
                 errors.add("startTime", new ActionMessage("ContestForm.startTime.required"));
             }
         } else if (!Utility.validateTimestamp(this.startTime)) {
@@ -403,7 +404,7 @@ public class ContestForm extends ActionForm implements Serializable {
         }
 
         if (this.contestLength == null || this.contestLength.trim().length() == 0) {
-            if (!this.problemset || this.startTime != null && this.startTime.trim().length() > 0) {
+            if (this.contestType == 0 || this.startTime != null && this.startTime.trim().length() > 0) {
                 errors.add("contestLength", new ActionMessage("ContestForm.contestLength.required"));
             }
         } else if (!Utility.validateTime(this.contestLength)) {
@@ -455,9 +456,11 @@ public class ContestForm extends ActionForm implements Serializable {
         this.description = contest.getDescription();
         this.forumId = String.valueOf(contest.getForumId());
         if (contest instanceof Contest) {
-            this.problemset = false;
+            this.contestType = 0;
+        } else if (contest instanceof Problemset) {
+            this.contestType = 1;
         } else {
-            this.problemset = true;
+            this.contestType = 2;
         }
         if (contest.getStartTime() != null) {
             this.startTime = Utility.toTimestamp(contest.getStartTime());
@@ -483,10 +486,12 @@ public class ContestForm extends ActionForm implements Serializable {
 
     public AbstractContest toContest() throws ParseException, NumberFormatException, PersistenceException {
         AbstractContest contest = null;
-        if (this.problemset) {
+        if (this.contestType == 1) {
             contest = new Problemset();
-        } else {
+        } else if (this.contestType == 0) {
             contest = new Contest();
+        } else {
+        	contest = new Course();
         }
         if (this.startTime != null && this.startTime.trim().length() > 0) {
             contest.setStartTime(Utility.parseTimestamp(this.startTime));

@@ -10,10 +10,11 @@
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.Utility" %>
 
 <%
-    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));    
-    String actionPath = request.getContextPath() + "/" +  (isProblemset ? "showProblemsets.do" : "showContests.do");
-    String name = isProblemset ? "problemset" : "contest";
-    String longName = isProblemset ? "Problem Set" : "Contest";
+    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));
+    boolean isCourse =  "Courses".equals(request.getAttribute("region"));   
+    String actionPath = request.getContextPath() + "/" +  (isProblemset ? "showProblemsets.do" : (isCourse? "showCourses.do": "showContests.do"));
+    String name = isProblemset ? "problemset" : (isCourse? "course" : "contest");
+    String longName = isProblemset ? "Problem Set" : (isCourse? "Course" : "Contest");
     
 %>
 
@@ -35,7 +36,7 @@
                         
                         AbstractContest contest = (AbstractContest) contests.get(i);
                         String contestStatus = "<font color=\"red\">Always run</font>";
-                        String problemLink = isProblemset ? "showProblems.do" : "showContestProblems.do";
+                        String problemLink = isProblemset ? "showProblems.do" : (isCourse ? "showCourseProblems.do" : "showContestProblems.do");
                         String startDate = "";
                         long current = System.currentTimeMillis();
                          

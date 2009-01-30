@@ -54,6 +54,16 @@
              direct="true">
         </put>
     </definition>
+    <definition name="course.default"
+                extends="default">
+        <put name="leftnav"
+             value="/layouts/coursenav.jsp">
+        </put>
+        <put name="title"
+             value="Courses -"
+             direct="true">
+        </put>
+    </definition>
     <definition name="forum.default"
                 extends="default">
         <put name="leftnav"

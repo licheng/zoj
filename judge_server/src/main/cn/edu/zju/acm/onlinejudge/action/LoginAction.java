@@ -143,6 +143,11 @@ public class LoginAction extends BaseAction {
 
         context.setUserProfile(profile);
         context.setUserSecurity(security);
+        if(context.getAllCourses().size()!=0) {
+        	security.setHasCourses(true);
+        } else {
+        	security.setHasCourses(false);
+        }
         context.setUserPreference(perference);
 
         return errors;

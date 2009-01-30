@@ -75,14 +75,16 @@ public class ShowProblemsAction extends BaseAction {
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
         // check contest
-        boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblems.do");
 
+        //System.out.println("in show problems");
+        boolean isProblemset = context.getRequest().getRequestURI().endsWith("showProblems.do");
+        //boolean isCourse=context.getRequest().getRequestURI().endsWith("showCourseProblems.do");
         ActionForward forward = this.checkContestViewPermission(mapping, context, isProblemset, true);
         if (forward != null) {
             return forward;
         }
         AbstractContest contest = context.getContest();
-
+        //System.out.println("" + contest.getId());
         long problemsCount = ContestManager.getInstance().getProblemsCount(contest.getId());
 
         long pageNumber = Utility.parseLong(context.getRequest().getParameter("pageNumber"));

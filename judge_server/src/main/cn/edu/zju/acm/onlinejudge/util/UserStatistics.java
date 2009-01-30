@@ -28,6 +28,7 @@ public class UserStatistics {
     private final long contestId;
     private int total = 0;
     private Set<Problem> solved = null;
+    private Set<Problem> confirmed = null;
 
     public UserStatistics(long userId, long contestId) {
         this.userId = userId;
@@ -101,4 +102,11 @@ public class UserStatistics {
         this.solved = s;
     }
 
+    public Set<Problem> getConfirmed() {
+        return this.confirmed;
+    }
+
+    public void setConfirmed(Set<Problem> s) {
+        this.confirmed = s;
+    }
 }

@@ -867,12 +867,19 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             UserStatistics statistics = new UserStatistics(userId, contestId);
             conn = Database.createConnection();
             PreparedStatement ps = null;
-            String sql =
-                    "SELECT DISTINCT p.problem_id, p.code, p.title " +
+            /*String sql =
+                    "SELECT DISTINCT p.problem_id, p.code, p.title, s.judge_comment " +
                         SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART +
-                        " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";
+                        " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";*/
+            String sql =
+                "SELECT p.problem_id, p.code, p.title, s.judge_comment " +
+                    SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART +
+                    " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";
             sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_user_reply_contest)");
+            HashSet<Long> solvedid=new HashSet<Long>();
+            HashSet<Long> confirmedid=new HashSet<Long>();
             List<Problem> solved = new ArrayList<Problem>();
+            List<Problem> confirmed = new ArrayList<Problem>();
             try {
                 ps = conn.prepareStatement(sql);
                 ps.setLong(1, userId);
@@ -880,17 +887,32 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 ps.setLong(3, contestId);
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
-                    Problem p = new Problem();
-                    p.setContestId(contestId);
-                    p.setId(rs.getLong("problem_id"));
-                    p.setCode(rs.getString("code"));
-                    p.setTitle(rs.getString("title"));
-                    solved.add(p);
+                	Long probemid=new Long(rs.getLong("problem_id"));
+                	if(!solvedid.contains(probemid)) {
+	                    Problem p = new Problem();
+	                    p.setContestId(contestId);
+	                    p.setId(rs.getLong("problem_id"));
+	                    p.setCode(rs.getString("code"));
+	                    p.setTitle(rs.getString("title"));
+	                    solved.add(p);
+	                    solvedid.add(probemid);
+                	}
+                    String comment=rs.getString("judge_comment");
+                	if(!confirmed.contains(probemid) && "Yes".equals(comment)) {
+	                    Problem p = new Problem();
+	                    p.setContestId(contestId);
+	                    p.setId(rs.getLong("problem_id"));
+	                    p.setCode(rs.getString("code"));
+	                    p.setTitle(rs.getString("title"));
+	                    confirmed.add(p);
+	                    confirmedid.add(probemid);
+                	}
                 }
             } finally {
                 Database.dispose(ps);
             }
             statistics.setSolved(new TreeSet<Problem>(solved));
+            statistics.setConfirmed(new TreeSet<Problem>(confirmed));
             try {
                 ps =
                         conn

@@ -136,7 +136,7 @@ public class ProblemPersistenceImpl implements ProblemPersistence {
      */
     private static final String SEARCH_PROBLEMS =
             MessageFormat.format(
-                                 "SELECT {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, p.{9}, {10}, {11}, {12}, {13}, {17} "
+                                 "SELECT {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, p.{9}, {10}, {11}, {12}, {13}, {17}, {18} "
                                      + "FROM {14} p LEFT JOIN {15} l ON p.{9} = l.{9} WHERE {16}=1 ",
                                  new Object[] {DatabaseConstants.PROBLEM_PROBLEM_ID,
                                                DatabaseConstants.PROBLEM_CONTEST_ID,
