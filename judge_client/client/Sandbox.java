@@ -269,6 +269,9 @@ public class Sandbox {
         } catch (NoSuchMethodException e) {
             logError("No main found");
             halt(JudgeReply.RUNTIME_ERROR);
+        } catch (NoClassDefFoundError e) {
+            logError(printError(e));
+            halt(JudgeReply.RUNTIME_ERROR);
         }
         if (!Modifier.isStatic(mainMethod.getModifiers())) {
             logError("main is not static");

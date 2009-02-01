@@ -248,3 +248,12 @@ TEST_F(JavaRunnerTest, RuntimeErrorSleep) {
     ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
     ASSERT(Eof(fd_[0]));
 }
+
+TEST_F(JavaRunnerTest, RuntimeErrorCatchError) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rte_catch_error.class").c_str(), "Main.class"));
+
+    ASSERT_EQUAL(1, Run());
+
+    ASSERT_EQUAL(RUNTIME_ERROR, ReadUntilNotRunning(fd_[0]));
+    ASSERT(Eof(fd_[0]));
+}
