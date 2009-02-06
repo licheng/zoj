@@ -6,6 +6,7 @@
 
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.UserProfile" %>
 <%@ page import="java.util.Iterator" %>
+<%@ page import="java.util.TreeSet" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.UserStatistics" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problem" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Problemset" %>
@@ -14,7 +15,7 @@
 <%
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
     boolean isProblemset = contest instanceof Problemset;
-    String problemPath = request.getContextPath() + (isProblemset ? "/showProblem.do" : "/showContestProblem.do") + "?problemId=";
+    String problemPath = request.getContextPath() + (isProblemset ? "/showProblem.do" : "/showContestProblem.do") + "?problemCode=";
     String contestPath = request.getContextPath() + (isProblemset ? "/showProblems.do" : "/showContestProblems.do") + "?contestId=";
     UserStatistics statistics = (UserStatistics) request.getAttribute("UserStatistics");
     UserProfile user = (UserProfile) request.getAttribute("user");
@@ -66,10 +67,15 @@
         <b>Solved Problems:</b><br/>
         <% 
             if (statistics.getSolved() != null) {
+                TreeSet<String> s=new TreeSet<String>();
                 for (Iterator it = statistics.getSolved().iterator(); it.hasNext();) {
                     Problem problem = (Problem) it.next();
+            		s.add(problem.getCode());
+            	}
+            	for (Iterator it = s.iterator(); it.hasNext();) {
+            		String problemCode = (String) it.next();
         %>
-               <a href="<%=problemPath + problem.getId()%>"><%=problem.getCode()%></a>
+               <a href="<%=problemPath + problemCode%>"><%=problemCode%></a>
         <% }} %>
         </div>
         </logic:present>
