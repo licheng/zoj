@@ -82,53 +82,7 @@
 <% if(titlefrom*50+49<TitleQueryResultCount) {%>
 <input type="submit" onclick="document.all['titlefrom'].value='<%=titlefrom+1 %>'" value="Next Page"/>
 <%} %>
-<!-- 
-<div id="content_title"> Search by Author (from <%=authorfrom*50+1 %> to <%=(authorfrom*50+49 >AuthorQueryResultCount)?AuthorQueryResultCount:authorfrom*50+49+1 %> result in all <%=AuthorQueryResultCount %> )</div>
-<table class="list">
-    <%
-    problems = (List) request.getAttribute("AuthorQueryResult");
-    %>
-    <tr class="rowHeader">            
-        <td class="problemId">ID</td>
-        <td class="problemTitle">Title</td>
-        <td class="problemTitle">Author</td>
-        <% if (admin) { %>
-            <td class="problemAdmin">Admin</td>
-        <% } %>                     
-    </tr>
-    <%
-    for (int k = 0; k < problems.size(); ++k) {
-         Problem problem = (Problem) problems.get(k);
-    %>
-    <tr class="<%=i % 2 == 0 ? "rowOdd" : "rowEven"%>">  
-        <% if(contest.getId()!=ConfigManager.getDefaultProblemSetId()) { %>
-        <td class="problemId"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getCode()%></font></a></td>
-        <td class="problemTitle"><a href="<%=problemLink%>?problemId=<%=problem.getId()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
-        <td class="problemTitle"><font color="blue"><%=problem.getAuthor()%></font></td>
-        <% } else {%>
-        <td class="problemId"><a href="<%=problemLink%>?problemCode=<%=problem.getCode()%>"><font color="blue"><%=problem.getCode()%></font></a></td>
-        <td class="problemTitle"><a href="<%=problemLink%>?problemCode=<%=problem.getCode()%>"><font color="blue"><%=problem.getTitle()%></font></a></td>
-        <td class="problemTitle"><font color="blue"><%=problem.getAuthor()%></font></td>
-        <% } %>
-        <% if (admin) { %>
-        <td class="problemAdmin">
-            <a href="<%=request.getContextPath()%>/edit<%=actionName%>.do?problemId=<%=problem.getId()%>"><font color="red">Edit</font></a>
-            <a href="javascript:deleteProblem('<%=problem.getCode()%>',<%=problem.getId()%>)"><font color="red">Delete</font></a>
-        </td>
-        <% } %>                  
-    </tr>
-    <%
-    }
-    %>
-</table>
 
-<% if(authorfrom>0) {%>
-<input type="submit" onclick="document.all['authorfrom'].value='<%=authorfrom-1 %>'" value="Prev Page"/>
-<%} %>
-<% if(authorfrom*50+49<AuthorQueryResultCount) {%>
-<input type="submit" onclick="document.all['authorfrom'].value='<%=authorfrom+1 %>'" value="Next Page"/>
-<%} %>
- -->
 <div id="content_title"> Search by Source (from <%=sourcefrom*50+1 %> to <%=(sourcefrom*50+49 >SourceQueryResultCount)?SourceQueryResultCount:sourcefrom*50+49+1 %> result in all <%=SourceQueryResultCount %> ) </div>
 <table class="list">
     <%
