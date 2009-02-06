@@ -874,7 +874,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             String sql =
                 "SELECT p.problem_id, p.code, p.title, s.judge_comment " +
                     SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART +
-                    " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";
+                    " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=? order by p.code";
             sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_user_reply_contest)");
             HashSet<Long> solvedid=new HashSet<Long>();
             HashSet<Long> confirmedid=new HashSet<Long>();
