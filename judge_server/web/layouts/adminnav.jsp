@@ -62,6 +62,16 @@
                     <a href="<%=request.getContextPath()%>/manageContests.do">Manage Contests</a>
                 </td></tr>
                 </logic:equal>
+                
+                <tr><td class="nav_header">
+                    <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"/><div><a href="<%=request.getContextPath()%>/manageCourses.do">Manage Courses</a></div>
+                </td></tr>
+
+                <logic:equal name="menuId" value="ManageCourses">
+                <tr><td class="<%="ManageCourses".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/manageCourses.do">Manage Courses</a>
+                </td></tr>
+                </logic:equal>
 
                 <tr><td class="nav_header">
                     <img src="<%=request.getContextPath()%>/image/arrow_sub2.gif"/><div><a href="<%=request.getContextPath()%>/manageForums.do">Manage Forums</a></div>

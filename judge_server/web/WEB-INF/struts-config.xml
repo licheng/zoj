@@ -31,7 +31,7 @@
         <form-bean name="ResetPasswordForm"
                    type="cn.edu.zju.acm.onlinejudge.form.ResetPasswordForm"/>
     <form-bean name="editPasswordForm" type="cn.edu.zju.acm.onlinejudge.form.EditPasswordForm" />
-                   
+     <form-bean name="addUserForm" type="cn.edu.zju.acm.onlinejudge.form.AddUserForm" />              
     </form-beans>
      
 
@@ -115,7 +115,18 @@
   Login, Logout  -->
         <action path="/login" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
                 validate="true" name="LoginForm" scope="request" input="/login.jsp">
-            <forward name="success" path="/" redirect="true"/>
+            <forward name="success" path="/showProblemsets.do" redirect="true"/>
+            <forward name="failure" path="/login.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/naStudentsLogin" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
+                validate="true" name="LoginForm" scope="request" input="/login.jsp">
+            <forward name="success" path="/showCourseProblems.do?contestId=288" redirect="true"/>
+            <forward name="failure" path="/login.jsp" redirect="false"/>
+        </action>
+        <action path="/naBookReaderLogin" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
+                validate="true" name="LoginForm" scope="request" input="/login.jsp">
+            <forward name="success" path="/showProblemsets.do" redirect="true"/>
             <forward name="failure" path="/login.jsp" redirect="false"/>
         </action>
 
@@ -488,6 +499,28 @@
     </action>
      <action path="/searchContestProblem" type="cn.edu.zju.acm.onlinejudge.action.SearchProblemAction">
       <forward name="success" path="/contest_search_result.jsp" />
+    </action>
+    <action path="/manageCourses"
+	type="org.apache.struts.actions.ForwardAction"
+	parameter="/manage_courses.jsp"
+	/>
+	<action
+      attribute="addUserForm"
+      input="/manage_courses.jsp"
+      name="addUserForm"
+      path="/addBookReader"
+      scope="request"
+      type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
+      <forward name="success" path="/manageUsers.do?roleId=10" />
+    </action>
+    <action
+      attribute="addUserForm"
+      input="/manage_courses.jsp"
+      name="addUserForm"
+      path="/addTeacher"
+      scope="request"
+      type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
+      <forward name="success" path="/manageCourses.do" />
     </action>
     </action-mappings>
 

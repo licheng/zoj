@@ -45,6 +45,20 @@ public interface UserPersistence {
      *             wrapping a persistence implementation specific exception
      */
     void createUserProfile(UserProfile profile, long user) throws PersistenceException;
+    
+    /**
+     * <p>
+     * Creates the specified teacher in persistence layer.
+     * </p>
+     * 
+     * @param profile
+     *            the UserProfile instance to create
+     * @param user
+     *            the id of the user who made this modification
+     * @throws PersistenceException
+     *             wrapping a persistence implementation specific exception
+     */
+    void createTeacher(UserProfile profile, long user) throws PersistenceException;
 
     /**
      * <p>

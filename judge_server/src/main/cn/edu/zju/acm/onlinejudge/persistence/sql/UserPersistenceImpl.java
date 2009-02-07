@@ -97,6 +97,43 @@ public class UserPersistenceImpl implements UserPersistence {
                                                DatabaseConstants.USER_PROFILE_SUPER_ADMIN,
                                                DatabaseConstants.USER_PROFILE_ACTIVE,
                                                "nickname"});
+    
+    /**
+     * The statement to create a user.
+     */
+    private static final String INSERT_TEACHER =
+            MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, "
+                + "{13}, {14}, {15}, {16}, {17}, {18}, {19}, {20}, {21}, {22}, {23}, {24}, {25}, {26}, {27}, {28}) "
+                + "VALUES(?, MD5(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?)",
+                                 new Object[] {"teacher",
+                                               DatabaseConstants.USER_PROFILE_HANDLE,
+                                               DatabaseConstants.USER_PROFILE_PASSWORD,
+                                               DatabaseConstants.USER_PROFILE_EMAIL_ADDRESS,
+                                               DatabaseConstants.USER_PROFILE_REG_DATE,
+                                               DatabaseConstants.USER_PROFILE_FIRST_NAME,
+                                               DatabaseConstants.USER_PROFILE_LAST_NAME,
+                                               DatabaseConstants.USER_PROFILE_ADDRESS_LINE1,
+                                               DatabaseConstants.USER_PROFILE_ADDRESS_LINE2,
+                                               DatabaseConstants.USER_PROFILE_CITY,
+                                               DatabaseConstants.USER_PROFILE_STATE,
+                                               DatabaseConstants.USER_PROFILE_COUNTRY_ID,
+                                               DatabaseConstants.USER_PROFILE_ZIP_CODE,
+                                               DatabaseConstants.USER_PROFILE_PHONE_NUMBER,
+                                               DatabaseConstants.USER_PROFILE_BIRTH_DATE,
+                                               DatabaseConstants.USER_PROFILE_GENDER,
+                                               DatabaseConstants.USER_PROFILE_SCHOOL,
+                                               DatabaseConstants.USER_PROFILE_MAJOR,
+                                               DatabaseConstants.USER_PROFILE_GRADUATE_STUDENT,
+                                               DatabaseConstants.USER_PROFILE_GRADUATION_YEAR,
+                                               DatabaseConstants.USER_PROFILE_STUDENT_NUMBER,
+                                               DatabaseConstants.USER_PROFILE_CONFIRMED,
+                                               DatabaseConstants.CREATE_USER,
+                                               DatabaseConstants.CREATE_DATE,
+                                               DatabaseConstants.LAST_UPDATE_USER,
+                                               DatabaseConstants.LAST_UPDATE_DATE,
+                                               DatabaseConstants.USER_PROFILE_SUPER_ADMIN,
+                                               DatabaseConstants.USER_PROFILE_ACTIVE,
+                                               "nickname"});
 
     /**
      * The statement to update a user.
@@ -360,6 +397,73 @@ public class UserPersistenceImpl implements UserPersistence {
             PreparedStatement ps = null;
             try {
                 ps = conn.prepareStatement(UserPersistenceImpl.INSERT_USER);
+                ps.setString(1, profile.getHandle());
+                ps.setString(2, profile.getPassword());
+                ps.setString(3, profile.getEmail());
+                ps.setTimestamp(4, new Timestamp(new Date().getTime()));
+                ps.setString(5, profile.getFirstName());
+                ps.setString(6, profile.getLastName());
+                ps.setString(7, profile.getAddressLine1());
+                ps.setString(8, profile.getAddressLine2());
+                ps.setString(9, profile.getCity());
+                ps.setString(10, profile.getState());
+                ps.setLong(11, profile.getCountry().getId());
+                ps.setString(12, profile.getZipCode());
+                ps.setString(13, profile.getPhoneNumber());
+                ps.setTimestamp(14, new Timestamp(profile.getBirthDate().getTime()));
+                ps.setString(15, "" + profile.getGender());
+                ps.setString(16, profile.getSchool());
+                ps.setString(17, profile.getMajor());
+                ps.setBoolean(18, profile.isGraduateStudent());
+                ps.setInt(19, profile.getGraduationYear());
+                ps.setString(20, profile.getStudentNumber());
+                ps.setBoolean(21, profile.isConfirmed());
+                ps.setLong(22, user);
+                ps.setTimestamp(23, new Timestamp(new Date().getTime()));
+                ps.setLong(24, user);
+                ps.setTimestamp(25, new Timestamp(new Date().getTime()));
+                ps.setString(26, profile.getNickName());
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+            try {
+                ps = conn.prepareStatement(UserPersistenceImpl.GET_LAST_ID);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                profile.setId(rs.getLong(1));
+            } finally {
+                Database.dispose(ps);
+            }
+
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to create user.", e);
+        } finally {
+            Database.dispose(conn);
+        }
+    }
+    
+    /**
+     * <p>
+     * Creates the specified user profile in persistence layer.
+     * </p>
+     * 
+     * @param profile
+     *            the UserProfile instance to create
+     * @param user
+     *            the id of the user who made this modification
+     * @throws NullPointerException
+     *             if argument is null
+     * @throws PersistenceException
+     *             wrapping a persistence implementation specific exception
+     */
+    public void createTeacher(UserProfile profile, long user) throws PersistenceException {
+        Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps = conn.prepareStatement(UserPersistenceImpl.INSERT_TEACHER);
                 ps.setString(1, profile.getHandle());
                 ps.setString(2, profile.getPassword());
                 ps.setString(3, profile.getEmail());
