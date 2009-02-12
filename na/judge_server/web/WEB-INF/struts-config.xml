@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
+          "http://jakarta.apache.org/struts/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+    
+
+    <form-beans>
+        <form-bean name="LoginForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.LoginForm"/>         
+        <form-bean name="ProfileForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ProfileForm"/>
+        <form-bean name="ContestForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ContestForm"/>
+		<form-bean name="ProblemForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ProblemForm"/>                   
+        <form-bean name="ProblemImportForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ProblemImportForm"/>
+        <form-bean name="SubmissionSearchForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.SubmissionSearchForm"/>
+        <form-bean name="LogSearchForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.LogSearchForm"/>
+        <form-bean name="UserSearchForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.UserSearchForm"/>
+        <form-bean name="RoleForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.RoleForm"/>
+        <form-bean name="LimitForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.LimitForm"/>
+        <form-bean name="ResetPasswordForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ResetPasswordForm"/>
+    <form-bean name="editPasswordForm" type="cn.edu.zju.acm.onlinejudge.form.EditPasswordForm" />
+     <form-bean name="addUserForm" type="cn.edu.zju.acm.onlinejudge.form.AddUserForm" />              
+    </form-beans>
+     
+
+    <global-forwards> 
+            <forward name="nopermission" path="/home.do" redirect="true"/> 
+    </global-forwards>
+
+
+    <action-mappings>
+
+        <!--  Home Region  -->
+        <action path="/home"
+                parameter="/index.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request">
+        </action>
+
+        <action path="/faq"
+                parameter="/faq.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request">
+        </action>
+
+        <action path="/about"
+                parameter="/about.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request">
+        </action>
+
+        <action path="/contactUs"
+                parameter="/contact_us.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request">
+        </action>
+
+
+        <action path="/editProfile" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditProfileAction"
+                validate="true" name="ProfileForm" scope="request" input="/editProfile.jsp">
+            <forward name="success" path="/home_message.jsp" redirect="false"/>
+            <forward name="failure" path="/editProfile.jsp" redirect="false"/>
+            <forward name="login" path="/login.jsp" redirect="false"/>
+        </action>
+
+        <action path="/editPreference"
+                parameter="/edit_preference.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request">
+        </action>
+
+
+        <!--  Contest Region  -->
+        <action path="/showContests" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowContestsAction"
+                validate="false" scope="request" input="/show_contests.jsp">
+            <forward name="success" path="/show_contests.jsp" redirect="false"/>
+        </action>
+        <action path="/showProblemsets" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowContestsAction"
+                validate="false" scope="request" input="/show_contests.jsp">
+            <forward name="success" path="/show_problemsets.jsp" redirect="false"/>
+            <forward name="success_onlyone" path="/showProblems.do?contestId=1" redirect="false"/>
+        </action>
+		<action path="/showCourses" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowContestsAction"
+                validate="false" scope="request" input="/show_contests.jsp">
+            <forward name="success" path="/show_courses.jsp" redirect="false"/>
+        </action>
+
+
+        <!--  Problemset Region  -->
+
+
+        <!--  Forum Region  -->
+
+
+        <!--  Admin Region  -->
+
+        <!--
+  Login, Logout  -->
+        <action path="/login" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
+                validate="true" name="LoginForm" scope="request" input="/login.jsp">
+            <forward name="success" path="/showProblemsets.do" redirect="true"/>
+            <forward name="failure" path="/login.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/naStudentsLogin" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
+                validate="true" name="LoginForm" scope="request" input="/login.jsp">
+            <forward name="success" path="/showCourseProblems.do?contestId=288" redirect="true"/>
+            <forward name="failure" path="/login.jsp" redirect="false"/>
+        </action>
+        <action path="/naBookReaderLogin" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
+                validate="true" name="LoginForm" scope="request" input="/login.jsp">
+            <forward name="success" path="/showProblemsets.do" redirect="true"/>
+            <forward name="failure" path="/login.jsp" redirect="false"/>
+        </action>
+
+        <action path="/logout" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LogoutAction">
+            <forward name="success" path="/" redirect="true"/>
+        </action>
+
+        <!--  Register  -->
+        <action path="/register" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.RegisterAction"
+                validate="true" name="ProfileForm" scope="request" input="/register.jsp">
+            <forward name="success" path="/home_message.jsp" redirect="false"/>
+            <forward name="failure" path="/register.jsp" redirect="false"/>
+        </action>
+        
+        <!-- forgot password -->
+        <action path="/forgotPassword" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ForgotPasswordAction">
+            <forward name="success" path="/forgot_password.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/resetPassword" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ResetPasswordAction"
+            validate="true" name="ResetPasswordForm" scope="request" input="/reset_password.jsp">
+            <forward name="message" path="/home_message.jsp" redirect="false"/>
+            <forward name="failure" path="/reset_password.jsp" redirect="false"/>
+        </action>
+        
+        <!-- Administration -->
+        <action path="/showDashboard" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowDashboardAction"
+            validate="false" name="LogSearchForm" scope="request" input="/show_dashboard.jsp">
+            <forward name="success" path="/show_dashboard.jsp" redirect="false"/>
+            <forward name="failure" path="/show_dashboard.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/showActionDashboard" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowActionDashboardAction"
+            validate="false" name="LogSearchForm" scope="request" input="/show_action_dashboard.jsp">
+            <forward name="success" path="/show_action_dashboard.jsp" redirect="false"/>
+            <forward name="failure" path="/show_action_dashboard.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/manageContests" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.CreateContestAction"
+                validate="true" name="ContestForm" scope="request" input="/manage_contests.jsp">
+            <forward name="success" path="/contest_message.jsp" redirect="false"/>
+            <forward name="failure" path="/manage_contests.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+
+        <action path="/contestInfo" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ContestInfoAction"
+                validate="false" scope="request">
+            <forward name="success" path="/contest_info.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/problemsetInfo" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ContestInfoAction"
+                validate="false" scope="request">
+            <forward name="success" path="/problemset_info.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action> 
+        <action path="/courseInfo" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ContestInfoAction"
+                validate="false" scope="request">
+            <forward name="success" path="/course_info.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        
+        <action path="/editContest" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditContestAction"
+                validate="true" name="ContestForm" scope="request" input="/edit_contest.jsp">
+            <forward name="success" path="/contest_message.jsp" redirect="false"/>
+            <forward name="failure" path="/edit_contest.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+            
+        </action>
+        <action path="/editProblemset" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditContestAction"
+                validate="true" name="ContestForm" scope="request" input="/edit_problemset.jsp">
+            <forward name="success" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="failure" path="/edit_problemset.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+        <action path="/editCourse" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditContestAction"
+                validate="true" name="ContestForm" scope="request" input="/edit_course.jsp">
+            <forward name="success" path="/course_message.jsp" redirect="false"/>
+            <forward name="failure" path="/edit_course.jsp" redirect="false"/>
+            <forward name="nopermission" path="/course_message.jsp" redirect="false"/>
+            
+        </action>
+                
+        <action path="/importContestProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ProblemImportAction"
+                validate="true" name="ProblemImportForm" scope="request" input="/import_contest_problem_preview.jsp">
+            <forward name="selectcontest" path="/showContests.do" redirect="true"/>
+            <forward name="preview" path="/import_contest_problem_preview.jsp" redirect="false"/>
+            <forward name="success" path="/contest_message.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>            
+        </action>
+        <action path="/importProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ProblemImportAction"
+                validate="true" name="ProblemImportForm" scope="request" input="/import_problem_preview.jsp">
+            <forward name="selectcontest" path="/showContests.do" redirect="true"/>
+            <forward name="preview" path="/import_problem_preview.jsp" redirect="false"/>
+            <forward name="success" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>            
+        </action>
+
+        <action path="/showContestProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemsAction">
+            <forward name="success" path="/show_contest_problems.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/showProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemsAction">
+            <forward name="success" path="/show_problems.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+        <action path="/showCourseProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemsAction">
+            <forward name="success" path="/show_course_problems.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>        
+        
+        <action path="/showContestProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemAction">
+            <forward name="success" path="/show_contest_problem.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/showProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemAction">
+            <forward name="success" path="/show_problem.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+        <action path="/showCourseProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemAction">
+            <forward name="success" path="/show_course_problem.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+
+        <action path="/contestSubmit" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.SubmitAction">
+            <forward name="success" path="/contest_submit_success.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+            <forward name="submit" path="/contest_submit.jsp" redirect="false"/>
+            <forward name="login" path="/login.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/courseSubmit" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.SubmitAction">
+            <forward name="success" path="/course_submit_success.jsp" redirect="false"/>
+            <forward name="failure" path="/course_message.jsp" redirect="false"/>
+            <forward name="submit" path="/course_submit.jsp" redirect="false"/>
+            <forward name="login" path="/login.jsp" redirect="false"/>
+            <forward name="nopermission" path="/course_message.jsp" redirect="false"/>
+        </action>
+        <action path="/submit" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.SubmitAction">
+            <forward name="success" path="/problem_submit_success.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="submit" path="/problem_submit.jsp" redirect="false"/>
+            <forward name="login" path="/login.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+
+        <action path="/showContestRuns" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRunsAction"
+            validate="false" name="SubmissionSearchForm" scope="request" input="/show_contest_runs.jsp">
+            <forward name="success" path="/show_contest_runs.jsp" redirect="false"/>
+            
+            <forward name="failure" path="/show_contest_runs.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+
+        <action path="/showQQs" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowQQAction"
+            scope="request">
+            <forward name="success" path="/show_qqs.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/changeQQStatus" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ChangeQQStatusAction"
+            scope="request">
+            <forward name="success" path="/showQQs.do" redirect="true"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>        
+                
+        <action path="/showRuns" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRunsAction"
+            validate="false" name="SubmissionSearchForm" scope="request" input="/show_runs.jsp">
+            <forward name="success" path="/show_runs.jsp" redirect="false"/>
+            <forward name="failure" path="/show_runs.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+        <action path="/showCourseRuns" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRunsAction"
+            validate="false" name="SubmissionSearchForm" scope="request" input="/show_runs.jsp">
+            <forward name="success" path="/show_course_runs.jsp" redirect="false"/>
+            <forward name="failure" path="/show_course_runs.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>      
+
+        <action path="/showContestStatistics" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowStatisticsAction">
+            <forward name="success" path="/show_contest_statistics.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+             <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+         <action path="/showContestRankList" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRankListAction">
+            <forward name="success" path="/show_contest_ranklist.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+             <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+
+
+
+
+        <action path="/deleteContest" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteContestAction"
+                validate="false" scope="request">
+            <forward name="success" path="/contest_message.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/deleteProblemset" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteContestAction"
+                validate="false" scope="request">
+            <forward name="success" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action>
+
+        <action path="/addContestProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/add_contest_problem.jsp">
+            <forward name="success" path="/showContestProblems.do" redirect="true"/>
+            <forward name="failure" path="/add_contest_problem.jsp" redirect="false"/>
+            <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/addProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/add_problem.jsp">
+            <forward name="success" path="/showProblems.do" redirect="true"/>
+            <forward name="failure" path="/add_problem.jsp" redirect="false"/>
+            <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action> 
+        <action path="/addCourseProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/add_course_problem.jsp">
+            <forward name="success" path="/showCourseProblems.do" redirect="true"/>
+            <forward name="failure" path="/add_course_problem.jsp" redirect="false"/>
+            <forward name="nopermission" path="/course_message.jsp" redirect="false"/>
+        </action> 
+        
+
+        <action path="/editContestProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/edit_contest_problem.jsp">
+            <forward name="success" path="/showContestProblems.do" redirect="true"/>
+            <forward name="failure" path="/edit_contest_problem.jsp" redirect="false"/>
+             <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>
+        <action path="/editProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/edit_problem.jsp">
+            <forward name="success" path="/showProblems.do" redirect="true"/>
+            <forward name="failure" path="/edit_problem.jsp" redirect="false"/>
+             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action> 
+        
+        <action path="/deleteContestProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteProblemAction"
+                validate="false" scope="request">
+            <forward name="success" path="/contest_message.jsp" redirect="false"/>
+            <forward name="failure" path="/contest_message.jsp" redirect="false"/>
+             <forward name="nopermission" path="/contest_message.jsp" redirect="false"/>
+        </action>          
+        <action path="/deleteProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteProblemAction"
+                validate="false" scope="request">
+            <forward name="success" path="/problemset_message.jsp" redirect="false"/>
+            <forward name="failure" path="/problemset_message.jsp" redirect="false"/>
+             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action> 
+             
+        <action path="/showReference" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowReferenceAction">             
+        </action> 
+        <action path="/showJudgeComment" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowJudgeCommentAction">             
+        </action> 
+        <action path="/showSubmission" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowSubmissionAction">             
+        </action>         
+        <action path="/showImage" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowImageAction">             
+        </action>
+         
+        <action path="/exportContestProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ExportProblemsAction">            
+        </action>
+        <action path="/exportProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ExportProblemsAction">            
+        </action>
+         
+        <action path="/showRoles" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowRolesAction"
+            scope="request">
+            <forward name="success" path="/show_roles.jsp" redirect="false"/>
+        </action>        
+         
+        <action path="/deleteRole" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteRoleAction">
+            <forward name="success" path="/showRoles.do" redirect="true"/>
+        </action>     
+        
+        <action path="/addRole" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddRoleAction">
+            <forward name="success" path="/showRoles.do" redirect="true"/>
+        </action>  
+        
+        <action path="/editRole" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditRoleAction"
+            validate="true" name="RoleForm" scope="request" input="/edit_role.jsp">
+            <forward name="success" path="/showRoles.do" redirect="true"/>
+            <forward name="failure" path="/edit_role.jsp" redirect="false"/>
+        </action>
+        <action path="/manageRoleUsers" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ManageRoleUsersAction"
+            validate="false" scope="request">
+            <forward name="failure" path="/showRoles.do" redirect="true"/>
+            <forward name="success" path="/manage_role_users.jsp" redirect="false"/>
+        </action>
+                
+                 
+        <action path="/defaultLimits" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditLimitAction"
+                validate="true" name="LimitForm" scope="request" input="/default_limits.jsp">
+            <forward name="success" path="/default_limits.jsp" redirect="false"/>
+            <forward name="failure" path="/default_limits.jsp" redirect="false"/>
+        </action>    
+        
+        <action path="/language" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowLanguagesAction"
+                scope="request">
+            <forward name="success" path="/language.jsp" redirect="false"/> 
+        </action>        
+                     
+        <action path="/judgeReply" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowJudgeRepliesAction"
+                scope="request">
+            <forward name="success" path="/judge_reply.jsp" redirect="false"/>   
+        </action> 
+         
+        <action path="/manageUsers" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.UserSearchAction"
+            validate="false" name="UserSearchForm" scope="request" input="/manage_users.jsp">
+            <forward name="success" path="/manage_users.jsp" redirect="false"/>
+            <forward name="failure" path="/manage_users.jsp" redirect="false"/>
+        </action>
+         
+        <action path="/manageUserRole" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowUserRoleAction"
+                scope="request">
+            <forward name="success" path="/manage_user_role.jsp" redirect="false"/>   
+            <forward name="failure" path="/manageUsers.do" redirect="true"/>   
+        </action> 
+        <action path="/addUserRole" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddUserRoleAction"
+                scope="request">
+            <forward name="success" path="/manageUserRole.do" redirect="true"/>    
+            <forward name="failure" path="/manageUsers.do" redirect="true"/>              
+        </action> 
+        <action path="/deleteUserRole" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteUserRoleAction"
+                scope="request">
+            <forward name="success" path="/manageUserRole.do" redirect="true"/>    
+            <forward name="failure" path="/manageUsers.do" redirect="true"/>              
+        </action>      
+         
+        <!-- Administration TODO -->
+
+        <action path="/systemParameters"
+                parameter="/system_parameters.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request" />
+
+        
+        <action path="/judge"
+                parameter="/judge.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request" />
+
+        <action path="/manageForums"
+                parameter="/manage_forums.jsp"
+                type="org.apache.struts.actions.ForwardAction"
+                validate="false"
+                scope="request" />
+    <action path="/showRankList" type="cn.edu.zju.acm.onlinejudge.action.ShowRankListAction">
+      <forward name="success" path="/show_problemset_ranklist.jsp" />
+    </action>
+    <action path="/showProblemStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemStatusAction">
+      <forward name="success" path="/show_problem_status.jsp" />
+    </action>
+    <action path="/showContestProblemStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowProblemStatusAction">
+      <forward name="success" path="/show_contest_problem_status.jsp" />
+    </action>
+    <action path="/showUserStatus" type="cn.edu.zju.acm.onlinejudge.action.ShowUserStatusAction">
+      <forward name="success" path="/show_user_status.jsp" />
+    </action>
+     <action path="/searchProblem" type="cn.edu.zju.acm.onlinejudge.action.SearchProblemAction">
+      <forward name="success" path="/search_result.jsp" />
+    </action>
+     <action path="/searchContestProblem" type="cn.edu.zju.acm.onlinejudge.action.SearchProblemAction">
+      <forward name="success" path="/contest_search_result.jsp" />
+    </action>
+    <action path="/manageCourses"
+	type="org.apache.struts.actions.ForwardAction"
+	parameter="/manage_courses.jsp"
+	/>
+	<action
+      attribute="addUserForm"
+      input="/manage_courses.jsp"
+      name="addUserForm"
+      path="/addBookReader"
+      scope="request"
+      type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
+      <forward name="success" path="/manageUsers.do?roleId=10" />
+    </action>
+    <action
+      attribute="addUserForm"
+      input="/manage_courses.jsp"
+      name="addUserForm"
+      path="/addTeacher"
+      scope="request"
+      type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
+      <forward name="success" path="/manageCourses.do" />
+    </action>
+    </action-mappings>
+
+    <controller tempDir="/tmp"
+                maxFileSize="256M"
+                bufferSize="4096"
+                contentType="text/html;charset=UTF-8" 
+                >
+    </controller>
+
+    <message-resources parameter="MessageResources">
+    </message-resources>
+    <plug-in className="org.apache.struts.tiles.TilesPlugin">
+        <set-property property="definitions-config"
+                      value="/WEB-INF/tiles-config.xml" />
+    </plug-in>
+
+    
+</struts-config>
