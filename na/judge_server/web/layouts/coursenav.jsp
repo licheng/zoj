@@ -17,12 +17,14 @@
                 <tr><td class="<%="CourseInfo".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/courseInfo.do?contestId=<bean:write name="contest" property="id"/>">Information</a>
                 </td></tr>
+                <logic:notPresent name="oj_security">
                 <tr><td class="<%="CourseProblems".equals(request.getAttribute("pageId")) || "ShowContestProblem".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/showCourseProblems.do?contestId=<bean:write name="contest" property="id"/>">Problems</a>
                 </td></tr>
                 <tr><td class="<%="ShowCourseRuns".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/showCourseRuns.do?contestId=<bean:write name="contest" property="id"/>">Runs</a>
                 </td></tr>
+                </logic:notPresent>
                 <logic:present name="oj_security">
                 
                 <%
@@ -36,9 +38,25 @@
                 <tr><td class="<%="AddCourseProblem".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                     <a href="<%=request.getContextPath()%>/addCourseProblem.do?contestId=<bean:write name="contest" property="id"/>">Add Problem</a>
                 </td></tr>
+                <tr><td class="<%="StudentManage".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/studentmanage.do?contestId=<bean:write name="contest" property="id"/>">Student Manage</a>
+                </td></tr>
+                <tr><td class="<%="ConfirmSubmissions".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/confirmSubmissions.do?contestId=<bean:write name="contest" property="id"/>">Confirm Submissions</a>
+                </td></tr>
+                <tr><td class="<%="ReviewSubmissions".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/reviewSubmissions.do?contestId=<bean:write name="contest" property="id"/>">Review Submissions</a>
+                </td></tr>
                 <%
-                }
-                %>  
+                } else {
+                %> 
+                <tr><td class="<%="CourseProblems".equals(request.getAttribute("pageId")) || "ShowContestProblem".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/showCourseProblems.do?contestId=<bean:write name="contest" property="id"/>">Problems</a>
+                </td></tr>
+                <tr><td class="<%="ShowCourseRuns".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+                    <a href="<%=request.getContextPath()%>/showCourseRuns.do?contestId=<bean:write name="contest" property="id"/>">Runs</a>
+                </td></tr>
+                <%} %> 
                                 
                 </logic:present>
                 </logic:present>

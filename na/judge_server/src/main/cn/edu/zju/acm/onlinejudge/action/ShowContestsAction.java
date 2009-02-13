@@ -77,6 +77,9 @@ public class ShowContestsAction extends BaseAction {
             }
         } else if (isCourses) {
             contests = context.getAllCourses();
+            if(contests.size()==1) {
+            	return this.handleSuccess(mapping, context, "success_onlyone");
+            }
         } else {
             contests = context.getAllContests();
         }

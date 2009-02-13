@@ -30,6 +30,8 @@
                    type="cn.edu.zju.acm.onlinejudge.form.LimitForm"/>
         <form-bean name="ResetPasswordForm"
                    type="cn.edu.zju.acm.onlinejudge.form.ResetPasswordForm"/>
+        <form-bean name="ContestRefImportForm"
+                   type="cn.edu.zju.acm.onlinejudge.form.ContestRefImportForm"/>
     <form-bean name="editPasswordForm" type="cn.edu.zju.acm.onlinejudge.form.EditPasswordForm" />
      <form-bean name="addUserForm" type="cn.edu.zju.acm.onlinejudge.form.AddUserForm" />              
     </form-beans>
@@ -100,6 +102,7 @@
 		<action path="/showCourses" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ShowContestsAction"
                 validate="false" scope="request" input="/show_contests.jsp">
             <forward name="success" path="/show_courses.jsp" redirect="false"/>
+            <forward name="success_onlyone" path="/showCourseProblems.do?contestId=1" redirect="false"/>
         </action>
 
 
@@ -115,18 +118,7 @@
   Login, Logout  -->
         <action path="/login" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
                 validate="true" name="LoginForm" scope="request" input="/login.jsp">
-            <forward name="success" path="/showProblemsets.do" redirect="true"/>
-            <forward name="failure" path="/login.jsp" redirect="false"/>
-        </action>
-        
-        <action path="/naStudentsLogin" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
-                validate="true" name="LoginForm" scope="request" input="/login.jsp">
-            <forward name="success" path="/showCourseProblems.do?contestId=288" redirect="true"/>
-            <forward name="failure" path="/login.jsp" redirect="false"/>
-        </action>
-        <action path="/naBookReaderLogin" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.LoginAction"
-                validate="true" name="LoginForm" scope="request" input="/login.jsp">
-            <forward name="success" path="/showProblemsets.do" redirect="true"/>
+            <forward name="success" path="/showCourses.do" redirect="true"/>
             <forward name="failure" path="/login.jsp" redirect="false"/>
         </action>
 
@@ -207,6 +199,13 @@
             <forward name="failure" path="/edit_course.jsp" redirect="false"/>
             <forward name="nopermission" path="/course_message.jsp" redirect="false"/>
             
+        </action>
+        
+        <action path="/editCourseTAInfo" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditContestAction"
+                validate="true" name="ContestRefImportForm" scope="request" input="/edit_course.jsp">
+            <forward name="success" path="/course_message.jsp" redirect="false"/>
+            <forward name="failure" path="/edit_course.jsp" redirect="false"/>
+            <forward name="nopermission" path="/course_message.jsp" redirect="false"/>
         </action>
                 
         <action path="/importContestProblems" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ProblemImportAction"
@@ -521,6 +520,9 @@
       scope="request"
       type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
       <forward name="success" path="/manageCourses.do" />
+    </action>
+    <action path="/studentManager" type="cn.edu.zju.acm.onlinejudge.action.ShowUserStatusAction">
+      <forward name="success" path="/show_user_status.jsp" />
     </action>
     </action-mappings>
 

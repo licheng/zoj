@@ -90,6 +90,27 @@ public class ReferenceType {
      * </p>
      */
     public static final ReferenceType MISC = new ReferenceType(9, "Misc");
+    
+    /**
+     * <p>
+     * Represents MISC static instance.
+     * </p>
+     */
+    public static final ReferenceType TAName = new ReferenceType(10, "TA Name");
+    
+    /**
+     * <p>
+     * Represents MISC static instance.
+     * </p>
+     */
+    public static final ReferenceType TAPhone = new ReferenceType(11, "TA Phone");
+    
+    /**
+     * <p>
+     * Represents MISC static instance.
+     * </p>
+     */
+    public static final ReferenceType TAEmail = new ReferenceType(12, "TA Email");
 
     /**
      * <p>
@@ -166,6 +187,9 @@ public class ReferenceType {
         list.add(ReferenceType.JUDGE_SOLUTION);
         list.add(ReferenceType.DOWNLOAD);
         list.add(ReferenceType.MISC);
+        list.add(ReferenceType.TAName);
+        list.add(ReferenceType.TAPhone);
+        list.add(ReferenceType.TAEmail);
         return list;
     }
 
@@ -198,6 +222,12 @@ public class ReferenceType {
             return ReferenceType.DOWNLOAD;
         } else if (ReferenceType.MISC.id == id) {
             return ReferenceType.MISC;
+        } else if (ReferenceType.TAName.id == id) {
+            return ReferenceType.TAName;
+        } else if (ReferenceType.TAPhone.id == id) {
+            return ReferenceType.TAPhone;
+        } else if (ReferenceType.TAEmail.id == id) {
+            return ReferenceType.TAEmail;
         } else {
             return null;
         }
@@ -232,6 +262,12 @@ public class ReferenceType {
             return ReferenceType.DOWNLOAD;
         } else if (ReferenceType.MISC.description.equalsIgnoreCase(name)) {
             return ReferenceType.MISC;
+        } else if (ReferenceType.TAName.description.equalsIgnoreCase(name)) {
+            return ReferenceType.TAName;
+        } else if (ReferenceType.TAPhone.description.equalsIgnoreCase(name)) {
+            return ReferenceType.TAPhone;
+        } else if (ReferenceType.TAEmail.description.equalsIgnoreCase(name)) {
+            return ReferenceType.TAEmail;
         } else {
             return null;
         }

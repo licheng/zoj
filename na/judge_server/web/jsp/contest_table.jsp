@@ -5,6 +5,7 @@
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 
 <%@ page import="cn.edu.zju.acm.onlinejudge.form.ContestForm" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.form.ContestRefImportForm" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.enumeration.Language" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.Limit" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.PersistenceManager" %>
@@ -43,6 +44,7 @@
     
     Limit defaultLimit = PersistenceManager.getInstance().getContestPersistence().getDefaultLimit();
     ContestForm contestForm = (ContestForm) request.getAttribute("ContestForm");
+    ContestRefImportForm contestRefImportForm = (ContestRefImportForm) request.getAttribute("ContestRefImportForm");
 %>
 
 <script language="JavaScript">
@@ -390,7 +392,7 @@ function checkLocalProblemFile(pform) {
             </blockquote>
     </form>
     <%
-    if ("EditContest".equals(request.getAttribute("pageId")) || "EditProblemset".equals(request.getAttribute("pageId"))) {
+    if ("EditCourse".equals(request.getAttribute("pageId")) || "EditContest".equals(request.getAttribute("pageId")) || "EditProblemset".equals(request.getAttribute("pageId"))) {
     %>
         <hr>
         <form enctype="multipart/form-data" name="ProblemImportForm" method="post" action="<%=request.getContextPath() + "/" + importAction%>" onsubmit="return checkProblemFile(this);" >
@@ -416,6 +418,24 @@ function checkLocalProblemFile(pform) {
             <input name="contestId" type="hidden" value="<bean:write name="ContestForm" property="id" />">
             <p><b>Export Problems</b></p>
             <p><input type="submit" value="Export Problems"></p>
+        </form>
+    <%
+    }
+    %>
+    
+    <%
+    if ("EditCourse".equals(request.getAttribute("pageId"))) {
+    %>
+        <hr>
+        <form enctype="multipart/form-data" name="ContestRefImportForm" method="post" action="<%=request.getContextPath() + "/editCourseTAInfo.do"%>">
+            <input name="contestId" type="hidden" value="<bean:write name="ContestForm" property="id" />">
+            <p><b>Import TA information</b></p>
+            <p>TA name <input name="TAname" type="text"/>
+            <p>TA phone <input name="TAphone" type="text"/> 
+            <p>TA E-mail <input name="TAemail" type="text"/>                 
+            </p>
+            <p><input type="submit" value="Import Problems"
+                ></p>
         </form>
     <%
     }

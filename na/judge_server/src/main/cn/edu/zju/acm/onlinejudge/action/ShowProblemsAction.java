@@ -163,12 +163,18 @@ public class ShowProblemsAction extends BaseAction {
                                      .getUserStatistics(contest.getId(), context.getUserProfile().getId());
         }
 
+        List<Reference> TAname=PersistenceManager.getInstance().getReferencePersistence().getContestReferences(contest.getId(), ReferenceType.TAName);
+        List<Reference> TAphone=PersistenceManager.getInstance().getReferencePersistence().getContestReferences(contest.getId(), ReferenceType.TAPhone);
+        List<Reference> TAemail=PersistenceManager.getInstance().getReferencePersistence().getContestReferences(contest.getId(), ReferenceType.TAEmail);
         context.setAttribute("problems", problems);
         context.setAttribute("pageNumber", (new Long(pageNumber)).toString());
         context.setAttribute("ContestStatistics", contestStatistics);
         context.setAttribute("UserStatistics", userStatistics);
         context.setAttribute("totalPages", new Long(totalPages));
         context.setAttribute("currentPage", new Long(pageNumber));
+        context.setAttribute("TAname", TAname);
+        context.setAttribute("TAphone", TAphone);
+        context.setAttribute("TAemail", TAemail);
         if (this.checkContestAdminPermission(mapping, context, isProblemset, true) == null &&
             "true".equalsIgnoreCase(context.getRequest().getParameter("check"))) {
             List<String> checkMessages = new ArrayList<String>();

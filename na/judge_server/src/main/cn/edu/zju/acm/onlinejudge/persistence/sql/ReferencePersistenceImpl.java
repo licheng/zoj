@@ -116,7 +116,47 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
      *             wrapping a persistence implementation specific exception
      */
     public void createContestReference(long contestId, Reference reference, long user) throws PersistenceException {
-    // empty
+    	Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            conn.setAutoCommit(false);
+            PreparedStatement ps = null;
+            try {
+                ps =
+                        conn
+                            .prepareStatement("INSERT INTO reference (reference_type_id, name, content_type, "
+                                + "content, size, compressed, create_user, create_date, last_update_user, last_update_date) "
+                                + "VALUES(?,?,?,?,?,?,?,?,?,?)");
+                ps.setLong(1, reference.getReferenceType().getId());
+                ps.setString(2, reference.getName());
+                ps.setString(3, reference.getContentType());
+                ps.setBytes(4, reference.getContent());
+                ps.setLong(5, reference.getSize());
+                ps.setBoolean(6, reference.isCompressed());
+                ps.setLong(7, user);
+                ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+                ps.setLong(9, user);
+                ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+            reference.setId(Database.getLastId(conn));
+            try {
+                ps = conn.prepareStatement("INSERT INTO contest_reference (contest_id, reference_id) VALUES (?,?)");
+                ps.setLong(1, contestId);
+                ps.setLong(2, reference.getId());
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+            conn.commit();
+        } catch (Exception e) {
+            Database.rollback(conn);
+            throw new PersistenceException("Failed to create contest reference.", e);
+        } finally {
+            Database.dispose(conn);
+        }
     }
 
     /**
@@ -198,6 +238,14 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
             PreparedStatement ps = null;
             try {
                 String query = "DELETE FROM problem_reference WHERE reference_id = ?";
+                ps = conn.prepareStatement(query);
+                ps.setLong(1, id);
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+            try {
+                String query = "DELETE FROM contest_reference WHERE reference_id = ?";
                 ps = conn.prepareStatement(query);
                 ps.setLong(1, id);
                 ps.executeUpdate();
@@ -395,7 +443,34 @@ public class ReferencePersistenceImpl implements ReferencePersistence {
      *             wrapping a persistence implementation specific exception
      */
     public List<Reference> getContestReferences(long contestId, ReferenceType referenceType) throws PersistenceException {
-        return null;
+    	Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps =
+                        conn.prepareStatement("SELECT r.reference_id, reference_type_id, name, content_type, "
+                            + "content, size, compressed "
+                            + "FROM contest_reference pr LEFT JOIN reference r ON pr.reference_id = r.reference_id "
+                            + "WHERE pr.contest_id = ? AND r.reference_type_id=?");
+                ps.setLong(1, contestId);
+                ps.setLong(2, referenceType.getId());
+                ResultSet rs = ps.executeQuery();
+
+                List<Reference> references = new ArrayList<Reference>();
+                while (rs.next()) {
+                    Reference reference = this.populateReference(rs);
+                    references.add(reference);
+                }
+                return references;
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the references", e);
+        } finally {
+            Database.dispose(conn);
+        }
     }
 
     /**

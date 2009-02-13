@@ -90,6 +90,13 @@ CREATE TABLE user_profile (
     last_update_date    DATETIME        NOT NULL
 ) ENGINE = InnoDb;
 
+CREATE TABLE ta_information (
+    user_profile_id     BIGINT          NOT NULL PRIMARY KEY,
+    ta_name                TEXT            NULL,
+    ta_phone      INT             NOT NULL,
+    ta_email   INT             NOT NULL
+) ENGINE = InnoDb;
+
 CREATE TABLE user_preference (
     user_profile_id     BIGINT          NOT NULL PRIMARY KEY,
     plan                TEXT            NULL,
@@ -896,6 +903,9 @@ INSERT INTO reference_type(reference_type_id, description, create_user, create_d
 INSERT INTO reference_type(reference_type_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(7, 'Judge Solution', 1, NOW(), 1, NOW());
 INSERT INTO reference_type(reference_type_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(8, 'Download', 1, NOW(), 1, NOW());
 INSERT INTO reference_type(reference_type_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(9, 'Misc', 1, NOW(), 1, NOW());
+INSERT INTO reference_type(reference_type_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(10, 'Ta Name', 1, NOW(), 1, NOW());
+INSERT INTO reference_type(reference_type_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(11, 'Ta Phone', 1, NOW(), 1, NOW());
+INSERT INTO reference_type(reference_type_id, description, create_user, create_date, last_update_user, last_update_date) VALUES(12, 'Ta Email', 1, NOW(), 1, NOW());
 
 DELETE FROM configuration;
 
@@ -913,6 +923,8 @@ DELETE FROM forum;
 
 INSERT INTO forum (forum_id, name, description, create_user, create_date, last_update_user, last_update_date)
   VALUES(1, 'ZOJ Forum', 'Zhejiang University Online Judge Forum', 1, NOW(), 1, NOW());
+INSERT INTO forum (forum_id, name, description, create_user, create_date, last_update_user, last_update_date)
+  VALUES(2, 'CC98 Forum', 'Zhejiang University CC98 Forum', 1, NOW(), 1, NOW());
 
 
 

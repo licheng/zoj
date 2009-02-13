@@ -13,6 +13,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.security.UserSecurity" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.bean.AbstractContest" %>
+<%@ page import="cn.edu.zju.acm.onlinejudge.bean.Reference" %>
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
 
 <%
@@ -145,6 +146,28 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                     }
                     %>
                 </table>
+                <%
+                List<Reference> TAname = (List<Reference>)request.getAttribute("TAname");
+                List<Reference> TAphone = (List<Reference>)request.getAttribute("TAphone");
+                List<Reference> TAemail = (List<Reference>)request.getAttribute("TAemail");
+                 if (TAname.size()>0) { %>
+
+                <blockquote>
+                TA name: <%=new String(TAname.get(0).getContent()) %>
+                </blockquote>
+                <% }
+                if (TAphone.size()>0) { %>
+
+                <blockquote>
+                TA phone: <%=new String(TAphone.get(0).getContent()) %>
+                </blockquote>
+                <% }
+                if (TAemail.size()>0) { %>
+
+                <blockquote>
+                TA email: <%=new String(TAemail.get(0).getContent()) %>
+                </blockquote>
+                <% } %>   
                 <% if (admin) { %>
 
                 <blockquote>
@@ -152,7 +175,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                 <a href="<%=request.getContextPath()%>/export<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>"><font color="red">Export Problems</font></a>&nbsp;&nbsp;&nbsp;
                 <a href="<%=request.getContextPath()%>/show<%=actionName%>s.do?contestId=<%=request.getAttribute("contestId")%>&check=true"><font color="red">Check Problems</font></a>
                 </blockquote>
-                <% } %>   
+                <% } %>  
                 
             </form>
             

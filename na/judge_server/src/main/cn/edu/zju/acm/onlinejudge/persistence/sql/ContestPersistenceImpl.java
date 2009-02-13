@@ -782,7 +782,6 @@ public class ContestPersistenceImpl implements ContestPersistence {
         }
     }
 
-	@Override
 	public List<AbstractContest> getAllCourses() throws PersistenceException {
 		return this.getContests(2);
 	}
