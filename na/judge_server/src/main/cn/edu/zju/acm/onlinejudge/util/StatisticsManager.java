@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cn.edu.zju.acm.onlinejudge.bean.AbstractContest;
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
@@ -252,13 +253,16 @@ public class StatisticsManager {
         }
         
         public List<Submission> getSubmissions() {
-            for (;;) {
-                Submission submission = this.iter.next();
-                if (submission == null) {
-                    break;
-                }
-                this.submissionMap.put(submission.getId(), submission);
-            }
+            
+        	if(this.iter!=null) {
+        		for (;;) {
+	                Submission submission = this.iter.next();
+	                if (submission == null) {
+	                    break;
+	                }
+	                this.submissionMap.put(submission.getId(), submission);
+	            }
+        	}
             for (int i = 0; i < this.submissions.size(); i++) {
                 Submission submission = this.submissions.get(i);
                 Submission t = this.submissionMap.get(submission.getId());

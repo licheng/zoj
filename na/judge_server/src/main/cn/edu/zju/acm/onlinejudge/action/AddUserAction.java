@@ -73,15 +73,28 @@ public class AddUserAction extends BaseAction {
 		
     	UserProfile u = context.getUserProfile();
 		long teacherId = u.getId();
-		UserProfile student=PersistenceManager.getInstance().getUserPersistence().getUserProfileByHandle(addUserForm.getUsername());
+		UserProfile student = null;
+		if(addUserForm.getStudentNumber()!=null) {
+			student=PersistenceManager.getInstance().getUserPersistence().getUserProfileByHandle(addUserForm.getStudentNumber());
+		} else {
+			student=PersistenceManager.getInstance().getUserPersistence().getUserProfileByHandle(addUserForm.getUsername());
+		}
+		
 		if(student==null)
 		{
 			student=new UserProfile();
 			student.setAddressLine1("line1");
 			student.setAddressLine2("line2");
-			student.setHandle(addUserForm.getUsername());
+
+			if(addUserForm.getStudentNumber()!=null) {
+				student.setHandle(addUserForm.getStudentNumber());
+			} else {
+				student.setHandle(addUserForm.getUsername());
+			}
 			student.setPassword(addUserForm.getPassword());
-			student.setFirstName(addUserForm.getUsername());
+			String str=addUserForm.getUsername();
+			//str = new String(str.getBytes("GBK"), "UTF-8");
+			student.setFirstName(str);
 			student.setLastName("");
 			student.setEmail(new Integer(new Date().hashCode()).toString());
 			student.setCity("null");
@@ -95,19 +108,21 @@ public class AddUserAction extends BaseAction {
 			student.setMajor("null");
 			student.setGraduateStudent(false);
 			student.setGraduationYear(2010);
-			student.setStudentNumber("0000");  
+			if(addUserForm.getStudentNumber()!=null)
+			student.setStudentNumber(addUserForm.getStudentNumber());  
 			student.setConfirmed(true);
-			if(!isTeacher){
-				PersistenceManager.getInstance().getUserPersistence().createUserProfile(student, teacherId);
-			} else {
-				PersistenceManager.getInstance().getUserPersistence().createTeacher(student, teacherId);
-			}
+			PersistenceManager.getInstance().getUserPersistence().createUserProfile(student, teacherId);
 		}
 		List<String> list = new LinkedList<String>();
-		list.add(addUserForm.getUsername());if(!isTeacher){
-			PersistenceManager.getInstance().getAuthorizationPersistence().addRoleUsers(list, 10);
+		if(!isTeacher){
+			list.add(addUserForm.getStudentNumber());
 		} else {
-			PersistenceManager.getInstance().getAuthorizationPersistence().addRoleUsers(list, 11);
+			list.add(addUserForm.getUsername());
+		}
+		if(!isTeacher){
+			PersistenceManager.getInstance().getAuthorizationPersistence().addRoleUsers(list, 4);
+		} else {
+			PersistenceManager.getInstance().getAuthorizationPersistence().addRoleUsers(list, 3);
 		}
 		return handleSuccess(mapping, context, "success");
     }

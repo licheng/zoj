@@ -12,10 +12,10 @@
                     <a href="<%=request.getContextPath()%>/editProfile.do">Edit Profile</a>
                 </td></tr>
 <% } %>                
-				<tr><td class="<%="ShowUserStatus".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
+<%-- 				<tr><td class="<%="ShowUserStatus".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                         <a href="<%=request.getContextPath()%>/showUserStatus.do?userId=<%=((UserProfile)request.getSession().getAttribute("oj_user")).getId() %>">User Status</a>
                 </td></tr>
-<%--                
+               
                 <tr><td class="<%="EditPreference".equals(request.getAttribute("pageId")) ? "selected_item" : "item"%>">
                         <a href="<%=request.getContextPath()%>/editPreference.do">Edit Preference</a>
                 </td></tr>

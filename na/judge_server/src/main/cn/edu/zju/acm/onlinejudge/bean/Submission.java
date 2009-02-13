@@ -340,6 +340,7 @@ public class Submission {
      * @return userName
      */
     public String getUserName() {
+    	if(userName==null) return null;
         return this.userName.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
 

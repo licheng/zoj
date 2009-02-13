@@ -4,6 +4,8 @@
  */
 package cn.edu.zju.acm.onlinejudge.form;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
@@ -16,7 +18,7 @@ import org.apache.struts.action.ActionMapping;
  * XDoclet definition:
  * @struts.form name="addUserForm"
  */
-public class AddUserForm extends ActionForm {
+public class AddUserForm extends ActionForm implements Serializable {
 	/*
 	 * Generated fields
 	 */
@@ -28,32 +30,7 @@ public class AddUserForm extends ActionForm {
 	private String studentNumber;
 	/** password property */
 	private String password;
-
-	/*
-	 * Generated Methods
-	 */
-
-	/** 
-	 * Method validate
-	 * @param mapping
-	 * @param request
-	 * @return ActionErrors
-	 */
-	public ActionErrors validate(ActionMapping mapping,
-			HttpServletRequest request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/** 
-	 * Method reset
-	 * @param mapping
-	 * @param request
-	 */
-	public void reset(ActionMapping mapping, HttpServletRequest request) {
-		// TODO Auto-generated method stub
-	}
-
+	
 	/** 
 	 * Returns the username.
 	 * @return String

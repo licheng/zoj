@@ -32,6 +32,7 @@
                    type="cn.edu.zju.acm.onlinejudge.form.ResetPasswordForm"/>
         <form-bean name="ContestRefImportForm"
                    type="cn.edu.zju.acm.onlinejudge.form.ContestRefImportForm"/>
+    <form-bean name="importUserForm" type="cn.edu.zju.acm.onlinejudge.form.ImportUserForm" />
     <form-bean name="editPasswordForm" type="cn.edu.zju.acm.onlinejudge.form.EditPasswordForm" />
      <form-bean name="addUserForm" type="cn.edu.zju.acm.onlinejudge.form.AddUserForm" />              
     </form-beans>
@@ -203,7 +204,7 @@
         
         <action path="/editCourseTAInfo" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditContestAction"
                 validate="true" name="ContestRefImportForm" scope="request" input="/edit_course.jsp">
-            <forward name="success" path="/course_message.jsp" redirect="false"/>
+            <forward name="success" path="/showCourses.do" redirect="false"/>
             <forward name="failure" path="/edit_course.jsp" redirect="false"/>
             <forward name="nopermission" path="/course_message.jsp" redirect="false"/>
         </action>
@@ -510,7 +511,8 @@
       path="/addBookReader"
       scope="request"
       type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
-      <forward name="success" path="/manageUsers.do?roleId=10" />
+      <forward name="success" path="/manageUsers.do?roleId=3" />
+      <forward name="failure" path="/course_message.jsp" redirect="false"/>
     </action>
     <action
       attribute="addUserForm"
@@ -519,11 +521,33 @@
       path="/addTeacher"
       scope="request"
       type="cn.edu.zju.acm.onlinejudge.action.AddUserAction">
-      <forward name="success" path="/manageCourses.do" />
+      <forward name="success" path="/manageUsers.do?roleId=3" />
+      <forward name="failure" path="/course_message.jsp" redirect="false"/>
     </action>
-    <action path="/studentManager" type="cn.edu.zju.acm.onlinejudge.action.ShowUserStatusAction">
-      <forward name="success" path="/show_user_status.jsp" />
+    <action path="/addUser" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.AddUserAction"
+                validate="true" name="addUserForm" scope="request" input="/student_manage.jsp">
+            <forward name="success" path="/studentmanage.do?contestId=1" />
+      <forward name="failure" path="/course_message.jsp" redirect="false"/>
+        </action>
+    
+    <action path="/studentmanage" type="cn.edu.zju.acm.onlinejudge.action.StudentManageAction">
+      <forward name="success" path="/student_manage.jsp" />
     </action>
+    <action path="/exportCodes" type="cn.edu.zju.acm.onlinejudge.action.ExportCodeAction">
+    </action>
+    <action path="/deleteUser" type="cn.edu.zju.acm.onlinejudge.action.DeleteUserAction">
+      <forward name="success" path="/studentmanage.do?contestId=1" />
+      <forward name="failure" path="/course_message.jsp" redirect="false"/>
+    </action>
+    <action
+      input="/student_manage.jsp"
+      name="importUserForm"
+      path="/importUser"
+      scope="request"
+      type="cn.edu.zju.acm.onlinejudge.action.ImportUserAction" >
+      <forward name="success" path="/studentmanage.do?contestId=1" />
+      <forward name="failure" path="/course_message.jsp" redirect="false"/>
+      </action>
     </action-mappings>
 
     <controller tempDir="/tmp"

@@ -16,8 +16,9 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Iterator" %>
 <%
-    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));        
-    String actionPath = request.getContextPath() + (isProblemset ? "/submit.do" : "/contestSubmit.do");    
+    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));  
+    boolean isCourse =  "Courses".equals(request.getAttribute("region"));       
+    String actionPath = request.getContextPath() + (isProblemset ? "/submit.do" : (isCourse? "/courseSubmit.do": "/contestSubmit.do"));    
 
 %>
 <script language="JavaScript">

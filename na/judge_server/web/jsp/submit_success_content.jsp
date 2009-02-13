@@ -4,8 +4,9 @@
 <%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %>
 <%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %>
 <%
-    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));    
-    String actionPath = isProblemset ? "showRuns.do" : "showContestRuns.do";    
+    boolean isProblemset =  "Problems".equals(request.getAttribute("region"));
+    boolean isCourse =  "Courses".equals(request.getAttribute("region"));     
+    String actionPath = isProblemset ? "showRuns.do" : (isCourse? "showCourseRuns.do":"showContestRuns.do");    
     
 %>
         <div id="content_title">Submit Successfully</div>

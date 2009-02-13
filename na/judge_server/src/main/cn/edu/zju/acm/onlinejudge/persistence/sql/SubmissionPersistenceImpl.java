@@ -398,7 +398,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         submission.setMemoryConsumption(rs.getInt(DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION));
         submission.setTimeConsumption(rs.getInt(DatabaseConstants.SUBMISSION_TIME_CONSUMPTION));
         submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_NICKNAME));
-	 if(submission.getUserName().equals("")) {
+        if(submission.getUserName()==null  || submission.getUserName().equals("")) {
              submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_HANDLE));
         }
         submission.setProblemCode(rs.getString(DatabaseConstants.PROBLEM_CODE));

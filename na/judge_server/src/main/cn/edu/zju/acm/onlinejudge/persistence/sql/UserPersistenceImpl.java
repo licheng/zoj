@@ -257,7 +257,7 @@ public class UserPersistenceImpl implements UserPersistence {
      * The query to get a user profile by create user.
      */
     private static final String GET_USER_BY_CREATE_USER =
-            UserPersistenceImpl.GET_USER + " WHERE " + DatabaseConstants.CREATE_USER + "=?";
+            UserPersistenceImpl.GET_USER + " WHERE " + DatabaseConstants.CREATE_USER + "=? and active=1";
 
     /**
      * The query to login a user.
@@ -402,6 +402,7 @@ public class UserPersistenceImpl implements UserPersistence {
                 ps.setString(3, profile.getEmail());
                 ps.setTimestamp(4, new Timestamp(new Date().getTime()));
                 ps.setString(5, profile.getFirstName());
+                System.out.println(profile.getFirstName());
                 ps.setString(6, profile.getLastName());
                 ps.setString(7, profile.getAddressLine1());
                 ps.setString(8, profile.getAddressLine2());

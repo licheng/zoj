@@ -883,7 +883,7 @@ public class ProfileForm extends ActionForm implements Serializable {
         this.setCity(profile.getCity());
         this.setCountry(String.valueOf(profile.getCountry().getId()));
         this.setEmail(profile.getEmail());
-        this.setPlan(preference.getPlan());
+        this.setPlan((preference==null? "" : preference.getPlan()));
         this.setFirstName(profile.getFirstName());
         this.setLastName(profile.getLastName());
         this.setGender(String.valueOf(profile.getGender()));
