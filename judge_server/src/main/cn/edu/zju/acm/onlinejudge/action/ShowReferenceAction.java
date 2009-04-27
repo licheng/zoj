@@ -65,8 +65,12 @@ public class ShowReferenceAction extends BaseAction {
      */
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
+	 ActionForward forward = this.checkContestAdminPermission(mapping, context, null, false);
+        if (forward != null) {
+            return forward;
+        }
         HttpServletResponse response = context.getResponse();
-        if (context.getUserSecurity()==null) {
+        if (context.getUserSecurity()==context.getDefaultUserSecurity()) {
             response.sendError(404);
             return null;
         }
