@@ -97,6 +97,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                          String headerPath=request.getContextPath() + "/" + showProblemsAction+"?contestId="+contest.getId()+"&pageNumber=";
                          %>
                         <td class="problemStatus"><a href="<%=headerPath%><bean:write name="currentPage"/><%="&order=ratio"%>">Ratio</a> (<a href="<%=headerPath%><bean:write name="currentPage"/><%="&order=ac"%>">AC</a>/<a href="<%=headerPath%><bean:write name="currentPage"/><%="&order=all"%>">All</n>)</td>
+                        <td class="problemStatus">Score</td>
                         <% if (admin) { %>
                             <td class="problemAdmin">Admin</td>
                         <% } %>                     
@@ -134,6 +135,7 @@ location.href="<%=request.getContextPath()%>/delete<%=actionName%>.do?problemId=
                             }
                         %>
                         <td class="problemStatus"><%=ratio%> (<%=acLink%>/<%=totalLink%>)</td>
+                        <td class="problemStatus"><%=problem.getScore() %></td>
                         <% if (admin) { %>
                         <td class="problemAdmin">
                             <a href="<%=request.getContextPath()%>/edit<%=actionName%>.do?problemId=<%=problem.getId()%>"><font color="red">Edit</font></a>

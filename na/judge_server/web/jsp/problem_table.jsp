@@ -30,6 +30,14 @@
         title = "Edit Contest Problem";
         actionPath = request.getContextPath() + "/editContestProblem.do";
         submitName = "Edit Problem";
+    } else if ("AddCourseProblem".equals(request.getAttribute("pageId"))) {
+        title = "Add Course Problem";
+        actionPath = request.getContextPath() + "/addCourseProblem.do";
+        submitName = "Add Problem";
+    } else if ("EditCourseProblem".equals(request.getAttribute("pageId"))) {
+        title = "Edit Course Problem";
+        actionPath = request.getContextPath() + "/editCourseProblem.do";
+        submitName = "Edit Problem";
     }
 
     boolean isProblemset = "EditProblem".equals(request.getAttribute("pageId"))

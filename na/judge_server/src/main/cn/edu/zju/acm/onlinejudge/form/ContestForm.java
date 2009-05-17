@@ -396,17 +396,11 @@ public class ContestForm extends ActionForm implements Serializable {
         }
 
         if (this.startTime == null || this.startTime.trim().length() == 0) {
-            if (this.contestType == 0 || this.contestLength != null && this.contestLength.trim().length() > 0) {
-                errors.add("startTime", new ActionMessage("ContestForm.startTime.required"));
-            }
         } else if (!Utility.validateTimestamp(this.startTime)) {
             errors.add("startTime", new ActionMessage("ContestForm.startTime.invalid"));
         }
 
         if (this.contestLength == null || this.contestLength.trim().length() == 0) {
-            if (this.contestType == 0 || this.startTime != null && this.startTime.trim().length() > 0) {
-                errors.add("contestLength", new ActionMessage("ContestForm.contestLength.required"));
-            }
         } else if (!Utility.validateTime(this.contestLength)) {
             errors.add("contestLength", new ActionMessage("ContestForm.contestLength.invalid"));
         }

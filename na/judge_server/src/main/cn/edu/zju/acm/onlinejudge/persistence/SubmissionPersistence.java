@@ -109,7 +109,11 @@ public interface SubmissionPersistence {
      *             wrapping a persistence implementation specific exception
      */
     List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count) throws PersistenceException;
-
+    
+    List<Submission> getUnConfirmSubmissions(long contestId, long firstId, long lastId, int count) throws PersistenceException;
+    
+    List<Submission> getConfirmedSubmissions(long contestId, long firstId, long lastId, int count) throws PersistenceException;
+    
     List<Submission> searchSubmissions(SubmissionCriteria criteria, long firstId, long lastId, int count,
                                        boolean withContent) throws PersistenceException;
 
@@ -134,4 +138,6 @@ public interface SubmissionPersistence {
     String getSubmissionSource(long id) throws PersistenceException;
 
     List<Submission> getQueueingSubmissions(long maxSubmissionId, int count) throws PersistenceException;
+    
+    void conformSubmission(int type, long submissionId) throws PersistenceException;
 }

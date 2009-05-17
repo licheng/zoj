@@ -70,8 +70,12 @@ public class ExportCodeAction  extends BaseAction {
         ArrayList judgeReplies = new ArrayList();
     	judgeReplies.add(JudgeReply.ACCEPTED);
         criteria.setJudgeReplies(judgeReplies);
-        List runs = StatisticsManager.getInstance().getSubmissions(criteria, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
-        
+        criteria.setContestId((long)1);
+        List runs = 
+            PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(criteria,
+                    0, Long.MAX_VALUE,
+                    Integer.MAX_VALUE, true);
+        System.out.println(runs.size());
         HttpServletResponse response = context.getResponse();
         response.setContentType("application/zip");        
         response.setHeader("Content-disposition", 

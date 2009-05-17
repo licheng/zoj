@@ -44,11 +44,11 @@ public class ImportUserAction extends BaseAction {
 		InputStreamReader isr = new InputStreamReader(users.getInputStream());
 		java.io.BufferedReader br = new BufferedReader(isr);
 		String user = br.readLine();
-
+		System.out.println(user);
 		List<String> list = new LinkedList<String>();
-		while(user!=null)
+		while(user!=null && (user.indexOf(' ')>0 || user.indexOf('\t')>0) )
 		{
-			String[] temp=user.split(" ");
+			String[] temp=user.split("[ \t]");
 			
 			UserProfile student=new UserProfile();
 			
@@ -74,7 +74,7 @@ public class ImportUserAction extends BaseAction {
 			student.setConfirmed(true);
 			PersistenceManager.getInstance().getUserPersistence().createUserProfile(student, teacherId);
 			user=br.readLine();
-
+			System.out.println(student.getHandle());
 			list.add(temp[0]);
 		}
 		PersistenceManager.getInstance().getAuthorizationPersistence().addRoleUsers(list, 4);

@@ -43,33 +43,17 @@ import cn.edu.zju.acm.onlinejudge.util.Utility;
  * @author Zhang, Zheng
  * @version 2.0
  */
-public class ShowRunsAction extends BaseAction {
+public class ShowReviewsAction extends BaseAction {
 
-    private final List<JudgeReply> judgeReplies;
-
-    private final List<JudgeReply> adminJudgeReplies;
-
+	private final List<JudgeReply> judgeReplies;
     /**
      * <p>
      * Default constructor.
      * </p>
      */
-    public ShowRunsAction() {
-        this.judgeReplies = new ArrayList<JudgeReply>();
+    public ShowReviewsAction() {
+    	this.judgeReplies = new ArrayList<JudgeReply>();
         this.judgeReplies.add(JudgeReply.ACCEPTED);
-        this.judgeReplies.add(JudgeReply.PRESENTATION_ERROR);
-        this.judgeReplies.add(JudgeReply.WRONG_ANSWER);
-        this.judgeReplies.add(JudgeReply.TIME_LIMIT_EXCEEDED);
-        this.judgeReplies.add(JudgeReply.MEMORY_LIMIT_EXCEEDED);
-        this.judgeReplies.add(JudgeReply.SEGMENTATION_FAULT);
-        this.judgeReplies.add(JudgeReply.FLOATING_POINT_ERROR);
-        this.judgeReplies.add(JudgeReply.COMPILATION_ERROR);
-        this.judgeReplies.add(JudgeReply.OUTPUT_LIMIT_EXCEEDED);
-
-        this.adminJudgeReplies = new ArrayList<JudgeReply>(this.judgeReplies);
-        this.adminJudgeReplies.add(JudgeReply.RUNTIME_ERROR);
-        this.adminJudgeReplies.add(JudgeReply.QUEUING);
-        this.adminJudgeReplies.add(JudgeReply.JUDGE_INTERNAL_ERROR);
     }
 
     /**
@@ -91,28 +75,8 @@ public class ShowRunsAction extends BaseAction {
      */
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, ContextAdapter context) throws Exception {
-
-        // check contest
-        boolean isProblemset = context.getRequest().getRequestURI().endsWith("showRuns.do");
-
-        ActionForward forward = this.checkContestViewPermission(mapping, context, isProblemset, true);
-        if (forward != null) {
-            return forward;
-        }
-
-        context.setAttribute("judgeReplies", context.isAdmin() ? this.adminJudgeReplies : this.judgeReplies);
-
-        // check contest
-        boolean isRejudge = "true".equalsIgnoreCase(context.getRequest().getParameter("rejudge"));
-
-        if (isRejudge) {
-            this.checkContestAdminPermission(mapping, context, isProblemset, true);
-        } else {
-            this.checkContestViewPermission(mapping, context, isProblemset, true);
-        }
-        if (forward != null) {
-            return forward;
-        }
+  
+        context.setAttribute("judgeReplies", this.judgeReplies);
 
         SubmissionSearchForm serachForm = (SubmissionSearchForm) form;
         ActionMessages errors = serachForm.check();
@@ -131,23 +95,8 @@ public class ShowRunsAction extends BaseAction {
         }
 
         int RUNS_PER_PAGE = 15;
-
-        SubmissionCriteria criteria = serachForm.toSubmissionCriteria();
-
-        if (isRejudge) {
-            int maxN = 100;
-            List<Submission> allRuns =
-                    PersistenceManager.getInstance().getSubmissionPersistence().searchSubmissions(criteria, -1,
-                                                                                                  Long.MAX_VALUE,
-                                                                                                  maxN + 1, true);
-            if (allRuns.size() > maxN) {
-                // TODO
-            }
-            this.rejudge(allRuns);
-            // TODO
-        }
         List<Submission> runs =
-                StatisticsManager.getInstance().getSubmissions(criteria, firstId, lastId, RUNS_PER_PAGE + 1);
+        	PersistenceManager.getInstance().getSubmissionPersistence().getConfirmedSubmissions(context.getContest().getId(), firstId, lastId, RUNS_PER_PAGE + 1);
 
         long newLastId = -1;
         long newFirstId = -1;
@@ -186,17 +135,5 @@ public class ShowRunsAction extends BaseAction {
 
         return this.handleSuccess(mapping, context, "success");
 
-    }
-
-    private void rejudge(List<Submission> runs) throws Exception {
-        for (Submission submission : runs) {
-            if (!submission.getJudgeReply().equals(JudgeReply.OUT_OF_CONTEST_TIME)) {
-                submission.setJudgeReply(JudgeReply.QUEUING);
-                submission.setMemoryConsumption(0);
-                submission.setTimeConsumption(0);
-                PersistenceManager.getInstance().getSubmissionPersistence().updateSubmission(submission, 1);
-                JudgeService.getInstance().judge(submission, Priority.LOW);
-            }
-        }
     }
 }

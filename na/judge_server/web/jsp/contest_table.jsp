@@ -33,7 +33,7 @@
         importOrExport = "Export Problemset";
     } if ("EditCourse".equals(request.getAttribute("pageId"))) {
         title = "Edit Course";
-        actionPath = request.getContextPath() + "/editcourse.do";
+        actionPath = request.getContextPath() + "/editCourse.do";
         submitName = "Edit Course";
         importOrExport = "Export Course";
     }

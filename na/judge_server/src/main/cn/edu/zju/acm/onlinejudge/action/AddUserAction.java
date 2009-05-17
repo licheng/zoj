@@ -74,45 +74,36 @@ public class AddUserAction extends BaseAction {
     	UserProfile u = context.getUserProfile();
 		long teacherId = u.getId();
 		UserProfile student = null;
-		if(addUserForm.getStudentNumber()!=null) {
-			student=PersistenceManager.getInstance().getUserPersistence().getUserProfileByHandle(addUserForm.getStudentNumber());
-		} else {
-			student=PersistenceManager.getInstance().getUserPersistence().getUserProfileByHandle(addUserForm.getUsername());
-		}
-		
-		if(student==null)
-		{
-			student=new UserProfile();
-			student.setAddressLine1("line1");
-			student.setAddressLine2("line2");
+		student=new UserProfile();
+		student.setAddressLine1("line1");
+		student.setAddressLine2("line2");
 
-			if(addUserForm.getStudentNumber()!=null) {
-				student.setHandle(addUserForm.getStudentNumber());
-			} else {
-				student.setHandle(addUserForm.getUsername());
-			}
-			student.setPassword(addUserForm.getPassword());
-			String str=addUserForm.getUsername();
-			//str = new String(str.getBytes("GBK"), "UTF-8");
-			student.setFirstName(str);
-			student.setLastName("");
-			student.setEmail(new Integer(new Date().hashCode()).toString());
-			student.setCity("null");
-			student.setState("null");
-			student.setBirthDate(new Date());
-			student.setCountry(PersistenceManager.getInstance().getCountry("44"));
-			student.setZipCode("null");
-			student.setPhoneNumber("null");
-			student.setGender('M');
-			student.setSchool("Zhejiang University");
-			student.setMajor("null");
-			student.setGraduateStudent(false);
-			student.setGraduationYear(2010);
-			if(addUserForm.getStudentNumber()!=null)
-			student.setStudentNumber(addUserForm.getStudentNumber());  
-			student.setConfirmed(true);
-			PersistenceManager.getInstance().getUserPersistence().createUserProfile(student, teacherId);
+		if(addUserForm.getStudentNumber()!=null) {
+			student.setHandle(addUserForm.getStudentNumber());
+		} else {
+			student.setHandle(addUserForm.getUsername());
 		}
+		student.setPassword(addUserForm.getPassword());
+		String str=addUserForm.getUsername();
+		//str = new String(str.getBytes("GBK"), "UTF-8");
+		student.setFirstName(str);
+		student.setLastName("");
+		student.setEmail(new Integer(new Date().hashCode()).toString());
+		student.setCity("null");
+		student.setState("null");
+		student.setBirthDate(new Date());
+		student.setCountry(PersistenceManager.getInstance().getCountry("44"));
+		student.setZipCode("null");
+		student.setPhoneNumber("null");
+		student.setGender('M');
+		student.setSchool("Zhejiang University");
+		student.setMajor("null");
+		student.setGraduateStudent(false);
+		student.setGraduationYear(2010);
+		if(addUserForm.getStudentNumber()!=null)
+		student.setStudentNumber(addUserForm.getStudentNumber());  
+		student.setConfirmed(true);
+		PersistenceManager.getInstance().getUserPersistence().createUserProfile(student, teacherId);
 		List<String> list = new LinkedList<String>();
 		if(!isTeacher){
 			list.add(addUserForm.getStudentNumber());

@@ -397,10 +397,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         submission.setSubmitDate(Database.getDate(rs, DatabaseConstants.SUBMISSION_SUBMISSION_DATE));
         submission.setMemoryConsumption(rs.getInt(DatabaseConstants.SUBMISSION_MEMORY_CONSUMPTION));
         submission.setTimeConsumption(rs.getInt(DatabaseConstants.SUBMISSION_TIME_CONSUMPTION));
-        submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_NICKNAME));
-        if(submission.getUserName()==null  || submission.getUserName().equals("")) {
-             submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_HANDLE));
-        }
+        submission.setUserName(rs.getString(DatabaseConstants.USER_PROFILE_HANDLE)); 
         submission.setProblemCode(rs.getString(DatabaseConstants.PROBLEM_CODE));
         submission.setContestId(rs.getLong("contest_id"));
         submission.setContestOrder(rs.getLong("contest_order"));
@@ -650,6 +647,92 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             index = defaultIndex;
         }
         String queryString = query.toString().replace("FORCE_INDEX", "USE INDEX (" + index + ")");
+        System.out.println(queryString);
+        return conn.prepareStatement(queryString);
+    }
+    
+    /**
+     * Build search query.
+     * 
+     * @param criteria
+     * @param lastId
+     * @param count
+     * @param conn
+     * @param ps
+     * @param rs
+     * @return search query.
+     * @throws SQLException
+     */
+    private PreparedStatement buildUnConformedQuery(String perfix, long contestId, long firstId, long lastId,
+                                         int count, Connection conn) throws SQLException {
+
+        // String userIndex = "index_submission_user";
+        // String problemIndex = "index_submission_problem";
+        String userIndex = "index_submission_user_reply_contest";
+        String problemIndex = "index_submission_problem_reply";
+
+        String judgeReplyIndex = "fk_submission_reply";
+        String defaultIndex = "index_submission_contest_order";
+
+        String order = firstId == -1 ? "DESC" : "ASC";
+
+        StringBuilder query = new StringBuilder();
+        query.append(perfix);
+        query.append(" AND s.contest_id=" + contestId);
+        query.append(" AND contest_order BETWEEN " + (firstId + 1) + " and " + (lastId - 1));
+
+        String index = judgeReplyIndex;
+        
+        query.append(" AND s.judge_reply_id = 5 ");
+        query.append(" AND (s.judge_comment is null OR NOT(s.judge_comment like 'Yes' OR s.judge_comment like 'No')) ORDER BY contest_order " + order);
+        query.append(" LIMIT " + count);
+        if (index == null) {
+            index = defaultIndex;
+        }
+        String queryString = query.toString().replace("FORCE_INDEX", "USE INDEX (" + index + ")");
+        System.out.println(queryString);
+        return conn.prepareStatement(queryString);
+    }
+    
+    /**
+     * Build search query.
+     * 
+     * @param criteria
+     * @param lastId
+     * @param count
+     * @param conn
+     * @param ps
+     * @param rs
+     * @return search query.
+     * @throws SQLException
+     */
+    private PreparedStatement buildConformedQuery(String perfix, long contestId, long firstId, long lastId,
+                                         int count, Connection conn) throws SQLException {
+
+        // String userIndex = "index_submission_user";
+        // String problemIndex = "index_submission_problem";
+        String userIndex = "index_submission_user_reply_contest";
+        String problemIndex = "index_submission_problem_reply";
+
+        String judgeReplyIndex = "fk_submission_reply";
+        String defaultIndex = "index_submission_contest_order";
+
+        String order = firstId == -1 ? "DESC" : "ASC";
+
+        StringBuilder query = new StringBuilder();
+        query.append(perfix);
+        query.append(" AND s.contest_id=" + contestId);
+        query.append(" AND contest_order BETWEEN " + (firstId + 1) + " and " + (lastId - 1));
+
+        String index = judgeReplyIndex;
+        
+        query.append(" AND s.judge_reply_id = 5 ");
+        query.append(" AND (s.judge_comment like 'Yes' OR s.judge_comment like 'No') ORDER BY contest_order " + order);
+        query.append(" LIMIT " + count);
+        if (index == null) {
+            index = defaultIndex;
+        }
+        String queryString = query.toString().replace("FORCE_INDEX", "USE INDEX (" + index + ")");
         return conn.prepareStatement(queryString);
     }
 
@@ -872,7 +955,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                         SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART +
                         " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";*/
             String sql =
-                "SELECT p.problem_id, p.code, p.title, s.judge_comment " +
+                "SELECT p.problem_id, p.code, p.title, p.score, s.judge_comment " +
                     SubmissionPersistenceImpl.GET_SUBMISSION_FROM_PART +
                     " AND s.user_profile_id=? AND s.judge_reply_id=? AND s.contest_id=?";
             sql = sql.replace("FORCE_INDEX", "USE INDEX (index_submission_user_reply_contest)");
@@ -894,6 +977,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 	                    p.setId(rs.getLong("problem_id"));
 	                    p.setCode(rs.getString("code"));
 	                    p.setTitle(rs.getString("title"));
+	                    p.setScore(rs.getInt("score"));
 	                    solved.add(p);
 	                    solvedid.add(probemid);
                 	}
@@ -904,6 +988,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
 	                    p.setId(rs.getLong("problem_id"));
 	                    p.setCode(rs.getString("code"));
 	                    p.setTitle(rs.getString("title"));
+	                    p.setScore(rs.getInt("score"));
 	                    confirmed.add(p);
 	                    confirmedid.add(probemid);
                 	}
@@ -1124,4 +1209,89 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
             Database.dispose(conn);
         }
     }
+
+	public List<Submission> getConfirmedSubmissions(long contestId,
+			long firstId, long lastId, int count) throws PersistenceException {
+		Connection conn = null;
+        Map<Long, Language> languageMap = PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps =
+                        this.buildConformedQuery(SubmissionPersistenceImpl.GET_SUBMISSIONS_WITH_CONTENT, contestId, firstId,
+                                        lastId, count, conn);
+                if (ps == null) {
+                    return new ArrayList<Submission>();
+                }
+                ResultSet rs = ps.executeQuery();
+                List<Submission> submissions = new ArrayList<Submission>();
+                while (rs.next()) {
+                    Submission submission = this.populateSubmission(rs, true, languageMap);
+                    submissions.add(submission);
+                }
+                return submissions;
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the submissions", e);
+        } finally {
+            Database.dispose(conn);
+        }
+	}
+
+	public List<Submission> getUnConfirmSubmissions(long contestId,
+			long firstId, long lastId, int count) throws PersistenceException {
+		Connection conn = null;
+        Map<Long, Language> languageMap = PersistenceManager.getInstance().getLanguagePersistence().getLanguageMap();
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps =
+                        this.buildUnConformedQuery(SubmissionPersistenceImpl.GET_SUBMISSIONS_WITH_CONTENT, contestId, firstId,
+                                        lastId, count, conn);
+                if (ps == null) {
+                    return new ArrayList<Submission>();
+                }
+                ResultSet rs = ps.executeQuery();
+                List<Submission> submissions = new ArrayList<Submission>();
+                while (rs.next()) {
+                    Submission submission = this.populateSubmission(rs, true, languageMap);
+                    submissions.add(submission);
+                }
+                return submissions;
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the submissions", e);
+        } finally {
+            Database.dispose(conn);
+        }
+	}
+
+	public void conformSubmission(int type, long submissionId) throws PersistenceException {
+		String text="No";
+		if(type == 1) {
+			text="Yes";
+		}
+		Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps = conn.prepareStatement("update submission set judge_comment='"+text+"' where submission_id="+submissionId);
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to conform the submissions", e);
+        } finally {
+            Database.dispose(conn);
+        }
+		
+	}
 }

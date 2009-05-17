@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=utf-8" language="java" pageEncoding="UTF-8" %>
+﻿<%@ page contentType="text/html; charset=utf-8" language="java" pageEncoding="UTF-8" %>
 <%@ taglib uri="/WEB-INF/struts-tiles.tld" prefix="tiles" %>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 <%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %>
@@ -54,18 +54,18 @@ UserProfile userProfile = (UserProfile) request.getAttribute("userProfile");%>
 	for(int i =0; i<students.size();++i) {
 		set.clear();
 		UserProfile u = (UserProfile)students.get(i);
-		Set conformed = StatisticsManager.getInstance().getUserStatistics(contest.getId(), userProfile.getId()).getConfirmed();
+		Set conformed = StatisticsManager.getInstance().getUserStatistics(contest.getId(), u.getId()).getConfirmed();
 		int conformedScore=0;
 		for(Object o : conformed)
 		{
-			Problem p = PersistenceManager.getInstance().getProblemPersistence().getProblem(((Long)o).longValue());
+			Problem p = (Problem)o;
 			conformedScore+=p.getScore();
 			set.add(p.getCode());
 		}
 		%>
 		 <tr>
 		<td align=center width=5%><font color=blue><%=i+1 %></font></td>
-		<td align=center width=10%><font color=blue><a href="<%=request.getContextPath()%>/showUserStatus.do?userId=<%=u.getId() %>"><%=u.getFirstName()+u.getLastName() %></a></font></td>
+		<td align=center width=10%><font color=blue><%=u.getFirstName()+u.getLastName() %></font></td>
 		<td align=center width=10%><font color=blue><%=u.getStudentNumber() %></font></td>
 		<td align=center width=10%><font color=red><%=set.contains("1001")? "Yes" : "&nbsp;" %></font></td>
 		<td align=center width=10%><font color=red><%=set.contains("1002")? "Yes" : "&nbsp;" %></font></td>

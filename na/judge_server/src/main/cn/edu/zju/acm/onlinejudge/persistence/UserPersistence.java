@@ -268,4 +268,6 @@ public interface UserPersistence {
     List getStudents(long userId) throws PersistenceException;
     
     long getCreateUser(long userId) throws PersistenceException;
+
+	void deleteAllUserProfile(long id) throws PersistenceException;
 }

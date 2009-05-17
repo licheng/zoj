@@ -6,12 +6,12 @@
 
 
 
-    <property name="tomcat_path" value="\opt\tomcat\webapps" />
+    <property name="tomcat_path" value="/opt/tomcat/webapps" />
 
 
     <property name="package" value="cn.edu.zju.acm.onlinejudge" />
     <property name="packagedir" value="cn/edu/zju/acm/onlinejudge" />
-    <property name="contest_path" value="onlinejudge" />
+    <property name="contest_path" value="NAjudge" />
 
     <property name="srcdir" value="src" />
     <property name="libdir" value="lib" />

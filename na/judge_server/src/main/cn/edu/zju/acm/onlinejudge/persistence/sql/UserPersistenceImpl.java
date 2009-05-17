@@ -67,7 +67,7 @@ public class UserPersistenceImpl implements UserPersistence {
     private static final String INSERT_USER =
             MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, "
                 + "{13}, {14}, {15}, {16}, {17}, {18}, {19}, {20}, {21}, {22}, {23}, {24}, {25}, {26}, {27}, {28}) "
-                + "VALUES(?, MD5(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?)",
+                + "VALUES(?, MD5(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?) ON DUPLICATE KEY UPDATE active=1;",
                                  new Object[] {DatabaseConstants.USER_PROFILE_TABLE,
                                                DatabaseConstants.USER_PROFILE_HANDLE,
                                                DatabaseConstants.USER_PROFILE_PASSWORD,
@@ -285,7 +285,7 @@ public class UserPersistenceImpl implements UserPersistence {
      * The statement to create a user preference.
      */
     private static final String INSERT_USER_PREFERENCE =
-            MessageFormat.format("INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}) "
+            MessageFormat.format("REPLACE INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}) "
                 + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                  new Object[] {DatabaseConstants.USER_PREFERENCE_TABLE,
                                                DatabaseConstants.USER_PREFERENCE_USER_PROFILE_ID,
@@ -1319,5 +1319,26 @@ public class UserPersistenceImpl implements UserPersistence {
         } finally {
             Database.dispose(conn);
         }
+	}
+
+	public void deleteAllUserProfile(long id) throws PersistenceException {
+		Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps = conn.prepareStatement("update user_profile set active=0 where create_user="+id);
+                System.out.println("update user_profile set active=0 where create_user="+id);
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to get the user profile with create user " + id, e);
+        } finally {
+            Database.dispose(conn);
+        }
+        System.out.println("OK");
+		
 	}
 }

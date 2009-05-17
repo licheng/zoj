@@ -594,7 +594,7 @@ public class AuthorizationPersistenceImpl implements AuthorizationPersistence {
                     String handle = idMap.get(id);
                     if (result.get(handle)) {
                         try {
-                            ps = conn.prepareStatement("INSERT INTO user_role(role_id, user_profile_id) VALUES(?,?)");
+                            ps = conn.prepareStatement("REPLACE INTO user_role(role_id, user_profile_id) VALUES(?,?)");
                             ps.setLong(1, roleId);
                             ps.setLong(2, id);
                             ps.executeUpdate();

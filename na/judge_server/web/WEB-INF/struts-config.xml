@@ -372,6 +372,13 @@
              <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
         </action> 
         
+        <action path="/editCourseProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.EditProblemAction"
+                validate="true" name="ProblemForm" scope="request" input="/edit_problem.jsp">
+            <forward name="success" path="/showCourseProblems.do" redirect="true"/>
+            <forward name="failure" path="/edit_course_problem.jsp" redirect="false"/>
+             <forward name="nopermission" path="/problemset_message.jsp" redirect="false"/>
+        </action> 
+        
         <action path="/deleteContestProblem" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.DeleteProblemAction"
                 validate="false" scope="request">
             <forward name="success" path="/contest_message.jsp" redirect="false"/>
@@ -548,6 +555,28 @@
       <forward name="success" path="/studentmanage.do?contestId=1" />
       <forward name="failure" path="/course_message.jsp" redirect="false"/>
       </action>
+      
+      <action path="/confirmSubmissions" type="cn.edu.zju.acm.onlinejudge.action.ShowConfirmsAction" validate="false" name="SubmissionSearchForm" scope="request" input="/confirm_runs.jsp">
+      	<forward name="success" path="/confirm_runs.jsp" />
+    </action>
+    <action path="/reviewSubmissions" type="cn.edu.zju.acm.onlinejudge.action.ShowReviewsAction" validate="false" name="SubmissionSearchForm" scope="request" input="/review_runs.jsp">
+      	<forward name="success" path="/review_runs.jsp"  />
+    </action>
+    <action path="/confirmRun" type="cn.edu.zju.acm.onlinejudge.action.ConfirmRunAction">
+      	<forward name="success" path="/confirmSubmissions.do?contestId=1"/>
+    </action>
+        <action path="/rejectRun" type="cn.edu.zju.acm.onlinejudge.action.RejectRunAction">
+      	<forward name="success" path="/confirmSubmissions.do?contestId=1"/>
+    </action>
+    <action path="/reviewConfirmRun" type="cn.edu.zju.acm.onlinejudge.action.ConfirmRunAction">
+      	<forward name="success" path="/reviewSubmissions.do?contestId=1" />
+    </action>
+        <action path="/reviewRejectRun" type="cn.edu.zju.acm.onlinejudge.action.RejectRunAction">
+      	<forward name="success" path="/reviewSubmissions.do?contestId=1" />
+    </action>
+        <action path="/deleteAllStudent" type="cn.edu.zju.acm.onlinejudge.action.DeleteAllStudentAction">
+      	<forward name="success" path="/studentmanage.do?contestId=1" />
+    </action>
     </action-mappings>
 
     <controller tempDir="/tmp"

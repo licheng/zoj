@@ -431,7 +431,13 @@ public class ContestPersistenceImpl implements ContestPersistence {
                 } else {
                     ps.setLong(6, limit.getId());
                 }
-                ps.setBoolean(7, contest instanceof Problemset);
+                int contesttype=0;
+                if(contest instanceof Course) {
+                	contesttype=2;
+                } else if (contest instanceof Problemset) {
+                	contesttype=1;
+                }
+                ps.setInt(7, contesttype);
                 ps.setLong(8, user);
                 ps.setTimestamp(9, new Timestamp(new Date().getTime()));
                 ps.setBoolean(10, contest.isCheckIp());

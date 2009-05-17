@@ -20,10 +20,13 @@
 
 <%
     boolean isProblemset =  "Problems".equals(request.getAttribute("region"));        
-    String actionPath = request.getContextPath() + (isProblemset ? "/showRuns.do" : "/showContestRuns.do");    
+    String actionPath = request.getContextPath() + ("ConfirmSubmissions".equals(request.getAttribute("pageId")) ? "/confirmSubmissions.do" : "/reviewSubmissions.do");    
+    String confirmPath = request.getContextPath() + ("ConfirmSubmissions".equals(request.getAttribute("pageId")) ? "/confirmRun.do" : "/reviewConfirmRun.do");   
+    String rejectPath = request.getContextPath() + ("ConfirmSubmissions".equals(request.getAttribute("pageId")) ? "/rejectRun.do" : "/reviewRejectRun.do");   
     String showProblemPath = request.getContextPath() + (isProblemset ? "/showProblem.do" : "/showContestProblem.do");    
     UserSecurity userSecurity = (UserSecurity) request.getSession().getAttribute("oj_security");                                                
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
+    actionPath = actionPath+"?contestId="+contest.getId();
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
     boolean canViewSource = (userSecurity != null && userSecurity.canViewSource(contest.getId()));
     String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";
@@ -37,14 +40,7 @@
         </logic:messagesPresent>
         <logic:messagesNotPresent property="error">
         <div id="content_title">
-          <div id="export">
-            <span id="searchRunsLink" style="display:<%=searchForm.isSearch() ? "none" : "block"%>">
-                <a href="JavaScript: showSearch(true);">Search</a>
-            </span>
-            <span id="hideSearchRunsLink" style="display:<%=searchForm.isSearch() ? "block" : "none"%>">
-                <a href="JavaScript: showSearch(false);">Hide Search Form</a>
-            </span>
-          </div>
+
           &nbsp;<bean:write name="contest" property="title"/>
         </div>
         <div id="content_body">
@@ -186,6 +182,7 @@
                         <td class="runUserName">Review Status</td>
                         <% if (admin || canViewSource) { %>
                             <td class="runAdmin">Admin</td>
+                            <td class="runAdmin">Confirm</td>
                         <% } %>
                     </tr>
                     <%
@@ -244,6 +241,7 @@
                         <td class="runUserName"><span class="<%=classtext %>"><%=reviewStatus %></span></td>
                         <% if (admin || canViewSource) { %>
                             <td class="runAdmin"><a href="<%=request.getContextPath()%>/showSubmission.do?submissionId=<%=submission.getId()%>" target="_blank">Source</a></td>
+                            <td class="runAdmin"><a href="<%=confirmPath%>?submissionId=<%=submission.getId()%>">Yes</a>&nbsp;<a href="<%=rejectPath%>?submissionId=<%=submission.getId()%>">No</a></td>
                         <% } %>                        
                     </tr>
                     <%
