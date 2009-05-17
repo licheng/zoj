@@ -1341,4 +1341,23 @@ public class UserPersistenceImpl implements UserPersistence {
         System.out.println("OK");
 		
 	}
+	public void changePassword(String handle, String password) throws PersistenceException {
+		Connection conn = null;
+        try {
+            conn = Database.createConnection();
+            PreparedStatement ps = null;
+            try {
+                ps = conn.prepareStatement("update user_profile set password=MD5('"+password+"' where handle='"+handle+"'"));
+                ps.executeUpdate();
+            } finally {
+                Database.dispose(ps);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Failed to changePassword with create user " + id, e);
+        } finally {
+            Database.dispose(conn);
+        }
+        System.out.println("OK");
+		
+	}
 }

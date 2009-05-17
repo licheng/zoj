@@ -536,6 +536,11 @@
             <forward name="success" path="/studentmanage.do?contestId=1" />
       <forward name="failure" path="/course_message.jsp" redirect="false"/>
         </action>
+<action path="/changePassword" unknown="false" type="cn.edu.zju.acm.onlinejudge.action.ChangePassowrdAction"
+                validate="true" name="addUserForm" scope="request" input="/student_manage.jsp">
+            <forward name="success" path="/studentmanage.do?contestId=1" />
+      <forward name="failure" path="/course_message.jsp" redirect="false"/>
+        </action>
     
     <action path="/studentmanage" type="cn.edu.zju.acm.onlinejudge.action.StudentManageAction">
       <forward name="success" path="/student_manage.jsp" />

@@ -28,6 +28,14 @@ UserProfile userProfile = (UserProfile) request.getAttribute("userProfile");%>
 			<input type="submit" value="Add User">
 </form>
 <hr>
+<H2><font color=red>Change Student Password</font></H2>
+<hr>
+<form enctype="multipart/form-data"  name="addUserForm" method="post" action="<%=request.getContextPath()%>/changePassword.do">
+			studentNumber : <input name="studentNumber" type="text"/><br/>
+			password      : <input name="password" type="text"/><br/>
+			<input type="submit" value="ChangePassword">
+</form>
+<hr>
 <H2><font color=red>Delete Student Information</font></H2>
 <hr>
 
@@ -45,7 +53,7 @@ UserProfile userProfile = (UserProfile) request.getAttribute("userProfile");%>
 		<td align=center width=10%><font color=blue>1007</font></td>
 		<td align=center width=10%><font color=blue>1008</font></td>
 		<td align=center width=10%><font color=blue>Score</font></td>
-		<td align=center><font color=blue>Delete<font></td>
+		<td align=center><font color=blue>Admin<font></td>
 	</tr>
 <%
   List students=(List)request.getAttribute("students");
