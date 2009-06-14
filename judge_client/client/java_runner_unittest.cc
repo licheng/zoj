@@ -106,9 +106,32 @@ TEST_F(JavaRunnerTest, GregorianCalendar) {
     ASSERT_EQUAL(-1, ReadUntilNotRunning(fd_[0]));
 }
 
+TEST_F(JavaRunnerTest, JavaRunTimeTest) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/java_time.class").c_str(), "Main.class"));
+    time_limit_ = 10;
+
+    ASSERT_EQUAL(0, Run());
+
+    int last_time_ = -1;
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+
+        if (time < 0) {
+            ASSERT(last_time_ > 2500);
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+        last_time_ = time;
+    }
+}
+
 TEST_F(JavaRunnerTest, TimeLimitExceeded) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/tle.class").c_str(), "Main.class"));
-    time_limit_ = 1;
+    time_limit_ = 5;
 
     ASSERT_EQUAL(1, Run());
 
@@ -119,7 +142,7 @@ TEST_F(JavaRunnerTest, TimeLimitExceeded) {
         int memory = TryReadUint32(fd_[0]);
         if (time < 0) {
             ASSERT_EQUAL(TIME_LIMIT_EXCEEDED, reply);
-            ASSERT_EQUAL(1001, last_time);
+            ASSERT_EQUAL(5001, last_time);
             break;
         }
         last_time = time;

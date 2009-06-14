@@ -46,6 +46,8 @@ public class Sandbox {
         System.loadLibrary("sandbox");
     }
 
+    private static final int UPDATE_TIME_THRESHOLD = 618;
+
     private static int timeConsumption = 0;
 
     private static int memoryConsumption = 0;
@@ -66,12 +68,23 @@ public class Sandbox {
 
         public void run() {
             closeLog();
-            if (setLimits(timeLimit, outputLimit, 6, uid, gid) < 0) {
+
+            // See here's the problem...
+            // it seems that we set resource for the jvm to tight that won't let JMX work
+            // cause we can't see the cpu time...
+            //
+            // a suggestion on this: just remove this line or increase the fd_count restriction
+            // because if it's not big enough, user might hold the fds and we cannot even
+            // get the cpu time for this thread.
+            // 
+            // - Mike
+            if (setLimits(timeLimit, outputLimit, 31, uid, gid) < 0) {
                 halt(JudgeReply.JUDGE_INTERNAL_ERROR);
             }
+            
             mainMethod.setAccessible(true);
-            System.setSecurityManager(sandboxSecurityManager);
             SandboxSecurityManager.targetThread = this;
+            System.setSecurityManager(sandboxSecurityManager);
             try {
                 mainMethod.invoke(null, targetArguments);
                 System.out.close();
@@ -191,8 +204,9 @@ public class Sandbox {
                 logError("Invalid thread state " + state);
                 halt(JudgeReply.RUNTIME_ERROR);
             }
+            
             try {
-                targetThread.join(1000);
+                targetThread.join(UPDATE_TIME_THRESHOLD);
             } catch (InterruptedException e) {
                 Runtime.getRuntime().halt(0);
                 break;

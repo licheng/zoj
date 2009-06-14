@@ -48,7 +48,7 @@ public class SandboxSecurityManager extends SecurityManager {
                 }
             } else if (perm instanceof FilePermission) {
                 String name = perm.getName();
-                if (name.length() > 1 && name.charAt(0) != '.' && name.charAt(1) != '/') {
+                if (name.length() > 1 && name.charAt(0) != '.' && name.charAt(0) != '/') {
                     return;
                 }
             }

@@ -54,6 +54,10 @@ class SandboxClassLoader extends ClassLoader {
 
     private boolean isAllowedClassName(String name) {
         if (name.startsWith("java.lang.")) {
+            // disable loading the thread class
+            // - Mike
+            if(name.equals("java.lang.Thread"))
+               return false;
             if (name.indexOf('.', 10) >= 0 || name.endsWith(".ClassNotFoundException")) {
                 return false;
             }

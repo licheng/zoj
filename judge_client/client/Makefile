@@ -38,7 +38,7 @@ JavaSandbox.jar: Sandbox.java SandboxClassLoader.java SandboxSecurityManager.jav
 	javah -classpath $$DIR -jni -force Sandbox && \
 	CWD=`pwd` && \
 	cd $$DIR && \
-	jar cfe $$CWD/JavaSandbox.jar Sandbox * && \
+	jar cvfe $$CWD/JavaSandbox.jar Sandbox * && \
 	rm -rf $$DIR
 
 CustomJavaCompiler.class: CustomJavaCompiler.java
