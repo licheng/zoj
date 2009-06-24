@@ -101,7 +101,7 @@ bool AllowedToOpen(const string& path, int flags) {
         return false;
     }
     if (path[0] == '/' || path[0] == '.') {
-        if (!(StringStartsWith(path, "/proc/") || StringEndsWith(path, ".so") || StringEndsWith(path, ".a"))) {
+        if (!(StringStartsWith(path, "/proc/") || StringEndsWith(path, ".so") || StringEndsWith(path, ".a") || path == "/dev/urandom")) {
             LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
             return false;
         }

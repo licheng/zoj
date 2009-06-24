@@ -39,7 +39,8 @@ ArgumentInfo::ArgumentInfo(
 }
 
 void ArgumentInfo::Print() {
-    cout<<string(8, ' ')<<"--"<<name_<<string(14 - name_.size(), ' ')
+    cout<<string(8, ' ')<<"--"<<name_
+        <<string(max(int(14 - name_.length()), 1), ' ')
         <<description_<<endl<<string(24, ' ')<<"type: "<<type_;
     if (optional_) {
         cout<<endl<<string(24, ' ')<<"default value: "<<default_value_;
