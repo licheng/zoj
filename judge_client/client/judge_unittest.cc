@@ -96,6 +96,7 @@ class ExecJudgeCommandTest: public TestFixture {
 
 TEST_F(ExecJudgeCommandTest, ReadCommandFailure) {
     ASSERT_EQUAL(-1, Run());
+
     ASSERT_EQUAL(0, Readn(fd_[0], buf_, 1));
 }
 
@@ -727,7 +728,6 @@ class ExecDataCommandTest: public TestFixture {
         temp_fd_ = 0;
         if (system(("rm -rf " + root_).c_str())) {
         }
-        cout << "tearing down" << endl << endl;
     }
 
     void SendCommand() {
