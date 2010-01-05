@@ -22,6 +22,7 @@
 
 #include "zunit.h"
 
+#include <cstdio>
 #include <iostream>
 #include <stdlib.h>
 

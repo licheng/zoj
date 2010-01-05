@@ -17,6 +17,7 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdio>
 #include <stdlib.h>
 #include <string>
 

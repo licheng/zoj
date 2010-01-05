@@ -18,6 +18,7 @@
  */
 
 #include <algorithm>
+#include <cstdio>
 #include <string.h>
 
 #include <dirent.h>

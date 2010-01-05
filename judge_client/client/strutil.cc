@@ -19,6 +19,7 @@
 
 #include "strutil.h"
 
+#include <cstdio>
 #include <stdarg.h>
 
 void SplitString(const string& str, char separator, vector<string>* output) {
