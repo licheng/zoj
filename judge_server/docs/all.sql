@@ -907,6 +907,8 @@ INSERT INTO language (language_id, name, description, options, compiler, create_
   VALUES(2, 'C++', 'C++', 'cc', 'g++ x.x.x', 1, NOW(), 1, NOW());
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
   VALUES(3, 'FPC', 'Free Pascal', 'pas', 'Free Pascal', 1, NOW(), 1, NOW());
+INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
+  VALUES(4, 'Java', 'Java', 'java', 'java version 1.6.0_06', 1, NOW(), 1, NOW());
 
 
 DELETE FROM forum;
