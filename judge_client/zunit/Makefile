@@ -1,5 +1,5 @@
 CC=$(CXX)
-CXXFLAGS=-Wall -Werror -Wno-sign-compare -ansi -O3 -MD
+CXXFLAGS=-Wall -Werror -Wno-sign-compare -ansi -O3 -MD -fPIC
 
 .PHONY: clean
 

@@ -1,5 +1,5 @@
 CC=$(CXX)
-CXXFLAGS=-I ../zunit -Wall -Werror -Wno-sign-compare -ansi -O3 -MD
+CXXFLAGS=-I ../zunit -Wall -Werror -Wno-sign-compare -ansi -O3 -MD -fPIC
 ALL_SOURCES:=$(filter-out Sandbox.cc, $(wildcard *.cc))
 UNITTEST_SOURCES:=$(wildcard *_unittest.cc)
 SOURCES=$(filter-out $(UNITTEST_SOURCES),$(ALL_SOURCES))
