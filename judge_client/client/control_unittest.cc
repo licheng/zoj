@@ -114,7 +114,7 @@ class ControlMainTest: public TestFixture {
             size_t len = sizeof(address);
             int sock = -1;
             for (int i = 0; i < 30; ++i) {
-                sock = accept(server_sock_, (struct sockaddr*)&address, &len);
+                sock = accept(server_sock_, (struct sockaddr*)&address, (socklen_t*)&len);
                 if (sock >= 0) {
                     break;
                 }

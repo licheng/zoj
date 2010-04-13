@@ -29,7 +29,6 @@
 #include <unistd.h>
 
 #include "common_io.h"
-#include "disabled_syscall.h"
 #include "logging.h"
 #include "protocol.h"
 #include "tracer.h"

@@ -58,7 +58,7 @@ class Tracer {
     int status_;
     bool first_execve_;
     bool before_syscall_;
-    int requested_brk_;
+    unsigned long requested_brk_;
     char path_[FILENAME_MAX + 1];
 };
 

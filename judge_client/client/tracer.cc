@@ -36,18 +36,19 @@ using namespace std;
 #include "protocol.h"
 #include "strutil.h"
 
-#if __WORDSIZE == 64
-#define ORIG_EAX orig_rax
-#define EAX rax
-#define EBX rbx
-#define ECX rcx
+#ifdef __i386
+#define REG_SYSCALL orig_eax
+#define REG_RET eax
+#define REG_ARG0 ebx
+#define REG_ARG1 ecx
 #else
-#define ORIG_EAX orig_eax
-#define EAX eax
-#define EBX ebx
-#define ECX ecx
+#ifdef __x86_64
+#define REG_SYSCALL orig_rax
+#define REG_RET rax
+#define REG_ARG0 rdi
+#define REG_ARG1 rsi
 #endif
-
+#endif
 namespace {
 
 void sigalrm_handler(int) {
@@ -62,15 +63,15 @@ int IgnoreSIGALRM() {
     return 0;
 }
 
-int ReadStringFromTracedProcess(pid_t pid, int address, char* buffer, int max_length) {
-    for (int i = 0; i < max_length; i += sizeof(int)) {
-        int data = ptrace(PTRACE_PEEKDATA, pid, address + i, 0);
+int ReadStringFromTracedProcess(pid_t pid, unsigned long address, char* buffer, int max_length) {
+    for (int i = 0; i < max_length; i += sizeof(long)) {
+        long data = ptrace(PTRACE_PEEKDATA, pid, address + i, 0);
         if (data == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to read address "<<address + i;
             return -1;
         }
         char* p = (char*) &data;
-        for (int j = 0; j < sizeof(int); j++, p++) {
+        for (int j = 0; j < sizeof(long); j++, p++) {
             if (*p && i + j < max_length) {
                 if (isprint(*p)) {
                     buffer[i + j] = *p;
@@ -126,7 +127,7 @@ void Tracer::Trace() {
         }
         struct user_regs_struct regs;
         ptrace(PTRACE_GETREGS, pid_, 0, &regs);
-        switch(regs.ORIG_EAX) {
+        switch(regs.REG_SYSCALL) {
           case SYS_exit:
           case SYS_exit_group:
               DLOG<<"SYS_exit";
@@ -142,11 +143,11 @@ void Tracer::Trace() {
             break;
           case SYS_brk:
             if (before_syscall_) {
-                requested_brk_ = regs.EBX;
+                requested_brk_ = regs.REG_ARG0;
                 before_syscall_ = false;
             } else {
-                if (regs.EAX < requested_brk_) {
-                    DLOG<<"brk request "<<requested_brk_<<" return "<<regs.EAX;
+                if (regs.REG_RET < requested_brk_) {
+                    DLOG<<"brk request "<<requested_brk_<<" return "<<regs.REG_RET;
                     ptrace(PTRACE_KILL, pid_, 0, 0);
                     memory_limit_exceeded_ = true;
                     continue;
@@ -156,11 +157,11 @@ void Tracer::Trace() {
             break;
           case SYS_open:
             if (before_syscall_) {
-                if (ReadStringFromTracedProcess(pid_, regs.EBX, path_, sizeof(path_)) < 0) {
+                if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
                     break;
                 }
-                DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.ECX;
-                if (!AllowedToOpen(path_, regs.ECX)) {
+                DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
+                if (!AllowedToOpen(path_, regs.REG_ARG1)) {
                     break;
                 }
                 before_syscall_ = false;
@@ -170,9 +171,9 @@ void Tracer::Trace() {
             ptrace(PTRACE_SYSCALL, pid_, 0, 0);
             continue;
         }
-        if (regs.ORIG_EAX < sizeof(disabled_syscall) &&
-            disabled_syscall[regs.ORIG_EAX]) {
-            LOG(ERROR)<<"Restricted syscall "<<regs.ORIG_EAX;
+        if (regs.REG_SYSCALL < sizeof(disabled_syscall) / sizeof(disabled_syscall[0]) &&
+            disabled_syscall[regs.REG_SYSCALL]) {
+            LOG(ERROR)<<"Restricted syscall "<<syscall_name[regs.REG_SYSCALL];
             ptrace(PTRACE_KILL, pid_, 0, 0);
             restricted_syscall_ = true;
         } else {

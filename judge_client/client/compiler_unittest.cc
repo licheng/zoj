@@ -84,7 +84,7 @@ TEST_F(CompilerTest, Success) {
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
-    ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
+    ASSERT_EQUAL(0, (int) read(fd_[0], buf_, 1));
 }
 
 TEST_F(CompilerTest, Failure) {
@@ -150,7 +150,7 @@ TEST_F(CCompilerTest, LibMath) {
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
-    ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
+    ASSERT_EQUAL(0, (int) read(fd_[0], buf_, 1));
 }
 
 class JavaCompilerTest : public CompilerTest {
@@ -171,7 +171,7 @@ TEST_F(JavaCompilerTest, Success) {
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd_[0], &t));
     ASSERT_EQUAL(COMPILING, (int)t);
-    ASSERT_EQUAL(0, read(fd_[0], buf_, 1));
+    ASSERT_EQUAL(0, (int) read(fd_[0], buf_, 1));
 }
 
 TEST_F(JavaCompilerTest, Failure) {

@@ -132,8 +132,8 @@ void JavaRunner::InternalRun() {
         close(server_sock);
         Log::Close();
         execlp("java",
-               StringPrintf("-Xms%dk", memory_limit_ / 2 + 190).c_str(),
-               StringPrintf("-Xmx%dk", memory_limit_ + 190).c_str(),
+               StringPrintf("-Xms%dk", memory_limit_ / 2 + 8192).c_str(),
+               StringPrintf("-Xmx%dk", memory_limit_ + 8192).c_str(),
                StringPrintf("-Djava.library.path=%s", ARG_root.c_str()).c_str(),
                "-Djava.class.path=",
                "-jar", StringPrintf("%s/JavaSandbox.jar", ARG_root.c_str()).c_str(),

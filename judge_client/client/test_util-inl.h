@@ -40,7 +40,7 @@ static inline int ReadLastUint32(int fd) {
     uint32_t t;
     ASSERT_EQUAL(0, ReadUint32(fd, &t));
     char ch;
-    ASSERT_EQUAL(0, read(fd, &ch, 1));
+    ASSERT_EQUAL(0, (int)read(fd, &ch, 1));
     return (int)t;
 }
 

@@ -41,7 +41,7 @@ class TextFileReaderTest : public TestFixture {
         if (make_file_) {
             int fd = open(filename_.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
             ASSERT(fd >= 0);
-            ASSERT_EQUAL((int)content.size(), write(fd, content.c_str(), content.size()));
+            ASSERT_EQUAL((int)content.size(), (int)write(fd, content.c_str(), content.size()));
             close(fd);
         }
         file_ = new TextFileReader(filename_);

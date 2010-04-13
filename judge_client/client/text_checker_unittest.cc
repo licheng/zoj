@@ -54,7 +54,7 @@ class TextCheckerTest : public TestFixture, public TextChecker {
         for (int i = 0; i < lines.size(); ++i) {
             content += lines[i];
         }
-        ASSERT_EQUAL((int)content.size(), write(fd, content.c_str(), content.size()));
+        ASSERT_EQUAL((int)content.size(), (int) write(fd, content.c_str(), content.size()));
         close(fd);
     }
 

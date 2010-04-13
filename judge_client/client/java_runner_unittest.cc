@@ -39,7 +39,8 @@ class JavaRunnerTest : public TestFixture {
         fd_[0] = fd_[1] = -1;
         ASSERT_EQUAL(0, socketpair(AF_UNIX, SOCK_STREAM, 0, fd_));
         time_limit_ = 10;
-        memory_limit_ = output_limit_ = 1000;
+        memory_limit_ = 8192;
+        output_limit_ = 1000;
         ARG_root = root_;
     }
 
