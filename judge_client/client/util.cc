@@ -180,18 +180,27 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
             raise(SIGKILL);
         }
     }
-    if (process_info.gid) {
-        if (setgid(process_info.gid) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set gid to "<<process_info.gid;
-            raise(SIGKILL);
+    
+    if (process_info.gid || process_info.uid) {
+        uid_t curr_uid = getuid();
+        setuid(0);
+
+        if (process_info.gid) {
+            if (setgid(process_info.gid) == -1) {
+                LOG(SYSCALL_ERROR)<<"Fail to set gid to "<<process_info.gid;
+                raise(SIGKILL);
+            }
+        }
+        if (process_info.uid) {
+            if (setuid(process_info.uid) == -1) {
+                LOG(SYSCALL_ERROR)<<"Fail to set uid to "<<process_info.uid;
+                raise(SIGKILL);
+            }
+        } else {
+            setuid(curr_uid);
         }
     }
-    if (process_info.uid) {
-        if (setuid(process_info.uid) == -1) {
-            LOG(SYSCALL_ERROR)<<"Fail to set uid to "<<process_info.uid;
-            raise(SIGKILL);
-        }
-    }
+
     if (process_info.proc_limit) {
         if (SetLimit(RLIMIT_NPROC, process_info.proc_limit) == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to set process limit to "<<process_info.proc_limit;

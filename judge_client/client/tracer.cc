@@ -20,6 +20,7 @@
 #include "tracer.h"
 
 #include <string>
+#include <cstring>
 
 using namespace std;
 
@@ -41,12 +42,14 @@ using namespace std;
 #define REG_RET eax
 #define REG_ARG0 ebx
 #define REG_ARG1 ecx
+#define REG_ARG4 edi
 #else
 #ifdef __x86_64
 #define REG_SYSCALL orig_rax
 #define REG_RET rax
 #define REG_ARG0 rdi
 #define REG_ARG1 rsi
+#define REG_ARG4 r8
 #endif
 #endif
 namespace {
@@ -89,24 +92,45 @@ int ReadStringFromTracedProcess(pid_t pid, unsigned long address, char* buffer, 
     return 0;
 }
 
-bool AllowedToOpen(const string& path, int flags) {
+bool AllowedFileAccess(const char* path) {
+    static char path_buffer[FILENAME_MAX + 1];
+    static const char zoj_root[] = "/zoj";
+    static const char zoj_working_root[] = "/zoj/working";
+    if (path[0] == '\0')
+        return false;
+    realpath(path, path_buffer);
+    if (strncmp(path_buffer, zoj_root, sizeof(zoj_root) - 1) == 0 &&
+        strncmp(path_buffer, zoj_working_root, sizeof(zoj_working_root) - 1) != 0) {
+        LOG(INFO)<<"Accessing "<<path_buffer<<" is not allowed";
+        return false;
+    }
+    return true;
+}
+
+bool AllowedToOpen(const string& path, long unsigned int& flags) {
     if ((flags & O_WRONLY) == O_WRONLY ||
         (flags & O_RDWR) == O_RDWR ||
         (flags & O_CREAT) == O_CREAT ||
         (flags & O_APPEND) == O_APPEND) {
         LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
-        return false;
+        flags &= ~O_WRONLY;
+        flags &= ~O_RDWR;
+        flags &= ~O_CREAT;
+        flags &= ~O_APPEND;
+        return true;
     }
     if (path.empty()) {
         LOG(INFO)<<"Can not open an empty file";
         return false;
     }
+    /*
     if (path[0] == '/' || path[0] == '.') {
         if (!(StringStartsWith(path, "/proc/") || StringEndsWith(path, ".so") || StringEndsWith(path, ".a") || path == "/dev/urandom")) {
             LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
             return false;
         }
     }
+    */
     return true;
 }
 
@@ -127,6 +151,7 @@ void Tracer::Trace() {
         }
         struct user_regs_struct regs;
         ptrace(PTRACE_GETREGS, pid_, 0, &regs);
+        //LOG(INFO)<<"Got syscall "<<syscall_name[regs.REG_SYSCALL];
         switch(regs.REG_SYSCALL) {
           case SYS_exit:
           case SYS_exit_group:
@@ -155,15 +180,50 @@ void Tracer::Trace() {
                 before_syscall_ = true;
             }
             break;
+          case SYS_unlink:
+            if (before_syscall_) {
+                if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
+                    break;
+                }
+                if (!AllowedFileAccess(path_)) {
+                    break;
+                }
+                //LOG(ERROR)<<"SYS_unlink "<<path_;
+                before_syscall_ = false;
+            } else {
+                before_syscall_ = true;
+            }
+            ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+            continue;
+          case SYS_select:
+            if (before_syscall_) {
+                size_t i;
+                if (regs.REG_ARG4 == 0 || ReadStringFromTracedProcess(pid_, regs.REG_ARG4, path_, sizeof(struct timeval) + 1) < 0) {
+                    break;
+                }
+                for (i = 0; i < sizeof(struct timeval); i++) {
+                    if (path_[i] != 0)
+                        break;
+                }
+                before_syscall_ = false;
+            } else {
+                before_syscall_ = true;
+            }
+            ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+            continue;
           case SYS_open:
             if (before_syscall_) {
                 if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
                     break;
                 }
                 DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
-                if (!AllowedToOpen(path_, regs.REG_ARG1)) {
+                //LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
+                //if (!AllowedToOpen(path_, regs.REG_ARG1)) {
+                if (!AllowedFileAccess(path_)) {
                     break;
                 }
+                regs.REG_ARG1 &= ~( O_WRONLY | O_RDWR | O_CREAT | O_APPEND);
+                ptrace(PTRACE_SETREGS, pid_, 0, &regs);
                 before_syscall_ = false;
             } else {
                 before_syscall_ = true;

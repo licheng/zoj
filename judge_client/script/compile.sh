@@ -11,10 +11,10 @@ if ! [[ -f $main ]]; then
 fi
 case $1 in
     gcc)
-        gcc -o $bin -ansi -fno-asm -O2 -Wall --static -s -DONLINE_JUDGE $src $main -lm >/dev/null
+        gcc -o $bin -ansi -fno-asm -O2 -Wall -static -DONLINE_JUDGE $src $main -lm >/dev/null
         ;;
     g++)
-        g++ -o $bin -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $src $main >/dev/null
+        g++ -o $bin -ansi -fno-asm -O2 -Wall -lm -static -DONLINE_JUDGE $src $main >/dev/null
         ;;
     fpc)
         if ! [[ $main = "" ]]; then
@@ -45,6 +45,27 @@ case $1 in
             exit 1
         fi
         exit 0
+        ;;
+    python)
+        exit 0
+        ;;
+    perl)
+        exit 0
+        ;;
+    scheme)
+        exit 0
+        ;;
+    php)
+        exit 0
+        ;;
+    brainfuck)
+        bf2c $src > "$src.c"
+        gcc -o $bin -ansi -fno-asm -O2 -Wall -static -DONLINE_JUDGE $src.c >/dev/null
+        rm -f "$src.c"
+        if [[ -f $bin ]]; then
+            exit 0
+        fi
+        exit 1
         ;;
     *) exit -1;;
 esac

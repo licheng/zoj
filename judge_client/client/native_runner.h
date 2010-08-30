@@ -22,18 +22,22 @@
 
 #include "runner.h"
 
+static const char* g_commands[] =  {"p", "p", NULL};
 class TraceCallback;
 
 class NativeRunner : public Runner {
   public:
     NativeRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid)
         : Runner(sock, time_limit, memory_limit, output_limit, uid, gid) {
+            commands = g_commands;
     }
 
     void UpdateStatus();
+    void SetCommand(const char** commands) { this->commands = commands; };
 
   private:
     virtual void InternalRun();
+    const char** commands;
 
   friend class NativeRunnerTest;    
 };

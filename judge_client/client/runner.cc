@@ -62,6 +62,9 @@ int Runner::Run() {
       case SEGMENTATION_FAULT:
         LOG(INFO)<<"Segmentation fault";
         break;
+      case NON_ZERO_EXIT_CODE:
+        LOG(INFO)<<"Non-zero exit code";
+        break;
     }
     if (result_ == 0) {
         return 0;

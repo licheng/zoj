@@ -23,6 +23,7 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/stat.h>
 
 #include "args.h"
 #include "common_io.h"

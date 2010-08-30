@@ -21,6 +21,7 @@
 #include "unittest.h"
 #include "java_runner.h"
 
+#include <sys/stat.h>
 #include "protocol.h"
 #include "strutil.h"
 #include "test_util-inl.h"

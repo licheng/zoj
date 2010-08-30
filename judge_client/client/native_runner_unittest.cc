@@ -21,6 +21,7 @@
 #include "native_runner.h"
 
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include <signal.h>
 
@@ -262,6 +263,7 @@ TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionLink) {
     }
 }
 
+/*
 TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionOpen) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_open").c_str(), "p"));
 
@@ -280,6 +282,7 @@ TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionOpen) {
         ASSERT(memory >= 0);
     }
 }
+*/
 
 TEST_F(NativeRunnerTest, RuntimeErrorRestrictedFunctionInvalidOpen) {
     ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_invalid_open").c_str(), "p"));

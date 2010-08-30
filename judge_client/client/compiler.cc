@@ -49,7 +49,13 @@ struct CompilerInfo {
     {1, "gcc", "p.c"},
     {2, "g++", "p.cc"},
     {3, "fpc", "p.pas"},
-    {4, "javac", "Main.java"}
+    {4, "javac", "Main.java"},
+    {5, "python", "p.py"},
+    {6, "perl", "p.pl"},
+    {7, "scheme", "p.scm"},
+    {8, "php", "p.php"},
+    {9, "brainfuck", "p.bf"},
+    {10, "whitespace", "p.ws"}
 };
 
 }

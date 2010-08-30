@@ -80,7 +80,7 @@ class NativeTracer : public Tracer {
 }
 
 void NativeRunner::InternalRun() {
-    const char* commands[] = {"p", "p", NULL};
+    //const char* commands[] = {"p", "p", NULL};
     StartupInfo info;
     info.stdin_filename = "input";
     info.stdout_filename = "p.out";
@@ -92,7 +92,7 @@ void NativeRunner::InternalRun() {
     info.output_limit = output_limit_;
     info.stack_limit = 8192; // Always set stack limit to 8M
     info.proc_limit = 1;
-    info.file_limit = 5;
+    info.file_limit = 20; // some script languages may need to open more files
     info.trace = 1;
     pid_ = CreateProcess(commands, info);
     if (pid_ == -1) {
@@ -120,7 +120,12 @@ void NativeRunner::InternalRun() {
         } else {
             int status = tracer.GetStatus();
             if (WIFEXITED(status)) {
-                result_ = 0;
+                int code = WEXITSTATUS(status);
+                if (code == 0) {
+                    result_ = 0;
+                } else {
+                    result_ = NON_ZERO_EXIT_CODE;
+                }
             } else {
                 switch (WTERMSIG(status)) {
                     case SIGXCPU:

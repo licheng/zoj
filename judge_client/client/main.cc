@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <sys/un.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "args.h"
@@ -200,6 +201,10 @@ int ControlMain(const string& queue_address, int queueu_port, int port);
 int JudgeMain(int sock, int uid, int gid);
 
 int main(int argc, const char* argv[]) {
+    //LOG(INFO) << "real uid " << getuid() << " euid " << geteuid();
+    //return 1;
+    seteuid(getuid());
+
     if (ParseArguments(argc, argv) < 0) {
         return 1;
     }

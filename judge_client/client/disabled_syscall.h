@@ -107,6 +107,12 @@ int init() {
 #ifdef __NR_signal
     disabled_syscall[__NR_signal] = 1;
 #endif
+#ifdef __NR_kill
+    disabled_syscall[__NR_kill] = 1;
+#endif
+#ifdef __NR_rt_sigqueueinfo
+    disabled_syscall[__NR_rt_sigqueueinfo] = 1;
+#endif
 #ifdef __NR_umount2
     disabled_syscall[__NR_umount2] = 1;
 #endif
@@ -189,7 +195,7 @@ int init() {
     disabled_syscall[__NR_afs_syscall] = 1;
 #endif
 #ifdef __NR_getdents
-    disabled_syscall[__NR_getdents] = 1;
+    disabled_syscall[__NR_getdents] = 0;
 #endif
 #ifdef __NR_newselect
     disabled_syscall[__NR_newselect] = 1;
@@ -279,7 +285,7 @@ int init() {
     disabled_syscall[__NR_sendfile64] = 1;
 #endif
 #ifdef __NR_futex
-    disabled_syscall[__NR_futex] = 1;
+    disabled_syscall[__NR_futex] = 0;
 #endif
 #ifdef __NR_sched_setaffinity
     disabled_syscall[__NR_sched_setaffinity] = 1;
@@ -324,7 +330,7 @@ int init() {
     disabled_syscall[__NR_remap_file_pages] = 1;
 #endif
 #ifdef __NR_set_tid_address
-    disabled_syscall[__NR_set_tid_address] = 1;
+    disabled_syscall[__NR_set_tid_address] = 0;
 #endif
 #ifdef __NR_timer_create
     disabled_syscall[__NR_timer_create] = 1;

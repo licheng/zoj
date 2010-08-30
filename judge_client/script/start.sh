@@ -11,6 +11,7 @@ function CreateDir() {
         mkdir "$1"
     fi
     chmod $2 "$1"
+    chown zoj:zoj "$1"
 }
 
 if [ "$1" == "" ]; then
@@ -45,6 +46,26 @@ if [[ "`which java`" != "" && "`which javac`" != "" ]]; then
     supported_source_file_types=$supported_source_file_types,javac
 fi
 
+if [ "`which python`" != "" ]; then
+    supported_source_file_types=$supported_source_file_types,python
+fi
+
+if [ "`which perl`" != "" ]; then
+    supported_source_file_types=$supported_source_file_types,perl
+fi
+
+if [ "`which guile`" != "" ]; then
+    supported_source_file_types=$supported_source_file_types,scheme
+fi
+
+if [ "`which php`" != "" ]; then
+    supported_source_file_types=$supported_source_file_types,php
+fi
+
+if [[ "`which bf2c`" != "" && "`which gcc`" != "" ]]; then
+    supported_source_file_types=$supported_source_file_types,brainfuck
+fi
+
 # Prepare /prob
 CreateDir "$root/prob" 750
 CreateDir "$root/prob/0" 750
@@ -64,7 +85,7 @@ rm -rf "$root"/working/*
 # Prepare /log
 CreateDir "$root/log" 750
 
-ids=`cat /etc/passwd | grep zoj | awk -F ':' '{print "--uid=" $3, "--gid=" $4}'`
-cmd="$root/judged --compiler='$supported_source_file_types' --daemonize --root='$root' --queue_address='$address' --queue_port=$port $ids"
+ids="--uid=65534 --gid=65534"
+cmd="sudo -u zoj $root/judged --compiler='$supported_source_file_types' --daemonize=false --root='$root' --queue_address='$address' --queue_port=$port $ids"
 echo $cmd
 eval $cmd

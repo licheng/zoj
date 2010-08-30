@@ -23,6 +23,7 @@
 
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include "text_checker.h"
 #include "special_checker.h"
@@ -156,6 +157,11 @@ int ExecCompileCommand(int sock, int* compiler_id) {
     return 0;
 }
 
+static const char* g_command_python[] = { "/usr/bin/python", "python", "p.py", NULL };
+static const char* g_command_perl[] = { "/usr/bin/perl", "perl", "p.pl", NULL };
+static const char* g_command_guile[] = { "/usr/bin/guile", "guile", "p.scm", NULL };
+static const char* g_command_php[] = { "/usr/bin/php", "php", "p.php", NULL };
+
 int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, int uid, int gid) {
     uint32_t testcase;
     uint32_t time_limit;
@@ -227,6 +233,15 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         result = runner.Run();
     } else {
         NativeRunner runner(sock, time_limit, memory_limit, output_limit, uid, gid);
+        if (compiler == 5) {
+            runner.SetCommand(g_command_python);
+        } else if (compiler == 6) {
+            runner.SetCommand(g_command_perl);
+        } else if (compiler == 7) {
+            runner.SetCommand(g_command_guile);
+        } else if (compiler == 8) {
+            runner.SetCommand(g_command_php);
+        }
         result = runner.Run();
     }
     if (result) {

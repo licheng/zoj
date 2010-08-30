@@ -21,6 +21,7 @@
 #include "text_checker.h"
 
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #include "protocol.h"
 
