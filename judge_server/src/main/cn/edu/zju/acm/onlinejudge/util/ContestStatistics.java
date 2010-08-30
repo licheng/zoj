@@ -27,7 +27,8 @@ public class ContestStatistics {
 
     public static final JudgeReply[] JUDGE_REPLIES =
             new JudgeReply[] {JudgeReply.ACCEPTED, JudgeReply.WRONG_ANSWER, JudgeReply.PRESENTATION_ERROR,
-                              JudgeReply.RUNTIME_ERROR, JudgeReply.FLOATING_POINT_ERROR, JudgeReply.SEGMENTATION_FAULT,
+                              JudgeReply.RUNTIME_ERROR, JudgeReply.FLOATING_POINT_ERROR,
+                              JudgeReply.SEGMENTATION_FAULT, JudgeReply.NON_ZERO_EXIT_CODE,
                               JudgeReply.TIME_LIMIT_EXCEEDED, JudgeReply.MEMORY_LIMIT_EXCEEDED,
                               JudgeReply.OUTPUT_LIMIT_EXCEEDED, JudgeReply.COMPILATION_ERROR};
 

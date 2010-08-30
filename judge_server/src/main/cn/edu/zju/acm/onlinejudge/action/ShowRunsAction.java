@@ -62,6 +62,7 @@ public class ShowRunsAction extends BaseAction {
         this.judgeReplies.add(JudgeReply.TIME_LIMIT_EXCEEDED);
         this.judgeReplies.add(JudgeReply.MEMORY_LIMIT_EXCEEDED);
         this.judgeReplies.add(JudgeReply.SEGMENTATION_FAULT);
+        this.judgeReplies.add(JudgeReply.NON_ZERO_EXIT_CODE);
         this.judgeReplies.add(JudgeReply.FLOATING_POINT_ERROR);
         this.judgeReplies.add(JudgeReply.COMPILATION_ERROR);
         this.judgeReplies.add(JudgeReply.OUTPUT_LIMIT_EXCEEDED);

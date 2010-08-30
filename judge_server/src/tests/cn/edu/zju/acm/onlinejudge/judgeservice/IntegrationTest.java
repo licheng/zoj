@@ -54,6 +54,9 @@ public class IntegrationTest {
                     JudgeReply.OUTPUT_LIMIT_EXCEEDED.getId(), "cc"),
             new TestCase("#include <string.h>\nint a[1];int main(){memset(a, 0, 10000000);return 0;}",
                     JudgeReply.SEGMENTATION_FAULT.getId(), "cc"),
+            new TestCase("#include <string.h>\nint a[1];int main(){return 12;}",
+                    JudgeReply.NON_ZERO_EXIT_CODE.getId(), "cc"),
+            new TestCase("int main(){int a=0,b=1/a;return b;}", JudgeReply.FLOATING_POINT_ERROR.getId(), "cc"),
             new TestCase("int main(){int a=0,b=1/a;return b;}", JudgeReply.FLOATING_POINT_ERROR.getId(), "cc"),
             new TestCase("#include <unistd.h>\nint main(){fork();return 0;}", JudgeReply.RUNTIME_ERROR.getId(), "cc") };
 

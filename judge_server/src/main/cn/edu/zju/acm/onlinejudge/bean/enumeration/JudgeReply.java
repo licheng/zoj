@@ -72,6 +72,9 @@ public class JudgeReply {
     public final static JudgeReply SEGMENTATION_FAULT =
             new JudgeReply(16, "Segmentation Fault", "Segmentation Fault", null, true);
 
+    public final static JudgeReply NON_ZERO_EXIT_CODE =
+            new JudgeReply(21, "Non-zero Exit Code", "Non-zero Exit Code", null, true);
+
     public final static JudgeReply JUDGING = new JudgeReply(19, "Judging", "Judging", null, false);
 
     public final static JudgeReply SUBMISSION_LIMIT_EXCEEDED =

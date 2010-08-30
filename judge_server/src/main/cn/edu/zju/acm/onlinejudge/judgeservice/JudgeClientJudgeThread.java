@@ -275,6 +275,7 @@ public class JudgeClientJudgeThread extends Thread {
             submission.getJudgeReply() != JudgeReply.FLOATING_POINT_ERROR &&
             submission.getJudgeReply() != JudgeReply.SEGMENTATION_FAULT &&
             submission.getJudgeReply() != JudgeReply.RUNTIME_ERROR &&
+            submission.getJudgeReply() != JudgeReply.NON_ZERO_EXIT_CODE &&
             submission.getJudgeReply() != JudgeReply.ACCEPTED &&
             submission.getJudgeReply() != JudgeReply.WRONG_ANSWER &&
             submission.getJudgeReply() != JudgeReply.PRESENTATION_ERROR) {

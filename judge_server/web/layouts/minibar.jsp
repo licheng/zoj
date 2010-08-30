@@ -8,7 +8,7 @@
 <%@ page import="cn.edu.zju.acm.onlinejudge.util.ConfigManager" %>
 
                 <div id="menus">
-                <a <logic:equal name="region" value="Home">class="selected"</logic:equal> href="<%=request.getContextPath()%>">Home</a>
+                <a <logic:equal name="region" value="Home">class="selected"</logic:equal> href="<%=request.getContextPath()%>/">Home</a>
                 <% if (Features.contest()) {%>
                 | <a <logic:equal name="region" value="Contests">class="selected"</logic:equal> href="<%=request.getContextPath()%>/showContests.do">Contests</a>
                 <% } %>
