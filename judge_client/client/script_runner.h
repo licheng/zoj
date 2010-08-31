@@ -31,9 +31,10 @@ class ScriptRunner : public NativeRunner {
         this->commands = commands;
     }
 
-  private:
+  protected:
     virtual void InternalRun();
     const char** commands;
+    virtual Tracer* CreateTracer(pid_t pid, Runner* runner);
 
   friend class ScriptRunnerTest;    
 };

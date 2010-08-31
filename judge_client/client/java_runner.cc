@@ -136,9 +136,12 @@ void JavaRunner::InternalRun() {
         // parent user-id's permissions, and after opening the file the java
         // process need to set uid/gid to drop privilleges, we may need to
         // gain root access for the java process
-        if (seteuid(0) || setuid(0) || setgid(0)) {
-            LOG(SYSCALL_ERROR)<<"Fail to set uid/gid";
-            exit(-1);
+        if ((uid_ != 0 && uid_ != geteuid()) || (gid_ != 0 && gid_ != getegid())) {
+            //LOG(INFO) << "real uid " << getuid() << " euid " << geteuid() << " egid " << getegid() << " rgid " << getgid() << " gid_ " << gid_ << " uid_ " << uid_;
+            if (seteuid(0) || setuid(0) || setgid(0)) {
+                LOG(SYSCALL_ERROR)<<"Fail to set uid/gid";
+                exit(-1);
+            }
         }
 
         //execlp("strace", "strace", "-o", "/tmp/gao.tmp", "-f", "java",

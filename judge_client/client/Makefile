@@ -60,7 +60,7 @@ special_checker_unittest: checker.o util.o tracer.o
 native_runner_unittest: runner.o util.o tracer.o
 java_runner_unittest: runner.o libsandbox.so JavaSandbox.jar tracer.o util.o net_util.o
 compiler_unittest: environment.o util.o CustomJavaCompiler.class
-judge_unittest: compiler.o runner.o checker.o java_runner.o native_runner.o text_checker.o special_checker.o environment.o util.o tracer.o text_file_reader.o libsandbox.so JavaSandbox.jar net_util.o
+judge_unittest: compiler.o runner.o checker.o java_runner.o native_runner.o script_runner.o text_checker.o special_checker.o environment.o util.o tracer.o text_file_reader.o libsandbox.so JavaSandbox.jar net_util.o
 control_unittest: compiler.o environment.o tracer.o util.o
 util_unittest:
 main_unittest: $(filter-out main.o main_stub.o,$(OBJS))

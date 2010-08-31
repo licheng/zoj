@@ -34,6 +34,33 @@
 #include "tracer.h"
 #include "util.h"
 
+namespace {
+
+class ScriptTracer : public Tracer {
+  public:
+    ScriptTracer(pid_t pid, ScriptRunner* runner) : Tracer(pid), runner_(runner) {
+    }
+
+  protected:
+    virtual void OnExit() {
+        runner_->UpdateStatus();
+    }
+
+    virtual bool HandleSyscall(struct user_regs_struct& regs) {
+        return Tracer::HandleSyscall(regs);
+    }
+
+  private:
+    ScriptRunner* runner_;
+};
+
+}
+
+Tracer* ScriptRunner::CreateTracer(pid_t pid, Runner* runner) {
+    ScriptRunner* r = dynamic_cast<ScriptRunner*>(runner);
+    return new ScriptTracer(pid, r);
+}
+
 void ScriptRunner::InternalRun() {
     RunProgram(commands);
 }

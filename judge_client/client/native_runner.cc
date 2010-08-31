@@ -84,6 +84,12 @@ void NativeRunner::InternalRun() {
     RunProgram(commands);
 }
 
+Tracer* NativeRunner::CreateTracer(pid_t pid, Runner* runner) {
+    NativeRunner* r = dynamic_cast<NativeRunner*>(runner);
+    return new NativeTracer(pid, r);
+}
+
+
 void NativeRunner::RunProgram(const char* commands[]) {
     StartupInfo info;
     info.stdin_filename = "input";
@@ -104,11 +110,11 @@ void NativeRunner::RunProgram(const char* commands[]) {
         result_ = INTERNAL_ERROR;
         return;
     }
-    NativeTracer tracer(pid_, this);
+    Tracer* tracer = this->CreateTracer(pid_, this);
     for (;;) {
         alarm(1);
-        tracer.Trace();
-        if (tracer.HasExited()) {
+        tracer->Trace();
+        if (tracer->HasExited()) {
             break;
         }
         UpdateStatus();
@@ -117,12 +123,12 @@ void NativeRunner::RunProgram(const char* commands[]) {
         }
     }
     if (result_ < 0) {
-        if (tracer.IsMemoryLimitExceeded()) {
+        if (tracer->IsMemoryLimitExceeded()) {
             result_ = MEMORY_LIMIT_EXCEEDED;
-        } else if (tracer.IsRestrictedSyscall()) {
+        } else if (tracer->IsRestrictedSyscall()) {
             result_ = RUNTIME_ERROR;
         } else {
-            int status = tracer.GetStatus();
+            int status = tracer->GetStatus();
             if (WIFEXITED(status)) {
                 int code = WEXITSTATUS(status);
                 if (code == 0) {
@@ -158,6 +164,7 @@ void NativeRunner::RunProgram(const char* commands[]) {
             }
         }
     }
+    delete tracer;
     UpdateStatus();
 }
 

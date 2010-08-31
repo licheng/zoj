@@ -27,7 +27,7 @@ class Tracer {
   public:
     Tracer(pid_t pid)
         : pid_(pid), exited_(false), memory_limit_exceeded_(false), restricted_syscall_(false),
-          status_(-1), first_execve_(true), before_syscall_(true) {
+          status_(-1), first_execve_(true), before_syscall_(false) {
     }
 
     bool HasExited() {
@@ -48,8 +48,9 @@ class Tracer {
 
     void Trace();
 
-  private:
+  protected:
     virtual void OnExit();
+    virtual bool HandleSyscall(struct user_regs_struct& regs);
 
     pid_t pid_;
     bool exited_;

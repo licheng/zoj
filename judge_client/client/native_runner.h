@@ -23,6 +23,7 @@
 #include "runner.h"
 
 class TraceCallback;
+class Tracer;
 
 class NativeRunner : public Runner {
   public:
@@ -32,10 +33,9 @@ class NativeRunner : public Runner {
 
     void UpdateStatus();
 
-  private:
-    virtual void InternalRun();
-
   protected:
+    virtual void InternalRun();
+    virtual Tracer* CreateTracer(pid_t pid, Runner* runner);
     void RunProgram(const char* commands[]);
 
   friend class NativeRunnerTest;    

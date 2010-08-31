@@ -107,36 +107,82 @@ bool AllowedFileAccess(const char* path) {
     return true;
 }
 
-bool AllowedToOpen(const string& path, long unsigned int& flags) {
-    if ((flags & O_WRONLY) == O_WRONLY ||
-        (flags & O_RDWR) == O_RDWR ||
-        (flags & O_CREAT) == O_CREAT ||
-        (flags & O_APPEND) == O_APPEND) {
-        LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
-        flags &= ~O_WRONLY;
-        flags &= ~O_RDWR;
-        flags &= ~O_CREAT;
-        flags &= ~O_APPEND;
-        return true;
-    }
-    if (path.empty()) {
-        LOG(INFO)<<"Can not open an empty file";
-        return false;
-    }
-    /*
-    if (path[0] == '/' || path[0] == '.') {
-        if (!(StringStartsWith(path, "/proc/") || StringEndsWith(path, ".so") || StringEndsWith(path, ".a") || path == "/dev/urandom")) {
-            LOG(INFO)<<"Opening "<<path<<" with flags 0x"<<hex<<flags<<" is not allowed";
-            return false;
-        }
-    }
-    */
-    return true;
-}
-
 }
 
 int __to_install_sigalrm_handler = IgnoreSIGALRM();
+
+/* return true to ignore further checking. */
+bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
+    switch(regs.REG_SYSCALL) {
+    case SYS_exit:
+    case SYS_exit_group:
+        DLOG<<"SYS_exit";
+        OnExit();
+        break;
+    case SYS_execve:
+        if (first_execve_) {
+            DLOG<<"SYS_execve";
+            first_execve_ = false;
+            ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+            return true;
+        }
+        break;
+    case SYS_brk:
+        if (before_syscall_) {
+            requested_brk_ = regs.REG_ARG0;
+        } else {
+            if (regs.REG_RET < requested_brk_) {
+                DLOG<<"brk request "<<requested_brk_<<" return "<<regs.REG_RET;
+                ptrace(PTRACE_KILL, pid_, 0, 0);
+                memory_limit_exceeded_ = true;
+                return true;
+            }
+        }
+        break;
+    case SYS_unlink:
+        if (before_syscall_) {
+            if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
+                break;
+            }
+            if (!AllowedFileAccess(path_)) {
+                break;
+            }
+            //LOG(ERROR)<<"SYS_unlink "<<path_;
+        }
+        ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+        return true;
+    case SYS_select:
+        if (before_syscall_) {
+            size_t i;
+            if (regs.REG_ARG4 == 0 || ReadStringFromTracedProcess(pid_, regs.REG_ARG4, path_, sizeof(struct timeval) + 1) < 0) {
+                break;
+            }
+            for (i = 0; i < sizeof(struct timeval); i++) {
+                if (path_[i] != 0)
+                    break;
+            }
+        }
+        ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+        return true;
+    case SYS_open:
+        if (before_syscall_) {
+            if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
+                break;
+            }
+            DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
+            //LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
+            //if (!AllowedToOpen(path_, regs.REG_ARG1)) {
+            if (!AllowedFileAccess(path_)) {
+                break;
+            }
+            regs.REG_ARG1 &= ~( O_WRONLY | O_RDWR | O_CREAT | O_APPEND);
+            ptrace(PTRACE_SETREGS, pid_, 0, &regs);
+        }
+        ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+        return true;
+    }
+    return false;
+}
 
 void Tracer::Trace() {
     while (waitpid(pid_, &status_, 0) > 0) {
@@ -149,88 +195,12 @@ void Tracer::Trace() {
             ptrace(PTRACE_SYSCALL, pid_, 0, sig);
             continue;
         }
+        before_syscall_ = !before_syscall_;
         struct user_regs_struct regs;
         ptrace(PTRACE_GETREGS, pid_, 0, &regs);
+        if (HandleSyscall(regs))
+            continue;
         //LOG(INFO)<<"Got syscall "<<syscall_name[regs.REG_SYSCALL];
-        switch(regs.REG_SYSCALL) {
-          case SYS_exit:
-          case SYS_exit_group:
-              DLOG<<"SYS_exit";
-              OnExit();
-              break;
-          case SYS_execve:
-            if (first_execve_) {
-                DLOG<<"SYS_execve";
-                first_execve_ = false;
-                ptrace(PTRACE_SYSCALL, pid_, 0, 0);
-                continue;
-            }
-            break;
-          case SYS_brk:
-            if (before_syscall_) {
-                requested_brk_ = regs.REG_ARG0;
-                before_syscall_ = false;
-            } else {
-                if (regs.REG_RET < requested_brk_) {
-                    DLOG<<"brk request "<<requested_brk_<<" return "<<regs.REG_RET;
-                    ptrace(PTRACE_KILL, pid_, 0, 0);
-                    memory_limit_exceeded_ = true;
-                    continue;
-                }
-                before_syscall_ = true;
-            }
-            break;
-          case SYS_unlink:
-            if (before_syscall_) {
-                if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
-                    break;
-                }
-                if (!AllowedFileAccess(path_)) {
-                    break;
-                }
-                //LOG(ERROR)<<"SYS_unlink "<<path_;
-                before_syscall_ = false;
-            } else {
-                before_syscall_ = true;
-            }
-            ptrace(PTRACE_SYSCALL, pid_, 0, 0);
-            continue;
-          case SYS_select:
-            if (before_syscall_) {
-                size_t i;
-                if (regs.REG_ARG4 == 0 || ReadStringFromTracedProcess(pid_, regs.REG_ARG4, path_, sizeof(struct timeval) + 1) < 0) {
-                    break;
-                }
-                for (i = 0; i < sizeof(struct timeval); i++) {
-                    if (path_[i] != 0)
-                        break;
-                }
-                before_syscall_ = false;
-            } else {
-                before_syscall_ = true;
-            }
-            ptrace(PTRACE_SYSCALL, pid_, 0, 0);
-            continue;
-          case SYS_open:
-            if (before_syscall_) {
-                if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
-                    break;
-                }
-                DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
-                //LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
-                //if (!AllowedToOpen(path_, regs.REG_ARG1)) {
-                if (!AllowedFileAccess(path_)) {
-                    break;
-                }
-                regs.REG_ARG1 &= ~( O_WRONLY | O_RDWR | O_CREAT | O_APPEND);
-                ptrace(PTRACE_SETREGS, pid_, 0, &regs);
-                before_syscall_ = false;
-            } else {
-                before_syscall_ = true;
-            }
-            ptrace(PTRACE_SYSCALL, pid_, 0, 0);
-            continue;
-        }
         if (regs.REG_SYSCALL < sizeof(disabled_syscall) / sizeof(disabled_syscall[0]) &&
             disabled_syscall[regs.REG_SYSCALL]) {
             LOG(ERROR)<<"Restricted syscall "<<syscall_name[regs.REG_SYSCALL];
