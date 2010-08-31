@@ -131,7 +131,18 @@ void JavaRunner::InternalRun() {
         close(sock_);
         close(server_sock);
         Log::Close();
-        execlp("java",
+
+        // since java need to open corresponding output file, which needs
+        // parent user-id's permissions, and after opening the file the java
+        // process need to set uid/gid to drop privilleges, we may need to
+        // gain root access for the java process
+        if (seteuid(0) || setuid(0) || setgid(0)) {
+            LOG(SYSCALL_ERROR)<<"Fail to set uid/gid";
+            exit(-1);
+        }
+
+        //execlp("strace", "strace", "-o", "/tmp/gao.tmp", "-f", "java",
+        execlp("java", "java",
                StringPrintf("-Xms%dk", memory_limit_ / 2 + 8192).c_str(),
                StringPrintf("-Xmx%dk", memory_limit_ + 8192).c_str(),
                StringPrintf("-Djava.library.path=%s", ARG_root.c_str()).c_str(),

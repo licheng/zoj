@@ -191,11 +191,9 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
                 raise(SIGKILL);
             }
         }
-        if (process_info.uid) {
-            if (setuid(process_info.uid) == -1) {
-                LOG(SYSCALL_ERROR)<<"Fail to set uid to "<<process_info.uid;
-                raise(SIGKILL);
-            }
+        if (process_info.uid && (setuid(process_info.uid) == -1)) {
+            LOG(SYSCALL_ERROR)<<"Fail to set uid to "<<process_info.uid;
+            raise(SIGKILL);
         } else {
             setuid(curr_uid);
         }
