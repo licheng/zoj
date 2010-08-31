@@ -35,6 +35,7 @@
 #include "logging.h"
 #include "protocol.h"
 #include "native_runner.h"
+#include "script_runner.h"
 #include "strutil.h"
 #include "util.h"
 
@@ -227,23 +228,29 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         return -1;
     }
     int result;
+    Runner* runner = NULL;
     if (compiler == 4) {
         result = INTERNAL_ERROR;
-        JavaRunner runner(sock, time_limit, memory_limit, output_limit, uid, gid);
-        result = runner.Run();
-    } else {
-        NativeRunner runner(sock, time_limit, memory_limit, output_limit, uid, gid);
-        if (compiler == 5) {
-            runner.SetCommand(g_command_python);
-        } else if (compiler == 6) {
-            runner.SetCommand(g_command_perl);
-        } else if (compiler == 7) {
-            runner.SetCommand(g_command_guile);
-        } else if (compiler == 8) {
-            runner.SetCommand(g_command_php);
-        }
-        result = runner.Run();
+        runner = new JavaRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
+    } else if (compiler == 1 || compiler == 2 || compiler == 3 || compiler == 9) {
+        runner = new NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
+    } else if (compiler == 5) {
+        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_python);
+    } else if (compiler == 6) {
+        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_perl);
+    } else if (compiler == 7) {
+        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_guile);
+    } else if (compiler == 8) {
+        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_php);
     }
+
+    if (runner == NULL) {
+        result = INTERNAL_ERROR;
+    } else {
+        result = runner->Run();
+        delete runner;
+    }
+
     if (result) {
         return result == -1 ? -1 : 0;
     }

@@ -80,7 +80,11 @@ class NativeTracer : public Tracer {
 }
 
 void NativeRunner::InternalRun() {
-    //const char* commands[] = {"p", "p", NULL};
+    const char* commands[] = {"p", "p", NULL};
+    RunProgram(commands);
+}
+
+void NativeRunner::RunProgram(const char* commands[]) {
     StartupInfo info;
     info.stdin_filename = "input";
     info.stdout_filename = "p.out";
@@ -92,7 +96,7 @@ void NativeRunner::InternalRun() {
     info.output_limit = output_limit_;
     info.stack_limit = 8192; // Always set stack limit to 8M
     info.proc_limit = 1;
-    info.file_limit = 20; // some script languages may need to open more files
+    info.file_limit = 10; // some script languages may need to open more files
     info.trace = 1;
     pid_ = CreateProcess(commands, info);
     if (pid_ == -1) {

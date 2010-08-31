@@ -17,28 +17,24 @@
  * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __NATIVE_RUNNER_H__
-#define __NATIVE_RUNNER_H__
+#include "script_runner.h"
 
-#include "runner.h"
+#include <string>
 
-class TraceCallback;
+#include <signal.h>
+#include <sys/ptrace.h>
+#include <sys/syscall.h>
+#include <sys/user.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-class NativeRunner : public Runner {
-  public:
-    NativeRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid)
-        : Runner(sock, time_limit, memory_limit, output_limit, uid, gid) {
-    }
+#include "common_io.h"
+#include "logging.h"
+#include "protocol.h"
+#include "tracer.h"
+#include "util.h"
 
-    void UpdateStatus();
+void ScriptRunner::InternalRun() {
+    RunProgram(commands);
+}
 
-  private:
-    virtual void InternalRun();
-
-  protected:
-    void RunProgram(const char* commands[]);
-
-  friend class NativeRunnerTest;    
-};
-
-#endif // __NATIVE_RUNNER_H__
