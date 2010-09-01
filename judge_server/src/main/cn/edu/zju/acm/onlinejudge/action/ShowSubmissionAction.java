@@ -23,6 +23,7 @@ import org.apache.struts.action.ActionMapping;
 
 import cn.edu.zju.acm.onlinejudge.bean.Problem;
 import cn.edu.zju.acm.onlinejudge.bean.Submission;
+import cn.edu.zju.acm.onlinejudge.bean.UserProfile;
 import cn.edu.zju.acm.onlinejudge.util.ContestManager;
 import cn.edu.zju.acm.onlinejudge.util.Utility;
 
@@ -74,12 +75,18 @@ public class ShowSubmissionAction extends BaseAction {
             response.sendError(404);
             return null;
         }
-        Problem problem = ContestManager.getInstance().getProblem(submission.getProblemId());
-        context.setAttribute("problem", problem);
-        ActionForward forward = this.checkProblemViewSourecPermission(mapping, context, null);
-        if (forward != null) {
-            response.sendError(404);
-            return null;
+
+
+        // user can always view their own submission
+        UserProfile user = context.getUserProfile();
+        if (user == null || user.getId() != submission.getUserProfileId()) {
+            Problem problem = ContestManager.getInstance().getProblem(submission.getProblemId());
+            context.setAttribute("problem", problem);
+            ActionForward forward = this.checkProblemViewSourecPermission(mapping, context, null);
+            if (forward != null) {
+                response.sendError(404);
+                return null;
+            }
         }
 
         response.setContentType("text/plain");

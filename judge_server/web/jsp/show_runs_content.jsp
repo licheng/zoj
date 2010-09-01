@@ -215,7 +215,17 @@
                                 %>
                             </span></td>
                         <td class="runProblemId"><a href="<%=showProblemPath%>?problemId=<%=submission.getProblemId()%>"><%=submission.getProblemCode()%></a></td>
-                        <td class="runLanguage"><%=submission.getLanguage()%></td>
+                        <%
+                            if (submission.getUserProfileId() == userId) {
+                        %>
+                            <td class="runLanguage"><a href="<%=request.getContextPath()%>/showSubmission.do?submissionId=<%=submission.getId()%>" target="_blank"><%=submission.getLanguage()%></a></td>
+                        <%
+                            } else {
+                        %>
+                            <td class="runLanguage"><%=submission.getLanguage()%></td>
+                        <%
+                            }
+                        %>
                         <td class="runTime"><%=submission.getTimeConsumption()%></td>
                         <td class="runMemory"><%=submission.getMemoryConsumption()%></td>
                         <td class="runUserName"><a href="<%=userStatusPath + submission.getUserProfileId() %>"><font color="db6d00"><%=submission.getUserName()%></font></a></td>
