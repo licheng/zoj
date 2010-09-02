@@ -21,6 +21,7 @@
 #define __NATIVE_RUNNER_H__
 
 #include "runner.h"
+#include "util.h"
 
 class TraceCallback;
 class Tracer;
@@ -31,10 +32,11 @@ class NativeRunner : public Runner {
         : Runner(sock, time_limit, memory_limit, output_limit, uid, gid) {
     }
 
-    void UpdateStatus();
+    virtual void UpdateStatus();
 
   protected:
     virtual void InternalRun();
+    virtual StartupInfo GetStartupInfo();
     virtual Tracer* CreateTracer(pid_t pid, Runner* runner);
     void RunProgram(const char* commands[]);
 

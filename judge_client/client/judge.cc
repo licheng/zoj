@@ -23,6 +23,7 @@
 
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <sys/stat.h>
 
 #include "text_checker.h"
@@ -38,6 +39,8 @@
 #include "script_runner.h"
 #include "strutil.h"
 #include "util.h"
+
+DECLARE_ARG(string, root);
 
 // Reads the file content from the given file descriptor and writes the file
 // specified by output_filename. Creates the file if not exists.
@@ -158,10 +161,10 @@ int ExecCompileCommand(int sock, int* compiler_id) {
     return 0;
 }
 
-static const char* g_command_python[] = { "/usr/bin/python", "python", "p.py", NULL };
-static const char* g_command_perl[] = { "/usr/bin/perl", "perl", "p.pl", NULL };
+//static const char* g_command_python[] = { "/usr/bin/python", "python", "p.py", NULL };
+//static const char* g_command_perl[] = { "/usr/bin/perl", "perl", "p.pl", NULL };
 static const char* g_command_guile[] = { "/usr/bin/guile", "guile", "p.scm", NULL };
-static const char* g_command_php[] = { "/usr/bin/php", "php", "p.php", NULL };
+//static const char* g_command_php[] = { "/usr/bin/php", "php", "p.php", NULL };
 
 int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, int uid, int gid) {
     uint32_t testcase;
@@ -228,28 +231,64 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         return -1;
     }
     int result;
+    string memory_limit_str = StringPrintf("%d", memory_limit);
+    string loader_string;
     Runner* runner = NULL;
     if (compiler == 4) {
+        // Java
         result = INTERNAL_ERROR;
         runner = new JavaRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
-    } else if (compiler == 1 || compiler == 2 || compiler == 3 || compiler == 9) {
-        runner = new NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
     } else if (compiler == 5) {
-        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_python);
+        // Python
+        loader_string = StringPrintf("%s/PythonLoader.py", ARG_root.c_str());
+        const char* commands[] = {
+            "/usr/bin/python",
+            "python",
+            loader_string.c_str(),
+            memory_limit_str.c_str(),
+            "p.py",
+            NULL };
+        ScriptRunner* sr = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, commands);
+        sr->SetLoaderSyscallMagic(__NR_setrlimit, 2);
+        runner = sr;
     } else if (compiler == 6) {
-        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_perl);
+        // Perl
+        setenv("MEMORY_LIMIT", memory_limit_str.c_str(), 1);
+        setenv("PERL5LIB", ARG_root.c_str(), 1);
+        const char* commands[] = {
+            "/usr/bin/perl",
+            "perl",
+            "-mPerlLoader",
+            "p.pl",
+            NULL };
+        ScriptRunner* sr = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, commands);
+        sr->SetLoaderSyscallMagic(__NR_setrlimit, 2);
+        runner = sr;
     } else if (compiler == 7) {
+        // Guile
         runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_guile);
     } else if (compiler == 8) {
-        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_php);
+        // PHP
+        loader_string = StringPrintf("%s/PHPLoader.php", ARG_root.c_str());
+        memory_limit_str = StringPrintf("memory_limit=%dk", memory_limit);
+        const char* commands[] = {
+            "/usr/bin/php",
+            "php",
+            "-d",
+            memory_limit_str.c_str(),
+            "-d",
+            "disable_functions=ini_set",
+            loader_string.c_str(),
+            NULL };
+        ScriptRunner* sr = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, commands);
+        sr->SetLoaderSyscallMagic(__NR_uname, 1);
+        runner = sr;
+    } else {
+        runner = new NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
     }
 
-    if (runner == NULL) {
-        result = INTERNAL_ERROR;
-    } else {
-        result = runner->Run();
-        delete runner;
-    }
+    result = runner->Run();
+    delete runner;
 
     if (result) {
         return result == -1 ? -1 : 0;

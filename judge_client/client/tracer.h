@@ -23,11 +23,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __i386
+#define REG_SYSCALL orig_eax
+#define REG_RET eax
+#define REG_ARG0 ebx
+#define REG_ARG1 ecx
+#define REG_ARG4 edi
+#else
+#ifdef __x86_64
+#define REG_SYSCALL orig_rax
+#define REG_RET rax
+#define REG_ARG0 rdi
+#define REG_ARG1 rsi
+#define REG_ARG4 r8
+#endif
+#endif
+
 class Tracer {
   public:
     Tracer(pid_t pid)
         : pid_(pid), exited_(false), memory_limit_exceeded_(false), restricted_syscall_(false),
-          status_(-1), first_execve_(true), before_syscall_(false) {
+          status_(-1), first_execve_(true), before_syscall_(false), restricted_open_path_(true) {
     }
 
     bool HasExited() {
@@ -46,6 +62,10 @@ class Tracer {
         return status_;
     }
 
+    void SetRestrictedOpenPath(bool value) {
+        restricted_open_path_ = value;
+    }
+
     void Trace();
 
   protected:
@@ -59,6 +79,7 @@ class Tracer {
     int status_;
     bool first_execve_;
     bool before_syscall_;
+    bool restricted_open_path_;
     unsigned long requested_brk_;
     char path_[FILENAME_MAX + 1];
 };

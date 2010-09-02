@@ -61,6 +61,7 @@ int SpecialChecker::InternalCheck(int sock) {
         return -1;
     }
     Tracer tracer(pid);
+    tracer.SetRestrictedOpenPath(false);
     do {
         alarm(1);
         tracer.Trace();

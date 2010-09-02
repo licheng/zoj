@@ -32,7 +32,6 @@
 #include "logging.h"
 #include "protocol.h"
 #include "tracer.h"
-#include "util.h"
 
 void NativeRunner::UpdateStatus() {
     int ts = ReadTimeConsumption(pid_);
@@ -89,8 +88,7 @@ Tracer* NativeRunner::CreateTracer(pid_t pid, Runner* runner) {
     return new NativeTracer(pid, r);
 }
 
-
-void NativeRunner::RunProgram(const char* commands[]) {
+StartupInfo NativeRunner::GetStartupInfo() {
     StartupInfo info;
     info.stdin_filename = "input";
     info.stdout_filename = "p.out";
@@ -102,8 +100,13 @@ void NativeRunner::RunProgram(const char* commands[]) {
     info.output_limit = output_limit_;
     info.stack_limit = 8192; // Always set stack limit to 8M
     info.proc_limit = 1;
-    info.file_limit = 10; // some script languages may need to open more files
+    info.file_limit = 5;
     info.trace = 1;
+    return info;
+}
+
+void NativeRunner::RunProgram(const char* commands[]) {
+    StartupInfo info = GetStartupInfo();
     pid_ = CreateProcess(commands, info);
     if (pid_ == -1) {
         LOG(ERROR)<<"Fail to execute the program";

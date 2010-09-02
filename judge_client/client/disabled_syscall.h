@@ -285,7 +285,7 @@ int init() {
     disabled_syscall[__NR_sendfile64] = 1;
 #endif
 #ifdef __NR_futex
-    disabled_syscall[__NR_futex] = 0;
+    disabled_syscall[__NR_futex] = 1;
 #endif
 #ifdef __NR_sched_setaffinity
     disabled_syscall[__NR_sched_setaffinity] = 1;

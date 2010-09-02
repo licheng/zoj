@@ -59,7 +59,9 @@ case $1 in
         exit 0
         ;;
     brainfuck)
-        bf2c $src > "$src.c"
+        if ! bf2c $src > "$src.c"; then
+            exit 1
+        fi
         gcc -o $bin -ansi -fno-asm -O2 -Wall -static -DONLINE_JUDGE $src.c >/dev/null
         rm -f "$src.c"
         if [[ -f $bin ]]; then

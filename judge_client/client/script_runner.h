@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ * Copyright 2010 Li, Cheng <hanshuiys@gmail.com>
  *
  * This file is part of ZOJ.
  *
@@ -29,12 +29,27 @@ class ScriptRunner : public NativeRunner {
     ScriptRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid, const char* commands[])
         : NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid) {
         this->commands = commands;
+        this->loader_syscall_magic_id_ = 0;
+        this->loader_syscall_magic_left_ = 0;
+        this->base_time_ = 0;
+        this->base_memory_ = 0;
     }
+    void SetLoaderSyscallMagic(unsigned long id, int count);
+    void SetBaseTime(int time) { this->base_time_ = time; };
+    void SetBaseMemory(int memory) { this->base_memory_ = memory; };
+    virtual void UpdateStatus();
 
   protected:
     virtual void InternalRun();
-    const char** commands;
+    virtual StartupInfo GetStartupInfo();
     virtual Tracer* CreateTracer(pid_t pid, Runner* runner);
+
+    const char** commands;
+    unsigned long loader_syscall_magic_id_;
+    int loader_syscall_magic_left_;
+
+    int base_memory_;
+    int base_time_;
 
   friend class ScriptRunnerTest;    
 };

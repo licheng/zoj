@@ -37,21 +37,6 @@ using namespace std;
 #include "protocol.h"
 #include "strutil.h"
 
-#ifdef __i386
-#define REG_SYSCALL orig_eax
-#define REG_RET eax
-#define REG_ARG0 ebx
-#define REG_ARG1 ecx
-#define REG_ARG4 edi
-#else
-#ifdef __x86_64
-#define REG_SYSCALL orig_rax
-#define REG_RET rax
-#define REG_ARG0 rdi
-#define REG_ARG1 rsi
-#define REG_ARG4 r8
-#endif
-#endif
 namespace {
 
 void sigalrm_handler(int) {
@@ -94,13 +79,11 @@ int ReadStringFromTracedProcess(pid_t pid, unsigned long address, char* buffer, 
 
 bool AllowedFileAccess(const char* path) {
     static char path_buffer[FILENAME_MAX + 1];
-    static const char zoj_root[] = "/zoj";
-    static const char zoj_working_root[] = "/zoj/working";
+    static const char zoj_root[] = "/zoj/prob";
     if (path[0] == '\0')
         return false;
     realpath(path, path_buffer);
-    if (strncmp(path_buffer, zoj_root, sizeof(zoj_root) - 1) == 0 &&
-        strncmp(path_buffer, zoj_working_root, sizeof(zoj_working_root) - 1) != 0) {
+    if (strncmp(path_buffer, zoj_root, sizeof(zoj_root) - 1) == 0) {
         LOG(INFO)<<"Accessing "<<path_buffer<<" is not allowed";
         return false;
     }
@@ -144,7 +127,7 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
             if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
                 break;
             }
-            if (!AllowedFileAccess(path_)) {
+            if (restricted_open_path_ && !AllowedFileAccess(path_)) {
                 break;
             }
             //LOG(ERROR)<<"SYS_unlink "<<path_;
@@ -164,6 +147,14 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
         }
         ptrace(PTRACE_SYSCALL, pid_, 0, 0);
         return true;
+    case SYS_kill:
+        if (before_syscall_) {
+            // allow self-kill 
+            if (regs.REG_ARG0 != pid_ || regs.REG_ARG1 != SIGKILL)
+                break;
+        }
+        ptrace(PTRACE_SYSCALL, pid_, 0, 0);
+        return true;
     case SYS_open:
         if (before_syscall_) {
             if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
@@ -172,7 +163,7 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
             DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
             //LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
             //if (!AllowedToOpen(path_, regs.REG_ARG1)) {
-            if (!AllowedFileAccess(path_)) {
+            if (restricted_open_path_ && !AllowedFileAccess(path_)) {
                 break;
             }
             regs.REG_ARG1 &= ~( O_WRONLY | O_RDWR | O_CREAT | O_APPEND);
