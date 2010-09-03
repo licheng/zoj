@@ -34,6 +34,7 @@
                         <td class="statisticsRTE">RTE</td>
                         <td class="statisticsFPE">FPE</td>
                         <td class="statisticsSF">SF</td>
+                        <td class="statisticsNZEC">NZEC</td>
                         <td class="statisticsTLE">TLE</td>
                         <td class="statisticsMLE">MLE</td>
                         <td class="statisticsOLE">OLE</td>
@@ -54,10 +55,11 @@
                         <td class="statisticsRTE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.RUNTIME_ERROR.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 3)%></a></td>
                         <td class="statisticsFPE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.FLOATING_POINT_ERROR.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 4)%></a></td>
                         <td class="statisticsSF"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.SEGMENTATION_FAULT.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 5)%></a></td>
-                        <td class="statisticsTLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.TIME_LIMIT_EXCEEDED.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 6)%></a></td>
-                        <td class="statisticsMLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.MEMORY_LIMIT_EXCEEDED.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 7)%></a></td>
-                        <td class="statisticsOLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.OUTPUT_LIMIT_EXCEEDED.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 8)%></a></td>
-                        <td class="statisticsCE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.COMPILATION_ERROR.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 9)%></a></td>
+                        <td class="statisticsNZEC"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.NON_ZERO_EXIT_CODE.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 6)%></a></td>
+                        <td class="statisticsTLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.TIME_LIMIT_EXCEEDED.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 7)%></a></td>
+                        <td class="statisticsMLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.MEMORY_LIMIT_EXCEEDED.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 8)%></a></td>
+                        <td class="statisticsOLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.OUTPUT_LIMIT_EXCEEDED.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 9)%></a></td>
+                        <td class="statisticsCE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.COMPILATION_ERROR.getId()+"&problemCode=" + problem.getCode()%>"><%=statistics.getCount(i, 10)%></a></td>
                         <td class="statisticsSubmit"><a href="<%=statisticsPath + "&problemCode=" + problem.getCode()%>"><%=statistics.getProblemCount(i)%></a></td>
                     </tr>                                      																
                     <%
@@ -71,10 +73,11 @@
                         <td class="statisticsRTE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.RUNTIME_ERROR.getId()%>"><%=statistics.getJudgeReplyCount(3)%></a></td>
                         <td class="statisticsFPE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.FLOATING_POINT_ERROR.getId()%>"><%=statistics.getJudgeReplyCount(4)%></a></td>                        
                         <td class="statisticsSF"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.SEGMENTATION_FAULT.getId()%>"><%=statistics.getJudgeReplyCount(5)%></a></td>
-                        <td class="statisticsTLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.TIME_LIMIT_EXCEEDED.getId()%>"><%=statistics.getJudgeReplyCount(6)%></a></td>
-                        <td class="statisticsMLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.MEMORY_LIMIT_EXCEEDED.getId()%>"><%=statistics.getJudgeReplyCount(7)%></a></td>
-                        <td class="statisticsOLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.OUTPUT_LIMIT_EXCEEDED.getId()%>"><%=statistics.getJudgeReplyCount(8)%></a></td>
-                        <td class="statisticsCE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.COMPILATION_ERROR.getId()%>"><%=statistics.getJudgeReplyCount(9)%></a></td>
+                        <td class="statisticsNZEC"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.NON_ZERO_EXIT_CODE.getId()%>"><%=statistics.getJudgeReplyCount(6)%></a></td>
+                        <td class="statisticsTLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.TIME_LIMIT_EXCEEDED.getId()%>"><%=statistics.getJudgeReplyCount(7)%></a></td>
+                        <td class="statisticsMLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.MEMORY_LIMIT_EXCEEDED.getId()%>"><%=statistics.getJudgeReplyCount(8)%></a></td>
+                        <td class="statisticsOLE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.OUTPUT_LIMIT_EXCEEDED.getId()%>"><%=statistics.getJudgeReplyCount(9)%></a></td>
+                        <td class="statisticsCE"><a href="<%=statisticsPath + "&judgeReplyIds=" + JudgeReply.COMPILATION_ERROR.getId()%>"><%=statistics.getJudgeReplyCount(10)%></a></td>
                         <td class="statisticsSubmit"><a href="<%=statisticsPath%>"><%=statistics.getTotal()%></a></td>
                     </tr>
                 </table>

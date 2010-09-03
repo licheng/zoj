@@ -44,6 +44,7 @@
                         <td style="color:green">PE</td>
                         <td style="color:green">FPE</td>
                         <td style="color:green">SF</td>
+                        <td style="color:green">NZEC</td>
                         <td style="color:green">TLE</td>
                         <td style="color:green">MLE</td>
                         <td style="color:green">CE</td>
@@ -55,6 +56,7 @@
                         <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.PRESENTATION_ERROR.getId()%>"><%=statistics.getCount(JudgeReply.PRESENTATION_ERROR)%>(<%=statistics.getPercentageInt(JudgeReply.PRESENTATION_ERROR)%>%)</a></td>
                         <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.FLOATING_POINT_ERROR.getId()%>"><%=statistics.getCount(JudgeReply.FLOATING_POINT_ERROR)%>(<%=statistics.getPercentageInt(JudgeReply.FLOATING_POINT_ERROR)%>%)</a></td>
                         <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.SEGMENTATION_FAULT.getId()%>"><%=statistics.getCount(JudgeReply.SEGMENTATION_FAULT)%>(<%=statistics.getPercentageInt(JudgeReply.SEGMENTATION_FAULT)%>%)</a></td>
+                        <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.NON_ZERO_EXIT_CODE.getId()%>"><%=statistics.getCount(JudgeReply.NON_ZERO_EXIT_CODE)%>(<%=statistics.getPercentageInt(JudgeReply.NON_ZERO_EXIT_CODE)%>%)</a></td>
                         <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.TIME_LIMIT_EXCEEDED.getId()%>"><%=statistics.getCount(JudgeReply.TIME_LIMIT_EXCEEDED)%>(<%=statistics.getPercentageInt(JudgeReply.TIME_LIMIT_EXCEEDED)%>%)</a></td>
                         <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.MEMORY_LIMIT_EXCEEDED.getId()%>"><%=statistics.getCount(JudgeReply.MEMORY_LIMIT_EXCEEDED)%>(<%=statistics.getPercentageInt(JudgeReply.MEMORY_LIMIT_EXCEEDED)%>%)</a></td>
                         <td style="color:green"><a href="<%=runsPath + "&judgeReplyIds=" + JudgeReply.COMPILATION_ERROR.getId()%>"><%=statistics.getCount(JudgeReply.COMPILATION_ERROR)%>(<%=statistics.getPercentageInt(JudgeReply.COMPILATION_ERROR)%>%)</a></td>
