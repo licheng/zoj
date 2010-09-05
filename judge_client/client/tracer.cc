@@ -36,6 +36,9 @@ using namespace std;
 #include "logging.h"
 #include "protocol.h"
 #include "strutil.h"
+#include "args.h"
+
+DECLARE_ARG(string, root);
 
 namespace {
 
@@ -79,11 +82,12 @@ int ReadStringFromTracedProcess(pid_t pid, unsigned long address, char* buffer, 
 
 bool AllowedFileAccess(const char* path) {
     static char path_buffer[FILENAME_MAX + 1];
-    static const char zoj_root[] = "/zoj/prob";
+    string prob_root = ARG_root + "/prob";
+    //static const char zoj_root[] = "/zoj/prob";
     if (path[0] == '\0')
         return false;
     realpath(path, path_buffer);
-    if (strncmp(path_buffer, zoj_root, sizeof(zoj_root) - 1) == 0) {
+    if (strncmp(path_buffer, prob_root.c_str(), prob_root.size()) == 0) {
         LOG(INFO)<<"Accessing "<<path_buffer<<" is not allowed";
         return false;
     }
@@ -150,7 +154,7 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
     case SYS_kill:
         if (before_syscall_) {
             // allow self-kill 
-            if (regs.REG_ARG0 != pid_ || regs.REG_ARG1 != SIGKILL)
+            if (regs.REG_ARG0 != pid_ || (regs.REG_ARG1 != SIGKILL && regs.REG_ARG1 != SIGFPE))
                 break;
         }
         ptrace(PTRACE_SYSCALL, pid_, 0, 0);

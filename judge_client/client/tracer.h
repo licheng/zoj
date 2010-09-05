@@ -43,7 +43,7 @@ class Tracer {
   public:
     Tracer(pid_t pid)
         : pid_(pid), exited_(false), memory_limit_exceeded_(false), restricted_syscall_(false),
-          status_(-1), first_execve_(true), before_syscall_(false), restricted_open_path_(true) {
+          status_(-1), first_execve_(true), before_syscall_(true), restricted_open_path_(true) {
     }
 
     bool HasExited() {

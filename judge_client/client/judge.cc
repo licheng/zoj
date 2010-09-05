@@ -161,11 +161,6 @@ int ExecCompileCommand(int sock, int* compiler_id) {
     return 0;
 }
 
-//static const char* g_command_python[] = { "/usr/bin/python", "python", "p.py", NULL };
-//static const char* g_command_perl[] = { "/usr/bin/perl", "perl", "p.pl", NULL };
-static const char* g_command_guile[] = { "/usr/bin/guile", "guile", "p.scm", NULL };
-//static const char* g_command_php[] = { "/usr/bin/php", "php", "p.php", NULL };
-
 int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, int uid, int gid) {
     uint32_t testcase;
     uint32_t time_limit;
@@ -231,59 +226,16 @@ int ExecTestCaseCommand(int sock, int problem_id, int revision, int compiler, in
         return -1;
     }
     int result;
-    string memory_limit_str = StringPrintf("%d", memory_limit);
-    string loader_string;
     Runner* runner = NULL;
     if (compiler == 4) {
         // Java
         result = INTERNAL_ERROR;
         runner = new JavaRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
-    } else if (compiler == 5) {
-        // Python
-        loader_string = StringPrintf("%s/PythonLoader.py", ARG_root.c_str());
-        const char* commands[] = {
-            "/usr/bin/python",
-            "python",
-            loader_string.c_str(),
-            memory_limit_str.c_str(),
-            "p.py",
-            NULL };
-        ScriptRunner* sr = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, commands);
-        sr->SetLoaderSyscallMagic(__NR_setrlimit, 2);
-        runner = sr;
-    } else if (compiler == 6) {
-        // Perl
-        setenv("MEMORY_LIMIT", memory_limit_str.c_str(), 1);
-        setenv("PERL5LIB", ARG_root.c_str(), 1);
-        const char* commands[] = {
-            "/usr/bin/perl",
-            "perl",
-            "-mPerlLoader",
-            "p.pl",
-            NULL };
-        ScriptRunner* sr = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, commands);
-        sr->SetLoaderSyscallMagic(__NR_setrlimit, 2);
-        runner = sr;
-    } else if (compiler == 7) {
-        // Guile
-        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, g_command_guile);
-    } else if (compiler == 8) {
-        // PHP
-        loader_string = StringPrintf("%s/PHPLoader.php", ARG_root.c_str());
-        memory_limit_str = StringPrintf("memory_limit=%dk", memory_limit);
-        const char* commands[] = {
-            "/usr/bin/php",
-            "php",
-            "-d",
-            memory_limit_str.c_str(),
-            "-d",
-            "disable_functions=ini_set",
-            loader_string.c_str(),
-            NULL };
-        ScriptRunner* sr = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, commands);
-        sr->SetLoaderSyscallMagic(__NR_uname, 1);
-        runner = sr;
+    } else if (compiler == 5 || compiler == 6 || compiler == 7 || compiler == 8) {
+        // Script
+        runner = new ScriptRunner(sock, time_limit, memory_limit, output_limit, uid, gid, compiler);
     } else {
+        // Native
         runner = new NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid);
     }
 

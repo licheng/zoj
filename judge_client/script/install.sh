@@ -31,6 +31,7 @@ cp -f client/libsandbox.so "$dir"
 cp -f client/PythonLoader.py "$dir"
 cp -f client/PHPLoader.php "$dir"
 cp -f client/PerlLoader.pm "$dir"
+cp -f client/guile_loader "$dir"
 cp -f client/CustomJavaCompiler*.class "$dir"
 chmod +x "$dir"/*.sh
 chmod +x "$dir"/script/compile.sh

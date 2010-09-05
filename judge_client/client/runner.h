@@ -44,6 +44,8 @@ class Runner {
     // Runs the specified program. Returns 0 if execution succeeded, or -1 on error.
     int Run();
 
+    int GetMemoryLimit() { return memory_limit_; };
+
 
   protected:
     virtual void InternalRun() = 0;

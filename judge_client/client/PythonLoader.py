@@ -39,4 +39,6 @@ try :
     runpy.run_module(module_name, run_name = '__main__')
 except MemoryError :
     os.kill(os.getpid(), signal.SIGKILL)
+except ZeroDivisionError :
+    os.kill(os.getpid(), signal.SIGFPE)
 

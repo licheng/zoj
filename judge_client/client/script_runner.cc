@@ -54,10 +54,10 @@ class ScriptTracer : public Tracer {
 
     virtual bool HandleSyscall(struct user_regs_struct& regs) {
         if (loader_syscall_magic_left_ > 0) {
-            if (before_syscall_) {
+            if (!before_syscall_) {
                 if (regs.REG_SYSCALL == loader_syscall_magic_id_) {
-                    LOG(INFO) << "Got magic syscall: " << loader_syscall_magic_left_;
                     loader_syscall_magic_left_--;
+                    LOG(INFO) << "Left syscall times: " << loader_syscall_magic_left_;
                     runner_->SetBaseMemory(ReadMemoryConsumption(pid_));
                     runner_->SetBaseTime(ReadTimeConsumption(pid_));
                 }
@@ -84,6 +84,7 @@ Tracer* ScriptRunner::CreateTracer(pid_t pid, Runner* runner) {
 }
 
 void ScriptRunner::InternalRun() {
+    initializer_->SetUp(this);
     RunProgram(commands);
 }
 
@@ -126,7 +127,7 @@ StartupInfo ScriptRunner::GetStartupInfo() {
     info.uid = uid_;
     info.gid = gid_;
     info.time_limit = time_limit_;
-    info.memory_limit = memory_limit_ + 64 * 1024;
+    info.memory_limit = memory_limit_ + 64 * 1024; // PHP really uses too much memory...
     info.vm_limit = memory_limit_ + 128 * 1024;
     info.output_limit = output_limit_;
     info.stack_limit = 8192; // Always set stack limit to 8M

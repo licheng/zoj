@@ -8,7 +8,7 @@ JAVA_CLASSES:=$(patsubst %.java,%.class,$(JAVA_SOURCES))
 all: $(CC_BINARIES) $(JAVA_CLASSES)
 
 clean: 
-	rm -f $(CC_BINARIES) $(JAVA_CLASSES)
+	rm -f $(CC_BINARIES) $(JAVA_CLASSES) guile_loader
 
 $(CC_BINARIES): % : %.cc
 	g++ -o $@ -ansi -fno-asm -O2 -Wall -lm --static -s -DONLINE_JUDGE $^
