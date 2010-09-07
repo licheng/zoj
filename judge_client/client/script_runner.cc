@@ -34,6 +34,8 @@
 #include "tracer.h"
 #include "util.h"
 
+DECLARE_ARG(string, root);
+
 namespace {
 
 class ScriptTracer : public Tracer {

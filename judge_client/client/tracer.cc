@@ -32,7 +32,7 @@ using namespace std;
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "disabled_syscall.h"
+#include "enabled_syscall.h"
 #include "logging.h"
 #include "protocol.h"
 #include "strutil.h"
@@ -126,18 +126,6 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
             }
         }
         break;
-    case SYS_unlink:
-        if (before_syscall_) {
-            if (ReadStringFromTracedProcess(pid_, regs.REG_ARG0, path_, sizeof(path_)) < 0) {
-                break;
-            }
-            if (restricted_open_path_ && !AllowedFileAccess(path_)) {
-                break;
-            }
-            //LOG(ERROR)<<"SYS_unlink "<<path_;
-        }
-        ptrace(PTRACE_SYSCALL, pid_, 0, 0);
-        return true;
     case SYS_select:
         if (before_syscall_) {
             size_t i;
@@ -165,7 +153,7 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
                 break;
             }
             DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
-            //LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
+            LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
             //if (!AllowedToOpen(path_, regs.REG_ARG1)) {
             if (restricted_open_path_ && !AllowedFileAccess(path_)) {
                 break;
@@ -195,9 +183,8 @@ void Tracer::Trace() {
         ptrace(PTRACE_GETREGS, pid_, 0, &regs);
         if (HandleSyscall(regs))
             continue;
-        //LOG(INFO)<<"Got syscall "<<syscall_name[regs.REG_SYSCALL];
-        if (regs.REG_SYSCALL < sizeof(disabled_syscall) / sizeof(disabled_syscall[0]) &&
-            disabled_syscall[regs.REG_SYSCALL]) {
+        if (regs.REG_SYSCALL < sizeof(enabled_syscall) / sizeof(enabled_syscall[0]) &&
+            !enabled_syscall[regs.REG_SYSCALL]) {
             LOG(ERROR)<<"Restricted syscall "<<syscall_name[regs.REG_SYSCALL];
             ptrace(PTRACE_KILL, pid_, 0, 0);
             restricted_syscall_ = true;

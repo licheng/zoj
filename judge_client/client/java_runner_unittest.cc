@@ -26,7 +26,7 @@
 #include "strutil.h"
 #include "test_util-inl.h"
 
-DEFINE_ARG(string, root, "");
+DECLARE_ARG(string, root);
 
 class JavaRunnerTest : public TestFixture {
   protected:

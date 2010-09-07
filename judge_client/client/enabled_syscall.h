@@ -1,382 +1,167 @@
 /*
- * Copyright 2007 Xu, Chuan <xuchuan@gmail.com>
+ * Copyright 2010 Li, Cheng <hanshuiys@gmail.com>
  *
- * This file is part of ZOJ Judge Server.
+ * This file is part of ZOJ.
  *
- * ZOJ Judge Server is free software; you can redistribute it and/or modify
+ * ZOJ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
- * ZOJ Judge Server is distributed in the hope that it will be useful,
+ * ZOJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ZOJ Judge Server; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * along with ZOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __DISABLED_SYSCALL_H__
-#define __DISABLED_SYSCALL_H__
+#ifndef __ENABLED_SYSCALL_H__
+#define __ENABLED_SYSCALL_H__
 
 #include <sys/syscall.h>
 
 namespace {
 
-bool disabled_syscall[512] = {0};
+bool enabled_syscall[512] = {0};
 const char* syscall_name[512] = {0};
 
 int init() {
-#ifdef __NR_fork
-    disabled_syscall[__NR_fork] = 1;
+
+#ifdef __NR_access
+    enabled_syscall[__NR_access] = 1;
 #endif
-#ifdef __NR_open
-    disabled_syscall[__NR_open] = 1;
+
+#ifdef __NR_arch_prctl
+    enabled_syscall[__NR_arch_prctl] = 1;
 #endif
-#ifdef __NR_creat
-    disabled_syscall[__NR_creat] = 1;
+
+#ifdef __NR_brk
+    enabled_syscall[__NR_brk] = 1;
 #endif
-#ifdef __NR_link
-    disabled_syscall[__NR_link] = 1;
+
+#ifdef __NR_close
+    enabled_syscall[__NR_close] = 1;
 #endif
-#ifdef __NR_unlink
-    disabled_syscall[__NR_unlink] = 1;
+
+#ifdef __NR_exit_group
+    enabled_syscall[__NR_exit_group] = 1;
 #endif
-#ifdef __NR_execve
-    disabled_syscall[__NR_execve] = 1;
+
+#ifdef __NR_fcntl
+    enabled_syscall[__NR_fcntl] = 1;
 #endif
-#ifdef __NR_chdir
-    disabled_syscall[__NR_chdir] = 1;
+
+#ifdef __NR_fstat
+    enabled_syscall[__NR_fstat] = 1;
 #endif
-#ifdef __NR_mknod
-    disabled_syscall[__NR_mknod] = 1;
+
+#ifdef __NR_getcwd
+    enabled_syscall[__NR_getcwd] = 1;
 #endif
-#ifdef __NR_chmod
-    disabled_syscall[__NR_chmod] = 1;
-#endif
-#ifdef __NR_break
-    disabled_syscall[__NR_break] = 1;
-#endif
-#ifdef __NR_oldstat
-    disabled_syscall[__NR_oldstat] = 1;
-#endif
-#ifdef __NR_mount
-    disabled_syscall[__NR_mount] = 1;
-#endif
-#ifdef __NR_umount
-    disabled_syscall[__NR_umount] = 1;
-#endif
-#ifdef __NR_ptrace
-    disabled_syscall[__NR_ptrace] = 1;
-#endif
-#ifdef __NR_oldfstat
-    disabled_syscall[__NR_oldfstat] = 1;
-#endif
-#ifdef __NR_pause
-    disabled_syscall[__NR_pause] = 1;
-#endif
-#ifdef __NR_stty
-    disabled_syscall[__NR_stty] = 1;
-#endif
-#ifdef __NR_gtty
-    disabled_syscall[__NR_gtty] = 1;
-#endif
-#ifdef __NR_ftime
-    disabled_syscall[__NR_ftime] = 1;
-#endif
-#ifdef __NR_sync
-    disabled_syscall[__NR_sync] = 1;
-#endif
-#ifdef __NR_rename
-    disabled_syscall[__NR_rename] = 1;
-#endif
-#ifdef __NR_mkdir
-    disabled_syscall[__NR_mkdir] = 1;
-#endif
-#ifdef __NR_rmdir
-    disabled_syscall[__NR_rmdir] = 1;
-#endif
-#ifdef __NR_dup
-    disabled_syscall[__NR_dup] = 1;
-#endif
-#ifdef __NR_prof
-    disabled_syscall[__NR_prof] = 1;
-#endif
-#ifdef __NR_signal
-    disabled_syscall[__NR_signal] = 1;
-#endif
-#ifdef __NR_kill
-    disabled_syscall[__NR_kill] = 1;
-#endif
-#ifdef __NR_rt_sigqueueinfo
-    disabled_syscall[__NR_rt_sigqueueinfo] = 1;
-#endif
-#ifdef __NR_umount2
-    disabled_syscall[__NR_umount2] = 1;
-#endif
-#ifdef __NR_lock
-    disabled_syscall[__NR_lock] = 1;
-#endif
-#ifdef __NR_mpx
-    disabled_syscall[__NR_mpx] = 1;
-#endif
-#ifdef __NR_ulimit
-    disabled_syscall[__NR_ulimit] = 1;
-#endif
-#ifdef __NR_oldolduname
-    disabled_syscall[__NR_oldolduname] = 1;
-#endif
-#ifdef __NR_chroot
-    disabled_syscall[__NR_chroot] = 1;
-#endif
-#ifdef __NR_dup2
-    disabled_syscall[__NR_dup2] = 1;
-#endif
-#ifdef __NR_setrlimit
-    disabled_syscall[__NR_setrlimit] = 1;
-#endif
-#ifdef __NR_select
-    disabled_syscall[__NR_select] = 1;
-#endif
-#ifdef __NR_symlink
-    disabled_syscall[__NR_symlink] = 1;
-#endif
-#ifdef __NR_oldlstat
-    disabled_syscall[__NR_oldlstat] = 1;
-#endif
-#ifdef __NR_swapon
-    disabled_syscall[__NR_swapon] = 1;
-#endif
-#ifdef __NR_reboot
-    disabled_syscall[__NR_reboot] = 1;
-#endif
-#ifdef __NR_readdir
-    disabled_syscall[__NR_readdir] = 1;
-#endif
-#ifdef __NR_fchmod
-    disabled_syscall[__NR_fchmod] = 1;
-#endif
-#ifdef __NR_profil
-    disabled_syscall[__NR_profil] = 1;
-#endif
-#ifdef __NR_statfs
-    disabled_syscall[__NR_statfs] = 1;
-#endif
-#ifdef __NR_fstatfs
-    disabled_syscall[__NR_fstatfs] = 1;
-#endif
-#ifdef __NR_syslog
-    disabled_syscall[__NR_syslog] = 1;
-#endif
-#ifdef __NR_idle
-    disabled_syscall[__NR_idle] = 1;
-#endif
-#ifdef __NR_swapoff
-    disabled_syscall[__NR_swapoff] = 1;
-#endif
-#ifdef __NR_ipc
-    disabled_syscall[__NR_ipc] = 1;
-#endif
-#ifdef __NR_clone
-    disabled_syscall[__NR_clone] = 1;
-#endif
-#ifdef __NR_create_module
-    disabled_syscall[__NR_create_module] = 1;
-#endif
-#ifdef __NR_init_module
-    disabled_syscall[__NR_init_module] = 1;
-#endif
-#ifdef __NR_delete_module
-    disabled_syscall[__NR_delete_module] = 1;
-#endif
-#ifdef __NR_afs_syscall
-    disabled_syscall[__NR_afs_syscall] = 1;
-#endif
+
 #ifdef __NR_getdents
-    disabled_syscall[__NR_getdents] = 0;
+    enabled_syscall[__NR_getdents] = 1;
 #endif
-#ifdef __NR_newselect
-    disabled_syscall[__NR_newselect] = 1;
+
+#ifdef __NR_getegid
+    enabled_syscall[__NR_getegid] = 1;
 #endif
-#ifdef __NR_nanosleep
-    disabled_syscall[__NR_nanosleep] = 1;
+
+#ifdef __NR_geteuid
+    enabled_syscall[__NR_geteuid] = 1;
 #endif
-#ifdef __NR_query_module
-    disabled_syscall[__NR_query_module] = 1;
+
+#ifdef __NR_getgid
+    enabled_syscall[__NR_getgid] = 1;
 #endif
-#ifdef __NR_pread64
-    disabled_syscall[__NR_pread64] = 1;
+
+#ifdef __NR_getgroups
+    enabled_syscall[__NR_getgroups] = 1;
 #endif
-#ifdef __NR_pwrite64
-    disabled_syscall[__NR_pwrite64] = 1;
+
+#ifdef __NR_getrlimit
+    enabled_syscall[__NR_getrlimit] = 1;
 #endif
-#ifdef __NR_chown
-    disabled_syscall[__NR_chown] = 1;
+
+#ifdef __NR_getuid
+    enabled_syscall[__NR_getuid] = 1;
 #endif
-#ifdef __NR_sigaltstack
-    disabled_syscall[__NR_sigaltstack] = 1;
+
+#ifdef __NR_ioctl
+    enabled_syscall[__NR_ioctl] = 1;
 #endif
-#ifdef __NR_sendfile
-    disabled_syscall[__NR_sendfile] = 1;
+
+#ifdef __NR_lseek
+    enabled_syscall[__NR_lseek] = 1;
 #endif
-#ifdef __NR_getpmsg
-    disabled_syscall[__NR_getpmsg] = 1;
+
+#ifdef __NR_lstat
+    enabled_syscall[__NR_lstat] = 1;
 #endif
-#ifdef __NR_putpmsg
-    disabled_syscall[__NR_putpmsg] = 1;
+
+#ifdef __NR_mmap
+    enabled_syscall[__NR_mmap] = 1;
 #endif
-#ifdef __NR_vfork
-    disabled_syscall[__NR_vfork] = 1;
+
+#ifdef __NR_mprotect
+    enabled_syscall[__NR_mprotect] = 1;
 #endif
-#ifdef __NR_lchown32
-    disabled_syscall[__NR_lchown32] = 1;
+
+#ifdef __NR_mremap
+    enabled_syscall[__NR_mremap] = 1;
 #endif
-#ifdef __NR_chown32
-    disabled_syscall[__NR_chown32] = 1;
+
+#ifdef __NR_munmap
+    enabled_syscall[__NR_munmap] = 1;
 #endif
-#ifdef __NR_madvise1
-    disabled_syscall[__NR_madvise1] = 1;
+
+#ifdef __NR_pipe
+    enabled_syscall[__NR_pipe] = 1;
 #endif
-#ifdef __NR_fcntl64
-    disabled_syscall[__NR_fcntl64] = 1;
+
+#ifdef __NR_read
+    enabled_syscall[__NR_read] = 1;
 #endif
-#ifdef __NR_unused
-    disabled_syscall[__NR_unused] = 1;
+
+#ifdef __NR_readlink
+    enabled_syscall[__NR_readlink] = 1;
 #endif
-#ifdef __NR_setxattr
-    disabled_syscall[__NR_setxattr] = 1;
+
+#ifdef __NR_rt_sigaction
+    enabled_syscall[__NR_rt_sigaction] = 1;
 #endif
-#ifdef __NR_lsetxattr
-    disabled_syscall[__NR_lsetxattr] = 1;
+
+#ifdef __NR_rt_sigprocmask
+    enabled_syscall[__NR_rt_sigprocmask] = 1;
 #endif
-#ifdef __NR_fsetxattr
-    disabled_syscall[__NR_fsetxattr] = 1;
+
+#ifdef __NR_set_robust_list
+    enabled_syscall[__NR_set_robust_list] = 1;
 #endif
-#ifdef __NR_getxattr
-    disabled_syscall[__NR_getxattr] = 1;
-#endif
-#ifdef __NR_lgetxattr
-    disabled_syscall[__NR_lgetxattr] = 1;
-#endif
-#ifdef __NR_fgetxattr
-    disabled_syscall[__NR_fgetxattr] = 1;
-#endif
-#ifdef __NR_listxattr
-    disabled_syscall[__NR_listxattr] = 1;
-#endif
-#ifdef __NR_llistxattr
-    disabled_syscall[__NR_llistxattr] = 1;
-#endif
-#ifdef __NR_flistxattr
-    disabled_syscall[__NR_flistxattr] = 1;
-#endif
-#ifdef __NR_removexattr
-    disabled_syscall[__NR_removexattr] = 1;
-#endif
-#ifdef __NR_lremovexattr
-    disabled_syscall[__NR_lremovexattr] = 1;
-#endif
-#ifdef __NR_fremovexattr
-    disabled_syscall[__NR_fremovexattr] = 1;
-#endif
-#ifdef __NR_sendfile64
-    disabled_syscall[__NR_sendfile64] = 1;
-#endif
-#ifdef __NR_futex
-    disabled_syscall[__NR_futex] = 1;
-#endif
-#ifdef __NR_sched_setaffinity
-    disabled_syscall[__NR_sched_setaffinity] = 1;
-#endif
-#ifdef __NR_sched_getaffinity
-    disabled_syscall[__NR_sched_getaffinity] = 1;
-#endif
-#ifdef __NR_io_setup
-    disabled_syscall[__NR_io_setup] = 1;
-#endif
-#ifdef __NR_io_destroy
-    disabled_syscall[__NR_io_destroy] = 1;
-#endif
-#ifdef __NR_io_getevents
-    disabled_syscall[__NR_io_getevents] = 1;
-#endif
-#ifdef __NR_io_submit
-    disabled_syscall[__NR_io_submit] = 1;
-#endif
-#ifdef __NR_io_cancel
-    disabled_syscall[__NR_io_cancel] = 1;
-#endif
-#ifdef __NR_fadvise64
-    disabled_syscall[__NR_fadvise64] = 1;
-#endif
-#ifdef __NR_unused
-    disabled_syscall[__NR_unused] = 1;
-#endif
-#ifdef __NR_lookup_dcookie
-    disabled_syscall[__NR_lookup_dcookie] = 1;
-#endif
-#ifdef __NR_epoll_create
-    disabled_syscall[__NR_epoll_create] = 1;
-#endif
-#ifdef __NR_epoll_ctl
-    disabled_syscall[__NR_epoll_ctl] = 1;
-#endif
-#ifdef __NR_epoll_wait
-    disabled_syscall[__NR_epoll_wait] = 1;
-#endif
-#ifdef __NR_remap_file_pages
-    disabled_syscall[__NR_remap_file_pages] = 1;
-#endif
+
 #ifdef __NR_set_tid_address
-    disabled_syscall[__NR_set_tid_address] = 0;
+    enabled_syscall[__NR_set_tid_address] = 1;
 #endif
-#ifdef __NR_timer_create
-    disabled_syscall[__NR_timer_create] = 1;
+
+#ifdef __NR_stat
+    enabled_syscall[__NR_stat] = 1;
 #endif
-#ifdef __NR_timer_settime
-    disabled_syscall[__NR_timer_settime] = 1;
+
+#ifdef __NR_times
+    enabled_syscall[__NR_times] = 1;
 #endif
-#ifdef __NR_timer_gettime
-    disabled_syscall[__NR_timer_gettime] = 1;
+
+#ifdef __NR_uname
+    enabled_syscall[__NR_uname] = 1;
 #endif
-#ifdef __NR_timer_getoverrun
-    disabled_syscall[__NR_timer_getoverrun] = 1;
+
+#ifdef __NR_write
+    enabled_syscall[__NR_write] = 1;
 #endif
-#ifdef __NR_timer_delete
-    disabled_syscall[__NR_timer_delete] = 1;
-#endif
-#ifdef __NR_clock_settime
-    disabled_syscall[__NR_clock_settime] = 1;
-#endif
-#ifdef __NR_clock_gettime
-    disabled_syscall[__NR_clock_gettime] = 1;
-#endif
-#ifdef __NR_clock_getres
-    disabled_syscall[__NR_clock_getres] = 1;
-#endif
-#ifdef __NR_clock_nanosleep
-    disabled_syscall[__NR_clock_nanosleep] = 1;
-#endif
-#ifdef __NR_statfs64
-    disabled_syscall[__NR_statfs64] = 1;
-#endif
-#ifdef __NR_fstatfs64
-    disabled_syscall[__NR_fstatfs64] = 1;
-#endif
-#ifdef __NR_tgkill
-    disabled_syscall[__NR_tgkill] = 1;
-#endif
-#ifdef __NR_utimes
-    disabled_syscall[__NR_utimes] = 1;
-#endif
-#ifdef __NR_fadvise64_64
-    disabled_syscall[__NR_fadvise64_64] = 1;
-#endif
-#ifdef __NR_vserver
-    disabled_syscall[__NR_vserver] = 1;
-#endif
+
+
 
 #ifdef __NR_accept
     syscall_name[__NR_accept] = "__NR_accept";
@@ -1489,4 +1274,4 @@ int t = init();
 
 }
 
-#endif // __DISABLED_SYSCALL_H__
+#endif // __ENABLED_SYSCALL_H__

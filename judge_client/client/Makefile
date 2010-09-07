@@ -59,10 +59,10 @@ $(UNITTESTS): %_unittest : %.o %_unittest.o global.o args.o common_io.o logging.
 	$(CXX) $(CXXFLAGS) -L ../zunit -lzunit -DENABLE_DLOG -o $@ $(filter-out libsandbox.so JavaSandbox.jar CustomJavaCompiler.class guile_loader, $^)
 
 text_checker_unittest: text_file_reader.o checker.o
-special_checker_unittest: checker.o util.o tracer.o
-native_runner_unittest: runner.o util.o tracer.o
-script_runner_unittest: runner.o util.o tracer.o native_runner.o script_initializer.o guile_loader
-java_runner_unittest: runner.o libsandbox.so JavaSandbox.jar tracer.o util.o net_util.o
+special_checker_unittest: checker.o util.o tracer.o environment.o
+native_runner_unittest: runner.o util.o tracer.o environment.o
+script_runner_unittest: runner.o util.o tracer.o native_runner.o script_initializer.o guile_loader environment.o
+java_runner_unittest: runner.o libsandbox.so JavaSandbox.jar tracer.o util.o net_util.o environment.o
 compiler_unittest: environment.o util.o CustomJavaCompiler.class
 judge_unittest: compiler.o runner.o checker.o java_runner.o native_runner.o script_runner.o script_initializer.o text_checker.o special_checker.o environment.o util.o tracer.o text_file_reader.o libsandbox.so JavaSandbox.jar net_util.o
 control_unittest: compiler.o environment.o tracer.o util.o
