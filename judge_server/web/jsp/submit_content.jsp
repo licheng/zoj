@@ -21,28 +21,16 @@
 
 %>
 <script language="JavaScript">
+     function checkProblemFile(submitForm) {
+         var language = submitForm.languageId.value;
+         document.cookie = 'last_language=' + language;
 
-function checkProblemFile(submitForm) {
-    var message = "";
-    var languagelist=submitForm.languageId;
-    var flag=false;
-	for(i = 0; i<languagelist.length; i++)
-	{
-		if(languagelist[i].checked)
-			flag=true;
-    }
-    if(!flag){
-    	message = 'Language should be selected.';
-    }
-    if (submitForm.source.value == '') {
-        message += '\nSource cannot be empty';
-    }
-    if (message != "") {
-        alert(message);
-        return false;
-    }
-    return true;
-}
+         if (submitForm.source.value == '') {
+             alert('Source cannot be empty');
+             return false;
+         }
+         return true;
+     }
 </script>
         <logic:messagesPresent property="error">
         <div class="internalError">
@@ -68,14 +56,30 @@ function checkProblemFile(submitForm) {
                           <td>&nbsp;</td>
                           <td height="25"> <div align="right">Language&nbsp;&nbsp;</div></td>
                           <td>
+                              <select name="languageId">
                             <%
+                            int last_language = 1;
+                            Cookie[] cookies = request.getCookies();
+
+                            for(int i = 0; i < cookies.length; i++) { 
+                                Cookie c = cookies[i];
+                                try {
+                                    if (c.getName().equals("last_language")) {
+                                        last_language = Integer.valueOf(c.getValue());
+                                        break;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    continue;
+                                }
+                            }
                                 for (Iterator it = ((AbstractContest) request.getAttribute("contest")).getLanguages().iterator(); it.hasNext();) {
                                     Language language = (Language) it.next();
                             %>
-                              <input type="radio" name="languageId" value="<%=language.getId() %>" <%=("" +language.getId()).equals(request.getParameter("languageId")) ? "checked" : ""%>><%=language.getName()%>
+                            <option value="<%=language.getId() %>" <%=(language.getId() == last_language) ? "selected" : ""%>><%=language.getName()%> (<%=language.getCompiler()%>)</option>
                             <%
                             }
                             %>
+                            </select>
 
                         </tr>
                         <tr>
