@@ -60,7 +60,7 @@ class ScriptTracer : public Tracer {
                 if (regs.REG_SYSCALL == loader_syscall_magic_id_) {
                     loader_syscall_magic_left_--;
                     LOG(INFO) << "Left syscall times: " << loader_syscall_magic_left_;
-                    runner_->SetBaseMemory(ReadMemoryConsumption(pid_));
+                    runner_->SetBaseMemory(ReadMemoryConsumption(pid_, false));
                     runner_->SetBaseTime(ReadTimeConsumption(pid_));
                 }
             }
@@ -93,33 +93,6 @@ void ScriptRunner::InternalRun() {
 void ScriptRunner::SetLoaderSyscallMagic(unsigned long id, int count) {
     loader_syscall_magic_id_ = id;
     loader_syscall_magic_left_ = count;
-}
-
-void ScriptRunner::UpdateStatus() {
-    int ts = ReadTimeConsumption(pid_) - base_time_;
-    int ms = ReadMemoryConsumption(pid_) - base_memory_;
-    if (ts > time_consumption_) {
-        time_consumption_ = ts;
-    }
-    if (ms > memory_consumption_) {
-        memory_consumption_ = ms;
-    }
-    if (time_consumption_ > time_limit_ * 1000) {
-        result_ = TIME_LIMIT_EXCEEDED;
-    }
-    if (result_ == TIME_LIMIT_EXCEEDED && time_consumption_ <= time_limit_ * 1000) {
-        time_consumption_ = time_limit_ * 1000 + 1;
-    }
-    if (memory_consumption_ > memory_limit_) {
-        result_ = MEMORY_LIMIT_EXCEEDED;
-    }
-    if (result_ == MEMORY_LIMIT_EXCEEDED && memory_consumption_ <= memory_limit_) {
-        memory_consumption_ = memory_limit_ + 1;
-    }
-    DLOG<<time_consumption_<<' '<<memory_consumption_;
-    if (SendRunningMessage() == -1) {
-        result_ = INTERNAL_ERROR;
-    }
 }
 
 StartupInfo ScriptRunner::GetStartupInfo() {

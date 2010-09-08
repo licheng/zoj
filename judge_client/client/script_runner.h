@@ -28,7 +28,7 @@ class TraceCallback;
 class ScriptRunner : public NativeRunner {
   public:
     ScriptRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid, int language_id)
-        : NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid), base_memory_(0), base_time_(0) {
+        : NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid) {
         initializer_ = ScriptInitializer::create(language_id);
     }
 
@@ -37,10 +37,7 @@ class ScriptRunner : public NativeRunner {
     }
 
     void SetCommands(const char** commands) { this->commands = commands; };
-    void SetBaseTime(int time) { this->base_time_ = time; };
-    void SetBaseMemory(int memory) { this->base_memory_ = memory; };
     void SetLoaderSyscallMagic(unsigned long id, int count);
-    virtual void UpdateStatus();
 
   protected:
     virtual void InternalRun();
@@ -51,9 +48,6 @@ class ScriptRunner : public NativeRunner {
     const char** commands;
     unsigned long loader_syscall_magic_id_;
     int loader_syscall_magic_left_;
-
-    int base_memory_;
-    int base_time_;
 
   friend class ScriptRunnerTest;    
 };

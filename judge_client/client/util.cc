@@ -72,7 +72,7 @@ int ReadTimeConsumption(pid_t pid) {
     return int((utime + stime + 0.0) / clktck * 1000);
 }
 
-int ReadMemoryConsumption(pid_t pid) {
+int ReadMemoryConsumption(pid_t pid, bool is_peak_memory) {
     char buffer[64];
     sprintf(buffer, "/proc/%d/status", pid);
     FILE* fp = fopen(buffer, "r");
@@ -94,7 +94,7 @@ int ReadMemoryConsumption(pid_t pid) {
         }
     }
     fclose(fp);
-    if (vmPeak) {
+    if (vmPeak && is_peak_memory) {
         vmSize = vmPeak;
     }
     return vmSize - vmExe - vmLib - vmStack;

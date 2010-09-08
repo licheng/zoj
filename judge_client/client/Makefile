@@ -13,7 +13,7 @@ UNITTEST_RUNS:=$(patsubst %.cc,%.run,$(UNITTEST_SOURCES))
 all: judged guile_loader JavaSandbox.jar Sandbox.h libsandbox.so CustomJavaCompiler.class
 
 clean:
-	rm -f *.o *.d judged *.jar $(UNITTESTS) *.so Sandbox.h *.class
+	rm -f *.o *.d judged *.jar $(UNITTESTS) *.so Sandbox.h *.class guile_loader
 	@make -C testdata clean
 
 rebuild: clean all

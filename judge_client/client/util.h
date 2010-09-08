@@ -43,8 +43,9 @@ int SetLimit(int resource, unsigned int limit);
 int ReadTimeConsumption(int pid);
 
 // Returns the current maximum virtual memory consumption of the specified process in kilobytes. VmExe and VmLib are
-// excluded. If no such process exists, returns -1.
-int ReadMemoryConsumption(int pid);
+// excluded. If is_peak_memory is set(default), memory peak usage is returned, otherwise current usage is returned. If
+// no such process exists, returns -1.
+int ReadMemoryConsumption(int pid, bool is_peak_memory = true);
 
 // A struct including all restrictions to fork a child process.
 struct StartupInfo {

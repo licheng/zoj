@@ -29,12 +29,17 @@ class Tracer;
 class NativeRunner : public Runner {
   public:
     NativeRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid)
-        : Runner(sock, time_limit, memory_limit, output_limit, uid, gid) {
+        : Runner(sock, time_limit, memory_limit, output_limit, uid, gid), base_memory_(0), base_time_(0) {
     }
 
+    void SetBaseTime(int time) { this->base_time_ = time; };
+    void SetBaseMemory(int memory) { this->base_memory_ = memory; };
     virtual void UpdateStatus();
 
   protected:
+    int base_memory_;
+    int base_time_;
+
     virtual void InternalRun();
     virtual StartupInfo GetStartupInfo();
     virtual Tracer* CreateTracer(pid_t pid, Runner* runner);

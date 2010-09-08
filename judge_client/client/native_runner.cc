@@ -34,8 +34,8 @@
 #include "tracer.h"
 
 void NativeRunner::UpdateStatus() {
-    int ts = ReadTimeConsumption(pid_);
-    int ms = ReadMemoryConsumption(pid_);
+    int ts = ReadTimeConsumption(pid_) - base_time_;
+    int ms = ReadMemoryConsumption(pid_) - base_memory_;
     if (ts > time_consumption_) {
         time_consumption_ = ts;
     }
