@@ -82,11 +82,15 @@ int ReadStringFromTracedProcess(pid_t pid, unsigned long address, char* buffer, 
 
 bool AllowedFileAccess(const char* path) {
     static char path_buffer[FILENAME_MAX + 1];
+    // this should be consistent with environment.cc
     string prob_root = ARG_root + "/prob";
-    //static const char zoj_root[] = "/zoj/prob";
+
     if (path[0] == '\0')
         return false;
+
     realpath(path, path_buffer);
+
+    // the program is not allowed to access problem data
     if (strncmp(path_buffer, prob_root.c_str(), prob_root.size()) == 0) {
         LOG(INFO)<<"Accessing "<<path_buffer<<" is not allowed";
         return false;
@@ -132,6 +136,8 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
             if (regs.REG_ARG4 == 0 || ReadStringFromTracedProcess(pid_, regs.REG_ARG4, path_, sizeof(struct timeval) + 1) < 0) {
                 break;
             }
+
+            // we only allow "selects" that immediately returns
             for (i = 0; i < sizeof(struct timeval); i++) {
                 if (path_[i] != 0)
                     break;
@@ -153,8 +159,6 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
                 break;
             }
             DLOG<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
-            LOG(INFO)<<"SYS_open "<<path_<<" flag "<<hex<<regs.REG_ARG1;
-            //if (!AllowedToOpen(path_, regs.REG_ARG1)) {
             if (restricted_open_path_ && !AllowedFileAccess(path_)) {
                 break;
             }

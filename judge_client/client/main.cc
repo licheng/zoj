@@ -201,8 +201,9 @@ int ControlMain(const string& queue_address, int queueu_port, int port);
 int JudgeMain(int sock, int uid, int gid);
 
 int main(int argc, const char* argv[]) {
-    //LOG(INFO) << "real uid " << getuid() << " euid " << geteuid();
-    //return 1;
+    // if the executable file is marked with setuid attribute, the effective uid
+    // may be file's uid (usually root). so we need to downgrade to runner's uid
+    // first
     seteuid(getuid());
 
     if (ParseArguments(argc, argv) < 0) {

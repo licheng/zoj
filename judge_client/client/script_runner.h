@@ -28,7 +28,7 @@ class TraceCallback;
 class ScriptRunner : public NativeRunner {
   public:
     ScriptRunner(int sock, int time_limit, int memory_limit, int output_limit, int uid, int gid, int language_id)
-        : NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid) {
+        : NativeRunner(sock, time_limit, memory_limit, output_limit, uid, gid), commands(NULL) {
         initializer_ = ScriptInitializer::create(language_id);
     }
 

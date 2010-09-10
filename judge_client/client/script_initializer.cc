@@ -175,5 +175,9 @@ namespace {
 }
 
 ScriptInitializer* ScriptInitializer::create(int language_id) {
-    return SCRIPT_INITIALIZER_LIST.get(language_id);
+    ScriptInitializer* ret = SCRIPT_INITIALIZER_LIST.get(language_id);
+    if (ret == NULL) {
+        LOG(ERROR) << "initializer for script language " << language_id << "is not found";
+    }
+    return ret;
 }

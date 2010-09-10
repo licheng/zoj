@@ -62,6 +62,7 @@ class Tracer {
         return status_;
     }
 
+    // this is mainly for special judge
     void SetRestrictedOpenPath(bool value) {
         restricted_open_path_ = value;
     }

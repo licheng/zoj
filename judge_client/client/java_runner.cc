@@ -132,8 +132,8 @@ void JavaRunner::InternalRun() {
         close(server_sock);
         Log::Close();
 
-        // since java need to open corresponding output file, which needs
-        // parent user-id's permissions, and after opening the file the java
+        // since java need to open corresponding output file (which needs
+        // parent user's permissions) and after opening the file the java
         // process need to set uid/gid to drop privilleges, we may need to
         // gain root access for the java process
         if ((uid_ != 0 && uid_ != geteuid()) || (gid_ != 0 && gid_ != getegid())) {
@@ -144,7 +144,6 @@ void JavaRunner::InternalRun() {
             }
         }
 
-        //execlp("strace", "strace", "-o", "/tmp/gao.tmp", "-f", "java",
         execlp("java", "java",
                StringPrintf("-Xms%dk", memory_limit_ / 2 + 8192).c_str(),
                StringPrintf("-Xmx%dk", memory_limit_ + 8192).c_str(),

@@ -87,6 +87,12 @@ Tracer* ScriptRunner::CreateTracer(pid_t pid, Runner* runner) {
 
 void ScriptRunner::InternalRun() {
     initializer_->SetUp(this);
+    if (commands == NULL) {
+        LOG(ERROR) << "script command is not set";
+        result_ = INTERNAL_ERROR;
+        UpdateStatus();
+        return;
+    }
     RunProgram(commands);
 }
 
