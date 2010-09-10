@@ -42,7 +42,7 @@ namespace {
     private:
         string loader_string;
         string memory_limit_str;
-        const char* commands[6];
+        const char* commands[7];
 
     public:
         PythonScriptInitializer() : ScriptInitializer(5) {};
@@ -55,10 +55,11 @@ namespace {
 
             commands[0] = "/usr/bin/python";
             commands[1] = "python";
-            commands[2] = loader_string.c_str();
-            commands[3] = memory_limit_str.c_str();
-            commands[4] = "p.py";
-            commands[5] = NULL;
+            commands[2] = "-B";
+            commands[3] = loader_string.c_str();
+            commands[4] = memory_limit_str.c_str();
+            commands[5] = "p.py";
+            commands[6] = NULL;
 
             runner->SetCommands(commands);
             runner->SetLoaderSyscallMagic(__NR_setrlimit, 2);
