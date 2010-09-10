@@ -413,8 +413,7 @@ public abstract class BaseAction extends Action {
      */
     protected boolean isLogin(ContextAdapter context, boolean includeParameters) {
         if (context.getUserProfile() == null) {
-            String uri = context.getRequest().getRequestURI();
-            uri = uri.substring(uri.indexOf('/', 1));
+            String uri = context.getRequest().getServletPath();
             if (includeParameters) {
                 StringBuffer sb = new StringBuffer();
                 sb.append(uri);
