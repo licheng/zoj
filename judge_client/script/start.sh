@@ -1,4 +1,11 @@
 #!/bin/bash
+
+JUDGE_USER=65533
+JUDGE_GROUP=65533
+UNTRUSTED_USER=65534
+UNTRUSTED_GROUP=65534
+
+
 set -e
 
 function CreateDir() {
@@ -85,7 +92,6 @@ rm -rf "$root"/working/*
 # Prepare /log
 CreateDir "$root/log" 750
 
-ids="--uid=65534 --gid=65534"
-cmd="sudo -u zoj $root/judged --compiler='$supported_source_file_types' --daemonize=false --root='$root' --queue_address='$address' --queue_port=$port $ids"
+cmd="sudo -u \\#$JUDGE_USER $root/judged --compiler='$supported_source_file_types' --daemonize=true --root='$root' --queue_address='$address' --queue_port=$port --uid=$UNTRUSTED_USER --gid=$UNTRUSTED_GROUP"
 echo $cmd
 eval $cmd

@@ -54,8 +54,7 @@ struct CompilerInfo {
     {6, "perl", "p.pl"},
     {7, "scheme", "p.scm"},
     {8, "php", "p.php"},
-    {9, "brainfuck", "p.bf"},
-    {10, "whitespace", "p.ws"}
+    {9, "brainfuck", "p.bf"}
 };
 
 }
