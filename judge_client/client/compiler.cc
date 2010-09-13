@@ -117,53 +117,34 @@ int Compiler::Compile(int sock) const {
                                   this->compiler_name_.c_str(),
                                   source_filename_.c_str());
     LOG(INFO)<<"Command: "<<command;
-    int fd_pipe[2];
-    if (pipe(fd_pipe) < 0) {
-        LOG(SYSCALL_ERROR)<<"Fail to create pipe";
-        WriteUint32(sock, INTERNAL_ERROR);
-        return -1;
-    }
+
     StartupInfo info;
-    info.fd_stderr = fd_pipe[1];
+    info.stderr_filename = "compile_msg";
     info.time_limit = ARG_compilation_time_limit;
     info.output_limit = ARG_compilation_output_limit;
     info.trace = 0;
     pid_t pid = CreateShellProcess(command.c_str(), info);
-    close(fd_pipe[1]);
     if (pid < 0) {
         LOG(INFO)<<"Compilation failed";
-        close(fd_pipe[0]);
         WriteUint32(sock, INTERNAL_ERROR);
         return -1;
     }
-    static signed char error_message[4096];
-    int count = Readn(fd_pipe[0], error_message, sizeof(error_message));
-    close(fd_pipe[0]);
-    if (count < 0) {
-        LOG(ERROR)<<"Fail to read error messages";
-        WriteUint32(sock, INTERNAL_ERROR);
-        return -1;
-    }
+
     int status = 0;
-    if (count == sizeof(error_message)) {
-        kill(pid, SIGKILL);
-    }
     while (waitpid(pid, &status, 0) < 0) {
         if (errno != EINTR) {
             LOG(SYSCALL_ERROR);
             return INTERNAL_ERROR;
         }
     }
-    if (count == sizeof(error_message)) {
-        status = 1;
-    } else {
-        if (WIFSIGNALED(status)) {
-            LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
-            WriteUint32(sock, INTERNAL_ERROR);
-            return -1;
-        }
-        status = WEXITSTATUS(status);
+
+    if (WIFSIGNALED(status)) {
+        LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
+        WriteUint32(sock, INTERNAL_ERROR);
+        return -1;
     }
+    status = WEXITSTATUS(status);
+
     if (status) {
         if (status >= 126) {
             LOG(INFO)<<"Running compile.sh failed";
@@ -172,6 +153,17 @@ int Compiler::Compile(int sock) const {
         } else {
             LOG(INFO)<<"Compilation error";
             WriteUint32(sock, COMPILATION_ERROR);
+
+            static signed char error_message[4096];
+            int count = 0;
+            int fd = open("compile_msg", O_RDONLY, 0777);
+            if (fd != -1) {
+                count = Readn(fd, error_message, sizeof(error_message));
+                if (count == -1)
+                    count = 0;
+                close(fd);
+            }
+
             uint32_t len = htonl(count);
             Writen(sock, &len, sizeof(len));
             for (int i = 0; i < count; ++i) {

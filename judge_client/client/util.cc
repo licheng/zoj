@@ -111,7 +111,7 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
     } if (pid > 0) {
         return pid;
     }
-    int mode[] = {O_RDONLY, O_RDWR | O_CREAT | O_TRUNC, O_RDWR};
+    int mode[] = {O_RDONLY, O_RDWR | O_CREAT | O_TRUNC, O_RDWR | O_CREAT | O_TRUNC};
     int fd[] = {process_info.fd_stdin,
                 process_info.fd_stdout,
                 process_info.fd_stderr};
@@ -120,7 +120,7 @@ int CreateProcess(const char* commands[], const StartupInfo& process_info) {
             if (fd[i]) {
                 close(fd[i]);
             }
-            fd[i] = open(filename[i], mode[i], 0777);
+            fd[i] = open(filename[i], mode[i], 0666);
         }
         if (fd[i] == -1) {
             LOG(SYSCALL_ERROR)<<"Fail to open "<<filename[i];
