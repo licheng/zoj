@@ -42,6 +42,7 @@
     	<input type="hidden" name="query" value="<%=query %>" />
 
 <div id="content_title"> Search by Title (from <%=titlefrom*50+1 %> to <%=(titlefrom*50+49 >TitleQueryResultCount)?TitleQueryResultCount:titlefrom*50+49+1 %> result in all <%=TitleQueryResultCount %> ) </div>
+<div id="content_body">
 <table class="list">
     <%
     List problems = (List) request.getAttribute("TitleQueryResult");
@@ -76,6 +77,7 @@
     }
     %>
 </table>
+</div>
 <% if(titlefrom>0) {%>
 <input type="submit" onclick="document.all['titlefrom'].value='<%=titlefrom-1 %>'" value="Prev Page"/>
 <%} %>
@@ -84,6 +86,7 @@
 <%} %>
 
 <div id="content_title"> Search by Source (from <%=sourcefrom*50+1 %> to <%=(sourcefrom*50+49 >SourceQueryResultCount)?SourceQueryResultCount:sourcefrom*50+49+1 %> result in all <%=SourceQueryResultCount %> ) </div>
+<div id="content_body">
 <table class="list">
     <%
     problems = (List) request.getAttribute("SourceQueryResult");
@@ -121,6 +124,7 @@
     }
     %>
 </table>
+</div>
 <% if(sourcefrom>0) {%>
 <input type="submit" onclick="document.all['sourcefrom'].value='<%=sourcefrom-1 %>'" value="Prev Page"/>
 <%} %>
