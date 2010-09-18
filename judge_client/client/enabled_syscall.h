@@ -101,8 +101,8 @@ int init() {
     enabled_syscall[__NR_ioctl] = 1;
 #endif
 
-#ifdef __NR_llseek
-    enabled_syscall[__NR_llseek] = 1;
+#ifdef __NR__llseek
+    enabled_syscall[__NR__llseek] = 1;
 #endif
 
 #ifdef __NR_lseek
@@ -111,6 +111,10 @@ int init() {
 
 #ifdef __NR_lstat
     enabled_syscall[__NR_lstat] = 1;
+#endif
+
+#ifdef __NR_lstat64
+    enabled_syscall[__NR_lstat64] = 1;
 #endif
 
 #ifdef __NR_mmap

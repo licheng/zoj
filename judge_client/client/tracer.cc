@@ -130,7 +130,11 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
             }
         }
         break;
+#if __WORDSIZE == 64
     case SYS_select:
+#else
+    case SYS__newselect:
+#endif
         if (before_syscall_) {
             size_t i;
             if (regs.REG_ARG4 == 0 || ReadStringFromTracedProcess(pid_, regs.REG_ARG4, path_, sizeof(struct timeval) + 1) < 0) {
