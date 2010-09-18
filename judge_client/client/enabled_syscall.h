@@ -185,6 +185,10 @@ int init() {
     enabled_syscall[__NR_times] = 1;
 #endif
 
+#ifdef __NR_ugetrlimit
+    enabled_syscall[__NR_ugetrlimit] = 1;
+#endif
+
 #ifdef __NR_uname
     enabled_syscall[__NR_uname] = 1;
 #endif
