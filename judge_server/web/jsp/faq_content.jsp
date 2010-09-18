@@ -9,10 +9,10 @@ C++: <font color=blue>g++ foo.c -o foo -ansi -fno-asm -O2 -Wall -lm --static -DO
 Free Pascal(FPC): <font color=blue>fpc -Sd -O2 -Op2 -dONLINE_JUDGE</font><br>
 Java: <font color=blue>No special options</font><br>
 Our compiler software version:<br>
-<font color=blue>gcc/g++ (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)</font><br>
-<font color=blue>glibc 2.7.1</font><br>
-<font color=blue>Free Pascal Compiler version 2.2.0 [2008/04/01] for i386</font><br>
-<font color=blue>java version "1.6.0_06"</font><br>
+<font color=blue>gcc/g++ 4.4.5 (Debian 4.4.4-8)</font><br>
+<font color=blue>glibc 2.11.2</font><br>
+<font color=blue>Free Pascal Compiler version 2.4.0 [2010/02/20] for i386</font><br>
+<font color=blue>java version "1.6.0_21"</font><br>
 <hr>
 <font color=green>Q</font>:Free Pascal Runtime Error Numbers<br>
 <font color=red>A</font>:Refer to here <a href="http://www.freepascal.org/docs-html/user/node16.html">http://www.freepascal.org/docs-html/user/node16.html</a> for detailed runtime error informations.<br>
@@ -32,32 +32,33 @@ We list some frequently used error numbers here:<br>
 User programs are not allowed to open and read from/write to files, you will get a "<font color=green>Runtime Error</font>" if you try to do so.<br>
 <a name="sample">Here is a sample solution for problem 1001 using C++:</a><br>
 <pre>
-<font color="20B000" size=5>#include &lt;iostream&gt;
+<font color="20B000">#include &lt;iostream&gt;
 using namespace std;
 
 int main()
 {
     int a,b;
-    while(cin >> a >> b)
-        cout << a+b << endl;
+    while(cin &gt;&gt; a &gt;&gt; b)
+        cout &lt;&lt; a+b &lt;&lt; endl;
 }
 </font>
 </pre>
 Here is a sample solution for problem 1001 using C:<br>
 <pre>
-<font color="20B000" size=5>#include &lt;stdio.h&gt;
+<font color="20B000">#include &lt;stdio.h&gt;
 
 int main()
 {
     int a,b;
     while(scanf("%d %d",&amp;a, &amp;b) != EOF)
         printf("%d\n",a+b);
+    return 0;
 }
 </font>
 </pre>
 Here is a sample solution for problem 1001 using PASCAL(FPC):<br>
 <pre>
-<font color="20B000" size=5>
+<font color="20B000">
 program p1001(Input,Output); 
 var 
   a,b:Integer; 
@@ -72,7 +73,7 @@ end.
 </pre>
 Here is a sample solution for problem 1001 using Java:<br>
 <pre>
-<font color="20B000" size=5>
+<font color="20B000">
 import java.util.Scanner;
 
 public class Main {
@@ -87,6 +88,26 @@ public class Main {
 }
 </font>
 </pre>
+Here is a sample solution for problem 1001 using Python:<br>
+<pre>
+<font color="20B000">
+import sys
+for line in sys.stdin:
+    a = line.split()
+    print int(a[0]) + int(a[1])
+</font>
+</pre>
+
+Here is a sample solution for problem 1001 using PHP:<br>
+<pre>
+<font color="20B000">
+&lt;?php
+while (fscanf(STDIN, "%d%d", $a, $b) == 2) {
+    print ($a + $b) . "\n";
+}
+</font>
+</pre>
+
 <hr>
 <font color=green>Q</font>:Why did I get a Compile Error? It's well done!<br>
 <font color=red>A</font>:There are some differences between GNU and MS-VC++, such as:<br>
@@ -113,6 +134,8 @@ public class Main {
 <font color=blue>Memory Limit Exceeded</font> : Your program tried to use more memory than the judge default settings.  <br>
 <br>
 <font color=blue>Output Limit Exceeded</font>: Your program tried to write too much information. This usually occurs if it goes into a infinite loop. Currently the output limit is 1M bytes.<br>
+<br>
+<font color=blue>Non-zero Exit Code</font>: Your program exited returning a non-zero value to the shell. For languages such as C, this probably means you forgot to add "return 0" at the end of the program. For interpreted languages NZEC will usually mean that your program either crashed or raised an uncaught exception.<br>
 <br>
 <font color=blue>Compile Error</font> : The compiler (gcc, g++, fpc, etc) could not compile your program. Of course, warning messages are not error messages. Click the link at the judge reply to see the actual error message.<br>
 <br>
