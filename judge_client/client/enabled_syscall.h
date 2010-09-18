@@ -177,6 +177,10 @@ int init() {
     enabled_syscall[__NR_stat64] = 1;
 #endif
 
+#ifdef __NR_time
+    enabled_syscall[__NR_time] = 1;
+#endif
+
 #ifdef __NR_times
     enabled_syscall[__NR_times] = 1;
 #endif
