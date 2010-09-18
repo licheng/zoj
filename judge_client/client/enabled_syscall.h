@@ -137,6 +137,10 @@ int init() {
     enabled_syscall[__NR_rt_sigprocmask] = 1;
 #endif
 
+#ifdef __NR_set_thread_area
+    enabled_syscall[__NR_set_thread_area] = 1;
+#endif
+
 #ifdef __NR_set_tid_address
     enabled_syscall[__NR_set_tid_address] = 1;
 #endif
