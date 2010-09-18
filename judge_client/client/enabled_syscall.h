@@ -53,6 +53,10 @@ int init() {
     enabled_syscall[__NR_fcntl] = 1;
 #endif
 
+#ifdef __NR_fcntl64
+    enabled_syscall[__NR_fcntl64] = 1;
+#endif
+
 #ifdef __NR_fstat
     enabled_syscall[__NR_fstat] = 1;
 #endif
@@ -95,6 +99,10 @@ int init() {
 
 #ifdef __NR_ioctl
     enabled_syscall[__NR_ioctl] = 1;
+#endif
+
+#ifdef __NR_llseek
+    enabled_syscall[__NR_llseek] = 1;
 #endif
 
 #ifdef __NR_lseek
@@ -155,6 +163,10 @@ int init() {
 
 #ifdef __NR_stat
     enabled_syscall[__NR_stat] = 1;
+#endif
+
+#ifdef __NR_stat64
+    enabled_syscall[__NR_stat64] = 1;
 #endif
 
 #ifdef __NR_times
