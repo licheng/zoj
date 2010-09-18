@@ -141,7 +141,7 @@ namespace {
             commands[7] = NULL;
 
             runner->SetCommands(commands);
-            runner->SetLoaderSyscallMagic(__NR_uname, 1);
+            runner->SetLoaderSyscallMagic(__NR_times, 1);
         };
     };
 

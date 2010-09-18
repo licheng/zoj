@@ -19,7 +19,7 @@ register_shutdown_function("sandbox_shutdown_function");
 set_error_handler("sandbox_error_function");
 
 # special signal send to judge notifing program is ready to run
-posix_uname();
+posix_times();
 
 require 'p.php';
 
