@@ -73,6 +73,10 @@ int init() {
     enabled_syscall[__NR_getdents] = 1;
 #endif
 
+#ifdef __NR_getdents64
+    enabled_syscall[__NR_getdents64] = 1;
+#endif
+
 #ifdef __NR_getegid
     enabled_syscall[__NR_getegid] = 1;
 #endif
