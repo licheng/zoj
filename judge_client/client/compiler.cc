@@ -139,11 +139,16 @@ int Compiler::Compile(int sock) const {
     }
 
     if (WIFSIGNALED(status)) {
-        LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
-        WriteUint32(sock, INTERNAL_ERROR);
-        return -1;
+        if (WTERMSIG(status) != SIGXFSZ) {
+            LOG(ERROR)<<"Compilation terminated by signal "<<WTERMSIG(status);
+            WriteUint32(sock, INTERNAL_ERROR);
+            return -1;
+        } else {
+            status = 1;
+        }
+    } else {
+        status = WEXITSTATUS(status);
     }
-    status = WEXITSTATUS(status);
 
     if (status) {
         if (status >= 126) {
