@@ -57,6 +57,10 @@ int init() {
     enabled_syscall[__NR_fstat] = 1;
 #endif
 
+#ifdef __NR_fstat64
+    enabled_syscall[__NR_fstat64] = 1;
+#endif
+
 #ifdef __NR_getcwd
     enabled_syscall[__NR_getcwd] = 1;
 #endif
