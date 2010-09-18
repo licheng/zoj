@@ -109,6 +109,10 @@ int init() {
     enabled_syscall[__NR_mmap] = 1;
 #endif
 
+#ifdef __NR_mmap2
+    enabled_syscall[__NR_mmap2] = 1;
+#endif
+
 #ifdef __NR_mprotect
     enabled_syscall[__NR_mprotect] = 1;
 #endif
