@@ -24,3 +24,9 @@ $SIG{__DIE__} = sub {
 setrlimit(RLIMIT_DATA, $memory_limit, $memory_limit + 1);
 setrlimit(RLIMIT_AS, $memory_limit + 10 * 1024 * 1024, $memory_limit + 10 * 1024 * 1024 + 1);
 
+# just uses some more memory to keep memory usage away from zero...
+my %_foooo = ();
+for (my $_barrr = 1; $_barrr < 1000; $_barrr++) {
+    $_foooo{$_barrr} = '................';
+}
+1;

@@ -559,7 +559,6 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                                                                         JudgeReply.TIME_LIMIT_EXCEEDED,
                                                                         JudgeReply.MEMORY_LIMIT_EXCEEDED,
                                                                         JudgeReply.SEGMENTATION_FAULT,
-                                                                        JudgeReply.NON_ZERO_EXIT_CODE,
                                                                         JudgeReply.COMPILATION_ERROR,
                                                                         JudgeReply.PRESENTATION_ERROR}));
 
