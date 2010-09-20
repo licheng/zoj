@@ -438,6 +438,9 @@ CREATE UNIQUE INDEX unique_reply
 CREATE INDEX index_submission_contest_order 
         ON submission (contest_id, contest_order);
 
+CREATE INDEX index_submission_contest_language_order
+        ON submission (contest_id, language_id, contest_order);
+
 CREATE INDEX index_submission_user_reply_contest
         ON submission (user_profile_id, judge_reply_id, contest_id);
 

@@ -546,6 +546,7 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
         String problemIndex = "index_submission_problem_reply";
 
         String judgeReplyIndex = "fk_submission_reply";
+        String languageIndex = "index_submission_contest_language_order";
         String defaultIndex = "index_submission_contest_order";
 
         Set<String> easyProblems =
@@ -643,6 +644,8 @@ public class SubmissionPersistenceImpl implements SubmissionPersistence {
                 languageIds.add(language.getId());
             }
             query.append(" AND s.language_id IN " + Database.createNumberValues(languageIds));
+            if (index == null)
+                index = languageIndex;
         }
         query.append(" ORDER BY contest_order " + order);
         query.append(" LIMIT " + count);
