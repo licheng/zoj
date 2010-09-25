@@ -221,7 +221,10 @@ public class JudgeClientJudgeThread extends Thread {
             reply = this.sendDataCommand(problem);
         }
         if (reply == JudgeReply.COMPILATION_ERROR.getId()) {
-            throw new ProblemDataErrorException("Special judge compilation failure for problem " + problem.getId());
+            int length = this.in.readInt();
+            byte[] bytes = new byte[length];
+            this.in.read(bytes);
+            throw new ProblemDataErrorException("Special judge compilation failure for problem " + problem.getId() + ": " + new String(bytes));
         }
         if (reply != JudgeReply.READY.getId()) {
             throw new JudgeClientErrorException();

@@ -26,7 +26,7 @@ setrlimit(RLIMIT_AS, $memory_limit + 10 * 1024 * 1024, $memory_limit + 10 * 1024
 
 # just uses some more memory to keep memory usage away from zero...
 my %_foooo = ();
-for (my $_barrr = 1; $_barrr < 1000; $_barrr++) {
+for (my $_barrr = 1; $_barrr < 5000; $_barrr++) {
     $_foooo{$_barrr} = '................';
 }
 1;

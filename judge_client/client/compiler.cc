@@ -164,7 +164,7 @@ int Compiler::Compile(int sock) const {
             int fd = open("compile_msg", O_RDONLY, 0777);
             if (fd != -1) {
                 count = Readn(fd, error_message, sizeof(error_message));
-                if (count == -1)
+                if (count < 0)
                     count = 0;
                 close(fd);
             }
