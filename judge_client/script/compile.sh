@@ -47,6 +47,7 @@ case $1 in
         exit 0
         ;;
     python)
+        echo >> $src
         exit 0
         ;;
     perl)
