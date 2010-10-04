@@ -53,7 +53,7 @@ if [[ "`which java`" != "" && "`which javac`" != "" ]]; then
     supported_source_file_types=$supported_source_file_types,javac
 fi
 
-if [ "`which python`" != "" ]; then
+if [ "`which python`" != "" && "`which pyflakes`" != "" ]; then
     supported_source_file_types=$supported_source_file_types,python
 fi
 

@@ -48,7 +48,7 @@ case $1 in
         ;;
     python)
         echo >> $src
-        exit 0
+        pyflakes $src 1>&2
         ;;
     perl)
         exit 0
