@@ -348,7 +348,7 @@ int CheckData(int sock, const string& data_dir) {
                     ret = -1;
                 } else {
                     int result = judge_compiler->Compile(sock);
-                    if (result == -1) {
+                    if (result != 0) {
                         ret = -1;
                     } else if (result == 0 && system(("mv p \"" + data_dir + "/judge\"").c_str())) {
                         LOG(SYSCALL_ERROR)<<"Fail to mv";
