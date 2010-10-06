@@ -153,6 +153,10 @@ int init() {
     enabled_syscall[__NR_readlink] = 1;
 #endif
 
+#ifdef __NR_readv
+    enabled_syscall[__NR_readv] = 1;
+#endif
+
 #ifdef __NR_rt_sigaction
     enabled_syscall[__NR_rt_sigaction] = 1;
 #endif
@@ -195,6 +199,10 @@ int init() {
 
 #ifdef __NR_write
     enabled_syscall[__NR_write] = 1;
+#endif
+
+#ifdef __NR_writev
+    enabled_syscall[__NR_writev] = 1;
 #endif
 
 
