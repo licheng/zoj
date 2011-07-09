@@ -91,7 +91,7 @@ public class SearchProblemAction extends BaseAction {
 		context.setAttribute("authorfrom", authorfrom);
 		
 		context.setAttribute("SourceQueryResultCount", SourceQueryResult.size());
-		if(titlefrom*50+49>SourceQueryResult.size()) {
+		if(sourcefrom*50+49>SourceQueryResult.size()) {
 			context.setAttribute("SourceQueryResult", SourceQueryResult.subList(sourcefrom*50, SourceQueryResult.size()));
 			} else {
 				context.setAttribute("SourceQueryResult", SourceQueryResult.subList(sourcefrom*50, sourcefrom*50+49));
