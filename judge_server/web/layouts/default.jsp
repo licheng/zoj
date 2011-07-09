@@ -15,6 +15,8 @@
     <head>
         <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
         <META HTTP-EQUIV="EXPIRES" CONTENT="0">
+        <meta content="ZOJ is an online judge system maintained by Zhejiang University ACM/ICPC Team. It allows people to solve algorithm problems online." name="description">
+        <meta name="keywords" content="programming, language, algorithm, contest, java, scheme, php, pascal, c, c++, python, perl, online, judge, problem, problemset, acm, zoj, zhejiang, university, zju">
 
         <title><tiles:getAsString name="title"/></title>
         <link rel="stylesheet" href="<%=request.getContextPath()%>/style/zoj.css" type="text/css">
