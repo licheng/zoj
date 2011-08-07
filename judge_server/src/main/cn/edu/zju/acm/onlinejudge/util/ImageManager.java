@@ -17,6 +17,7 @@ package cn.edu.zju.acm.onlinejudge.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.FileInputStream;
 
 import cn.edu.zju.acm.onlinejudge.persistence.PersistenceCreationException;
@@ -76,8 +77,16 @@ public class ImageManager {
     }
 
     private byte[] getImageFile(String name) {
-
-        File file = new File(ConfigManager.getImagePath(), name);
+        String imagePath = ConfigManager.getImagePath();
+        File file = new File(imagePath, name);
+        try {
+            if (!file.getCanonicalPath().startsWith(imagePath)) {
+                // WTF?
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
         FileInputStream in = null;
         try {
             if (!file.isFile() || !file.canRead()) {
