@@ -20,6 +20,7 @@
 #include "logging.h"
 
 #include <cstdio>
+#include <cstddef>
 
 #include <sys/socket.h>
 #include <sys/un.h>

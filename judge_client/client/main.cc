@@ -25,6 +25,7 @@
 #include <sys/un.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <cstddef>
 #include <unistd.h>
 
 #include "args.h"
