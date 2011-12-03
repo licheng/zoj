@@ -136,16 +136,22 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
     case SYS__newselect:
 #endif
         if (before_syscall_) {
-            size_t i;
-            if (regs.REG_ARG4 == 0 || ReadStringFromTracedProcess(pid_, regs.REG_ARG4, path_, sizeof(struct timeval) + 1) < 0) {
+            long address = regs.REG_ARG4;
+            if (address == 0)
                 break;
+
+            size_t i;
+            memset(path_, 0, sizeof(struct timeval));
+            for (i = 0; i < sizeof(struct timeval); i += sizeof(long)) {
+                long data = ptrace(PTRACE_PEEKDATA, pid_, address + i, 0);
+                long* buf = (long*)&path_[i];
+                *buf = data;
             }
 
             // we only allow "selects" that immediately returns
-            for (i = 0; i < sizeof(struct timeval); i++) {
-                if (path_[i] != 0)
-                    break;
-            }
+            struct timeval* t = (struct timeval*)&path_;
+            if (t->tv_sec != 0 || t->tv_usec != 0)
+                break;
         }
         ptrace(PTRACE_SYSCALL, pid_, 0, 0);
         return true;

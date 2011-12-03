@@ -236,6 +236,25 @@ TEST_F(ScriptRunnerTest, PythonRuntimeErrorRestrictedFunctionInvalidOpen) {
     }
 }
 
+TEST_F(ScriptRunnerTest, PythonRuntimeErrorRestrictedFunctionSleep) {
+    ASSERT_EQUAL(0, symlink((TESTDIR + "/rf_sleep.py").c_str(), "p.py"));
+
+    ASSERT_EQUAL(1, Run(LANGUAGE_PYTHON));
+
+    for (;;) {
+        int reply = TryReadUint32(fd_[0]);
+        int time = TryReadUint32(fd_[0]);
+        int memory = TryReadUint32(fd_[0]);
+        if (time < 0) {
+            ASSERT_EQUAL(RUNTIME_ERROR, reply);
+            break;
+        }
+        ASSERT_EQUAL(RUNNING, reply);
+        ASSERT(time >= 0);
+        ASSERT(memory >= 0);
+    }
+}
+
 // ==================================================================
 
 
