@@ -46,6 +46,8 @@ class Tracer {
           status_(-1), first_execve_(true), before_syscall_(true), restricted_open_path_(true) {
     }
 
+    virtual ~Tracer() {}
+
     bool HasExited() {
         return exited_;
     }

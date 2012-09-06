@@ -77,7 +77,9 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
             WriteUint32(sock, READY);
             wait_time = 1;
         } else if (command == CMD_INFO) {
-            uint32_t buf[128] = {port, supported_compilers.size()};
+            uint32_t buf[128];
+            buf[0] = port;
+            buf[1] = supported_compilers.size();
             int n = 2;
             for (int i = 0; i < supported_compilers.size(); ++i) {
                 buf[n++] = supported_compilers[i]->id();

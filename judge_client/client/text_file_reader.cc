@@ -20,6 +20,7 @@
 #include "text_file_reader.h"
 
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "common_io.h"
 #include "logging.h"

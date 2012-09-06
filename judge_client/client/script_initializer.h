@@ -39,6 +39,7 @@ protected:
 public:
     // this function will be called each time target script runs
     virtual void SetUp(ScriptRunner* runner) {};
+    virtual ~ScriptInitializer() {};
 
     static ScriptInitializer* create(int language_id);
 }; 
