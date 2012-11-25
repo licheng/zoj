@@ -965,6 +965,8 @@ VALUES(19, 'judging', 'Judging', false, 1, NOW(), 1, NOW());
 INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
 VALUES(20, 'Submission Limit Exceeded', 'Submission Limit Exceeded', false, 1, NOW(), 1, NOW());
 INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
+VALUES(21, 'Non-zero Exit Code', 'Non-zero Exit Code', false, 1, NOW(), 1, NOW());
+INSERT INTO judge_reply (judge_reply_id, name, description, committed, create_user, create_date, last_update_user, last_update_date)
 VALUES(101, 'Aborted', 'Aborted', false, 1, NOW(), 1, NOW());
 
 INSERT INTO user_profile(user_profile_id, handle, nickname, password, email_address, reg_date, first_name, last_name, address_line1, address_line2, city, state, country_id, zip_code, phone_number, 
