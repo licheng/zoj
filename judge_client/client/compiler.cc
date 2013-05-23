@@ -35,9 +35,9 @@
 #include "util.h"
 
 DEFINE_ARG(string, compiler, "All compilers supported by this client");
-DEFINE_OPTIONAL_ARG(int, compilation_time_limit, 10, "The time limit of compilers in seconds");
-DEFINE_OPTIONAL_ARG(int, compilation_output_limit, 4096, "The output limit of compilers in kb");
-DEFINE_OPTIONAL_ARG(int, max_output_file_number, 16, "The maximum number of files that the compiler can create");
+DEFINE_OPTIONAL_ARG(int, compilation_time_limit, 16, "The time limit of compilers in seconds");
+DEFINE_OPTIONAL_ARG(int, compilation_output_limit, 32768, "The output limit of compilers in kb");
+DEFINE_OPTIONAL_ARG(int, max_output_file_number, 32, "The maximum number of files that the compiler can create");
 
 namespace {
 
