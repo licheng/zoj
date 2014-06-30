@@ -1,0 +1,9 @@
+*.d
+*.o
+*.class
+client/JavaSandbox.jar
+client/Sandbox.h
+client/guile_loader
+client/judged
+client/libsandbox.so
+zunit/libzunit.so

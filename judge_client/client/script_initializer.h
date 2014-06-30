@@ -31,18 +31,18 @@ private:
     int language_id_;    // should be consistent with compiler.cc
 
 protected:
-    ScriptInitializer(int language_id) : language_id_(language_id) { };
-    int GetLanguageId() { return language_id_; };
+    ScriptInitializer(int language_id) : language_id_(language_id) { }
+    int GetLanguageId() { return language_id_; }
     virtual ScriptInitializer* clone() = 0;
     friend class ::ScriptInitializerBuilder;
 
 public:
     // this function will be called each time target script runs
-    virtual void SetUp(ScriptRunner* runner) {};
-    virtual ~ScriptInitializer() {};
+    virtual void SetUp(ScriptRunner* runner) {}
+    virtual ~ScriptInitializer() {}
 
     static ScriptInitializer* create(int language_id);
-}; 
+};
 
 
 #endif // __SCRIPT_INITIALIZER_H__

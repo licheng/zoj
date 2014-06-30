@@ -18,7 +18,8 @@
  */
 
 #include <cstdio>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 #include <string>
 
 #include <errno.h>
