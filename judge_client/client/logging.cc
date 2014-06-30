@@ -133,7 +133,7 @@ void UnixDomainSocketLogFile::Connect() {
     }
     struct sockaddr_un un;
     memset(&un, 0, sizeof(un));
-    un.sun_family = AF_UNIX; 
+    un.sun_family = AF_UNIX;
     unlink(client_sock_name_.c_str());
     strcpy(un.sun_path, client_sock_name_.c_str());
     if (bind(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + strlen(un.sun_path)) < 0) {
@@ -149,7 +149,7 @@ void UnixDomainSocketLogFile::Connect() {
         return;
     }
     memset(&un, 0, sizeof(un));
-    un.sun_family = AF_UNIX; 
+    un.sun_family = AF_UNIX;
     strcpy(un.sun_path, server_sock_name_.c_str());
     if (connect(sock_, (struct sockaddr*)&un, offsetof(struct sockaddr_un, sun_path) + server_sock_name_.size()) < 0) {
         string error_message = strerror(errno);
