@@ -13,6 +13,10 @@ Our compiler software version:<br>
 <font color=blue>glibc 2.11.2</font><br>
 <font color=blue>Free Pascal Compiler version 2.6.0-9 [2013/04/14] for x86_64</font><br>
 <font color=blue>java version "1.7.0_40"</font><br>
+<font color=blue>Python 2.7.3</font><br>
+<font color=blue>perl 5, version 14, subversion 2 (v5.14.2)</font><br>
+<font color=blue>Scheme Guile 1.8.8</font><br>
+<font color=blue>PHP 5.4.4-14+deb7u5 (cli)</font><br>
 <hr>
 <font color=green>Q</font>:Free Pascal Runtime Error Numbers<br>
 <font color=red>A</font>:Refer to here <a href="http://www.freepascal.org/docs-html/user/node16.html">http://www.freepascal.org/docs-html/user/node16.html</a> for detailed runtime error informations.<br>
