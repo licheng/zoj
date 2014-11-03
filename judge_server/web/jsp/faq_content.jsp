@@ -10,7 +10,7 @@ Free Pascal(FPC): <font color=blue>fpc -Sd -O2 -Op2 -dONLINE_JUDGE</font><br>
 Java: <font color=blue>No special options</font><br>
 Our compiler software version:<br>
 <font color=blue>gcc/g++ 4.7.2 (Debian 4.7.2-5)</font><br>
-<font color=blue>glibc 2.11.2</font><br>
+<font color=blue>GNU C Library (Debian EGLIBC 2.13-38+deb7u6)</font><br>
 <font color=blue>Free Pascal Compiler version 2.6.0-9 [2013/04/14] for x86_64</font><br>
 <font color=blue>java version "1.7.0_40"</font><br>
 <font color=blue>Python 2.7.3</font><br>
