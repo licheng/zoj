@@ -79,7 +79,7 @@ int ControlMain(const string& queue_address, int queue_port, int port) {
         } else if (command == CMD_INFO) {
             uint32_t buf[128] = {
               static_cast<uint32_t>(port),
-              supported_compilers.size()
+              static_cast<uint32_t>(supported_compilers.size())
             };
             int n = 2;
             for (int i = 0; i < supported_compilers.size(); ++i) {
