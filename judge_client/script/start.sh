@@ -43,6 +43,7 @@ fi
 
 if [ "`which g++`" != "" ]; then
     supported_source_file_types=$supported_source_file_types,g++
+    supported_source_file_types=$supported_source_file_types,c++0x
 fi
 
 if [ "`which fpc`" != "" ]; then
