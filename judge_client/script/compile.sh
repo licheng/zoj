@@ -17,7 +17,7 @@ case $1 in
         g++ -o $bin -ansi -fno-asm -O2 -Wall -lm -static -DONLINE_JUDGE $src $main >/dev/null
         ;;
     c++0x)
-        g++ -o $bin -ansi -std=gnu++0x -fno-asm -O2 -Wall -lm -static -DONLINE_JUDGE $src $main >/dev/null
+        g++ -o $bin -std=gnu++0x -fno-asm -O2 -Wall -lm -static -DONLINE_JUDGE $src $main >/dev/null
         ;;
     fpc)
         if ! [[ $main = "" ]]; then
