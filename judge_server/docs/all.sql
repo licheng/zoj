@@ -905,14 +905,23 @@ DELETE FROM configuration;
 DELETE FROM language;
 
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
-  VALUES(1, 'C', 'C', 'c', 'gcc x.x.x', 1, NOW(), 1, NOW());
+  VALUES(1, 'C', 'C', 'c', 'gcc 4.x.x', 1, NOW(), 1, NOW());
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
-  VALUES(2, 'C++', 'C++', 'cc', 'g++ x.x.x', 1, NOW(), 1, NOW());
+  VALUES(2, 'C++', 'C++', 'cc', 'g++ 4.x.x', 1, NOW(), 1, NOW());
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
-  VALUES(3, 'FPC', 'Free Pascal', 'pas', 'Free Pascal', 1, NOW(), 1, NOW());
+  VALUES(3, 'FPC', 'Free Pascal', 'pas', 'Free Pascal 2.x.x', 1, NOW(), 1, NOW());
 INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
-  VALUES(4, 'Java', 'Java', 'java', 'java version 1.6.0_06', 1, NOW(), 1, NOW());
-
+  VALUES(4, 'Java', 'Java', 'java', 'java version x.x.x', 1, NOW(), 1, NOW());
+INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
+  VALUES(5, 'Python', 'Python', 'python', 'Python 2.x.x', 1, NOW(), 1, NOW());
+INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
+  VALUES(6, 'Perl', 'Perl', 'perl', 'Perl 5.x.x', 1, NOW(), 1, NOW());
+INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
+  VALUES(7, 'Scheme', 'Scheme', 'scheme', 'Guile x.x.x', 1, NOW(), 1, NOW());
+INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
+  VALUES(8, 'PHP', 'PHP', 'php', 'PHP 5.x.x', 1, NOW(), 1, NOW());
+INSERT INTO language (language_id, name, description, options, compiler, create_user, create_date, last_update_user, last_update_date)
+  VALUES(9, 'C++0x', 'C++0x', 'cxx', 'g++ 4.x.x', 1, NOW(), 1, NOW());
 
 DELETE FROM forum;
 
