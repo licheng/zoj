@@ -50,7 +50,7 @@
                 <logic:notPresent name="nextFrom">
                 <font color="#777777">Next&gt;&gt;</font>
                 </logic:notPresent>
-                </div>        
+                </div>
                 <table class="problemsetList" style="width:100%">
                     <tr class="rowHeader" >
                         <td class="problemsetRanklistRank">Rank</td>
