@@ -19,7 +19,7 @@
     String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";  
     String order=request.getParameter("order");
     String ranklistPath;
-    if(order==null) {
+    if(order==null || !order.equalsIgnoreCase("submit")) {
     ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
     }
     else {
