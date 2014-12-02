@@ -19,7 +19,7 @@
     String userStatusPath = request.getContextPath() + "/showUserStatus.do?userId=";  
     String order=request.getParameter("order");
     String ranklistPath;
-    if(order==null) {
+    if(order==null || !order.equalsIgnoreCase("submit")) {
     ranklistPath = request.getContextPath() + "/showRankList.do?contestId=" + contest.getId() + "&from=";
     }
     else {
@@ -50,7 +50,7 @@
                 <logic:notPresent name="nextFrom">
                 <font color="#777777">Next&gt;&gt;</font>
                 </logic:notPresent>
-                </div>        
+                </div>
                 <table class="problemsetList" style="width:100%">
                     <tr class="rowHeader" >
                         <td class="problemsetRanklistRank">Rank</td>

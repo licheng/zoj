@@ -109,7 +109,7 @@ public class ShowRankListAction extends BaseAction {
             }
             int count = 30;
             String sort=context.getRequest().getParameter("order");
-            if(sort==null)
+            if(sort == null || !sort.equalsIgnoreCase("submit"))
             {
                 sort="ac";
             }
