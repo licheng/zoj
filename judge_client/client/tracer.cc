@@ -28,6 +28,7 @@ using namespace std;
 #include <signal.h>
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
 #include <sys/user.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -181,7 +182,36 @@ bool Tracer::HandleSyscall(struct user_regs_struct& regs) {
     return false;
 }
 
+static bool isUnsafeBehavior(pid_t pid, const struct user_regs_struct& regs) {
+    if ((unsigned long long)regs.REG_SYSCALL >=
+        sizeof(enabled_syscall) / sizeof(enabled_syscall[0])) {
+        return true;
+    }
+
+    siginfo_t siginfo;
+    memset(&siginfo, 0, sizeof(siginfo_t));
+    ptrace(PTRACE_GETSIGINFO, pid, NULL, &siginfo);
+
+    // SIGTRAP not triggered by ptrace? ex. "int 0x3"
+    if (siginfo.si_pid != pid) {
+        return true;
+    }
+
+#ifdef __x86_64
+    long bytes = ptrace(PTRACE_PEEKTEXT, pid, regs.rip - 2, NULL);
+    // "0f 05" is asm "syscall". It is the standard way to call a syscall in amd64.
+    // It uses 64-bit syscall table.
+    // "int 0x80" and "sysenter" use 32-bit syscall table. They should be banned.
+    if ((bytes & 0xffff) != 0x050f) {
+        return true;
+    }
+#endif
+
+    return false;
+}
+
 void Tracer::Trace() {
+    bool first_trap = true;
     while (waitpid(pid_, &status_, 0) > 0) {
         if (!WIFSTOPPED(status_)) {
             exited_ = true;
@@ -195,6 +225,14 @@ void Tracer::Trace() {
         before_syscall_ = !before_syscall_;
         struct user_regs_struct regs;
         ptrace(PTRACE_GETREGS, pid_, 0, &regs);
+        // 1st SIGTRAP is not caused by a syscall but PTRACE_TRACEME
+        if (!first_trap && isUnsafeBehavior(pid_, regs)) {
+            LOG(ERROR)<<"Unsafe behavior";
+            ptrace(PTRACE_KILL, pid_, 0, 0);
+            restricted_syscall_ = true;
+            continue;
+        }
+        first_trap = false;
         if (HandleSyscall(regs))
             continue;
         if (regs.REG_SYSCALL < sizeof(enabled_syscall) / sizeof(enabled_syscall[0]) &&
