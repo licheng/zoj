@@ -33,7 +33,7 @@ judged: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 guile_loader: guile_loader.cc args.o logging.o util.o runner.o strutil.o common_io.o global.o
-	$(CXX) $(CXXFLAGS) `guile-config link` -o $@ $^
+	$(CXX) $(CXXFLAGS) `guile-config compile` `guile-config link` -o $@ $^
 
 JavaSandbox.jar: Sandbox.java SandboxClassLoader.java SandboxSecurityManager.java ../../judge_server/src/main/cn/edu/zju/acm/onlinejudge/bean/enumeration/JudgeReply.java
 	DIR=`mktemp -d` && \
