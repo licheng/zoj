@@ -78,13 +78,14 @@
     }
     %>
 </table>
-</div>
 <% if(titlefrom>0) {%>
 <input type="submit" onclick="document.all['titlefrom'].value='<%=titlefrom-1 %>'" value="Prev Page"/>
 <%} %>
 <% if(titlefrom*50+49<TitleQueryResultCount) {%>
 <input type="submit" onclick="document.all['titlefrom'].value='<%=titlefrom+1 %>'" value="Next Page"/>
 <%} %>
+</div>
+
 
 <div id="content_title"> Search by Author (from <%=authorfrom*50+1 %> to <%=(authorfrom*50+49 >AuthorQueryResultCount)?AuthorQueryResultCount:authorfrom*50+49+1 %> result in all <%=AuthorQueryResultCount %> ) </div>
 <div id="content_body">
@@ -122,13 +123,13 @@
     }
     %>
 </table>
-</div>
 <% if(authorfrom>0) {%>
 <input type="submit" onclick="document.all['authorfrom'].value='<%=authorfrom-1 %>'" value="Prev Page"/>
 <%} %>
 <% if(authorfrom*50+49<AuthorQueryResultCount) {%>
 <input type="submit" onclick="document.all['authorfrom'].value='<%=authorfrom+1 %>'" value="Next Page"/>
 <%} %>
+</div>
 
 <div id="content_title"> Search by Source (from <%=sourcefrom*50+1 %> to <%=(sourcefrom*50+49 >SourceQueryResultCount)?SourceQueryResultCount:sourcefrom*50+49+1 %> result in all <%=SourceQueryResultCount %> ) </div>
 <div id="content_body">
@@ -169,12 +170,12 @@
     }
     %>
 </table>
-</div>
 <% if(sourcefrom>0) {%>
 <input type="submit" onclick="document.all['sourcefrom'].value='<%=sourcefrom-1 %>'" value="Prev Page"/>
 <%} %>
 <% if(sourcefrom*50+49<SourceQueryResultCount) {%>
 <input type="submit" onclick="document.all['sourcefrom'].value='<%=sourcefrom+1 %>'" value="Next Page"/>
 <%} %>
+</div>
 
 </form>
