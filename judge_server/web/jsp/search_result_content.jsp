@@ -26,7 +26,7 @@
 	UserSecurity userSecurity = (UserSecurity) request.getSession().getAttribute("oj_security");
     AbstractContest contest = (AbstractContest) request.getAttribute("contest");
     boolean admin = (userSecurity != null && userSecurity.canAdminContest(contest.getId()));
-    String query=request.getAttribute("query").toString();
+    String query=request.getAttribute("query").toString().replace("\"","");
     int TitleQueryResultCount = Integer.parseInt(request.getAttribute("TitleQueryResultCount").toString());
     int AuthorQueryResultCount = Integer.parseInt(request.getAttribute("AuthorQueryResultCount").toString());
     int SourceQueryResultCount = Integer.parseInt(request.getAttribute("SourceQueryResultCount").toString());
